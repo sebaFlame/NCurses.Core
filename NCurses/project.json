@@ -1,0 +1,22 @@
+{
+	"version": "6.0.20170225-*",
+	"name": "NCurses",
+	"description": "An application programming interface (API) that allows the programmer to write text-based user interfaces in a terminal-independent manner.",
+    "packOptions": {
+		"tags": [
+			"ncurses",
+			"console"
+		],
+        "files": {
+            "mappings": {
+                "runtimes/win-x64/native/libncursesw.dll": "x64/libncursesw6.dll",
+				"runtimes/win-x64/native/libpanelw.dll": "x64/libpanelw6.dll",
+                "runtimes/win-x86/native/libncursesw.dll": "x86/libncursesw6.dll",
+				"runtimes/win-x86/native/libpanelw.dll": "x86/libpanelw6.dll"
+            }
+        }
+    },
+	"frameworks": {
+		"netstandard1.0": {}
+	}
+}

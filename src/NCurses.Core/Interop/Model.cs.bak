@@ -1,0 +1,424 @@
+﻿using System;
+using System.Runtime.InteropServices;
+
+namespace NCurses.Core.Interop
+{
+    [StructLayout(LayoutKind.Sequential)]
+    public struct pdat
+    {
+        public short _pad_y, _pad_x;
+        public short _pad_top, _pad_left;
+        public short _pad_bottom, _pad_right;
+    }
+
+    [StructLayout(LayoutKind.Sequential)]
+    public struct ldat
+    {
+        public IntPtr text;         /* text of the line, pointer to NCURSES_CH_T */
+        public short firstchar;     /* first changed character in the line */
+        public short lastchar;      /* last changed character in the line */
+        public short oldindex;	    /* index of the line at last update */
+    }
+
+    [StructLayout(LayoutKind.Sequential)]
+    public struct WINDOW /* _win_st, from ncurses.h */
+    {
+        public short _cury, _curx;      /* current cursor position */
+
+        /* window location and size */
+        public short _maxy, _maxx;      /* maximums of x and y, NOT window size */
+        public short _begy, _begx;      /* screen coords of upper-left-hand corner */
+
+        public short _flags;            /* window state flags */
+
+        /* attribute tracking */
+        public uint _attrs;            /* current attribute for non-space character */
+        public uint _bkgd;              /* current background char/attribute pair */
+
+        /* option values set by user */
+        public bool _notimeout;         /* no time out on function-key entry? */
+        public bool _clear;             /* consider all data in the window invalid? */
+        public bool _leaveok;           /* OK to not reset cursor on exit? */
+        public bool _scroll;            /* OK to scroll this window? */
+        public bool _idlok;             /* OK to use insert/delete line? */
+        public bool _idcok;             /* OK to use insert/delete char? */
+        public bool _immed;             /* window in immed mode? (not yet used) */
+        public bool _sync;              /* window in sync mode? */
+        public bool _use_keypad;        /* process function keys into KEY_ symbols? */
+        public int _delay;              /* 0 = nodelay, <0 = blocking, >0 = delay */
+
+        public IntPtr _line;            /* the actual line data, pointer to ldat */
+
+        /* global screen state */
+        public short _regtop;           /* top line of scrolling region */
+        public short _regbottom;        /* bottom line of scrolling region */
+
+        /* these are used only if this is a sub-window */
+        public int _parx;               /* x coordinate of this window in parent */
+        public int _pary;               /* y coordinate of this window in parent */
+        public IntPtr _parent;          /* pointer to parent if a sub-window, WINDOW pointer */
+
+        public pdat _pad;               /* these are used only if this is a pad */
+
+        public short _yoffset;          /* real begy is _begy + _yoffset */
+
+        public NCURSES_CH_T _bkgrnd;    /* current background char/attribute pair */
+        public int _color;              /* current color-pair for non-space character */
+    }
+
+    [StructLayout(LayoutKind.Sequential)]
+    public struct TTY /* termios */
+    {
+        public uint c_iflag;
+        public uint c_oflag;
+        public uint c_cflag;
+        public uint c_lflag;
+        public char c_line;
+        [MarshalAs(UnmanagedType.ByValArray, SizeConst = 18)] //32 on linux
+        public byte[] c_cc;
+        public uint c_ispeed;
+        public uint c_ospeed;
+    }
+
+    [StructLayout(LayoutKind.Sequential)]
+    public struct TRIES
+    {
+        public IntPtr child;        /* ptr to child.  NULL if none, TRIES pointer          */
+        public IntPtr sibling;      /* ptr to sibling.  NULL if none , TRIES pointer        */
+        public byte ch;             /* character at this node               */
+        public ushort value;        /* code of string so far.  0 if none.   */
+    }
+
+    [StructLayout(LayoutKind.Sequential)]
+    public struct color_t
+    {
+        public short red, green, blue;	/* what color_content() returns */
+        public short r, g, b;		    /* params to init_color() */
+        public int init;			    /* true if we called init_color() */
+    }
+
+    public enum MouseType
+    {
+        M_XTERM = -1,
+        M_NONE = 0,
+        M_TERM_DRIVER
+    }
+
+    public enum MouseFormat
+    {
+        MF_X10 = 0,
+        MF_SGR1006
+    }
+
+    [StructLayout(LayoutKind.Sequential)]
+    public struct PANEL /* panel */
+    {
+        public IntPtr win;      /* WINDOW pointer */
+        public IntPtr below;    /* PANEL pointer */
+        public IntPtr above;    /* PANEL pointer */
+        public IntPtr user;
+    }
+
+    [StructLayout(LayoutKind.Sequential)]
+    public struct panelhook
+    {
+        public IntPtr top_panel;            /* PANEL pointer */
+        public IntPtr bottom_panel;         /* PANEL pointer */
+        public IntPtr stdscr_pseudo_panel;  /* PANEL pointer */
+    }
+
+    [StructLayout(LayoutKind.Sequential)]
+    public struct HASHMAP
+    {
+        public uint hashval;
+        public int oldcount, newcount;
+        public int oldindex, newindex;
+    }
+
+    [StructLayout(LayoutKind.Sequential)]
+    public struct WINDOWLIST /* _win_list */
+    {
+        public IntPtr next;         /* pointer to WINDOWLIST */
+        public IntPtr screen;       /* screen containing the window, pointer to SCREEN */
+        public WINDOW win;          /* WINDOW_EXT() needs to account for offset */
+        public IntPtr addch_work;   /* pointer to char[] */
+        public uint addch_used;	    /* number of bytes in addch_work[] */
+	    public int addch_x; 		/* x-position for addch_work[] */
+	    public int addch_y;		    /* y-position for addch_work[] */
+    }
+
+    [StructLayout(LayoutKind.Sequential)]
+    public struct ripoff_t
+    {
+        public IntPtr win;      /* the window used in the hook, pointer to WINDOW */
+        public int line;        /* lines to take, < 0 => from bottom*/
+        public IntPtr hook;     /* int	(*hook)(WINDOW*, int); */ /* callback for user	    */
+    }
+
+    //TODO: TERMINAL
+    [StructLayout(LayoutKind.Sequential)]
+    public struct SCREEN /* screen, from curses.priv.h */
+    {
+        public int _ifd;                /* input file descriptor for screen */
+        public int _ofd;                /* output file descriptor for screen */
+        public IntPtr _ofp;             /* output file ptr for screen	    */
+        public IntPtr out_buffer;       /* output buffer, pointer to char		    */
+        public uint out_limit;          /* output buffer size		    */
+        public uint out_inuse;          /* output buffer current use	    */
+        public bool _filtered;          /* filter() was called		    */
+        public bool _prescreen;         /* is in prescreen phase	    */
+        public bool _use_env;           /* LINES & COLS from environment?   */
+        public int _checkfd;            /* filedesc for typeahead check	    */
+        public IntPtr _term;            /* terminal type information	    */
+        public TTY _saved_tty;          /* savetty/resetty information	    */
+        public short _lines;            /* screen lines			    */
+        public short _columns;          /* screen columns		    */
+
+        public short _lines_avail;      /* lines available for stdscr	    */
+        public short _topstolen;        /* lines stolen from top	    */
+
+        public IntPtr _curscr;          /* current screen, WINDOW pointer   */
+        public IntPtr _newscr;          /* virtual screen to be updated to, WINDOW pointer  */
+        public IntPtr _stdscr;          /* screen's full-window context, WINDOW pointer	    */
+
+        public IntPtr _keytry;          /* "Try" for use with keypad mode, TRIES pointer   */
+        public IntPtr _key_ok;          /* Disabled keys via keyok(,FALSE), TRIES pointer  */
+        public bool _tried;             /* keypad mode was initialized	    */
+        public bool _keypad_on;         /* keypad mode is currently on	    */
+
+        public bool _called_wgetch;     /* check for recursion in wgetch()  */
+        [MarshalAs(UnmanagedType.ByValArray, SizeConst = 136)] //should be 137???
+        public int[] _fifo;             /* input push-back buffer  */
+        public short _fifohead,         /* head of fifo queue		    */
+                _fifotail,              /* tail of fifo queue		    */
+                _fifopeek,              /* where to peek for next char	    */
+                _fifohold;              /* set if breakout marked	    */
+
+        public int _endwin;             /* are we out of window mode?	    */
+        public IntPtr _current_attr;    /* holds current attributes set, pointer to NCURSES_CH_T  */
+        public int _coloron;            /* is color enabled?		    */
+        public int _color_defs;         /* are colors modified		    */
+        public int _cursor;             /* visibility of the cursor	    */
+        public int _cursrow;            /* physical cursor row		    */
+        public int _curscol;            /* physical cursor column	    */
+        public bool _notty;             /* true if we cannot switch non-tty */
+        public int _nl;                 /* True if NL -> CR/NL is on	    */
+        public int _raw;                /* True if in raw mode		    */
+        public int _cbreak;             /* 1 if in cbreak mode		    */
+                                        /* > 1 if in halfdelay mode	    */
+        public int _echo;               /* True if echo on		    */
+        public int _use_meta;           /* use the meta key?		    */
+        public IntPtr _slk;		        /* ptr to soft key struct / NULL    */
+	    public int slk_format;          /* selected format for this screen  */
+        //public bool _no_padding;	    /* flag to set if padding disabled  */
+        public int _char_padding;       /* cost of character put	    */
+        public int _cr_cost;            /* cost of (carriage_return)	    */
+        public int _cup_cost;           /* cost of (cursor_address)	    */
+        public int _home_cost;          /* cost of (cursor_home)	    */
+        public int _ll_cost;            /* cost of (cursor_to_ll)	    */
+        public int _ht_cost;            /* cost of (tab)		    */
+        public int _cbt_cost;           /* cost of (backtab)		    */
+        public int _cub1_cost;          /* cost of (cursor_left)	    */
+        public int _cuf1_cost;          /* cost of (cursor_right)	    */
+        public int _cud1_cost;          /* cost of (cursor_down)	    */
+        public int _cuu1_cost;          /* cost of (cursor_up)		    */
+        public int _cub_cost;           /* cost of (parm_cursor_left)	    */
+        public int _cuf_cost;           /* cost of (parm_cursor_right)	    */
+        public int _cud_cost;           /* cost of (parm_cursor_down)	    */
+        public int _cuu_cost;           /* cost of (parm_cursor_up)	    */
+        public int _hpa_cost;           /* cost of (column_address)	    */
+        public int _vpa_cost;           /* cost of (row_address)	    */
+        /* used in tty_update.c, must be chars */
+        public int _ed_cost;            /* cost of (clr_eos)		    */
+        public int _el_cost;            /* cost of (clr_eol)		    */
+        public int _el1_cost;           /* cost of (clr_bol)		    */
+        public int _dch1_cost;          /* cost of (delete_character)	    */
+        public int _ich1_cost;          /* cost of (insert_character)	    */
+        public int _dch_cost;           /* cost of (parm_dch)		    */
+        public int _ich_cost;           /* cost of (parm_ich)		    */
+        public int _ech_cost;           /* cost of (erase_chars)	    */
+        public int _rep_cost;           /* cost of (repeat_char)	    */
+        public int _hpa_ch_cost;        /* cost of (column_address)	    */
+        public int _cup_ch_cost;        /* cost of (cursor_address)	    */
+        public int _cuf_ch_cost;        /* cost of (parm_cursor_right)	    */
+        public int _inline_cost;        /* cost of inline-move		    */
+        public int _smir_cost;          /* cost of (enter_insert_mode)	    */
+        public int _rmir_cost;          /* cost of (exit_insert_mode)	    */
+        public int _ip_cost;            /* cost of (insert_padding)	    */
+        /* used in lib_mvcur.c */
+        public string _address_cursor;
+        /* used in tty_update.c */
+        public int _scrolling;          /* 1 if terminal's smart enough to  */
+
+        /* used in lib_color.c */
+        public IntPtr _color_table;     /* screen's color palette, pointer to color_t */
+        public int _color_count;        /* count of colors in palette	     */
+        public IntPtr _color_pairs;     /* screen's color pair list, pointer to uint[]   */
+        public int _pair_count;         /* count of color pairs		     */
+        public int _pair_limit;         /* actual limit of color-pairs       */
+	    public bool	_assumed_color;     /* use assumed colors		     */
+	    public bool _default_color;     /* use default colors		     */
+	    public bool	_has_sgr_39_49;     /* has ECMA default color support    */
+	    public int	_default_fg;	    /* assumed default foreground	     */
+	    public int	_default_bg;	    /* assumed default background	     */
+	    public int	_default_pairs;	    /* count pairs using default color   */
+
+        public uint  _ok_attributes;    /* valid attributes for terminal     */
+        public uint _xmc_suppress;      /* attributes to suppress if xmc     */
+        public uint _xmc_triggers;      /* attributes to process if xmc	     */
+        public IntPtr _acs_map;         /* the real alternate-charset map, pointer to uint[] */
+        public IntPtr _screen_acs_map;  /* pointer to bool[] */
+
+        /* used in lib_vidattr.c */
+        public bool _use_rmso;          /* true if we may use 'rmso'	     */
+        public bool _use_rmul;	        /* true if we may use 'rmul'	     */
+	    public bool _use_ritm;          /* true if we may use 'ritm'	     */
+
+        //public bool _extended_key;	/* true if an extended key	     */
+
+        public bool _nc_sp_idlok;
+        public bool _nc_sp_idcok;
+
+        /* These are the data that support the mouse interface. */
+        public bool _mouse_initialized;
+        public MouseType _mouse_type;
+        public int _maxclick;
+        public IntPtr _mouse_event;     /* bool (*_mouse_event) (SCREEN*); */
+        public IntPtr _mouse_inline;    /*  bool		(*_mouse_inline)(SCREEN*); */
+	    public IntPtr _mouse_parse;     /* bool		(*_mouse_parse) (SCREEN*, int); */
+        public IntPtr _mouse_resume;    /* void(*_mouse_resume)(SCREEN*); */
+        public IntPtr _mouse_wrap;      /* void(*_mouse_wrap)	(SCREEN*); */
+	    public int _mouse_fd;           /* file-descriptor, if any */
+        public bool _mouse_active;      /* true if initialized */
+        public uint _mouse_mask;        /* set via mousemask() */
+        public uint _mouse_mask2;       /* OR's in press/release bits */
+        public uint _mouse_bstate;
+        public MouseFormat _mouse_format;   /* type of xterm mouse protocol */
+        public string _mouse_xtermcap;  /* string to enable/disable mouse */
+        [MarshalAs(UnmanagedType.ByValArray, SizeConst = 8)]
+        public MEVENT[] _mouse_events;    /* hold the last mouse event seen */
+        public IntPtr _mouse_eventp;    /* next free slot in event queue, pointer to MEVENT[] */
+
+        //#if USE_GPM_SUPPORT
+        //	    bool		_mouse_gpm_loaded;
+        //	    bool		_mouse_gpm_found;
+        //# ifdef HAVE_LIBDL
+        //	    void		*_dlopen_gpm;
+        //	    TYPE_gpm_fd	_mouse_gpm_fd;
+        //	    TYPE_Gpm_Open	_mouse_Gpm_Open;
+        //	    TYPE_Gpm_Close	_mouse_Gpm_Close;
+        //	    TYPE_Gpm_GetEvent _mouse_Gpm_GetEvent;
+        //#endif
+        //        Gpm_Connect _mouse_gpm_connect;
+        //#endif /* USE_GPM_SUPPORT */
+
+        //#if USE_EMX_MOUSE
+        //	    int		_emxmouse_wfd;
+        //	    int		_emxmouse_thread;
+        //	    int		_emxmouse_activated;
+        //	    char		_emxmouse_buttons[4];
+        //#endif
+
+        //#if USE_SYSMOUSE
+        //	    MEVENT		_sysmouse_fifo[FIFO_SIZE];
+        //	    int		_sysmouse_head;
+        //	    int		_sysmouse_tail;
+        //	    int		_sysmouse_char_width;	/* character width */
+        //	    int		_sysmouse_char_height;	/* character height */
+        //	    int		_sysmouse_old_buttons;
+        //	    int		_sysmouse_new_buttons;
+        //#endif
+
+        [MarshalAs(UnmanagedType.ByValArray, SizeConst = 136)]
+        public MEVENT[] _drv_mouse_fifo;
+        public int _drv_mouse_head;
+        public int _drv_mouse_tail;
+        public int _drv_mouse_old_buttons;
+        public int _drv_mouse_new_buttons;
+
+        public IntPtr _resize;          /* int(*_resize)(NCURSES_SP_DCLx int y, int x); */
+        public IntPtr _ungetch;         /* int(*_ungetch)(SCREEN*, int); */
+
+        /*
+         * These are data that support the proper handling of the panel stack on an
+         * per screen basis.
+         */
+        public panelhook _panelHook;
+
+	    public bool _sig_winch;
+        public IntPtr _next_screen;     /* pointer to SCREEN */
+
+        /* hashes for old and new lines */
+        public IntPtr oldhash, newhash; /* pointer to long */
+	    public IntPtr hashtab;          /* pointer to HASHMAP */
+        public int hashtab_len;
+        public IntPtr _oldnum_list;     /* pointer to int */
+        public int _oldnum_size;
+
+        public IntPtr _outch;           /* output handler if not putc, pointer to a function */
+
+        public int _legacy_coding;      /* see use_legacy_coding() */
+
+        [MarshalAs(UnmanagedType.ByValArray, SizeConst = 256)]
+        public char[] _ttytype;
+        public int _ESCDELAY;
+        public int _TABSIZE;
+        public int _LINES;
+        public int _COLS;
+
+        public IntPtr _windowlist;      /* pointer to WINDOWLIST[] */
+
+        public IntPtr jump;             /* pointer to function */
+
+        [MarshalAs(UnmanagedType.ByValArray, SizeConst = 5)]
+        public ripoff_t[] rippedoff;
+        public IntPtr rsp;              /* pointer to ripoff_t */
+
+        public bool use_tioctl;
+
+        public bool _screen_acs_fix;
+        public bool _screen_unicode;
+    }
+
+    [StructLayout(LayoutKind.Sequential)]
+    public struct TERM_DRIVER
+    {
+        bool isTerminfo;
+        IntPtr td_name;
+        IntPtr td_CanHandle;
+        IntPtr td_init;
+        IntPtr td_release;
+        IntPtr td_size;
+        IntPtr td_sgmode;
+        IntPtr td_conattr;
+        IntPtr td_hwcur;
+        IntPtr td_mode;
+        IntPtr td_rescol;
+        IntPtr td_rescolors;
+        IntPtr td_color;
+        IntPtr td_doBeepOrFlash;
+        IntPtr td_initpair;
+        IntPtr td_initcolor;
+        IntPtr td_docolor;
+        IntPtr td_initmouse;
+        IntPtr td_testmouse;
+        IntPtr td_setfilter;
+        IntPtr td_hwlabel;
+        IntPtr td_hwlabelOnOff;
+        IntPtr td_update;
+        IntPtr td_defaultcolors;
+        IntPtr td_print;
+        IntPtr td_getsize;
+        IntPtr td_setsize;
+        IntPtr td_initacs;
+        IntPtr td_scinit;
+        IntPtr td_scexit;
+        IntPtr td_twait;
+        IntPtr td_read;
+        IntPtr td_nap;
+        IntPtr td_kpad;
+        IntPtr td_kyOk;
+        IntPtr td_kyExist;
+        IntPtr td_cursorSet;
+    }
+}
