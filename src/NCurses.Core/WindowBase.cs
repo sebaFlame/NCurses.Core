@@ -234,7 +234,7 @@ namespace NCurses.Core
         /// disable attribute(s) for the current window. Attaributes can be OR'd together.
         /// </summary>
         /// <param name="attr">attribute(s) to disable</param>
-        public void Attroff(uint attr)
+        public void AttrOff(uint attr)
         {
             NativeWindow.wattr_off(this.WindowPtr, attr);
         }
@@ -803,6 +803,47 @@ namespace NCurses.Core
             NativeWindow.box(this.WindowPtr, 0, 0);
         }
         #endregion
+
+        /// <summary>
+        /// Clear the window
+        /// </summary>
+        public void Erase()
+        {
+            NativeWindow.werase(this.WindowPtr);
+        }
+
+        /// <summary>
+        /// Clear the window without a call to refresh
+        /// </summary>
+        public void Clear()
+        {
+            NativeWindow.wclear(this.WindowPtr);
+        }
+
+        /// <summary>
+        /// Scroll the window <paramref name="lines"/> lines.
+        /// </summary>
+        /// <param name="lines">the number of lines to scroll, negative to scroll down.</param>
+        public void ScrollWindow(int lines)
+        {
+            NativeWindow.wscrl(this.WindowPtr, lines);
+        }
+
+        /// <summary>
+        /// Clear to the end of the line
+        /// </summary>
+        public void ClearToEol()
+        {
+            NativeWindow.wclrtoeol(this.WindowPtr);
+        }
+
+        /// <summary>
+        /// Clear window to bottom starting from current cursor position
+        /// </summary>
+        public void ClearToBottom()
+        {
+            NativeWindow.wclrtobot(this.WindowPtr);
+        }
 
         public abstract void Refresh();
         public abstract void NoOutRefresh();

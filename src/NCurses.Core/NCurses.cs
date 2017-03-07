@@ -155,6 +155,14 @@ namespace NCurses.Core
             }
         }
 
+        public static int CursorVisibility
+        {
+            set
+            {
+                NativeNCurses.curs_set(value);
+            }
+        }
+
         #region color
         /// <summary>
         /// check if the console supports colors
@@ -170,6 +178,51 @@ namespace NCurses.Core
         public static void StartColor()
         {
             NativeNCurses.start_color();
+        }
+
+        /// <summary>
+        /// Assigns the default terminal colors to pair -1.
+        /// </summary>
+        public static void UseDefaultColors()
+        {
+            NativeNCurses.use_default_colors();
+        }
+
+        /// <summary>
+        /// Redefines colors at pair index 0. Use -1 to use default terminal colors.
+        /// </summary>
+        /// <param name="foreGround">the foreground color to assign</param>
+        /// <param name="backGround">the background color to assign</param>
+        public static void AssumeDefaultColors(short foreGround, short backGround)
+        {
+            NativeNCurses.assume_default_colors(foreGround, backGround);
+        }
+
+        /// <summary>
+        /// see <see cref="AssumeDefaultColors(short, short)"/> 
+        /// </summary>
+        public static void AssumeDefaultColors(Color foreGround, Color backGround)
+        {
+            AssumeDefaultColors((short)foreGround, (short)backGround);
+        }
+
+        /// <summary>
+        /// Initialize a <paramref name="pairIndex"/> to a combination of <paramref name="foreGround"/> and <paramref name="backGround"/> color
+        /// </summary>
+        /// <param name="pairIndex">the pair index to initialize</param>
+        /// <param name="foreGround">the foreground color to use</param>
+        /// <param name="backGround">the background color to use</param>
+        public static void InitPair(short pairIndex, short foreGround, short backGround)
+        {
+            NativeNCurses.init_pair(pairIndex, foreGround, backGround);
+        }
+
+        /// <summary>
+        /// see <see cref="InitPair(short, short, short)"/> 
+        /// </summary>
+        public static void InitPair(short pairIndex, Color foreGround, Color backGround)
+        {
+            InitPair(pairIndex, (short)foreGround, (short)backGround);
         }
 
         /// <summary>
@@ -196,6 +249,26 @@ namespace NCurses.Core
         }
 
         /// <summary>
+        /// Initialize a color with a RGB value
+        /// </summary>
+        /// <param name="color">The number of the color to change (can't be 0-7)</param>
+        /// <param name="red">The amount of red in the range 0 through 1000</param>
+        /// <param name="green">The amount of green in the range 0 through 1000</param>
+        /// <param name="blue">The amount of blue in the range 0 through 1000</param>
+        public static void InitColor(short color, short red, short green, short blue)
+        {
+            NativeNCurses.init_color(color, red, green, blue);
+        }
+
+        /// <summary>
+        /// see <see cref="InitColor(short, short, short, short)"/> 
+        /// </summary>
+        public static void InitColor(Color color, short red, short green, short blue)
+        {
+            NativeNCurses.init_color((short)color, red, green, blue);
+        }
+
+        /// <summary>
         /// Returns the number of available color pairs
         /// </summary>
         public static int ColorPairs
@@ -211,6 +284,11 @@ namespace NCurses.Core
         public static uint ColorPair(short pairIndex)
         {
             return (uint)NativeNCurses.COLOR_PAIR(pairIndex);
+        }
+
+        public static int Colors
+        {
+            get { return NativeNCurses.COLORS(); }
         }
         #endregion
 
@@ -275,13 +353,40 @@ namespace NCurses.Core
         /// <param name="ch">the character you want check</param>
         /// <param name="key">the returned key</param>
         /// <returns>true if a function key has been pressed</returns>
-        public static bool GetKeyName(int ch, out Key key)
+        public static bool GetKey(int ch, out Key key)
         {
-            string keyName = NativeNCurses.keyname(ch);
-            if (Enum.TryParse(keyName, out key))
+            key = 0;
+            if (Enum.IsDefined(typeof(Key), (short)ch))
+            {
+                key = (Key)ch;
+                return true;
+            }
+            return false;
+        }
+
+        public static bool IsCtrlKey(int ch, out string keyName)
+        {
+            keyName = NativeNCurses.keyname(ch);
+            if (keyName.StartsWith("^"))
                 return true;
             return false;
         }
         #endregion
+
+        /// <summary>
+        /// Restores the terminal to the previous state
+        /// </summary>
+        public static void ResetProgramMode()
+        {
+            NativeNCurses.reset_prog_mode();
+        }
+
+        /// <summary>
+        /// Restores the terminal to the previous state
+        /// </summary>
+        public static void ResetShellMode()
+        {
+            NativeNCurses.reset_shell_mode();
+        }
     }
 }

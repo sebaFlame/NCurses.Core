@@ -4,19 +4,19 @@ using System.Runtime.InteropServices;
 
 namespace NCurses.Core.Interop
 {
-    internal class NCursesException : Exception
+    public class NCursesException : Exception
     {
-        public NCursesException(string message)
+        internal NCursesException(string message)
             : base(message)
         { }
 
-        public static void Verify(int result, string method)
+        internal static void Verify(int result, string method)
         {
             if (result == Constants.ERR)
                 throw new NCursesException(string.Format("{0} returned ERR", method));
         }
 
-        public static void Verify(IntPtr result, string method)
+        internal static void Verify(IntPtr result, string method)
         {
             if (result == IntPtr.Zero)
                 throw new NCursesException(string.Format("{0} returned NULL", method));

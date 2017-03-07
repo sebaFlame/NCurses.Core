@@ -70,6 +70,11 @@ namespace NCurses.Core
             return new Window(this);
         }
 
+        public Window DerWindow(int nlines, int ncols, int begin_y, int begin_x)
+        {
+            return new Window(NativeNCurses.derwin(this.WindowPtr, nlines, ncols, begin_y, begin_x), true);
+        }
+
         public void ExecuteThreadSafeMethod(Action<Window> method)
         {
             Func<IntPtr, int> callback = (IntPtr window) =>
