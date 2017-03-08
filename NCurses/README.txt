@@ -2,6 +2,7 @@
 //http://invisible-island.net/datafiles/release/mingw32.zip (bin/libncursesw6.dll & bin/libpanelw6.dll into x86 directory)
 //http://invisible-island.net/datafiles/release/mingw64.zip (bin/libncursesw6.dll & bin/libpanelw6.dll into x64 directory)
 //change version to correct one in project.json
+//copy libncursesw6.dll in each folder to libncursesw.dll
 dotnet build
 dotnet pack
 //with nuget >= 3.3

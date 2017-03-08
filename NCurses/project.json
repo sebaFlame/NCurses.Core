@@ -9,10 +9,12 @@
 		],
         "files": {
             "mappings": {
-                "runtimes/win-x64/native/libncursesw.dll": "x64/libncursesw6.dll",
+                "runtimes/win-x64/native/libncursesw.dll": "x64/libncursesw.dll",
 				"runtimes/win-x64/native/libpanelw.dll": "x64/libpanelw6.dll",
-                "runtimes/win-x86/native/libncursesw.dll": "x86/libncursesw6.dll",
-				"runtimes/win-x86/native/libpanelw.dll": "x86/libpanelw6.dll"
+				"runtimes/win-x64/native/libncursesw6.dll": "x64/libncursesw6.dll",
+                "runtimes/win-x86/native/libncursesw.dll": "x86/libncursesw.dll",
+				"runtimes/win-x86/native/libpanelw.dll": "x86/libpanelw6.dll",
+				"runtimes/win-x86/native/libncursesw6.dll": "x86/libncursesw6.dll"
             }
         }
     },
