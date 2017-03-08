@@ -73,6 +73,7 @@ namespace NCurses.Core.Interop
     internal delegate int NCURSES_WINDOW_CB(IntPtr window, IntPtr args);
     internal delegate int NCURSES_SCREEN_CB(IntPtr screen, IntPtr args);
 
+    //TODO: free GetFunctionPointerForDelegate pointers (possible memory leak)
     /// <summary>
     /// native curses methods.
     /// all methods can be found at http://invisible-island.net/ncurses/man/ncurses.3x.html#h3-Routine-Name-Index
