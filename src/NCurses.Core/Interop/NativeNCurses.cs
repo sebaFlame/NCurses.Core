@@ -24,14 +24,22 @@ namespace NCurses.Core.Interop
     }
 
     //TODO: create CustomMarshaller to create a null terminated array of NCURSES_CH_T (without size)
-    [StructLayout(LayoutKind.Sequential, CharSet = CharSet.Unicode)]
+    [StructLayout(LayoutKind.Sequential)]
     public struct NCURSES_CH_T /* cchar_t */
     {
         public NCURSES_CH_T(char ch)
             : this()
         {
-            this.chars = new char[5];
-            this.chars[0] = ch;
+            this.chars = new byte[10];
+            bool completed;
+            int charsUsed, bytesUsed;
+            if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
+                Encoding.Unicode.GetEncoder().Convert(new char[] { ch }, 0, 1, this.chars, 0, 10, false, out charsUsed, out bytesUsed, out completed);
+            else
+                Encoding.UTF8.GetEncoder().Convert(new char[] { ch }, 0, 1, this.chars, 0, 10, false, out charsUsed, out bytesUsed, out completed);
+
+            if (!completed)
+                throw new InvalidOperationException("Failed to convert character for marshaling");
         }
 
         public NCURSES_CH_T(char ch, uint attr)
@@ -43,7 +51,7 @@ namespace NCurses.Core.Interop
         public NCURSES_CH_T(uint c)
             : this()
         {
-            this.chars = new char[5];
+            this.chars = new byte[10];
             BitConverter.GetBytes(c).CopyTo(this.chars, 0);
         }
 
@@ -54,8 +62,8 @@ namespace NCurses.Core.Interop
         }
 
         public uint attr;
-        [MarshalAs(UnmanagedType.ByValArray, SizeConst = 5)]
-        public char[] chars;
+        [MarshalAs(UnmanagedType.ByValArray, SizeConst = 10)]
+        public byte[] chars;
         /// <summary>
         /// color pair, must be more than 16-bits
         /// </summary>
@@ -361,7 +369,7 @@ namespace NCurses.Core.Interop
         }
         #endregion
 
-        #region custom array marshaller
+        #region custom marshalling
         /// <summary>
         /// create a Null terminated array of a custom time, remember to add to GC and to call Marshal.FreeHGlobal
         /// </summary>
@@ -414,6 +422,22 @@ namespace NCurses.Core.Interop
             Marshal.Copy(wstrArray, 0, wstrPtr, wstrArray.Length);
             pointerSize = wstrArray.Length;
             return wstrPtr;
+        }
+
+        /// <summary>
+        /// Get the correct character representation from a NCURSES_CH_T
+        /// </summary>
+        /// <param name="cchar">the NCURSES_CH_T from which you want to retrieve the character</param>
+        /// <returns></returns>
+        public static char GetCharFromNCURSES_CH_T(NCURSES_CH_T cchar)
+        {
+            char[] ch;
+            if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
+                ch = Encoding.Unicode.GetChars(cchar.chars);
+            else
+                ch = Encoding.UTF8.GetChars(cchar.chars);
+
+            return ch[0];
         }
         #endregion
 

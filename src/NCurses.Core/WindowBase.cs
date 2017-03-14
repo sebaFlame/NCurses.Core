@@ -646,7 +646,7 @@ namespace NCurses.Core
             {
                 NCURSES_CH_T wch;
                 NativeWindow.win_wch(this.WindowPtr, out wch);
-                ch = wch.chars[0];
+                ch = NativeNCurses.GetCharFromNCURSES_CH_T(wch);
             }
             else
             {
@@ -738,7 +738,7 @@ namespace NCurses.Core
                 NativeWindow.win_wchstr(this.WindowPtr, ref wchArr);
                 for (int i = 0; i < wchArr.Length; i++)
                 {
-                    builder.Append(wchArr[i].chars[0]);
+                    builder.Append(NativeNCurses.GetCharFromNCURSES_CH_T(wchArr[i]));
                     lstAttributes.Add(Tuple.Create(wchArr[i].attr, (short)wchArr[i].ext_color));
                 }
             }
@@ -775,7 +775,7 @@ namespace NCurses.Core
                 NativeWindow.win_wchnstr(this.WindowPtr, ref wchArr, count);
                 for (int i = 0; i < wchArr.Length; i++)
                 {
-                    builder.Append(wchArr[i].chars[0]);
+                    builder.Append(NativeNCurses.GetCharFromNCURSES_CH_T(wchArr[i]));
                     lstAttributes.Add(Tuple.Create(wchArr[i].attr, (short)wchArr[i].ext_color));
                 }
             }
