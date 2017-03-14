@@ -325,7 +325,10 @@ namespace NCurses.Core.Interop
             if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
                 libPtr = NativeWindows.LoadLibrary(Constants.DLLNAME);
             else
-                libPtr = NativeLinux.dlopen(Constants.DLLNAME, 2);
+                libPtr = NativeLinux.dlopen(
+                    Constants.DLLNAME.EndsWith(".so", StringComparison.OrdinalIgnoreCase) ? 
+                        Constants.DLLNAME : string.Format("{0}.so", Constants.DLLNAME),
+                    2);
 
             if (libPtr == IntPtr.Zero)
                 throw new ArgumentNullException(string.Format("Couldn't load library {0}", Constants.DLLNAME));
@@ -386,6 +389,31 @@ namespace NCurses.Core.Interop
                 Marshal.FreeHGlobal(ptr);
                 throw;
             }
+        }
+
+        /// <summary>
+        /// converts a string to a byte array consisting of 4 byte encoded UTF-8 characters
+        /// </summary>
+        /// <param name="wStr">the string to encode</param>
+        /// <param name="pointerSize">the size of the allocated array (for GC)</param>
+        /// <returns></returns>
+        internal static IntPtr MarshalStringToUtf8_4byteArray(string wStr, out int pointerSize)
+        {
+            char[] charArray = wStr.ToCharArray();
+            byte[] wstrArray = new byte[charArray.Length * 4];
+            bool completed = true;
+            int charsUsed, bytesUsed;
+
+            for (int i = 0; completed && i < charArray.Length; i++)
+                Encoding.UTF8.GetEncoder().Convert(charArray, i, 1, wstrArray, i * 4, 4, false, out charsUsed, out bytesUsed, out completed);
+
+            if (!completed)
+                throw new InvalidOperationException("Failed to convert string to a wide char array for.");
+
+            IntPtr wstrPtr = Marshal.AllocHGlobal(wstrArray.Length);
+            Marshal.Copy(wstrArray, 0, wstrPtr, wstrArray.Length);
+            pointerSize = wstrArray.Length;
+            return wstrPtr;
         }
         #endregion
 
@@ -960,7 +988,7 @@ namespace NCurses.Core.Interop
         public static IntPtr initscr()
         {
             if (RuntimeInformation.IsOSPlatform(OSPlatform.Linux))
-                NativeLinux.setlocale(6, "");
+                NativeLinux.setlocale(6, ""); //6 = LC_ALL
 
             IntPtr stdScr = NativeNCurses.VerifyNCursesMethod(() => ncurses_initscr(), "initscr");
 

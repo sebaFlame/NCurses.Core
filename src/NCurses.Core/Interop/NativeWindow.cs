@@ -206,7 +206,7 @@ namespace NCurses.Core.Interop
         /// </summary>
         /// <param name="txt">string to add</param>
         /// <returns>Constants.ERR on error or Constants.OK on success</returns>
-        [DllImport(Constants.DLLNAME, EntryPoint = "waddstr", CharSet = CharSet.Unicode)]
+        [DllImport(Constants.DLLNAME, EntryPoint = "waddstr")]
         internal extern static int ncurses_waddstr(IntPtr window, string txt);
 
         /// <summary>
@@ -3292,21 +3292,42 @@ namespace NCurses.Core.Interop
         [DllImport(Constants.DLLNAME, EntryPoint = "waddnwstr", CharSet = CharSet.Unicode)]
         internal extern static int ncurses_waddnwstr(IntPtr window, string wstr, int n);
 
+        [DllImport(Constants.DLLNAME, EntryPoint = "waddnwstr")]
+        internal extern static int ncurses_waddnwstr(IntPtr window, IntPtr wstr, int n);
+
         /// <summary>
         /// see <see cref="NativeStdScr.addnwstr"/>
         /// <para />native method wrapped with verification.
         /// </summary>
         /// <param name="window">A pointer to a window</param>
-        public static void addnwstr(IntPtr window, string wstr, int n)
+        public static void waddnwstr(IntPtr window, string wstr, int n)
         {
-            NativeNCurses.VerifyNCursesMethod(() => ncurses_waddnwstr(window, wstr, n), "waddnwstr");
+            if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
+                NativeNCurses.VerifyNCursesMethod(() => ncurses_waddnwstr(window, wstr, n), "waddnwstr");
+            //UTF-8 support on linux still flaky
+            else
+            {
+                int pointerLength;
+                IntPtr wstrPtr = NativeNCurses.MarshalStringToUtf8_4byteArray(wstr, out pointerLength);
+                GC.AddMemoryPressure(pointerLength);
+
+                try
+                {
+                    NativeNCurses.VerifyNCursesMethod(() => ncurses_waddnwstr(window, wstrPtr, n), "waddnwstr");
+                }
+                finally
+                {
+                    Marshal.FreeHGlobal(wstrPtr);
+                    GC.RemoveMemoryPressure(pointerLength);
+                }
+            }
         }
 
         /// <summary>
         /// see <see cref="waddnwstr"/>
         /// <para />native method wrapped with verification and thread safety.
         /// </summary>
-        public static void addnwstr_t(IntPtr window, string wstr, int n)
+        public static void waddnwstr_t(IntPtr window, string wstr, int n)
         {
             Func<IntPtr, IntPtr, int> callback = (IntPtr w, IntPtr a) => ncurses_waddnwstr(window, wstr, n);
             NativeNCurses.use_window_v(window, Marshal.GetFunctionPointerForDelegate(new NCURSES_WINDOW_CB(callback)), "waddnwstr");
@@ -3321,6 +3342,9 @@ namespace NCurses.Core.Interop
         [DllImport(Constants.DLLNAME, EntryPoint = "waddwstr", CharSet = CharSet.Unicode)]
         internal extern static int ncurses_waddwstr(IntPtr window, string wstr);
 
+        [DllImport(Constants.DLLNAME, EntryPoint = "waddwstr")]
+        internal extern static int ncurses_waddwstr(IntPtr window, IntPtr wstr);
+
         /// <summary>
         /// see <see cref="NativeStdScr.addwstr"/>
         /// <para />native method wrapped with verification.
@@ -3328,7 +3352,24 @@ namespace NCurses.Core.Interop
         /// <param name="window">A pointer to a window</param>
         public static void waddwstr(IntPtr window, string wstr)
         {
-            NativeNCurses.VerifyNCursesMethod(() => ncurses_waddwstr(window, wstr), "waddwstr");
+            if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
+                NativeNCurses.VerifyNCursesMethod(() => ncurses_waddwstr(window, wstr), "waddwstr");
+            else
+            {
+                int pointerLength;
+                IntPtr wstrPtr = NativeNCurses.MarshalStringToUtf8_4byteArray(wstr, out pointerLength);
+                GC.AddMemoryPressure(pointerLength);
+
+                try
+                {
+                    NativeNCurses.VerifyNCursesMethod(() => ncurses_waddwstr(window, wstrPtr), "waddwstr");
+                }
+                finally
+                {
+                    Marshal.FreeHGlobal(wstrPtr);
+                    GC.RemoveMemoryPressure(pointerLength);
+                }
+            }
         }
 
         /// <summary>
@@ -4320,8 +4361,11 @@ namespace NCurses.Core.Interop
         /// see <see cref="mvwaddnwstr"/>
         /// </summary>
         /// <returns>Constants.ERR on error or Constants.OK on success</returns>
-        [DllImport(Constants.DLLNAME, EntryPoint = "mvwaddnwstr")]
+        [DllImport(Constants.DLLNAME, EntryPoint = "mvwaddnwstr", CharSet = CharSet.Unicode)]
         internal extern static int ncurses_mvwaddnwstr(IntPtr window, int y, int x, string wstr, int n);
+
+        [DllImport(Constants.DLLNAME, EntryPoint = "mvwaddnwstr")]
+        internal extern static int ncurses_mvwaddnwstr(IntPtr window, int y, int x, IntPtr wstr, int n);
 
         /// <summary>
         /// see <see cref="NativeStdScr.mvaddnwstr"/>
@@ -4330,7 +4374,24 @@ namespace NCurses.Core.Interop
         /// <param name="window">A pointer to a window</param>
         public static void mvwaddnwstr(IntPtr window, int y, int x, string wstr, int n)
         {
-            NativeNCurses.VerifyNCursesMethod(() => ncurses_mvwaddnwstr(window, y, x, wstr, n), "mvwaddnwstr");
+            if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
+                NativeNCurses.VerifyNCursesMethod(() => ncurses_mvwaddnwstr(window, y, x, wstr, n), "mvwaddnwstr");
+            else
+            {
+                int pointerLength;
+                IntPtr wstrPtr = NativeNCurses.MarshalStringToUtf8_4byteArray(wstr, out pointerLength);
+                GC.AddMemoryPressure(pointerLength);
+
+                try
+                {
+                    NativeNCurses.VerifyNCursesMethod(() => ncurses_mvwaddnwstr(window, y, x, wstrPtr, n), "mvwaddnwstr");
+                }
+                finally
+                {
+                    Marshal.FreeHGlobal(wstrPtr);
+                    GC.RemoveMemoryPressure(pointerLength);
+                }
+            }
         }
 
         /// <summary>
