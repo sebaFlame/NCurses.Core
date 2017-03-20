@@ -341,7 +341,7 @@ namespace NCurses.Core
         public void Write(char ch)
         {
             if (NCurses.UnicodeSupported)
-                NativeWindow.wadd_wch(this.WindowPtr, new NCURSES_CH_T(ch));
+                NativeWindow.wadd_wch(this.WindowPtr, new NCursesWCHAR(ch));
             else
                 NativeWindow.waddch(this.WindowPtr, (byte)ch);
         }
@@ -358,7 +358,7 @@ namespace NCurses.Core
         {
             if (NCurses.UnicodeSupported)
             {
-                NCURSES_CH_T wch = new NCURSES_CH_T(ch);
+                NCursesWCHAR wch = new NCursesWCHAR(ch);
                 wch.attr = attrs;
                 wch.ext_color = pair;
                 NativeWindow.wadd_wch(this.WindowPtr, wch);
@@ -404,7 +404,7 @@ namespace NCurses.Core
         public void Write(int nline, int ncol, char ch)
         {
             if (NCurses.UnicodeSupported)
-                NativeWindow.mvwadd_wch(this.WindowPtr, nline, ncol, new NCURSES_CH_T(ch));
+                NativeWindow.mvwadd_wch(this.WindowPtr, nline, ncol, new NCursesWCHAR(ch));
             else
                 NativeWindow.mvwaddch(this.WindowPtr, nline, ncol, (byte)ch);
 
@@ -449,9 +449,9 @@ namespace NCurses.Core
         {
             if (NCurses.UnicodeSupported)
             {
-                NCURSES_CH_T[] chArray = new NCURSES_CH_T[chars.Length];
+                NCursesWCHAR[] chArray = new NCursesWCHAR[chars.Length];
                 for (int i = 0; i < chars.Length; i++)
-                    chArray[i] = new NCURSES_CH_T(chars[i]);
+                    chArray[i] = new NCursesWCHAR(chars[i]);
                 NativeWindow.wadd_wchstr(this.WindowPtr, chArray);
             }
             else
@@ -473,10 +473,10 @@ namespace NCurses.Core
         /// <param name="pair">the color pair you want to use on this character</param>
         public void Write(char[] chars, uint attrs, short pair)
         {
-            NCURSES_CH_T[] chArray = new NCURSES_CH_T[chars.Length];
+            NCursesWCHAR[] chArray = new NCursesWCHAR[chars.Length];
             for (int i = 0; i < chars.Length; i++)
             {
-                chArray[i] = new NCURSES_CH_T(chars[i]);
+                chArray[i] = new NCursesWCHAR(chars[i]);
                 chArray[i].attr = attrs;
                 chArray[i].ext_color = pair;
             }
@@ -567,7 +567,7 @@ namespace NCurses.Core
         {
             if (NCurses.UnicodeSupported)
             {
-                NCURSES_CH_T wch = new NCURSES_CH_T(ch);
+                NCursesWCHAR wch = new NCursesWCHAR(ch);
                 NativeWindow.wins_wch(this.WindowPtr, wch);
             }
             else
@@ -586,7 +586,7 @@ namespace NCurses.Core
         {
             if (NCurses.UnicodeSupported)
             {
-                NCURSES_CH_T wch = new NCURSES_CH_T(ch);
+                NCursesWCHAR wch = new NCursesWCHAR(ch);
                 wch.attr = attrs;
                 wch.ext_color = pair;
                 NativeWindow.wins_wch(this.WindowPtr, wch);
@@ -644,9 +644,9 @@ namespace NCurses.Core
             char ch;
             if (NCurses.UnicodeSupported)
             {
-                NCURSES_CH_T wch;
+                NCursesWCHAR wch;
                 NativeWindow.win_wch(this.WindowPtr, out wch);
-                ch = NativeNCurses.GetCharFromNCURSES_CH_T(wch);
+                return wch.GetChar();
             }
             else
             {
@@ -668,21 +668,21 @@ namespace NCurses.Core
         public char ReadChar(out uint attrs, out short pair)
         {
             char ch;
-            //if (NCurses.UnicodeSupported)
-            //{
-            //    NCURSES_CH_T wch;
-            //    NativeWindow.win_wch(this.WindowPtr, out wch);
-            //    ch = wch.chars[0];
-            //    attrs = wch.attr;
-            //    pair = (short)wch.ext_color;
-            //}
-            //else
-            //{
+            if (NCurses.UnicodeSupported)
+            {
+                NCursesWCHAR wch;
+                NativeWindow.win_wch(this.WindowPtr, out wch);
+                ch = wch.GetChar();
+                attrs = wch.attr;
+                pair = (short)wch.ext_color;
+            }
+            else
+            {
                 uint c = NativeWindow.winch(this.WindowPtr);
                 ch = (char)(c & Attrs.CHARTEXT);
                 attrs = c & Attrs.ATTRIBUTES;
                 pair = (short)Constants.PAIR_NUMBER(c & Attrs.COLOR);
-            //}
+            }
 
             return ch;
         }
@@ -734,11 +734,11 @@ namespace NCurses.Core
             StringBuilder builder = new StringBuilder(1024);
             if (NCurses.UnicodeSupported)
             {
-                NCURSES_CH_T[] wchArr = new NCURSES_CH_T[1024];
+                NCursesWCHAR[] wchArr = new NCursesWCHAR[1024];
                 NativeWindow.win_wchstr(this.WindowPtr, ref wchArr);
                 for (int i = 0; i < wchArr.Length; i++)
                 {
-                    builder.Append(NativeNCurses.GetCharFromNCURSES_CH_T(wchArr[i]));
+                    builder.Append(wchArr[i].GetChar());
                     lstAttributes.Add(Tuple.Create(wchArr[i].attr, (short)wchArr[i].ext_color));
                 }
             }
@@ -771,11 +771,11 @@ namespace NCurses.Core
             StringBuilder builder = new StringBuilder(count);
             if (NCurses.UnicodeSupported)
             {
-                NCURSES_CH_T[] wchArr = new NCURSES_CH_T[count];
+                NCursesWCHAR[] wchArr = new NCursesWCHAR[count];
                 NativeWindow.win_wchnstr(this.WindowPtr, ref wchArr, count);
                 for (int i = 0; i < wchArr.Length; i++)
                 {
-                    builder.Append(NativeNCurses.GetCharFromNCURSES_CH_T(wchArr[i]));
+                    builder.Append(wchArr[i].GetChar());
                     lstAttributes.Add(Tuple.Create(wchArr[i].attr, (short)wchArr[i].ext_color));
                 }
             }

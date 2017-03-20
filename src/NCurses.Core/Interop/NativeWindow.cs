@@ -3135,20 +3135,12 @@ namespace NCurses.Core.Interop
         /// <para />native method wrapped with verification.
         /// </summary>
         /// <param name="window">A pointer to a window</param>
-        public static void wadd_wch(IntPtr window, NCURSES_CH_T wch)
+        public static void wadd_wch(IntPtr window, NCursesWCHAR wch)
         {
-            IntPtr wPtr = Marshal.AllocHGlobal(Marshal.SizeOf(wch));
-            Marshal.StructureToPtr(wch, wPtr, true);
-            GC.AddMemoryPressure(Marshal.SizeOf(wch));
-
-            try
+            IntPtr wPtr;
+            using (wch.ToPointer(out wPtr))
             {
                 NativeNCurses.VerifyNCursesMethod(() => ncurses_wadd_wch(window, wPtr), "wadd_wch");
-            }
-            finally
-            {
-                Marshal.FreeHGlobal(wPtr);
-                GC.RemoveMemoryPressure(Marshal.SizeOf(wch));
             }
         }
 
@@ -3156,11 +3148,10 @@ namespace NCurses.Core.Interop
         /// see <see cref="wadd_wch"/>
         /// <para />native method wrapped with verification and thread safety.
         /// </summary>
-        public static void wadd_wch_t(IntPtr window, NCURSES_CH_T wch)
+        public static void wadd_wch_t(IntPtr window, NCursesWCHAR wch)
         {
-            IntPtr wPtr = Marshal.AllocHGlobal(Marshal.SizeOf(wch));
-            Marshal.StructureToPtr(wch, wPtr, true);
-            GC.AddMemoryPressure(Marshal.SizeOf(wch));
+            IntPtr wPtr = wch.ToPointer();
+            GC.AddMemoryPressure(wch.Size);
 
             Func<IntPtr, IntPtr, int> callback = (IntPtr w, IntPtr a) => ncurses_wadd_wch(window, wPtr);
 
@@ -3171,7 +3162,7 @@ namespace NCurses.Core.Interop
             finally
             {
                 Marshal.FreeHGlobal(wPtr);
-                GC.RemoveMemoryPressure(Marshal.SizeOf(wch));
+                GC.RemoveMemoryPressure(wch.Size);
             }
         }
         #endregion
@@ -3189,7 +3180,7 @@ namespace NCurses.Core.Interop
         /// <para />native method wrapped with verification.
         /// </summary>
         /// <param name="window">A pointer to a window</param>
-        public static void wadd_wchnstr(IntPtr window, NCURSES_CH_T[] wchStr, int n)
+        public static void wadd_wchnstr(IntPtr window, NCursesWCHAR[] wchStr, int n)
         {
             int totalSize = 0;
             IntPtr arrayPtr = NativeNCurses.MarshallArray(wchStr, true, out totalSize);
@@ -3210,7 +3201,7 @@ namespace NCurses.Core.Interop
         /// see <see cref="wadd_wchnstr"/>
         /// <para />native method wrapped with verification and thread safety.
         /// </summary>
-        public static void wadd_wchnstr_t(IntPtr window, NCURSES_CH_T[] wchStr, int n)
+        public static void wadd_wchnstr_t(IntPtr window, NCursesWCHAR[] wchStr, int n)
         {
             int totalSize = 0;
             IntPtr arrayPtr = NativeNCurses.MarshallArray(wchStr, true, out totalSize);
@@ -3243,7 +3234,7 @@ namespace NCurses.Core.Interop
         /// <para />native method wrapped with verification.
         /// </summary>
         /// <param name="window">A pointer to a window</param>
-        public static void wadd_wchstr(IntPtr window, NCURSES_CH_T[] wchStr)
+        public static void wadd_wchstr(IntPtr window, NCursesWCHAR[] wchStr)
         {
             int totalSize = 0;
             IntPtr arrayPtr = NativeNCurses.MarshallArray(wchStr, true, out totalSize);
@@ -3264,7 +3255,7 @@ namespace NCurses.Core.Interop
         /// see <see cref="wadd_wchstr"/>
         /// <para />native method wrapped with verification and thread safety.
         /// </summary>
-        public static void wadd_wchstr_t(IntPtr window, NCURSES_CH_T[] wchStr)
+        public static void wadd_wchstr_t(IntPtr window, NCursesWCHAR[] wchStr)
         {
             int totalSize = 0;
             IntPtr arrayPtr = NativeNCurses.MarshallArray(wchStr, true, out totalSize);
@@ -3289,8 +3280,8 @@ namespace NCurses.Core.Interop
         /// see <see cref="waddnwstr"/>
         /// </summary>
         /// <returns>Constants.ERR on error or Constants.OK on success</returns>
-        [DllImport(Constants.DLLNAME, EntryPoint = "waddnwstr", CharSet = CharSet.Unicode)]
-        internal extern static int ncurses_waddnwstr(IntPtr window, string wstr, int n);
+        //[DllImport(Constants.DLLNAME, EntryPoint = "waddnwstr", CharSet = CharSet.Unicode)]
+        //internal extern static int ncurses_waddnwstr(IntPtr window, string wstr, int n);
 
         [DllImport(Constants.DLLNAME, EntryPoint = "waddnwstr")]
         internal extern static int ncurses_waddnwstr(IntPtr window, IntPtr wstr, int n);
@@ -3302,25 +3293,9 @@ namespace NCurses.Core.Interop
         /// <param name="window">A pointer to a window</param>
         public static void waddnwstr(IntPtr window, string wstr, int n)
         {
-            if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
-                NativeNCurses.VerifyNCursesMethod(() => ncurses_waddnwstr(window, wstr, n), "waddnwstr");
-            //UTF-8 support on linux still flaky
-            else
-            {
-                int pointerLength;
-                IntPtr wstrPtr = NativeNCurses.MarshalStringToUtf8_4byteArray(wstr, out pointerLength);
-                GC.AddMemoryPressure(pointerLength);
-
-                try
-                {
-                    NativeNCurses.VerifyNCursesMethod(() => ncurses_waddnwstr(window, wstrPtr, n), "waddnwstr");
-                }
-                finally
-                {
-                    Marshal.FreeHGlobal(wstrPtr);
-                    GC.RemoveMemoryPressure(pointerLength);
-                }
-            }
+            NativeNCurses.MarshalNativeWideStringAndExecuteAction((ptr) =>
+                NativeNCurses.VerifyNCursesMethod(() => ncurses_waddnwstr(window, ptr, n), "waddnwstr"),
+                wstr);
         }
 
         /// <summary>
@@ -3329,7 +3304,12 @@ namespace NCurses.Core.Interop
         /// </summary>
         public static void waddnwstr_t(IntPtr window, string wstr, int n)
         {
-            Func<IntPtr, IntPtr, int> callback = (IntPtr w, IntPtr a) => ncurses_waddnwstr(window, wstr, n);
+            Func<IntPtr, IntPtr, int> callback = (IntPtr w, IntPtr a) =>
+            {
+                int ret = 0;
+                NativeNCurses.MarshalNativeWideStringAndExecuteAction((ptr) => ret = ncurses_waddnwstr(window, ptr, n), wstr);
+                return ret;
+            };
             NativeNCurses.use_window_v(window, Marshal.GetFunctionPointerForDelegate(new NCURSES_WINDOW_CB(callback)), "waddnwstr");
         }
         #endregion
@@ -3339,8 +3319,8 @@ namespace NCurses.Core.Interop
         /// see <see cref="waddwstr"/>
         /// </summary>
         /// <returns>Constants.ERR on error or Constants.OK on success</returns>
-        [DllImport(Constants.DLLNAME, EntryPoint = "waddwstr", CharSet = CharSet.Unicode)]
-        internal extern static int ncurses_waddwstr(IntPtr window, string wstr);
+        //[DllImport(Constants.DLLNAME, EntryPoint = "waddwstr", CharSet = CharSet.Unicode)]
+        //internal extern static int ncurses_waddwstr(IntPtr window, string wstr);
 
         [DllImport(Constants.DLLNAME, EntryPoint = "waddwstr")]
         internal extern static int ncurses_waddwstr(IntPtr window, IntPtr wstr);
@@ -3352,24 +3332,9 @@ namespace NCurses.Core.Interop
         /// <param name="window">A pointer to a window</param>
         public static void waddwstr(IntPtr window, string wstr)
         {
-            if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
-                NativeNCurses.VerifyNCursesMethod(() => ncurses_waddwstr(window, wstr), "waddwstr");
-            else
-            {
-                int pointerLength;
-                IntPtr wstrPtr = NativeNCurses.MarshalStringToUtf8_4byteArray(wstr, out pointerLength);
-                GC.AddMemoryPressure(pointerLength);
-
-                try
-                {
-                    NativeNCurses.VerifyNCursesMethod(() => ncurses_waddwstr(window, wstrPtr), "waddwstr");
-                }
-                finally
-                {
-                    Marshal.FreeHGlobal(wstrPtr);
-                    GC.RemoveMemoryPressure(pointerLength);
-                }
-            }
+            NativeNCurses.MarshalNativeWideStringAndExecuteAction((ptr) =>
+                NativeNCurses.VerifyNCursesMethod(() => ncurses_waddwstr(window, ptr), "waddwstr"),
+                wstr, true);
         }
 
         /// <summary>
@@ -3378,7 +3343,12 @@ namespace NCurses.Core.Interop
         /// </summary>
         public static void waddwstr_t(IntPtr window, string wstr)
         {
-            Func<IntPtr, IntPtr, int> callback = (IntPtr w, IntPtr a) => ncurses_waddwstr(window, wstr);
+            Func<IntPtr, IntPtr, int> callback = (IntPtr w, IntPtr a) =>
+            {
+                int ret = 0;
+                NativeNCurses.MarshalNativeWideStringAndExecuteAction((ptr) => ret = ncurses_waddwstr(window, ptr), wstr);
+                return ret;
+            };
             NativeNCurses.use_window_v(window, Marshal.GetFunctionPointerForDelegate(new NCURSES_WINDOW_CB(callback)), "waddwstr");
         }
         #endregion
@@ -3396,20 +3366,12 @@ namespace NCurses.Core.Interop
         /// <para />native method wrapped with verification.
         /// </summary>
         /// <param name="window">A pointer to a window</param>
-        public static void wbkgrnd(IntPtr window, NCURSES_CH_T wch)
+        public static void wbkgrnd(IntPtr window, NCursesWCHAR wch)
         {
-            IntPtr wPtr = Marshal.AllocHGlobal(Marshal.SizeOf(wch));
-            Marshal.StructureToPtr(wch, wPtr, true);
-            GC.AddMemoryPressure(Marshal.SizeOf(wch));
-
-            try
+            IntPtr wPtr;
+            using (wch.ToPointer(out wPtr))
             {
                 NativeNCurses.VerifyNCursesMethod(() => ncurses_bkgrnd(window, wPtr), "wbkgrnd");
-            }
-            finally
-            {
-                Marshal.FreeHGlobal(wPtr);
-                GC.RemoveMemoryPressure(Marshal.SizeOf(wch));
             }
         }
 
@@ -3417,11 +3379,10 @@ namespace NCurses.Core.Interop
         /// see <see cref="wbkgrnd"/>
         /// <para />native method wrapped with verification and thread safety.
         /// </summary>
-        public static void wbkgrnd_t(IntPtr window, NCURSES_CH_T wch)
+        public static void wbkgrnd_t(IntPtr window, NCursesWCHAR wch)
         {
-            IntPtr wPtr = Marshal.AllocHGlobal(Marshal.SizeOf(wch));
-            Marshal.StructureToPtr(wch, wPtr, true);
-            GC.AddMemoryPressure(Marshal.SizeOf(wch));
+            IntPtr wPtr = wch.ToPointer();
+            GC.AddMemoryPressure(wch.Size);
 
             Func<IntPtr, IntPtr, int> callback = (IntPtr w, IntPtr a) => ncurses_bkgrnd(window, wPtr);
 
@@ -3432,7 +3393,7 @@ namespace NCurses.Core.Interop
             finally
             {
                 Marshal.FreeHGlobal(wPtr);
-                GC.RemoveMemoryPressure(Marshal.SizeOf(wch));
+                GC.RemoveMemoryPressure(wch.Size);
             }
         }
         #endregion
@@ -3449,20 +3410,12 @@ namespace NCurses.Core.Interop
         /// see <see cref="NativeStdScr.bkgrndset"/>
         /// </summary>
         /// <param name="window">A pointer to a window</param>
-        public static void wbkgrndset(IntPtr window, NCURSES_CH_T wch)
+        public static void wbkgrndset(IntPtr window, NCursesWCHAR wch)
         {
-            IntPtr wPtr = Marshal.AllocHGlobal(Marshal.SizeOf(wch));
-            Marshal.StructureToPtr(wch, wPtr, true);
-            GC.AddMemoryPressure(Marshal.SizeOf(wch));
-
-            try
+            IntPtr wPtr;
+            using (wch.ToPointer(out wPtr))
             {
                 ncurses_wbkgrndset(window, wPtr);
-            }
-            finally
-            {
-                Marshal.FreeHGlobal(wPtr);
-                GC.RemoveMemoryPressure(Marshal.SizeOf(wch));
             }
         }
         #endregion
@@ -3479,40 +3432,17 @@ namespace NCurses.Core.Interop
         /// see <see cref="NativeStdScr.border_set"/>
         /// </summary>
         /// <param name="window">A pointer to a window</param>
-        public static void wborder_set(IntPtr window, NCURSES_CH_T ls, NCURSES_CH_T rs, NCURSES_CH_T ts, NCURSES_CH_T bs, NCURSES_CH_T tl, NCURSES_CH_T tr,
-            NCURSES_CH_T bl, NCURSES_CH_T br)
+        public static void wborder_set(IntPtr window, NCursesWCHAR ls, NCursesWCHAR rs, NCursesWCHAR ts, NCursesWCHAR bs, NCursesWCHAR tl, NCursesWCHAR tr,
+            NCursesWCHAR bl, NCursesWCHAR br)
         {
-            IntPtr lsPtr = Marshal.AllocHGlobal(Marshal.SizeOf(ls));
-            Marshal.StructureToPtr(ls, lsPtr, true);
-            GC.AddMemoryPressure(Marshal.SizeOf(ls));
-
-            IntPtr rsPtr = Marshal.AllocHGlobal(Marshal.SizeOf(rs));
-            Marshal.StructureToPtr(rs, rsPtr, true);
-            GC.AddMemoryPressure(Marshal.SizeOf(rs));
-
-            IntPtr tsPtr = Marshal.AllocHGlobal(Marshal.SizeOf(ts));
-            Marshal.StructureToPtr(ts, tsPtr, true);
-            GC.AddMemoryPressure(Marshal.SizeOf(ts));
-
-            IntPtr bsPtr = Marshal.AllocHGlobal(Marshal.SizeOf(bs));
-            Marshal.StructureToPtr(bs, bsPtr, true);
-            GC.AddMemoryPressure(Marshal.SizeOf(bs));
-
-            IntPtr tlPtr = Marshal.AllocHGlobal(Marshal.SizeOf(tl));
-            Marshal.StructureToPtr(tl, tlPtr, true);
-            GC.AddMemoryPressure(Marshal.SizeOf(tl));
-
-            IntPtr trPtr = Marshal.AllocHGlobal(Marshal.SizeOf(tr));
-            Marshal.StructureToPtr(tr, trPtr, true);
-            GC.AddMemoryPressure(Marshal.SizeOf(tr));
-
-            IntPtr blPtr = Marshal.AllocHGlobal(Marshal.SizeOf(bl));
-            Marshal.StructureToPtr(bl, blPtr, true);
-            GC.AddMemoryPressure(Marshal.SizeOf(bl));
-
-            IntPtr brPtr = Marshal.AllocHGlobal(Marshal.SizeOf(br));
-            Marshal.StructureToPtr(br, brPtr, true);
-            GC.AddMemoryPressure(Marshal.SizeOf(br));
+            IntPtr lsPtr = ls.ToPointer();
+            IntPtr rsPtr = rs.ToPointer();
+            IntPtr tsPtr = ts.ToPointer();
+            IntPtr bsPtr = bs.ToPointer();
+            IntPtr tlPtr = tl.ToPointer();
+            IntPtr trPtr = tr.ToPointer();
+            IntPtr blPtr = bl.ToPointer();
+            IntPtr brPtr = br.ToPointer();
 
             try
             {
@@ -3550,40 +3480,17 @@ namespace NCurses.Core.Interop
         /// see <see cref="wborder_set"/>
         /// <para />native method wrapped with verification and thread safety.
         /// </summary>
-        public static void wborder_set_t(IntPtr window, NCURSES_CH_T ls, NCURSES_CH_T rs, NCURSES_CH_T ts, NCURSES_CH_T bs, NCURSES_CH_T tl, NCURSES_CH_T tr,
-            NCURSES_CH_T bl, NCURSES_CH_T br)
+        public static void wborder_set_t(IntPtr window, NCursesWCHAR ls, NCursesWCHAR rs, NCursesWCHAR ts, NCursesWCHAR bs, NCursesWCHAR tl, NCursesWCHAR tr,
+            NCursesWCHAR bl, NCursesWCHAR br)
         {
-            IntPtr lsPtr = Marshal.AllocHGlobal(Marshal.SizeOf(ls));
-            Marshal.StructureToPtr(ls, lsPtr, true);
-            GC.AddMemoryPressure(Marshal.SizeOf(ls));
-
-            IntPtr rsPtr = Marshal.AllocHGlobal(Marshal.SizeOf(rs));
-            Marshal.StructureToPtr(rs, rsPtr, true);
-            GC.AddMemoryPressure(Marshal.SizeOf(rs));
-
-            IntPtr tsPtr = Marshal.AllocHGlobal(Marshal.SizeOf(ts));
-            Marshal.StructureToPtr(ts, tsPtr, true);
-            GC.AddMemoryPressure(Marshal.SizeOf(ts));
-
-            IntPtr bsPtr = Marshal.AllocHGlobal(Marshal.SizeOf(bs));
-            Marshal.StructureToPtr(bs, bsPtr, true);
-            GC.AddMemoryPressure(Marshal.SizeOf(bs));
-
-            IntPtr tlPtr = Marshal.AllocHGlobal(Marshal.SizeOf(tl));
-            Marshal.StructureToPtr(tl, tlPtr, true);
-            GC.AddMemoryPressure(Marshal.SizeOf(tl));
-
-            IntPtr trPtr = Marshal.AllocHGlobal(Marshal.SizeOf(tr));
-            Marshal.StructureToPtr(tr, trPtr, true);
-            GC.AddMemoryPressure(Marshal.SizeOf(tr));
-
-            IntPtr blPtr = Marshal.AllocHGlobal(Marshal.SizeOf(bl));
-            Marshal.StructureToPtr(bl, blPtr, true);
-            GC.AddMemoryPressure(Marshal.SizeOf(bl));
-
-            IntPtr brPtr = Marshal.AllocHGlobal(Marshal.SizeOf(br));
-            Marshal.StructureToPtr(br, brPtr, true);
-            GC.AddMemoryPressure(Marshal.SizeOf(br));
+            IntPtr lsPtr = ls.ToPointer();
+            IntPtr rsPtr = rs.ToPointer();
+            IntPtr tsPtr = ts.ToPointer();
+            IntPtr bsPtr = bs.ToPointer();
+            IntPtr tlPtr = tl.ToPointer();
+            IntPtr trPtr = tr.ToPointer();
+            IntPtr blPtr = bl.ToPointer();
+            IntPtr brPtr = br.ToPointer();
 
             Func<IntPtr, IntPtr, int> callback = (IntPtr w, IntPtr a) => ncurses_wborder_set(window, lsPtr, rsPtr, tsPtr, bsPtr, tlPtr, trPtr, blPtr, brPtr);
 
@@ -3634,15 +3541,13 @@ namespace NCurses.Core.Interop
         /// <para />native method wrapped with verification.
         /// </summary>
         /// <param name="window">A pointer to a window</param>
-        public static void box_set(IntPtr window, NCURSES_CH_T verch, NCURSES_CH_T horch)
+        public static void box_set(IntPtr window, NCursesWCHAR verch, NCursesWCHAR horch)
         {
-            IntPtr vPtr = Marshal.AllocHGlobal(Marshal.SizeOf(verch));
-            Marshal.StructureToPtr(verch, vPtr, true);
-            GC.AddMemoryPressure(Marshal.SizeOf(verch));
+            IntPtr vPtr = verch.ToPointer();
+            GC.AddMemoryPressure(verch.Size);
 
-            IntPtr hPtr = Marshal.AllocHGlobal(Marshal.SizeOf(horch));
-            Marshal.StructureToPtr(horch, hPtr, true);
-            GC.AddMemoryPressure(Marshal.SizeOf(horch));
+            IntPtr hPtr = horch.ToPointer();
+            GC.AddMemoryPressure(horch.Size);
 
             try
             {
@@ -3662,15 +3567,13 @@ namespace NCurses.Core.Interop
         /// see <see cref="box_set"/>
         /// <para />native method wrapped with verification and thread safety.
         /// </summary>
-        public static void box_set_t(IntPtr window, NCURSES_CH_T verch, NCURSES_CH_T horch)
+        public static void box_set_t(IntPtr window, NCursesWCHAR verch, NCursesWCHAR horch)
         {
-            IntPtr vPtr = Marshal.AllocHGlobal(Marshal.SizeOf(verch));
-            Marshal.StructureToPtr(verch, vPtr, true);
-            GC.AddMemoryPressure(Marshal.SizeOf(verch));
+            IntPtr vPtr = verch.ToPointer();
+            GC.AddMemoryPressure(verch.Size);
 
-            IntPtr hPtr = Marshal.AllocHGlobal(Marshal.SizeOf(horch));
-            Marshal.StructureToPtr(horch, hPtr, true);
-            GC.AddMemoryPressure(Marshal.SizeOf(horch));
+            IntPtr hPtr = horch.ToPointer();
+            GC.AddMemoryPressure(horch.Size);
 
             Func<IntPtr, IntPtr, int> callback = (IntPtr w, IntPtr a) => ncurses_box_set(window, vPtr, hPtr);
 
@@ -3702,20 +3605,12 @@ namespace NCurses.Core.Interop
         /// <para />native method wrapped with verification.
         /// </summary>
         /// <param name="window">A pointer to a window</param>
-        public static void wecho_wchar(IntPtr window, NCURSES_CH_T wch)
+        public static void wecho_wchar(IntPtr window, NCursesWCHAR wch)
         {
-            IntPtr wPtr = Marshal.AllocHGlobal(Marshal.SizeOf(wch));
-            Marshal.StructureToPtr(wch, wPtr, true);
-            GC.AddMemoryPressure(Marshal.SizeOf(wch));
-
-            try
+            IntPtr wPtr;
+            using (wch.ToPointer(out wPtr))
             {
                 NativeNCurses.VerifyNCursesMethod(() => ncurses_wecho_wchar(window, wPtr), "wecho_wchar");
-            }
-            finally
-            {
-                Marshal.FreeHGlobal(wPtr);
-                GC.RemoveMemoryPressure(Marshal.SizeOf(wch));
             }
         }
 
@@ -3723,11 +3618,10 @@ namespace NCurses.Core.Interop
         /// see <see cref="wecho_wchar"/>
         /// <para />native method wrapped with verification and thread safety.
         /// </summary>
-        public static void wecho_wchar_t(IntPtr window, NCURSES_CH_T wch)
+        public static void wecho_wchar_t(IntPtr window, NCursesWCHAR wch)
         {
-            IntPtr wPtr = Marshal.AllocHGlobal(Marshal.SizeOf(wch));
-            Marshal.StructureToPtr(wch, wPtr, true);
-            GC.AddMemoryPressure(Marshal.SizeOf(wch));
+            IntPtr wPtr = wch.ToPointer();
+            GC.AddMemoryPressure(wch.Size);
 
             Func<IntPtr, IntPtr, int> callback = (IntPtr w, IntPtr a) => ncurses_wecho_wchar(window, wPtr);
 
@@ -3738,7 +3632,7 @@ namespace NCurses.Core.Interop
             finally
             {
                 Marshal.FreeHGlobal(wPtr);
-                GC.RemoveMemoryPressure(Marshal.SizeOf(wch));
+                GC.RemoveMemoryPressure(wch.Size);
             }
         }
         #endregion
@@ -3748,8 +3642,10 @@ namespace NCurses.Core.Interop
         /// see <see cref="wget_wch"/>
         /// </summary>
         /// <returns>Constants.ERR on error or Constants.OK on success</returns>
-        [DllImport(Constants.DLLNAME, EntryPoint = "wget_wch", CharSet = CharSet.Unicode)]
-        internal extern static int ncurses_wget_wch(IntPtr window, out char wch);
+        //[DllImport(Constants.DLLNAME, EntryPoint = "wget_wch", CharSet = CharSet.Unicode)]
+        //internal extern static int ncurses_wget_wch(IntPtr window, out char wch);
+        [DllImport(Constants.DLLNAME, EntryPoint = "wget_wch")]
+        internal extern static int ncurses_wget_wch(IntPtr window, IntPtr wch);
 
         /// <summary>
         /// see <see cref="NativeStdScr.get_wch"/>
@@ -3758,15 +3654,27 @@ namespace NCurses.Core.Interop
         /// <param name="window">A pointer to a window</param>
         public static void wget_wch(IntPtr window, out char wch)
         {
-            //if (NativeNCurses.UseWindowsInputOverride)
-            //{
-            //    //NativeWindows.SetConsoleCP(1252);
-            //    int read = NativeWindows.NativeWindowsConsoleRead(window);
-            //    wch = (char)read;
-            //    //wch = NativeWindows.NativeWindowsConsoleWCharInput(window);
-            //}
-            //else
-                ncurses_wget_wch(window, out wch);
+            //TODO: returns KEY_CODE_YES if a function key gets pressed
+            IntPtr chPtr = Marshal.AllocHGlobal(Marshal.SizeOf<uint>());
+            GC.AddMemoryPressure(Marshal.SizeOf<uint>());
+
+            try
+            {
+                NativeNCurses.VerifyNCursesMethod(() => ncurses_wget_wch(window, chPtr), "get_wch");
+
+                byte[] arr = new byte[Marshal.SizeOf<uint>()];
+                Marshal.Copy(chPtr, arr, 0, Marshal.SizeOf<uint>());
+
+                if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
+                    wch = Encoding.Unicode.GetChars(arr)[0];
+                else
+                    wch = Encoding.UTF8.GetChars(arr)[0];
+            }
+            finally
+            {
+                Marshal.FreeHGlobal(chPtr);
+                GC.RemoveMemoryPressure(Marshal.SizeOf<uint>());
+            }
         }
         #endregion
 
@@ -3775,8 +3683,10 @@ namespace NCurses.Core.Interop
         /// see <see cref="wget_wstr"/>
         /// </summary>
         /// <returns>Constants.ERR on error or Constants.OK on success</returns>
-        [DllImport(Constants.DLLNAME, EntryPoint = "wget_wstr", CharSet = CharSet.Unicode)]
-        internal extern static int ncurses_wget_wstr(IntPtr window, StringBuilder wstr);
+        //[DllImport(Constants.DLLNAME, EntryPoint = "wget_wstr", CharSet = CharSet.Unicode)]
+        //internal extern static int ncurses_wget_wstr(IntPtr window, StringBuilder wstr);
+        [DllImport(Constants.DLLNAME, EntryPoint = "wget_wstr")]
+        internal extern static int ncurses_wget_wstr(IntPtr window, IntPtr wstr);
 
         /// <summary>
         /// see <see cref="NativeStdScr.get_wstr"/>
@@ -3785,7 +3695,20 @@ namespace NCurses.Core.Interop
         /// <param name="window">A pointer to a window</param>
         public static void wget_wstr(IntPtr window, StringBuilder wstr)
         {
-            NativeNCurses.VerifyNCursesMethod(() => ncurses_wget_wstr(window, wstr), "wget_wstr");
+            int size = Marshal.SizeOf<uint>() * wstr.Capacity;
+            IntPtr strPtr = Marshal.AllocHGlobal(size);
+            GC.AddMemoryPressure(size);
+
+            try
+            {
+                NativeNCurses.VerifyNCursesMethod(() => ncurses_wget_wstr(window, strPtr), "wget_wstr");
+                wstr.Append(NativeNCurses.MarshalStringFromNativeWideString(strPtr, wstr.Capacity));
+            }
+            finally
+            {
+                Marshal.FreeHGlobal(strPtr);
+                GC.RemoveMemoryPressure(Marshal.SizeOf<uint>());
+            }
         }
 
         /// <summary>
@@ -3794,8 +3717,20 @@ namespace NCurses.Core.Interop
         /// </summary>
         public static void wget_wstr_t(IntPtr window, StringBuilder wstr)
         {
-            Func<IntPtr, IntPtr, int> callback = (IntPtr w, IntPtr a) => ncurses_wget_wstr(window, wstr);
-            NativeNCurses.use_window_v(window, Marshal.GetFunctionPointerForDelegate(new NCURSES_WINDOW_CB(callback)), "wget_wstr");
+            int size = Marshal.SizeOf<uint>() * wstr.Capacity;
+            IntPtr strPtr = Marshal.AllocHGlobal(size);
+            GC.AddMemoryPressure(size);
+
+            try
+            {
+                Func<IntPtr, IntPtr, int> callback = (IntPtr w, IntPtr a) => ncurses_wget_wstr(window, strPtr);
+                NativeNCurses.use_window_v(window, Marshal.GetFunctionPointerForDelegate(new NCURSES_WINDOW_CB(callback)), "wget_wstr");
+            }
+            finally
+            {
+                Marshal.FreeHGlobal(strPtr);
+                GC.RemoveMemoryPressure(size);
+            }
         }
         #endregion
 
@@ -3804,8 +3739,8 @@ namespace NCurses.Core.Interop
         /// see <see cref="wgetbkgrnd"/>
         /// </summary>
         /// <returns>Constants.ERR on error or Constants.OK on success</returns>
-        [DllImport(Constants.DLLNAME, EntryPoint = "wgetbkgrnd")]
-        internal extern static int ncurses_wgetbkgrnd(IntPtr window, out NCURSES_CH_T wch);
+        //[DllImport(Constants.DLLNAME, EntryPoint = "wgetbkgrnd")]
+        //internal extern static int ncurses_wgetbkgrnd(IntPtr window, out NCURSES_CH_T wch);
 
         /// <summary>
         /// see <see cref="wgetbkgrnd"/>
@@ -3819,31 +3754,36 @@ namespace NCurses.Core.Interop
         /// <para />native method wrapped with verification.
         /// </summary>
         /// <param name="window">A pointer to a window</param>
-        public static void wgetbkgrnd(IntPtr window, out NCURSES_CH_T wch)
+        public static void wgetbkgrnd(IntPtr window, out NCursesWCHAR wch)
         {
-            NCursesException.Verify(ncurses_wgetbkgrnd(window, out wch), "wgetbkgrnd");
+            IntPtr wPtr;
+            wch = new NCursesWCHAR();
+            using (wch.ToPointer(out wPtr))
+            {
+                NCursesException.Verify(ncurses_wgetbkgrnd(window, wPtr), "wgetbkgrnd");
+            }
         }
 
         /// <summary>
         /// see <see cref="wgetbkgrnd"/>
         /// <para />native method wrapped with verification and thread safety.
         /// </summary>
-        public static void wgetbkgrnd_t(IntPtr window, out NCURSES_CH_T wch)
+        public static void wgetbkgrnd_t(IntPtr window, out NCursesWCHAR wch)
         {
-            IntPtr wPtr = Marshal.AllocHGlobal(Marshal.SizeOf<NCURSES_CH_T>());
-            GC.AddMemoryPressure(Marshal.SizeOf<NCURSES_CH_T>());
+            IntPtr wPtr = (wch = new NCursesWCHAR()).ToPointer();
+            GC.AddMemoryPressure(wch.Size);
 
             Func<IntPtr, IntPtr, int> callback = (IntPtr w, IntPtr a) => ncurses_wgetbkgrnd(window, a);
 
             try
             {
                 NativeNCurses.use_window_v(window, Marshal.GetFunctionPointerForDelegate(new NCURSES_WINDOW_CB(callback)), wPtr, "wget_wch");
-                wch = Marshal.PtrToStructure<NCURSES_CH_T>(wPtr);
+                wch.ToStructure(wPtr);
             }
             finally
             {
                 Marshal.FreeHGlobal(wPtr);
-                GC.RemoveMemoryPressure(Marshal.SizeOf<NCURSES_CH_T>());
+                GC.RemoveMemoryPressure(wch.Size);
             }
         }
         #endregion
@@ -3853,8 +3793,10 @@ namespace NCurses.Core.Interop
         /// see <see cref="wgetn_wstr"/>
         /// </summary>
         /// <returns>Constants.ERR on error or Constants.OK on success</returns>
-        [DllImport(Constants.DLLNAME, EntryPoint = "wgetn_wstr", CharSet = CharSet.Unicode)]
-        internal extern static int ncurses_wgetn_wstr(IntPtr window, StringBuilder wstr, int n);
+        //[DllImport(Constants.DLLNAME, EntryPoint = "wgetn_wstr", CharSet = CharSet.Unicode)]
+        //internal extern static int ncurses_wgetn_wstr(IntPtr window, StringBuilder wstr, int n);
+        [DllImport(Constants.DLLNAME, EntryPoint = "wgetn_wstr")]
+        internal extern static int ncurses_wgetn_wstr(IntPtr window, IntPtr wstr, int n);
 
         /// <summary>
         /// see <see cref="NativeStdScr.getn_wstr"/>
@@ -3863,7 +3805,20 @@ namespace NCurses.Core.Interop
         /// <param name="window">A pointer to a window</param>
         public static void wgetn_wstr(IntPtr window, StringBuilder wstr, int n)
         {
-            NativeNCurses.VerifyNCursesMethod(() => ncurses_wgetn_wstr(window, wstr, n), "wgetn_wstr");
+            int size = Marshal.SizeOf<uint>() * n;
+            IntPtr strPtr = Marshal.AllocHGlobal(size);
+            GC.AddMemoryPressure(size);
+
+            try
+            {
+                NativeNCurses.VerifyNCursesMethod(() => ncurses_wgetn_wstr(window, strPtr, n), "wgetn_wstr");
+                wstr.Append(NativeNCurses.MarshalStringFromNativeWideString(strPtr, n));
+            }
+            finally
+            {
+                Marshal.FreeHGlobal(strPtr);
+                GC.RemoveMemoryPressure(size);
+            }
         }
 
         /// <summary>
@@ -3872,8 +3827,21 @@ namespace NCurses.Core.Interop
         /// </summary>
         public static void wgetn_wstr_t(IntPtr window, StringBuilder wstr, int n)
         {
-            Func<IntPtr, IntPtr, int> callback = (IntPtr w, IntPtr a) => ncurses_wgetn_wstr(window, wstr, n);
-            NativeNCurses.use_window_v(window, Marshal.GetFunctionPointerForDelegate(new NCURSES_WINDOW_CB(callback)), "wgetn_wstr");
+            int size = Marshal.SizeOf<uint>() * n;
+            IntPtr strPtr = Marshal.AllocHGlobal(size);
+            GC.AddMemoryPressure(size);
+
+            Func<IntPtr, IntPtr, int> callback = (IntPtr w, IntPtr a) => ncurses_wgetn_wstr(window, strPtr, n);
+
+            try
+            {
+                NativeNCurses.use_window_v(window, Marshal.GetFunctionPointerForDelegate(new NCURSES_WINDOW_CB(callback)), "wgetn_wstr");
+            }
+            finally
+            {
+                Marshal.FreeHGlobal(strPtr);
+                GC.RemoveMemoryPressure(size);
+            }
         }
         #endregion
 
@@ -3882,27 +3850,44 @@ namespace NCurses.Core.Interop
         /// see <see cref="whline_set"/>
         /// </summary>
         /// <returns>Constants.ERR on error or Constants.OK on success</returns>
+        //[DllImport(Constants.DLLNAME, EntryPoint = "whline_set")]
+        //internal extern static int ncurses_whline_set(IntPtr window, NCURSES_CH_T wch, int n);
         [DllImport(Constants.DLLNAME, EntryPoint = "whline_set")]
-        internal extern static int ncurses_whline_set(IntPtr window, NCURSES_CH_T wch, int n);
+        internal extern static int ncurses_whline_set(IntPtr window, IntPtr wch, int n);
 
         /// <summary>
         /// see <see cref="NativeStdScr.hline_set"/>
         /// <para />native method wrapped with verification.
         /// </summary>
         /// <param name="window">A pointer to a window</param>
-        public static void whline_set(IntPtr window, NCURSES_CH_T wch, int n)
+        public static void whline_set(IntPtr window, NCursesWCHAR wch, int n)
         {
-            NativeNCurses.VerifyNCursesMethod(() => ncurses_whline_set(window, wch, n), "whline_set");
+            IntPtr wPtr;
+            using (wch.ToPointer(out wPtr))
+            {
+                NativeNCurses.VerifyNCursesMethod(() => ncurses_whline_set(window, wPtr, n), "whline_set");
+            }
         }
 
         /// <summary>
         /// see <see cref="whline_set"/>
         /// <para />native method wrapped with verification and thread safety.
         /// </summary>
-        public static void whline_set_t(IntPtr window, NCURSES_CH_T wch, int n)
+        public static void whline_set_t(IntPtr window, NCursesWCHAR wch, int n)
         {
-            Func<IntPtr, IntPtr, int> callback = (IntPtr w, IntPtr a) => ncurses_whline_set(window, wch, n);
-            NativeNCurses.use_window_v(window, Marshal.GetFunctionPointerForDelegate(new NCURSES_WINDOW_CB(callback)), "whline_set");
+            IntPtr wPtr = wch.ToPointer();
+            GC.AddMemoryPressure(wch.Size);
+
+            Func<IntPtr, IntPtr, int> callback = (IntPtr w, IntPtr a) => ncurses_whline_set(window, wPtr, n);
+            try
+            {
+                NativeNCurses.use_window_v(window, Marshal.GetFunctionPointerForDelegate(new NCURSES_WINDOW_CB(callback)), "whline_set");
+            }
+            finally
+            {
+                Marshal.FreeHGlobal(wPtr);
+                GC.RemoveMemoryPressure(wch.Size);
+            }
         }
         #endregion
 
@@ -3911,8 +3896,8 @@ namespace NCurses.Core.Interop
         /// see <see cref="win_wch"/>
         /// </summary>
         /// <returns>Constants.ERR on error or Constants.OK on success</returns>
-        [DllImport(Constants.DLLNAME, EntryPoint = "win_wch")]
-        internal extern static int ncurses_win_wch(IntPtr window, out NCURSES_CH_T wch);
+        //[DllImport(Constants.DLLNAME, EntryPoint = "win_wch")]
+        //internal extern static int ncurses_win_wch(IntPtr window, out NCURSES_CH_T wch);
 
         /// <summary>
         /// see <see cref="win_wch"/>
@@ -3926,32 +3911,37 @@ namespace NCurses.Core.Interop
         /// <para />native method wrapped with verification.
         /// </summary>
         /// <param name="window">A pointer to a window</param>
-        public static void win_wch(IntPtr window, out NCURSES_CH_T wcval)
+        public static void win_wch(IntPtr window, out NCursesWCHAR wcval)
         {
-            NCursesException.Verify(ncurses_win_wch(window, out wcval), "win_wch");
+            IntPtr wPtr;
+            wcval = new NCursesWCHAR();
+            using (wcval.ToPointer(out wPtr))
+            {
+                NCursesException.Verify(ncurses_win_wch(window, wPtr), "win_wch");
+            }
         }
 
         /// <summary>
         /// see <see cref="win_wch"/>
         /// <para />native method wrapped with verification and thread safety.
         /// </summary>
-        public static void win_wch_t(IntPtr window, ref NCURSES_CH_T wcval)
+        public static void win_wch_t(IntPtr window, out NCursesWCHAR wcval)
         {
-            IntPtr wPtr = Marshal.AllocHGlobal(Marshal.SizeOf(wcval));
-            Marshal.StructureToPtr(wcval, wPtr, true);
-            GC.AddMemoryPressure(Marshal.SizeOf(wcval));
+            wcval = new NCursesWCHAR();
+            IntPtr wPtr = wcval.ToPointer();
+            GC.AddMemoryPressure(wcval.Size);
 
             Func<IntPtr, IntPtr, int> callback = (IntPtr w, IntPtr a) => ncurses_win_wch(window, a);
 
             try
             {
                 NativeNCurses.use_window_v(window, Marshal.GetFunctionPointerForDelegate(new NCURSES_WINDOW_CB(callback)), wPtr, "win_wch");
-                Marshal.PtrToStructure(wPtr, wcval);
+                wcval.ToStructure(wPtr);
             }
             finally
             {
                 Marshal.FreeHGlobal(wPtr);
-                GC.RemoveMemoryPressure(Marshal.SizeOf(wcval));
+                GC.RemoveMemoryPressure(wcval.Size);
             }
         }
         #endregion
@@ -3969,7 +3959,7 @@ namespace NCurses.Core.Interop
         /// <para />native method wrapped with verification.
         /// </summary>
         /// <param name="window">A pointer to a window</param>
-        public static void win_wchnstr(IntPtr window, ref NCURSES_CH_T[] wcval, int n)
+        public static void win_wchnstr(IntPtr window, ref NCursesWCHAR[] wcval, int n)
         {
             int totalSize = 0;
             IntPtr arrayPtr = NativeNCurses.MarshallArray(wcval, false, out totalSize);
@@ -3979,7 +3969,7 @@ namespace NCurses.Core.Interop
             {
                 NativeNCurses.VerifyNCursesMethod(() => ncurses_win_wchnstr(window, arrayPtr, totalSize), "win_wchnstr");
                 for (int i = 0; i < wcval.Length; i++)
-                    wcval[i] = Marshal.PtrToStructure<NCURSES_CH_T>(arrayPtr + (i * Marshal.SizeOf<NCURSES_CH_T>()));
+                    wcval[i].ToStructure(arrayPtr + (i * wcval[i].Size));
             }
             finally
             {
@@ -3993,7 +3983,7 @@ namespace NCurses.Core.Interop
         /// <para />native method wrapped with verification.
         /// </summary>
         /// <param name="window">A pointer to a window</param>
-        public static void win_wchnstr_t(IntPtr window, ref NCURSES_CH_T[] wcval, int n)
+        public static void win_wchnstr_t(IntPtr window, ref NCursesWCHAR[] wcval, int n)
         {
             int totalSize = 0;
             IntPtr arrayPtr = NativeNCurses.MarshallArray(wcval, false, out totalSize);
@@ -4005,7 +3995,7 @@ namespace NCurses.Core.Interop
             {
                 NativeNCurses.use_window_v(window, Marshal.GetFunctionPointerForDelegate(new NCURSES_WINDOW_CB(callback)), "win_wchnstr");
                 for (int i = 0; i < wcval.Length; i++)
-                    wcval[i] = Marshal.PtrToStructure<NCURSES_CH_T>(arrayPtr + (i * Marshal.SizeOf<NCURSES_CH_T>()));
+                    wcval[i].ToStructure(arrayPtr + (i * wcval[i].Size));
             }
             finally
             {
@@ -4028,7 +4018,7 @@ namespace NCurses.Core.Interop
         /// <para />native method wrapped with verification.
         /// </summary>
         /// <param name="window">A pointer to a window</param>
-        public static void win_wchstr(IntPtr window, ref NCURSES_CH_T[] wcval)
+        public static void win_wchstr(IntPtr window, ref NCursesWCHAR[] wcval)
         {
             int totalSize = 0;
             IntPtr arrayPtr = NativeNCurses.MarshallArray(wcval, false, out totalSize);
@@ -4038,7 +4028,7 @@ namespace NCurses.Core.Interop
             {
                 NativeNCurses.VerifyNCursesMethod(() => ncurses_win_wchstr(window, arrayPtr), "win_wchstr");
                 for (int i = 0; i < wcval.Length; i++)
-                    wcval[i] = Marshal.PtrToStructure<NCURSES_CH_T>(arrayPtr + (i * Marshal.SizeOf<NCURSES_CH_T>()));
+                    wcval[i].ToStructure(arrayPtr + (i * wcval[i].Size));
             }
             finally
             {
@@ -4052,7 +4042,7 @@ namespace NCurses.Core.Interop
         /// <para />native method wrapped with verification.
         /// </summary>
         /// <param name="window">A pointer to a window</param>
-        public static void win_wchstr_t(IntPtr window, ref NCURSES_CH_T[] wcval)
+        public static void win_wchstr_t(IntPtr window, ref NCursesWCHAR[] wcval)
         {
             int totalSize = 0;
             IntPtr arrayPtr = NativeNCurses.MarshallArray(wcval, false, out totalSize);
@@ -4064,7 +4054,7 @@ namespace NCurses.Core.Interop
             {
                 NativeNCurses.use_window_v(window, Marshal.GetFunctionPointerForDelegate(new NCURSES_WINDOW_CB(callback)), "win_wchstr");
                 for (int i = 0; i < wcval.Length; i++)
-                    wcval[i] = Marshal.PtrToStructure<NCURSES_CH_T>(arrayPtr + (i * Marshal.SizeOf<NCURSES_CH_T>()));
+                    wcval[i].ToStructure(arrayPtr + (i * wcval[i].Size));
             }
             finally
             {
@@ -4079,17 +4069,32 @@ namespace NCurses.Core.Interop
         /// see <see cref="winnwstr"/>
         /// </summary>
         /// <returns>Constants.ERR on error or Constants.OK on success</returns>
-        [DllImport(Constants.DLLNAME, EntryPoint = "winnwstr", CharSet = CharSet.Unicode)]
-        internal extern static int ncurses_winnwstr(IntPtr window, StringBuilder str, int n);
+        //[DllImport(Constants.DLLNAME, EntryPoint = "winnwstr", CharSet = CharSet.Unicode)]
+        //internal extern static int ncurses_winnwstr(IntPtr window, StringBuilder str, int n);
+        [DllImport(Constants.DLLNAME, EntryPoint = "winnwstr")]
+        internal extern static int ncurses_winnwstr(IntPtr window, IntPtr str, int n);
 
         /// <summary>
-        /// see <see cref="NativeStdScr.innstr"/>
+        /// see <see cref="NativeStdScr.innwstr"/>
         /// <para />native method wrapped with verification.
         /// </summary>
         /// <param name="window">A pointer to a window</param>
         public static void winnwstr(IntPtr window, StringBuilder str, int n)
         {
-            NativeNCurses.VerifyNCursesMethod(() => ncurses_winnwstr(window, str, n), "winnwstr");
+            int size = Constants.SIZEOF_WCHAR_T * n;
+            IntPtr strPtr = Marshal.AllocHGlobal(size);
+            GC.AddMemoryPressure(size);
+
+            try
+            {
+                NativeNCurses.VerifyNCursesMethod(() => ncurses_winnwstr(window, strPtr, n), "winnwstr");
+                str.Append(NativeNCurses.MarshalStringFromNativeWideString(strPtr, n));
+            }
+            finally
+            {
+                Marshal.FreeHGlobal(strPtr);
+                GC.RemoveMemoryPressure(size);
+            }
         }
 
         /// <summary>
@@ -4098,8 +4103,21 @@ namespace NCurses.Core.Interop
         /// </summary>
         public static void winnwstr_t(IntPtr window, StringBuilder str, int n)
         {
-            Func<IntPtr, IntPtr, int> callback = (IntPtr w, IntPtr a) => ncurses_winnwstr(window, str, n);
-            NativeNCurses.use_window_v(window, Marshal.GetFunctionPointerForDelegate(new NCURSES_WINDOW_CB(callback)), "winnwstr");
+            int size = Constants.SIZEOF_WCHAR_T * n;
+            IntPtr strPtr = Marshal.AllocHGlobal(size);
+            GC.AddMemoryPressure(size);
+
+            Func<IntPtr, IntPtr, int> callback = (IntPtr w, IntPtr a) => ncurses_winnwstr(window, strPtr, n);
+
+            try
+            {
+                NativeNCurses.use_window_v(window, Marshal.GetFunctionPointerForDelegate(new NCURSES_WINDOW_CB(callback)), "winnwstr");
+            }
+            finally
+            {
+                Marshal.FreeHGlobal(strPtr);
+                GC.RemoveMemoryPressure(size);
+            }
         }
         #endregion
 
@@ -4108,8 +4126,10 @@ namespace NCurses.Core.Interop
         /// see <see cref="wins_nwstr"/>
         /// </summary>
         /// <returns>Constants.ERR on error or Constants.OK on success</returns>
-        [DllImport(Constants.DLLNAME, EntryPoint = "wins_nwstr", CharSet = CharSet.Unicode)]
-        internal extern static int ncurses_wins_nwstr(IntPtr window, string str, int n);
+        //[DllImport(Constants.DLLNAME, EntryPoint = "wins_nwstr", CharSet = CharSet.Unicode)]
+        //internal extern static int ncurses_wins_nwstr(IntPtr window, string str, int n);
+        [DllImport(Constants.DLLNAME, EntryPoint = "wins_nwstr")]
+        internal extern static int ncurses_wins_nwstr(IntPtr window, IntPtr str, int n);
 
         /// <summary>
         /// see <see cref="NativeStdScr.ins_nwstr"/>
@@ -4118,7 +4138,9 @@ namespace NCurses.Core.Interop
         /// <param name="window">A pointer to a window</param>
         public static void wins_nwstr(IntPtr window, string str, int n)
         {
-            NativeNCurses.VerifyNCursesMethod(() => ncurses_wins_nwstr(window, str, n), "wins_nwstr");
+            NativeNCurses.MarshalNativeWideStringAndExecuteAction((strPtr) =>
+                NativeNCurses.VerifyNCursesMethod(() => ncurses_wins_nwstr(window, strPtr, n), "wins_nwstr"),
+                str);
         }
 
         /// <summary>
@@ -4127,7 +4149,12 @@ namespace NCurses.Core.Interop
         /// </summary>
         public static void wins_nwstr_t(IntPtr window, string str, int n)
         {
-            Func<IntPtr, IntPtr, int> callback = (IntPtr w, IntPtr a) => ncurses_wins_nwstr(window, str, n);
+            Func<IntPtr, IntPtr, int> callback = (IntPtr w, IntPtr a) =>
+            {
+                int ret = 0;
+                NativeNCurses.MarshalNativeWideStringAndExecuteAction((ptr) => ret = ncurses_wins_nwstr(window, ptr, n), str);
+                return ret;
+            };
             NativeNCurses.use_window_v(window, Marshal.GetFunctionPointerForDelegate(new NCURSES_WINDOW_CB(callback)), "wins_nwstr");
         }
         #endregion
@@ -4138,26 +4165,41 @@ namespace NCurses.Core.Interop
         /// </summary>
         /// <returns>Constants.ERR on error or Constants.OK on success</returns>
         [DllImport(Constants.DLLNAME, EntryPoint = "wins_wch")]
-        internal extern static int ncurses_wins_wch(IntPtr window, NCURSES_CH_T wch);
+        internal extern static int ncurses_wins_wch(IntPtr window, IntPtr wch);
 
         /// <summary>
         /// see <see cref="NativeStdScr.ins_wch"/>
         /// <para />native method wrapped with verification.
         /// </summary>
         /// <param name="window">A pointer to a window</param>
-        public static void wins_wch(IntPtr window, NCURSES_CH_T wch)
+        public static void wins_wch(IntPtr window, NCursesWCHAR wch)
         {
-            NativeNCurses.VerifyNCursesMethod(() => ncurses_wins_wch(window, wch), "wins_wch");
+            IntPtr wPtr;
+            using (wch.ToPointer(out wPtr))
+            {
+                NativeNCurses.VerifyNCursesMethod(() => ncurses_wins_wch(window, wPtr), "wins_wch");
+            }
         }
 
         /// <summary>
         /// see <see cref="wins_wch"/>
         /// <para />native method wrapped with verification and thread safety.
         /// </summary>
-        public static void wins_wch_t(IntPtr window, NCURSES_CH_T wch)
+        public static void wins_wch_t(IntPtr window, NCursesWCHAR wch)
         {
-            Func<IntPtr, IntPtr, int> callback = (IntPtr w, IntPtr a) => ncurses_wins_wch(window, wch); ;
-            NativeNCurses.use_window_v(window, Marshal.GetFunctionPointerForDelegate(new NCURSES_WINDOW_CB(callback)), "wins_wch");
+            IntPtr wPtr = wch.ToPointer();
+            GC.AddMemoryPressure(wch.Size);
+
+            Func<IntPtr, IntPtr, int> callback = (IntPtr w, IntPtr a) => ncurses_wins_wch(window, wPtr);
+            try
+            {
+                NativeNCurses.use_window_v(window, Marshal.GetFunctionPointerForDelegate(new NCURSES_WINDOW_CB(callback)), "wins_wch");
+            }
+            finally
+            {
+                Marshal.FreeHGlobal(wPtr);
+                GC.RemoveMemoryPressure(wch.Size);
+            }
         }
         #endregion
 
@@ -4166,8 +4208,10 @@ namespace NCurses.Core.Interop
         /// see <see cref="wins_wstr"/>
         /// </summary>
         /// <returns>Constants.ERR on error or Constants.OK on success</returns>
-        [DllImport(Constants.DLLNAME, EntryPoint = "wins_wstr", CharSet = CharSet.Unicode)]
-        internal extern static int ncurses_wins_wstr(IntPtr window, string str);
+        //[DllImport(Constants.DLLNAME, EntryPoint = "wins_wstr", CharSet = CharSet.Unicode)]
+        //internal extern static int ncurses_wins_wstr(IntPtr window, string str);
+        [DllImport(Constants.DLLNAME, EntryPoint = "wins_wstr")]
+        internal extern static int ncurses_wins_wstr(IntPtr window, IntPtr str);
 
         /// <summary>
         /// see <see cref="NativeStdScr.ins_wstr"/>
@@ -4176,7 +4220,9 @@ namespace NCurses.Core.Interop
         /// <param name="window">A pointer to a window</param>
         public static void wins_wstr(IntPtr window, string str)
         {
-            NativeNCurses.VerifyNCursesMethod(() => ncurses_wins_wstr(window, str), "wins_wstr");
+            NativeNCurses.MarshalNativeWideStringAndExecuteAction((strPtr) =>
+                NativeNCurses.VerifyNCursesMethod(() => ncurses_wins_wstr(window, strPtr), "wins_wstr"),
+                str, true);
         }
 
         /// <summary>
@@ -4185,7 +4231,12 @@ namespace NCurses.Core.Interop
         /// </summary>
         public static void wins_wstr_t(IntPtr window, string str)
         {
-            Func<IntPtr, IntPtr, int> callback = (IntPtr w, IntPtr a) => ncurses_wins_wstr(window, str);
+            Func<IntPtr, IntPtr, int> callback = (IntPtr w, IntPtr a) =>
+            {
+                int ret = 0;
+                NativeNCurses.MarshalNativeWideStringAndExecuteAction((ptr) => ret = ncurses_wins_wstr(window, ptr), str);
+                return ret;
+            };
             NativeNCurses.use_window_v(window, Marshal.GetFunctionPointerForDelegate(new NCURSES_WINDOW_CB(callback)), "wins_wstr");
         }
         #endregion
@@ -4195,8 +4246,10 @@ namespace NCurses.Core.Interop
         /// see <see cref="winwstr"/>
         /// </summary>
         /// <returns>Constants.ERR on error or Constants.OK on success</returns>
-        [DllImport(Constants.DLLNAME, EntryPoint = "winwstr", CharSet = CharSet.Unicode)]
-        internal extern static int ncurses_winwstr(IntPtr window, StringBuilder str);
+        //[DllImport(Constants.DLLNAME, EntryPoint = "winwstr", CharSet = CharSet.Unicode)]
+        //internal extern static int ncurses_winwstr(IntPtr window, StringBuilder str);
+        [DllImport(Constants.DLLNAME, EntryPoint = "winwstr")]
+        internal extern static int ncurses_winwstr(IntPtr window, IntPtr str);
 
         /// <summary>
         /// see <see cref="NativeStdScr.inwstr"/>
@@ -4205,7 +4258,20 @@ namespace NCurses.Core.Interop
         /// <param name="window">A pointer to a window</param>
         public static void winwstr(IntPtr window, StringBuilder str)
         {
-            NativeNCurses.VerifyNCursesMethod(() => ncurses_winwstr(window, str), "winwstr");
+            int size = Constants.SIZEOF_WCHAR_T * str.Capacity;
+            IntPtr strPtr = Marshal.AllocHGlobal(size);
+            GC.AddMemoryPressure(size);
+
+            try
+            {
+                NativeNCurses.VerifyNCursesMethod(() => ncurses_winwstr(window, strPtr), "winwstr");
+                str.Append(NativeNCurses.MarshalStringFromNativeWideString(strPtr, str.Capacity));
+            }
+            finally
+            {
+                Marshal.FreeHGlobal(strPtr);
+                GC.RemoveMemoryPressure(size);
+            }
         }
 
         /// <summary>
@@ -4214,8 +4280,21 @@ namespace NCurses.Core.Interop
         /// </summary>
         public static void winwstr_t(IntPtr window, StringBuilder str)
         {
-            Func<IntPtr, IntPtr, int> callback = (IntPtr w, IntPtr a) => ncurses_winwstr(window, str);
-            NativeNCurses.use_window_v(window, Marshal.GetFunctionPointerForDelegate(new NCURSES_WINDOW_CB(callback)), "winwstr");
+            int size = Constants.SIZEOF_WCHAR_T * str.Capacity;
+            IntPtr strPtr = Marshal.AllocHGlobal(size);
+            GC.AddMemoryPressure(size);
+
+            Func<IntPtr, IntPtr, int> callback = (IntPtr w, IntPtr a) => ncurses_winwstr(window, strPtr);
+
+            try
+            {
+                NativeNCurses.use_window_v(window, Marshal.GetFunctionPointerForDelegate(new NCURSES_WINDOW_CB(callback)), "winwstr");
+            }
+            finally
+            {
+                Marshal.FreeHGlobal(strPtr);
+                GC.RemoveMemoryPressure(size);
+            }
         }
         #endregion
 
@@ -4224,27 +4303,45 @@ namespace NCurses.Core.Interop
         /// see <see cref="mvwadd_wch"/>
         /// </summary>
         /// <returns>Constants.ERR on error or Constants.OK on success</returns>
+        //[DllImport(Constants.DLLNAME, EntryPoint = "mvwadd_wch")]
+        //internal extern static int ncurses_mvwadd_wch(IntPtr window, int y, int x, NCURSES_CH_T wch);
         [DllImport(Constants.DLLNAME, EntryPoint = "mvwadd_wch")]
-        internal extern static int ncurses_mvwadd_wch(IntPtr window, int y, int x, NCURSES_CH_T wch);
+        internal extern static int ncurses_mvwadd_wch(IntPtr window, int y, int x, IntPtr wch);
 
         /// <summary>
         /// see <see cref="NativeStdScr.mvadd_wch"/>
         /// <para />native method wrapped with verification.
         /// </summary>
         /// <param name="window">A pointer to a window</param>
-        public static void mvwadd_wch(IntPtr window, int y, int x, NCURSES_CH_T wch)
+        public static void mvwadd_wch(IntPtr window, int y, int x, NCursesWCHAR wch)
         {
-            NativeNCurses.VerifyNCursesMethod(() => ncurses_mvwadd_wch(window, y, x, wch), "mvwadd_wch");
+            IntPtr wPtr;
+            using (wch.ToPointer(out wPtr))
+            {
+                NativeNCurses.VerifyNCursesMethod(() => ncurses_mvwadd_wch(window, y, x, wPtr), "mvwadd_wch");
+            }
         }
 
         /// <summary>
         /// see <see cref="mvwadd_wch"/>
         /// <para />native method wrapped with verification and thread safety.
         /// </summary>
-        public static void mvwadd_wch_t(IntPtr window, int y, int x, NCURSES_CH_T wch)
+        public static void mvwadd_wch_t(IntPtr window, int y, int x, NCursesWCHAR wch)
         {
-            Func<IntPtr, IntPtr, int> callback = (IntPtr w, IntPtr a) => ncurses_mvwadd_wch(window, y, x, wch);
-            NativeNCurses.use_window_v(window, Marshal.GetFunctionPointerForDelegate(new NCURSES_WINDOW_CB(callback)), "mvwadd_wch");
+            IntPtr wPtr = wch.ToPointer();
+            GC.AddMemoryPressure(wch.Size);
+
+            Func<IntPtr, IntPtr, int> callback = (IntPtr w, IntPtr a) => ncurses_mvwadd_wch(window, y, x, wPtr);
+
+            try
+            {
+                NativeNCurses.use_window_v(window, Marshal.GetFunctionPointerForDelegate(new NCURSES_WINDOW_CB(callback)), "mvwadd_wch");
+            }
+            finally
+            {
+                Marshal.FreeHGlobal(wPtr);
+                GC.RemoveMemoryPressure(wch.Size);
+            }
         }
         #endregion
 
@@ -4261,7 +4358,7 @@ namespace NCurses.Core.Interop
         /// <para />native method wrapped with verification.
         /// </summary>
         /// <param name="window">A pointer to a window</param>
-        public static void mvwadd_wchnstr(IntPtr window, int y, int x, NCURSES_CH_T[] wchStr, int n)
+        public static void mvwadd_wchnstr(IntPtr window, int y, int x, NCursesWCHAR[] wchStr, int n)
         {
             int totalSize = 0;
             IntPtr arrayPtr = NativeNCurses.MarshallArray(wchStr, true, out totalSize);
@@ -4282,7 +4379,7 @@ namespace NCurses.Core.Interop
         /// see <see cref="mvwadd_wchnstr"/>
         /// <para />native method wrapped with verification and thread safety.
         /// </summary>
-        public static void mvwadd_wchnstr_t(IntPtr window, int y, int x, NCURSES_CH_T[] wchStr, int n)
+        public static void mvwadd_wchnstr_t(IntPtr window, int y, int x, NCursesWCHAR[] wchStr, int n)
         {
             int totalSize = 0;
             IntPtr arrayPtr = NativeNCurses.MarshallArray(wchStr, true, out totalSize);
@@ -4315,7 +4412,7 @@ namespace NCurses.Core.Interop
         /// <para />native method wrapped with verification.
         /// </summary>
         /// <param name="window">A pointer to a window</param>
-        public static void mvwadd_wchstr(IntPtr window, int y, int x, NCURSES_CH_T[] wchStr)
+        public static void mvwadd_wchstr(IntPtr window, int y, int x, NCursesWCHAR[] wchStr)
         {
             int totalSize = 0;
             IntPtr arrayPtr = NativeNCurses.MarshallArray(wchStr, true, out totalSize);
@@ -4336,7 +4433,7 @@ namespace NCurses.Core.Interop
         /// see <see cref="mvwadd_wchstr"/>
         /// <para />native method wrapped with verification and thread safety.
         /// </summary>
-        public static void mvwadd_wchstr_t(IntPtr window, int y, int x, NCURSES_CH_T[] wchStr)
+        public static void mvwadd_wchstr_t(IntPtr window, int y, int x, NCursesWCHAR[] wchStr)
         {
             int totalSize = 0;
             IntPtr arrayPtr = NativeNCurses.MarshallArray(wchStr, true, out totalSize);
@@ -4361,8 +4458,8 @@ namespace NCurses.Core.Interop
         /// see <see cref="mvwaddnwstr"/>
         /// </summary>
         /// <returns>Constants.ERR on error or Constants.OK on success</returns>
-        [DllImport(Constants.DLLNAME, EntryPoint = "mvwaddnwstr", CharSet = CharSet.Unicode)]
-        internal extern static int ncurses_mvwaddnwstr(IntPtr window, int y, int x, string wstr, int n);
+        //[DllImport(Constants.DLLNAME, EntryPoint = "mvwaddnwstr", CharSet = CharSet.Unicode)]
+        //internal extern static int ncurses_mvwaddnwstr(IntPtr window, int y, int x, string wstr, int n);
 
         [DllImport(Constants.DLLNAME, EntryPoint = "mvwaddnwstr")]
         internal extern static int ncurses_mvwaddnwstr(IntPtr window, int y, int x, IntPtr wstr, int n);
@@ -4374,24 +4471,9 @@ namespace NCurses.Core.Interop
         /// <param name="window">A pointer to a window</param>
         public static void mvwaddnwstr(IntPtr window, int y, int x, string wstr, int n)
         {
-            if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
-                NativeNCurses.VerifyNCursesMethod(() => ncurses_mvwaddnwstr(window, y, x, wstr, n), "mvwaddnwstr");
-            else
-            {
-                int pointerLength;
-                IntPtr wstrPtr = NativeNCurses.MarshalStringToUtf8_4byteArray(wstr, out pointerLength);
-                GC.AddMemoryPressure(pointerLength);
-
-                try
-                {
-                    NativeNCurses.VerifyNCursesMethod(() => ncurses_mvwaddnwstr(window, y, x, wstrPtr, n), "mvwaddnwstr");
-                }
-                finally
-                {
-                    Marshal.FreeHGlobal(wstrPtr);
-                    GC.RemoveMemoryPressure(pointerLength);
-                }
-            }
+            NativeNCurses.MarshalNativeWideStringAndExecuteAction((ptr) =>
+                NativeNCurses.VerifyNCursesMethod(() => ncurses_mvwaddnwstr(window, y, x, ptr, n), "mvwaddnwstr"),
+                wstr);
         }
 
         /// <summary>
@@ -4400,7 +4482,12 @@ namespace NCurses.Core.Interop
         /// </summary>
         public static void mvwaddnwstr_t(IntPtr window, int y, int x, string wstr, int n)
         {
-            Func<IntPtr, IntPtr, int> callback = (IntPtr w, IntPtr a) => ncurses_mvwaddnwstr(window, y, x, wstr, n);
+            Func<IntPtr, IntPtr, int> callback = (IntPtr w, IntPtr a) =>
+            {
+                int ret = 0;
+                NativeNCurses.MarshalNativeWideStringAndExecuteAction((ptr) => ret = ncurses_mvwaddnwstr(window, y, x, ptr, n), wstr);
+                return ret;
+            };
             NativeNCurses.use_window_v(window, Marshal.GetFunctionPointerForDelegate(new NCURSES_WINDOW_CB(callback)), "mvwaddnwstr");
         }
         #endregion
@@ -4411,7 +4498,7 @@ namespace NCurses.Core.Interop
         /// </summary>
         /// <returns>Constants.ERR on error or Constants.OK on success</returns>
         [DllImport(Constants.DLLNAME, EntryPoint = "mvwaddwstr")]
-        internal extern static int ncurses_mvwaddwstr(IntPtr window, int y, int x, string wstr);
+        internal extern static int ncurses_mvwaddwstr(IntPtr window, int y, int x, IntPtr wstr);
 
         /// <summary>
         /// see <see cref="NativeStdScr.mvaddwstr"/>
@@ -4420,7 +4507,9 @@ namespace NCurses.Core.Interop
         /// <param name="window">A pointer to a window</param>
         public static void mvwaddwstr(IntPtr window, int y, int x, string wstr)
         {
-            NativeNCurses.VerifyNCursesMethod(() => ncurses_mvwaddwstr(window, y, x, wstr), "mvwaddwstr");
+            NativeNCurses.MarshalNativeWideStringAndExecuteAction((ptr) =>
+                NativeNCurses.VerifyNCursesMethod(() => ncurses_mvwaddwstr(window, y, x, ptr), "mvwaddwstr"),
+                wstr, true);
         }
 
         /// <summary>
@@ -4429,7 +4518,12 @@ namespace NCurses.Core.Interop
         /// </summary>
         public static void mvwaddwstr_t(IntPtr window, int y, int x, string wstr)
         {
-            Func<IntPtr, IntPtr, int> callback = (IntPtr w, IntPtr a) => ncurses_mvwaddwstr(window, y, x, wstr);
+            Func<IntPtr, IntPtr, int> callback = (IntPtr w, IntPtr a) =>
+            {
+                int ret = 0;
+                NativeNCurses.MarshalNativeWideStringAndExecuteAction((ptr) => ret = ncurses_mvwaddwstr(window, y, x, ptr), wstr);
+                return ret;
+            };
             NativeNCurses.use_window_v(window, Marshal.GetFunctionPointerForDelegate(new NCURSES_WINDOW_CB(callback)), "mvwaddwstr");
         }
         #endregion
@@ -4439,8 +4533,8 @@ namespace NCurses.Core.Interop
         /// see <see cref="mvwget_wch"/>
         /// </summary>
         /// <returns>Constants.ERR on error or Constants.OK on success</returns>
-        [DllImport(Constants.DLLNAME, EntryPoint = "mvwget_wch")]
-        internal extern static int ncurses_mvwget_wch(IntPtr window, int y, int x, ref char wch);
+        //[DllImport(Constants.DLLNAME, EntryPoint = "mvwget_wch")]
+        //internal extern static int ncurses_mvwget_wch(IntPtr window, int y, int x, ref char wch);
 
         /// <summary>
         /// see <see cref="mvwget_wch"/>
@@ -4454,32 +4548,56 @@ namespace NCurses.Core.Interop
         /// <para />native method wrapped with verification.
         /// </summary>
         /// <param name="window">A pointer to a window</param>
-        public static void mvwget_wch(IntPtr window, int y, int x, ref char wch)
+        public static void mvwget_wch(IntPtr window, int y, int x, out char wch)
         {
-            NCursesException.Verify(ncurses_mvwget_wch(window, y, x, ref wch), "mvwget_wch");
+            IntPtr chPtr = Marshal.AllocHGlobal(Marshal.SizeOf<uint>());
+            GC.AddMemoryPressure(Marshal.SizeOf<uint>());
+
+            try
+            {
+                NCursesException.Verify(ncurses_mvwget_wch(window, y, x, chPtr), "mvwget_wch");
+
+                byte[] arr = new byte[Marshal.SizeOf<uint>()];
+                Marshal.Copy(chPtr, arr, 0, Marshal.SizeOf<uint>());
+
+                if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
+                    wch = Encoding.Unicode.GetChars(arr)[0];
+                else
+                    wch = Encoding.UTF8.GetChars(arr)[0];
+            }
+            finally
+            {
+                Marshal.FreeHGlobal(chPtr);
+                GC.RemoveMemoryPressure(Marshal.SizeOf<uint>());
+            }
         }
 
         /// <summary>
         /// see <see cref="mvwget_wch"/>
         /// <para />native method wrapped with verification and thread safety.
         /// </summary>
-        public static void mvwget_wch_t(IntPtr window, int y, int x, ref char wch)
+        public static void mvwget_wch_t(IntPtr window, int y, int x, out char wch)
         {
-            IntPtr wPtr = Marshal.AllocHGlobal(Marshal.SizeOf(wch));
-            Marshal.StructureToPtr(wch, wPtr, true);
-            GC.AddMemoryPressure(Marshal.SizeOf(wch));
-
-            Func<IntPtr, IntPtr, int> callback = (IntPtr w, IntPtr a) => ncurses_mvwget_wch(window, y, x, wPtr);
+            IntPtr chPtr = Marshal.AllocHGlobal(Marshal.SizeOf<uint>());
+            GC.AddMemoryPressure(Marshal.SizeOf<uint>());
 
             try
             {
+                Func<IntPtr, IntPtr, int> callback = (IntPtr w, IntPtr a) => ncurses_mvwget_wch(window, y, x, chPtr);
                 NativeNCurses.use_window_v(window, Marshal.GetFunctionPointerForDelegate(new NCURSES_WINDOW_CB(callback)), "mvwget_wch");
-                Marshal.PtrToStructure(wPtr, wch);
+
+                byte[] arr = new byte[Marshal.SizeOf<uint>()];
+                Marshal.Copy(chPtr, arr, 0, Marshal.SizeOf<uint>());
+
+                if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
+                    wch = Encoding.Unicode.GetChars(arr)[0];
+                else
+                    wch = Encoding.UTF8.GetChars(arr)[0];
             }
             finally
             {
-                Marshal.FreeHGlobal(wPtr);
-                GC.RemoveMemoryPressure(Marshal.SizeOf(wch));
+                Marshal.FreeHGlobal(chPtr);
+                GC.RemoveMemoryPressure(Marshal.SizeOf<uint>());
             }
         }
         #endregion
@@ -4489,8 +4607,10 @@ namespace NCurses.Core.Interop
         /// see <see cref="mvwget_wstr"/>
         /// </summary>
         /// <returns>Constants.ERR on error or Constants.OK on success</returns>
-        [DllImport(Constants.DLLNAME, EntryPoint = "mvwget_wstr", CharSet = CharSet.Unicode)]
-        internal extern static int ncurses_mvwget_wstr(IntPtr window, int y, int x, StringBuilder wstr);
+        //[DllImport(Constants.DLLNAME, EntryPoint = "mvwget_wstr", CharSet = CharSet.Unicode)]
+        //internal extern static int ncurses_mvwget_wstr(IntPtr window, int y, int x, StringBuilder wstr);
+        [DllImport(Constants.DLLNAME, EntryPoint = "mvwget_wstr")]
+        internal extern static int ncurses_mvwget_wstr(IntPtr window, int y, int x, IntPtr wstr);
 
         /// <summary>
         /// see <see cref="NativeStdScr.mvget_wstr"/>
@@ -4499,7 +4619,20 @@ namespace NCurses.Core.Interop
         /// <param name="window">A pointer to a window</param>
         public static void mvwget_wstr(IntPtr window, int y, int x, StringBuilder wstr)
         {
-            NativeNCurses.VerifyNCursesMethod(() => ncurses_mvwget_wstr(window, y, x, wstr), "mvwget_wstr");
+            int size = Marshal.SizeOf<uint>() * wstr.Capacity;
+            IntPtr strPtr = Marshal.AllocHGlobal(size);
+            GC.AddMemoryPressure(size);
+
+            try
+            {
+                NativeNCurses.VerifyNCursesMethod(() => ncurses_mvwget_wstr(window, y, x, strPtr), "mvwget_wstr");
+                wstr.Append(NativeNCurses.MarshalStringFromNativeWideString(strPtr, wstr.Capacity));
+            }
+            finally
+            {
+                Marshal.FreeHGlobal(strPtr);
+                GC.RemoveMemoryPressure(Marshal.SizeOf<uint>());
+            }
         }
 
         /// <summary>
@@ -4508,8 +4641,22 @@ namespace NCurses.Core.Interop
         /// </summary>
         public static void mvwget_wstr_t(IntPtr window, int y, int x, StringBuilder wstr)
         {
-            Func<IntPtr, IntPtr, int> callback = (IntPtr w, IntPtr a) => ncurses_mvwget_wstr(window, y, x, wstr);
-            NativeNCurses.use_window_v(window, Marshal.GetFunctionPointerForDelegate(new NCURSES_WINDOW_CB(callback)), "mvwget_wstr");
+            int size = Marshal.SizeOf<uint>() * wstr.Capacity;
+            IntPtr strPtr = Marshal.AllocHGlobal(size);
+            GC.AddMemoryPressure(size);
+
+            Func<IntPtr, IntPtr, int> callback = (IntPtr w, IntPtr a) => ncurses_mvwget_wstr(window, y, x, strPtr);
+
+            try
+            {
+                NativeNCurses.use_window_v(window, Marshal.GetFunctionPointerForDelegate(new NCURSES_WINDOW_CB(callback)), "mvwget_wstr");
+                wstr.Append(NativeNCurses.MarshalStringFromNativeWideString(strPtr, wstr.Capacity));
+            }
+            finally
+            {
+                Marshal.FreeHGlobal(strPtr);
+                GC.RemoveMemoryPressure(Marshal.SizeOf<uint>());
+            }
         }
         #endregion
 
@@ -4518,8 +4665,10 @@ namespace NCurses.Core.Interop
         /// see <see cref="mvwgetn_wstr"/>
         /// </summary>
         /// <returns>Constants.ERR on error or Constants.OK on success</returns>
-        [DllImport(Constants.DLLNAME, EntryPoint = "mvwgetn_wstr", CharSet = CharSet.Unicode)]
-        internal extern static int ncurses_mvwgetn_wstr(IntPtr window, int y, int x, StringBuilder wstr, int n);
+        //[DllImport(Constants.DLLNAME, EntryPoint = "mvwgetn_wstr", CharSet = CharSet.Unicode)]
+        //internal extern static int ncurses_mvwgetn_wstr(IntPtr window, int y, int x, StringBuilder wstr, int n);
+        [DllImport(Constants.DLLNAME, EntryPoint = "mvwgetn_wstr")]
+        internal extern static int ncurses_mvwgetn_wstr(IntPtr window, int y, int x, IntPtr wstr, int n);
 
         /// <summary>
         /// see <see cref="NativeStdScr.mvgetn_wstr"/>
@@ -4528,7 +4677,20 @@ namespace NCurses.Core.Interop
         /// <param name="window">A pointer to a window</param>
         public static void mvwgetn_wstr(IntPtr window, int y, int x, StringBuilder wstr, int n)
         {
-            NativeNCurses.VerifyNCursesMethod(() => ncurses_mvwgetn_wstr(window, y, x, wstr, n), "mvwgetn_wstr");
+            int size = Marshal.SizeOf<uint>() * n;
+            IntPtr strPtr = Marshal.AllocHGlobal(size);
+            GC.AddMemoryPressure(size);
+
+            try
+            {
+                NativeNCurses.VerifyNCursesMethod(() => ncurses_mvwgetn_wstr(window, y, x, strPtr, n), "mvwgetn_wstr");
+                wstr.Append(NativeNCurses.MarshalStringFromNativeWideString(strPtr, n));
+            }
+            finally
+            {
+                Marshal.FreeHGlobal(strPtr);
+                GC.RemoveMemoryPressure(size);
+            }
         }
 
         /// <summary>
@@ -4537,8 +4699,22 @@ namespace NCurses.Core.Interop
         /// </summary>
         public static void mvwgetn_wstr_t(IntPtr window, int y, int x, StringBuilder wstr, int n)
         {
-            Func<IntPtr, IntPtr, int> callback = (IntPtr w, IntPtr a) => ncurses_mvwgetn_wstr(window, y, x, wstr, n);
-            NativeNCurses.use_window_v(window, Marshal.GetFunctionPointerForDelegate(new NCURSES_WINDOW_CB(callback)), "mvwgetn_wstr");
+            int size = Marshal.SizeOf<uint>() * n;
+            IntPtr strPtr = Marshal.AllocHGlobal(size);
+            GC.AddMemoryPressure(size);
+
+            Func<IntPtr, IntPtr, int> callback = (IntPtr w, IntPtr a) => ncurses_mvwgetn_wstr(window, y, x, strPtr, n);
+
+            try
+            {
+                NativeNCurses.use_window_v(window, Marshal.GetFunctionPointerForDelegate(new NCURSES_WINDOW_CB(callback)), "mvwgetn_wstr");
+                wstr.Append(NativeNCurses.MarshalStringFromNativeWideString(strPtr, n));
+            }
+            finally
+            {
+                Marshal.FreeHGlobal(strPtr);
+                GC.RemoveMemoryPressure(size);
+            }
         }
         #endregion
 
@@ -4548,26 +4724,42 @@ namespace NCurses.Core.Interop
         /// </summary>
         /// <returns>Constants.ERR on error or Constants.OK on success</returns>
         [DllImport(Constants.DLLNAME, EntryPoint = "mvwhline_set")]
-        internal extern static int ncurses_mvwhline_set(IntPtr window, int y, int x, NCURSES_CH_T wch, int n);
+        internal extern static int ncurses_mvwhline_set(IntPtr window, int y, int x, IntPtr wch, int n);
 
         /// <summary>
         /// see <see cref="NativeStdScr.mvhline_set"/>
         /// <para />native method wrapped with verification.
         /// </summary>
         /// <param name="window">A pointer to a window</param>
-        public static void mvwhline_set(IntPtr window, int y, int x, NCURSES_CH_T wch, int n)
+        public static void mvwhline_set(IntPtr window, int y, int x, NCursesWCHAR wch, int n)
         {
-            NativeNCurses.VerifyNCursesMethod(() => ncurses_mvwhline_set(window, y, x, wch, n), "mvwhline_set");
+            IntPtr wPtr;
+            using (wch.ToPointer(out wPtr))
+            {
+                NativeNCurses.VerifyNCursesMethod(() => ncurses_mvwhline_set(window, y, x, wPtr, n), "mvwhline_set");
+            }
         }
 
         /// <summary>
         /// see <see cref="mvwhline_set"/>
         /// <para />native method wrapped with verification and thread safety.
         /// </summary>
-        public static void mvwhline_set_t(IntPtr window, int y, int x, NCURSES_CH_T wch, int n)
+        public static void mvwhline_set_t(IntPtr window, int y, int x, NCursesWCHAR wch, int n)
         {
-            Func<IntPtr, IntPtr, int> callback = (IntPtr w, IntPtr a) => ncurses_mvwhline_set(window, y, x, wch, n);
-            NativeNCurses.use_window_v(window, Marshal.GetFunctionPointerForDelegate(new NCURSES_WINDOW_CB(callback)), "mvwhline_set");
+            IntPtr wPtr = wch.ToPointer();
+            GC.AddMemoryPressure(wch.Size);
+
+            Func<IntPtr, IntPtr, int> callback = (IntPtr w, IntPtr a) => ncurses_mvwhline_set(window, y, x, wPtr, n);
+
+            try
+            {
+                NativeNCurses.use_window_v(window, Marshal.GetFunctionPointerForDelegate(new NCURSES_WINDOW_CB(callback)), "mvwhline_set");
+            }
+            finally
+            {
+                Marshal.FreeHGlobal(wPtr);
+                GC.RemoveMemoryPressure(wch.Size);
+            }
         }
         #endregion
 
@@ -4576,8 +4768,8 @@ namespace NCurses.Core.Interop
         /// see <see cref="mvin_wch"/>
         /// </summary>
         /// <returns>Constants.ERR on error or Constants.OK on success</returns>
-        [DllImport(Constants.DLLNAME, EntryPoint = "mvwin_wch")]
-        internal extern static int ncurses_mvwin_wch(IntPtr window, int y, int x, ref NCURSES_CH_T wch);
+        //[DllImport(Constants.DLLNAME, EntryPoint = "mvwin_wch")]
+        //internal extern static int ncurses_mvwin_wch(IntPtr window, int y, int x, ref NCURSES_CH_T wch);
 
         /// <summary>
         /// see <see cref="mvin_wch"/>
@@ -4591,32 +4783,35 @@ namespace NCurses.Core.Interop
         /// <para />native method wrapped with verification.
         /// </summary>
         /// <param name="window">A pointer to a window</param>
-        public static void mvwin_wch(IntPtr window, int y, int x, ref NCURSES_CH_T wcval)
+        public static void mvwin_wch(IntPtr window, int y, int x, ref NCursesWCHAR wcval)
         {
-            NCursesException.Verify(ncurses_mvwin_wch(window, y, x, ref wcval), "mvwin_wch");
+            IntPtr wPtr;
+            using (wcval.ToPointer(out wPtr))
+            {
+                NCursesException.Verify(ncurses_mvwin_wch(window, y, x, wPtr), "mvwin_wch");
+            }
         }
 
         /// <summary>
         /// see <see cref="in_wch"/>
         /// <para />native method wrapped with verification and thread safety.
         /// </summary>
-        public static void mvwin_wch_t(IntPtr window, int y, int x, ref NCURSES_CH_T wcval)
+        public static void mvwin_wch_t(IntPtr window, int y, int x, ref NCursesWCHAR wcval)
         {
-            IntPtr wPtr = Marshal.AllocHGlobal(Marshal.SizeOf(wcval));
-            Marshal.StructureToPtr(wcval, wPtr, true);
-            GC.AddMemoryPressure(Marshal.SizeOf(wcval));
+            IntPtr wPtr = wcval.ToPointer();
+            GC.AddMemoryPressure(wcval.Size);
 
             Func<IntPtr, IntPtr, int> callback = (IntPtr w, IntPtr a) => ncurses_mvwin_wch(window, y, x, wPtr);
 
             try
             {
                 NativeNCurses.use_window_v(window, Marshal.GetFunctionPointerForDelegate(new NCURSES_WINDOW_CB(callback)), "mvwin_wch");
-                Marshal.PtrToStructure(wPtr, wcval);
+                wcval.ToStructure(wPtr);
             }
             finally
             {
                 Marshal.FreeHGlobal(wPtr);
-                GC.RemoveMemoryPressure(Marshal.SizeOf(wcval));
+                GC.RemoveMemoryPressure(wcval.Size);
             }
         }
         #endregion
@@ -4634,7 +4829,7 @@ namespace NCurses.Core.Interop
         /// <para />native method wrapped with verification.
         /// </summary>
         /// <param name="wcval">array reference to store the complex characters in</param>
-        public static void mvwin_wchnstr(IntPtr window, int y, int x, ref NCURSES_CH_T[] wcval, int n)
+        public static void mvwin_wchnstr(IntPtr window, int y, int x, ref NCursesWCHAR[] wcval, int n)
         {
             if (n != wcval.Length)
                 throw new ArgumentException("lenght of the array and n should be the same");
@@ -4647,7 +4842,7 @@ namespace NCurses.Core.Interop
             {
                 NativeNCurses.VerifyNCursesMethod(() => ncurses_mvwin_wchnstr(window, y, x, arrayPtr, totalSize), "mvwin_wchnstr");
                 for (int i = 0; i < wcval.Length; i++)
-                    wcval[i] = Marshal.PtrToStructure<NCURSES_CH_T>(arrayPtr + (i * Marshal.SizeOf<NCURSES_CH_T>()));
+                    wcval[i].ToStructure(arrayPtr + (i * wcval[i].Size));
             }
             finally
             {
@@ -4660,7 +4855,7 @@ namespace NCurses.Core.Interop
         /// see <see cref="mvwin_wchnstr"/>
         /// <para />native method wrapped with verification.
         /// </summary>
-        public static void mvwin_wchnstr_t(IntPtr window, int y, int x, ref NCURSES_CH_T[] wcval, int n)
+        public static void mvwin_wchnstr_t(IntPtr window, int y, int x, ref NCursesWCHAR[] wcval, int n)
         {
             if (n != wcval.Length)
                 throw new ArgumentException("lenght of the array and n should be the same");
@@ -4675,7 +4870,7 @@ namespace NCurses.Core.Interop
             {
                 NativeNCurses.use_window_v(window, Marshal.GetFunctionPointerForDelegate(new NCURSES_WINDOW_CB(callback)), "mvwin_wchnstr");
                 for (int i = 0; i < wcval.Length; i++)
-                    wcval[i] = Marshal.PtrToStructure<NCURSES_CH_T>(arrayPtr + (i * Marshal.SizeOf<NCURSES_CH_T>()));
+                    wcval[i].ToStructure(arrayPtr + (i * wcval[i].Size));
             }
             finally
             {
@@ -4690,17 +4885,32 @@ namespace NCurses.Core.Interop
         /// see <see cref="mvwinnwstr"/>
         /// </summary>
         /// <returns>Constants.ERR on error or Constants.OK on success</returns>
-        [DllImport(Constants.DLLNAME, EntryPoint = "mvwinnwstr", CharSet = CharSet.Unicode)]
-        internal extern static int ncurses_mvwinnwstr(IntPtr window, int y, int x, StringBuilder str, int n);
+        //[DllImport(Constants.DLLNAME, EntryPoint = "mvwinnwstr", CharSet = CharSet.Unicode)]
+        //internal extern static int ncurses_mvwinnwstr(IntPtr window, int y, int x, StringBuilder str, int n);
+        [DllImport(Constants.DLLNAME, EntryPoint = "mvwinnwstr")]
+        internal extern static int ncurses_mvwinnwstr(IntPtr window, int y, int x, IntPtr str, int n);
 
         /// <summary>
-        /// see <see cref="NativeStdScr.mvinnstr"/>
+        /// see <see cref="NativeStdScr.mvinnwstr"/>
         /// <para />native method wrapped with verification.
         /// </summary>
         /// <param name="window">A pointer to a window</param>
         public static void mvwinnwstr(IntPtr window, int y, int x, StringBuilder str, int n)
         {
-            NativeNCurses.VerifyNCursesMethod(() => ncurses_mvwinnwstr(window, y, x, str, n), "mvwinnwstr");
+            int size = Constants.SIZEOF_WCHAR_T * n;
+            IntPtr strPtr = Marshal.AllocHGlobal(size);
+            GC.AddMemoryPressure(size);
+
+            try
+            {
+                NativeNCurses.VerifyNCursesMethod(() => ncurses_mvwinnwstr(window, y, x, strPtr, n), "mvwinnwstr");
+                str.Append(NativeNCurses.MarshalStringFromNativeWideString(strPtr, n));
+            }
+            finally
+            {
+                Marshal.FreeHGlobal(strPtr);
+                GC.RemoveMemoryPressure(size);
+            }
         }
 
         /// <summary>
@@ -4709,8 +4919,22 @@ namespace NCurses.Core.Interop
         /// </summary>
         public static void mvwinnwstr_t(IntPtr window, int y, int x, StringBuilder str, int n)
         {
-            Func<IntPtr, IntPtr, int> callback = (IntPtr w, IntPtr a) => ncurses_mvwinnwstr(window, y, x, str, n);
-            NativeNCurses.use_window_v(window, Marshal.GetFunctionPointerForDelegate(new NCURSES_WINDOW_CB(callback)), "mvwinnwstr");
+            int size = Constants.SIZEOF_WCHAR_T * n;
+            IntPtr strPtr = Marshal.AllocHGlobal(size);
+            GC.AddMemoryPressure(size);
+
+            Func<IntPtr, IntPtr, int> callback = (IntPtr w, IntPtr a) => ncurses_mvwinnwstr(window, y, x, strPtr, n);
+
+            try
+            {
+                NativeNCurses.use_window_v(window, Marshal.GetFunctionPointerForDelegate(new NCURSES_WINDOW_CB(callback)), "mvwinnwstr");
+                str.Append(NativeNCurses.MarshalStringFromNativeWideString(strPtr, n));
+            }
+            finally
+            {
+                Marshal.FreeHGlobal(strPtr);
+                GC.RemoveMemoryPressure(size);
+            }
         }
         #endregion
 
@@ -4720,16 +4944,18 @@ namespace NCurses.Core.Interop
         /// </summary>
         /// <returns>Constants.ERR on error or Constants.OK on success</returns>
         [DllImport(Constants.DLLNAME, EntryPoint = "mvwins_nwstr")]
-        internal extern static int ncurses_mvwins_nwstr(IntPtr window, int y, int x, string str, int n);
+        internal extern static int ncurses_mvwins_nwstr(IntPtr window, int y, int x, IntPtr str, int n);
 
         /// <summary>
-        /// see <see cref="NativeStdScr.mvinsstr"/>
+        /// see <see cref="NativeStdScr.mvins_nwstr"/>
         /// <para />native method wrapped with verification.
         /// </summary>
         /// <param name="window">A pointer to a window</param>
         public static void mvwins_nwstr(IntPtr window, int y, int x, string str, int n)
         {
-            NativeNCurses.VerifyNCursesMethod(() => ncurses_mvwins_nwstr(window, y, x, str, n), "mvwins_nwstr");
+            NativeNCurses.MarshalNativeWideStringAndExecuteAction((strPtr) =>
+                NativeNCurses.VerifyNCursesMethod(() => ncurses_mvwins_nwstr(window, y, x, strPtr, n), "mvwins_nwstr"),
+                str);
         }
 
         /// <summary>
@@ -4738,7 +4964,12 @@ namespace NCurses.Core.Interop
         /// </summary>
         public static void mvwins_nwstr_t(IntPtr window, int y, int x, string str, int n)
         {
-            Func<IntPtr, IntPtr, int> callback = (IntPtr w, IntPtr a) => ncurses_mvwins_nwstr(window, y, x, str, n);
+            Func<IntPtr, IntPtr, int> callback = (IntPtr w, IntPtr a) =>
+            {
+                int ret = 0;
+                NativeNCurses.MarshalNativeWideStringAndExecuteAction((ptr) => ret = ncurses_mvwins_nwstr(window, y, x, ptr, n), str);
+                return ret;
+            };
             NativeNCurses.use_window_v(window, Marshal.GetFunctionPointerForDelegate(new NCURSES_WINDOW_CB(callback)), "mvwins_nwstr");
         }
         #endregion
@@ -4748,27 +4979,45 @@ namespace NCurses.Core.Interop
         /// see <see cref="mvwins_wch"/>
         /// </summary>
         /// <returns>Constants.ERR on error or Constants.OK on success</returns>
+        //[DllImport(Constants.DLLNAME, EntryPoint = "mvwins_wch")]
+        //internal extern static int ncurses_mvwins_wch(IntPtr window, int y, int x, NCURSES_CH_T wch);
         [DllImport(Constants.DLLNAME, EntryPoint = "mvwins_wch")]
-        internal extern static int ncurses_mvwins_wch(IntPtr window, int y, int x, NCURSES_CH_T wch);
+        internal extern static int ncurses_mvwins_wch(IntPtr window, int y, int x, IntPtr wch);
 
         /// <summary>
         /// see <see cref="NativeStdScr.mvins_wch"/>
         /// <para />native method wrapped with verification.
         /// </summary>
         /// <param name="window">A pointer to a window</param>
-        public static void mvwins_wch(IntPtr window, int y, int x, NCURSES_CH_T wch)
+        public static void mvwins_wch(IntPtr window, int y, int x, NCursesWCHAR wch)
         {
-            NativeNCurses.VerifyNCursesMethod(() => ncurses_mvwins_wch(window, y, x, wch), "mvwins_wch");
+            IntPtr wPtr;
+            using (wch.ToPointer(out wPtr))
+            {
+                NativeNCurses.VerifyNCursesMethod(() => ncurses_mvwins_wch(window, y, x, wPtr), "mvwins_wch");
+            }
         }
 
         /// <summary>
         /// see <see cref="mvwins_wch"/>
         /// <para />native method wrapped with verification and thread safety.
         /// </summary>
-        public static void mvwins_wch_t(IntPtr window, int y, int x, NCURSES_CH_T wch)
+        public static void mvwins_wch_t(IntPtr window, int y, int x, NCursesWCHAR wch)
         {
-            Func<IntPtr, IntPtr, int> callback = (IntPtr w, IntPtr a) => ncurses_mvwins_wch(window, y, x, wch);
-            NativeNCurses.use_window_v(window, Marshal.GetFunctionPointerForDelegate(new NCURSES_WINDOW_CB(callback)), "mvwins_wch");
+            IntPtr wPtr = wch.ToPointer();
+            GC.AddMemoryPressure(wch.Size);
+
+            Func<IntPtr, IntPtr, int> callback = (IntPtr w, IntPtr a) => ncurses_mvwins_wch(window, y, x, wPtr);
+
+            try
+            {
+                NativeNCurses.use_window_v(window, Marshal.GetFunctionPointerForDelegate(new NCURSES_WINDOW_CB(callback)), "mvwins_wch");
+            }
+            finally
+            {
+                Marshal.FreeHGlobal(wPtr);
+                GC.RemoveMemoryPressure(wch.Size);
+            }
         }
         #endregion
 
@@ -4777,8 +5026,10 @@ namespace NCurses.Core.Interop
         /// see <see cref="mvins_wstr"/>
         /// </summary>
         /// <returns>Constants.ERR on error or Constants.OK on success</returns>
+        //[DllImport(Constants.DLLNAME, EntryPoint = "mvwins_wstr")]
+        //internal extern static int ncurses_mvwins_wstr(IntPtr window, int y, int x, string str);
         [DllImport(Constants.DLLNAME, EntryPoint = "mvwins_wstr")]
-        internal extern static int ncurses_mvwins_wstr(IntPtr window, int y, int x, string str);
+        internal extern static int ncurses_mvwins_wstr(IntPtr window, int y, int x, IntPtr str);
 
         /// <summary>
         /// see <see cref="NativeStdScr.mvins_wstr"/>
@@ -4787,7 +5038,9 @@ namespace NCurses.Core.Interop
         /// <param name="window">A pointer to a window</param>
         public static void mvwins_wstr(IntPtr window, int y, int x, string str)
         {
-            NativeNCurses.VerifyNCursesMethod(() => ncurses_mvwins_wstr(window, y, x, str), "mvwins_wstr");
+            NativeNCurses.MarshalNativeWideStringAndExecuteAction((strPtr) =>
+                NativeNCurses.VerifyNCursesMethod(() => ncurses_mvwins_wstr(window, y, x, strPtr), "mvwins_wstr"),
+                str, true);
         }
 
         /// <summary>
@@ -4796,7 +5049,12 @@ namespace NCurses.Core.Interop
         /// </summary>
         public static void mvwins_wstr_t(IntPtr window, int y, int x, string str)
         {
-            Func<IntPtr, IntPtr, int> callback = (IntPtr w, IntPtr a) => ncurses_mvwins_wstr(window, y, x, str);
+            Func<IntPtr, IntPtr, int> callback = (IntPtr w, IntPtr a) =>
+            {
+                int ret = 0;
+                NativeNCurses.MarshalNativeWideStringAndExecuteAction((ptr) => ret = ncurses_mvwins_wstr(window, y, x, ptr), str);
+                return ret;
+            };
             NativeNCurses.use_window_v(window, Marshal.GetFunctionPointerForDelegate(new NCURSES_WINDOW_CB(callback)), "mvwins_wstr");
         }
         #endregion
@@ -4806,8 +5064,10 @@ namespace NCurses.Core.Interop
         /// see <see cref="mvwinwstr"/>
         /// </summary>
         /// <returns>Constants.ERR on error or Constants.OK on success</returns>
-        [DllImport(Constants.DLLNAME, EntryPoint = "mvwinwstr", CharSet = CharSet.Unicode)]
-        internal extern static int ncurses_mvwinwstr(IntPtr window, int y, int x, StringBuilder str);
+        //[DllImport(Constants.DLLNAME, EntryPoint = "mvwinwstr", CharSet = CharSet.Unicode)]
+        //internal extern static int ncurses_mvwinwstr(IntPtr window, int y, int x, StringBuilder str);
+        [DllImport(Constants.DLLNAME, EntryPoint = "mvwinwstr")]
+        internal extern static int ncurses_mvwinwstr(IntPtr window, int y, int x, IntPtr str);
 
         /// <summary>
         /// see <see cref="NativeStdScr.mvinwstr"/>
@@ -4816,7 +5076,20 @@ namespace NCurses.Core.Interop
         /// <param name="window">A pointer to a window</param>
         public static void mvwinwstr(IntPtr window, int y, int x, StringBuilder str)
         {
-            NativeNCurses.VerifyNCursesMethod(() => ncurses_mvwinwstr(window, y, x, str), "mvwinwstr");
+            int size = Constants.SIZEOF_WCHAR_T * str.Capacity;
+            IntPtr strPtr = Marshal.AllocHGlobal(size);
+            GC.AddMemoryPressure(size);
+
+            try
+            {
+                NativeNCurses.VerifyNCursesMethod(() => ncurses_mvwinwstr(window, y, x, strPtr), "mvwinwstr");
+                str.Append(NativeNCurses.MarshalStringFromNativeWideString(strPtr, str.Capacity));
+            }
+            finally
+            {
+                Marshal.FreeHGlobal(strPtr);
+                GC.RemoveMemoryPressure(size);
+            }
         }
 
         /// <summary>
@@ -4825,8 +5098,22 @@ namespace NCurses.Core.Interop
         /// </summary>
         public static void mvwinwstr_t(IntPtr window, int y, int x, StringBuilder str)
         {
-            Func<IntPtr, IntPtr, int> callback = (IntPtr w, IntPtr a) => ncurses_mvwinwstr(window, y, x, str);
-            NativeNCurses.use_window_v(window, Marshal.GetFunctionPointerForDelegate(new NCURSES_WINDOW_CB(callback)), "mvwinwstr");
+            int size = Constants.SIZEOF_WCHAR_T * str.Capacity;
+            IntPtr strPtr = Marshal.AllocHGlobal(size);
+            GC.AddMemoryPressure(size);
+
+            Func<IntPtr, IntPtr, int> callback = (IntPtr w, IntPtr a) => ncurses_mvwinwstr(window, y, x, strPtr);
+
+            try
+            {
+                NativeNCurses.use_window_v(window, Marshal.GetFunctionPointerForDelegate(new NCURSES_WINDOW_CB(callback)), "mvwinwstr");
+                str.Append(NativeNCurses.MarshalStringFromNativeWideString(strPtr, str.Capacity));
+            }
+            finally
+            {
+                Marshal.FreeHGlobal(strPtr);
+                GC.RemoveMemoryPressure(size);
+            }
         }
         #endregion
 
@@ -4835,27 +5122,45 @@ namespace NCurses.Core.Interop
         /// see <see cref="mvwvline_set"/>
         /// </summary>
         /// <returns>Constants.ERR on error or Constants.OK on success</returns>
+        //[DllImport(Constants.DLLNAME, EntryPoint = "mvwvline_set")]
+        //internal extern static int ncurses_mvwvline_set(IntPtr window, int y, int x, NCURSES_CH_T wch, int n);
         [DllImport(Constants.DLLNAME, EntryPoint = "mvwvline_set")]
-        internal extern static int ncurses_mvwvline_set(IntPtr window, int y, int x, NCURSES_CH_T wch, int n);
+        internal extern static int ncurses_mvwvline_set(IntPtr window, int y, int x, IntPtr wch, int n);
 
         /// <summary>
         /// see <see cref="NativeStdScr.mvvline_set"/>
         /// <para />native method wrapped with verification.
         /// </summary>
         /// <param name="window">A pointer to a window</param>
-        public static void mvwvline_set(IntPtr window, int y, int x, NCURSES_CH_T wch, int n)
+        public static void mvwvline_set(IntPtr window, int y, int x, NCursesWCHAR wch, int n)
         {
-            NativeNCurses.VerifyNCursesMethod(() => ncurses_mvwvline_set(window, y, x, wch, n), "mvwvline_set");
+            IntPtr wPtr;
+            using (wch.ToPointer(out wPtr))
+            {
+                NativeNCurses.VerifyNCursesMethod(() => ncurses_mvwvline_set(window, y, x, wPtr, n), "mvwvline_set");
+            }
         }
 
         /// <summary>
         /// see <see cref="mvwvline_set"/>
         /// <para />native method wrapped with verification and thread safety.
         /// </summary>
-        public static void mvwvline_set_t(IntPtr window, int y, int x, NCURSES_CH_T wch, int n)
+        public static void mvwvline_set_t(IntPtr window, int y, int x, NCursesWCHAR wch, int n)
         {
-            Func<IntPtr, IntPtr, int> callback = (IntPtr w, IntPtr a) => ncurses_mvwvline_set(window, y, x, wch, n);
-            NativeNCurses.use_window_v(window, Marshal.GetFunctionPointerForDelegate(new NCURSES_WINDOW_CB(callback)), "mvwvline_set");
+            IntPtr wPtr = wch.ToPointer();
+            GC.AddMemoryPressure(wch.Size);
+
+            Func<IntPtr, IntPtr, int> callback = (IntPtr w, IntPtr a) => ncurses_mvwvline_set(window, y, x, wPtr, n);
+
+            try
+            {
+                NativeNCurses.use_window_v(window, Marshal.GetFunctionPointerForDelegate(new NCURSES_WINDOW_CB(callback)), "mvwvline_set");
+            }
+            finally
+            {
+                Marshal.FreeHGlobal(wPtr);
+                GC.RemoveMemoryPressure(wch.Size);
+            }
         }
         #endregion
 
@@ -4864,27 +5169,45 @@ namespace NCurses.Core.Interop
         /// see <see cref="wvline_set"/>
         /// </summary>
         /// <returns>Constants.ERR on error or Constants.OK on success</returns>
+        //[DllImport(Constants.DLLNAME, EntryPoint = "wvline_set")]
+        //internal extern static int ncurses_wvline_set(IntPtr window, NCURSES_CH_T wch, int n);
         [DllImport(Constants.DLLNAME, EntryPoint = "wvline_set")]
-        internal extern static int ncurses_wvline_set(IntPtr window, NCURSES_CH_T wch, int n);
+        internal extern static int ncurses_wvline_set(IntPtr window, IntPtr wch, int n);
 
         /// <summary>
         /// see <see cref="NativeStdScr.vline_set"/>
         /// <para />native method wrapped with verification.
         /// </summary>
         /// <param name="window">A pointer to a window</param>
-        public static void wvline_set(IntPtr window, NCURSES_CH_T wch, int n)
+        public static void wvline_set(IntPtr window, NCursesWCHAR wch, int n)
         {
-            NativeNCurses.VerifyNCursesMethod(() => ncurses_wvline_set(window, wch, n), "wvline_set");
+            IntPtr wPtr;
+            using (wch.ToPointer(out wPtr))
+            {
+                NativeNCurses.VerifyNCursesMethod(() => ncurses_wvline_set(window, wPtr, n), "wvline_set");
+            }
         }
 
         /// <summary>
         /// see <see cref="wvline_set"/>
         /// <para />native method wrapped with verification and thread safety.
         /// </summary>
-        public static void wvline_set_t(IntPtr window, NCURSES_CH_T wch, int n)
+        public static void wvline_set_t(IntPtr window, NCursesWCHAR wch, int n)
         {
-            Func<IntPtr, IntPtr, int> callback = (IntPtr w, IntPtr a) => ncurses_wvline_set(window, wch, n);
-            NativeNCurses.use_window_v(window, Marshal.GetFunctionPointerForDelegate(new NCURSES_WINDOW_CB(callback)), "wvline_set");
+            IntPtr wPtr = wch.ToPointer();
+            GC.AddMemoryPressure(wch.Size);
+
+            Func<IntPtr, IntPtr, int> callback = (IntPtr w, IntPtr a) => ncurses_wvline_set(window, wPtr, n);
+
+            try
+            {
+                NativeNCurses.use_window_v(window, Marshal.GetFunctionPointerForDelegate(new NCURSES_WINDOW_CB(callback)), "wvline_set");
+            }
+            finally
+            {
+                Marshal.FreeHGlobal(wPtr);
+                GC.RemoveMemoryPressure(wch.Size);
+            }
         }
         #endregion
 

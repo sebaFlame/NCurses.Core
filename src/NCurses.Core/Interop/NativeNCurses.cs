@@ -4,84 +4,6 @@ using System.Runtime.InteropServices;
 
 namespace NCurses.Core.Interop
 {
-    public class NCursesException : Exception
-    {
-        internal NCursesException(string message)
-            : base(message)
-        { }
-
-        internal static void Verify(int result, string method)
-        {
-            if (result == Constants.ERR)
-                throw new NCursesException(string.Format("{0} returned ERR", method));
-        }
-
-        internal static void Verify(IntPtr result, string method)
-        {
-            if (result == IntPtr.Zero)
-                throw new NCursesException(string.Format("{0} returned NULL", method));
-        }
-    }
-
-    //TODO: create CustomMarshaller to create a null terminated array of NCURSES_CH_T (without size)
-    [StructLayout(LayoutKind.Sequential)]
-    public struct NCURSES_CH_T /* cchar_t */
-    {
-        public NCURSES_CH_T(char ch)
-            : this()
-        {
-            this.chars = new byte[10];
-            bool completed;
-            int charsUsed, bytesUsed;
-            if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
-                Encoding.Unicode.GetEncoder().Convert(new char[] { ch }, 0, 1, this.chars, 0, 10, false, out charsUsed, out bytesUsed, out completed);
-            else
-                Encoding.UTF8.GetEncoder().Convert(new char[] { ch }, 0, 1, this.chars, 0, 10, false, out charsUsed, out bytesUsed, out completed);
-
-            if (!completed)
-                throw new InvalidOperationException("Failed to convert character for marshaling");
-        }
-
-        public NCURSES_CH_T(char ch, uint attr)
-            :this(ch)
-        {
-            this.attr = attr;
-        }
-
-        public NCURSES_CH_T(uint c)
-            : this()
-        {
-            this.chars = new byte[10];
-            BitConverter.GetBytes(c).CopyTo(this.chars, 0);
-        }
-
-        public NCURSES_CH_T(uint ch, uint attr)
-            : this(ch)
-        {
-            this.attr = attr;
-        }
-
-        public uint attr;
-        [MarshalAs(UnmanagedType.ByValArray, SizeConst = 10)]
-        public byte[] chars;
-        /// <summary>
-        /// color pair, must be more than 16-bits
-        /// </summary>
-        public int ext_color;
-    }
-
-    [StructLayout(LayoutKind.Sequential)]
-    public struct MEVENT
-    {
-        public short id;        /* ID to distinguish multiple devices */
-        public int x, y, z;     /* event coordinates (character-cell) */
-        public uint bstate;     /* button state bits */
-    }
-
-    internal delegate int NCURSES_WINDOW_CB(IntPtr window, IntPtr args);
-    internal delegate int NCURSES_SCREEN_CB(IntPtr screen, IntPtr args);
-
-    //TODO: free GetFunctionPointerForDelegate pointers (possible memory leak)
     /// <summary>
     /// native curses methods.
     /// all methods can be found at http://invisible-island.net/ncurses/man/ncurses.3x.html#h3-Routine-Name-Index
@@ -400,44 +322,109 @@ namespace NCurses.Core.Interop
         }
 
         /// <summary>
-        /// converts a string to a byte array consisting of 4 byte encoded UTF-8 characters
+        /// see <see cref="MarshallArray{T}(T[], bool, out int)"/>
         /// </summary>
-        /// <param name="wStr">the string to encode</param>
-        /// <param name="pointerSize">the size of the allocated array (for GC)</param>
-        /// <returns></returns>
-        internal static IntPtr MarshalStringToUtf8_4byteArray(string wStr, out int pointerSize)
+        internal static IntPtr MarshallArray(NCursesWCHAR[] array, bool addNullTerminator, out int pointerSize)
         {
-            char[] charArray = wStr.ToCharArray();
-            byte[] wstrArray = new byte[charArray.Length * 4];
-            bool completed = true;
-            int charsUsed, bytesUsed;
+            if(array == null)
+                throw new ArgumentNullException("Array hasn't been initialized");
 
-            for (int i = 0; completed && i < charArray.Length; i++)
-                Encoding.UTF8.GetEncoder().Convert(charArray, i, 1, wstrArray, i * 4, 4, false, out charsUsed, out bytesUsed, out completed);
+            if (array.Length == 0)
+                throw new ArgumentException("Empty array has been passed");
 
-            if (!completed)
-                throw new InvalidOperationException("Failed to convert string to a wide char array for.");
+            if(array[0].WCHAR == null)
+                throw new ArgumentNullException("Wide character hasn't been initialized");
 
-            IntPtr wstrPtr = Marshal.AllocHGlobal(wstrArray.Length);
-            Marshal.Copy(wstrArray, 0, wstrPtr, wstrArray.Length);
-            pointerSize = wstrArray.Length;
-            return wstrPtr;
+            pointerSize = (array[0].Size * array.Length) + (addNullTerminator ? array[0].Size : 0);
+            IntPtr ptr = Marshal.AllocHGlobal(pointerSize);
+
+            try
+            {
+                for (int i = 0; i < array.Length; i++)
+                    array[i].ToPointer(ptr + (array[0].Size * i));
+
+                if (addNullTerminator)
+                    Marshal.Copy(new byte[array[0].Size], 0, ptr + (array[0].Size * array.Length), array[0].Size);
+
+                return ptr;
+            }
+            catch (Exception)
+            {
+                Marshal.FreeHGlobal(ptr);
+                throw;
+            }
         }
 
         /// <summary>
-        /// Get the correct character representation from a NCURSES_CH_T
+        /// converts a string to it's native wide char counterpart
         /// </summary>
-        /// <param name="cchar">the NCURSES_CH_T from which you want to retrieve the character</param>
-        /// <returns></returns>
-        public static char GetCharFromNCURSES_CH_T(NCURSES_CH_T cchar)
+        /// <param name="action">action to execute after the string has been allocated in native memory</param>
+        /// <param name="wStr">the string to encode</param>
+        /// <param name="addNullTerminator">add a null terminator to the native string</param>
+        internal static void MarshalNativeWideStringAndExecuteAction(Action<IntPtr> action, string wStr, bool addNullTerminator = false)
         {
-            char[] ch;
-            if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
-                ch = Encoding.Unicode.GetChars(cchar.chars);
-            else
-                ch = Encoding.UTF8.GetChars(cchar.chars);
+            IntPtr ptr = IntPtr.Zero;
+            int pointerSize = 0;
+            try
+            {
+                if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
+                {
+                    ptr = Marshal.StringToHGlobalUni(wStr);
+                    pointerSize = wStr.Length;
+                }
+                else
+                {
+                    char[] charArray = wStr.ToCharArray();
+                    byte[] wstrArray = new byte[(charArray.Length * Constants.SIZEOF_WCHAR_T) + (addNullTerminator ? Constants.SIZEOF_WCHAR_T : 0)];
+                    bool completed = true;
+                    int charsUsed, bytesUsed;
 
-            return ch[0];
+                    for (int i = 0; completed && i < (addNullTerminator ? charArray.Length - Constants.SIZEOF_WCHAR_T : charArray.Length); i++)
+                        Encoding.UTF8.GetEncoder().Convert(charArray, i, 1, wstrArray, 
+                            i * Constants.SIZEOF_WCHAR_T, Constants.SIZEOF_WCHAR_T, false, out charsUsed, out bytesUsed, out completed);
+
+                    if (!completed)
+                        throw new InvalidOperationException("Failed to convert string to a wide char array.");
+
+                    IntPtr wstrPtr = Marshal.AllocHGlobal(wstrArray.Length);
+                    Marshal.Copy(wstrArray, 0, wstrPtr, wstrArray.Length);
+                    pointerSize = wstrArray.Length;
+                }
+
+                GC.AddMemoryPressure(pointerSize);
+                action(ptr);
+            }
+            finally
+            {
+                if(ptr != IntPtr.Zero)
+                    Marshal.FreeHGlobal(ptr);
+
+                if (pointerSize > 0)
+                    GC.RemoveMemoryPressure(pointerSize);
+            }
+        }
+
+        internal static string MarshalStringFromNativeWideString(IntPtr ptr, int length)
+        {
+            if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
+                return Marshal.PtrToStringUni(ptr);
+
+            byte[] wstrArray = new byte[Constants.SIZEOF_WCHAR_T * length];
+            char[] charArray = new char[length];
+
+            bool completed = true;
+            int charsUsed, bytesUsed;
+
+            Marshal.Copy(ptr, wstrArray, 0, length);
+
+            for (int i = 0; completed && i < charArray.Length; i++)
+                Encoding.UTF8.GetDecoder().Convert(wstrArray, i * Constants.SIZEOF_WCHAR_T, Constants.SIZEOF_WCHAR_T,
+                     charArray, i, 1, false, out charsUsed, out bytesUsed, out completed);
+
+            if (!completed)
+                throw new InvalidOperationException("Failed to convert wide char array to string.");
+
+            return new string(charArray);
         }
         #endregion
 
@@ -1029,11 +1016,12 @@ namespace NCurses.Core.Interop
 
             try
             {
+                NCursesWCHAR dummy = new NCursesWCHAR();
                 Action<IntPtr> loadWacs = (IntPtr wacsPtr) =>
                 {
                     IntPtr real_wacs = Marshal.ReadIntPtr(wacsPtr);
                     for (int i = 0; i < Wacs_Map.Length; i++)
-                        Wacs_Map[i] = (char)Marshal.ReadInt16(real_wacs + (i * Marshal.SizeOf<NCURSES_CH_T>()) + Marshal.SizeOf<uint>());
+                        Wacs_Map[i] = (char)Marshal.ReadInt16(real_wacs + (i * dummy.Size) + Marshal.SizeOf<uint>());
                 };
                 NativeNCurses.LoadProperty("_nc_wacs", loadWacs);
             }
@@ -2832,20 +2820,12 @@ namespace NCurses.Core.Interop
         /// <para />native method wrapped with verification.
         /// </summary>
         /// <param name="wch">a reference to store the erase char</param>
-        public static void erasewchar(ref NCURSES_CH_T wch)
+        public static void erasewchar(ref NCursesWCHAR wch)
         {
-            IntPtr wPtr = Marshal.AllocHGlobal(Marshal.SizeOf(wch));
-            Marshal.StructureToPtr(wch, wPtr, true);
-            GC.AddMemoryPressure(Marshal.SizeOf(wch));
-
-            try
+            IntPtr wPtr;
+            using (wch.ToPointer(out wPtr))
             {
                 NativeNCurses.VerifyNCursesMethod(() => ncurses_erasewcharr(wPtr), "erasewchar");
-            }
-            finally
-            {
-                Marshal.FreeHGlobal(wPtr);
-                GC.RemoveMemoryPressure(Marshal.SizeOf(wch));
             }
         }
         #endregion
@@ -2856,8 +2836,10 @@ namespace NCurses.Core.Interop
         /// </summary>
         /// <param name="opts">an application must provide a null pointer as opts</param>
         /// <returns>Constants.ERR on error or Constants.OK on success</returns>
-        [DllImport(Constants.DLLNAME, EntryPoint = "getcchar", CharSet = CharSet.Unicode)]
-        internal extern static int ncurses_getcchar(NCURSES_CH_T wcval, StringBuilder wch, out uint attrs, out short color_pair, IntPtr opts);
+        //[DllImport(Constants.DLLNAME, EntryPoint = "getcchar", CharSet = CharSet.Unicode)]
+        //internal extern static int ncurses_getcchar(NCURSES_CH_T wcval, StringBuilder wch, out uint attrs, out short color_pair, IntPtr opts);
+        [DllImport(Constants.DLLNAME, EntryPoint = "getcchar")]
+        internal extern static int ncurses_getcchar(IntPtr wcval, IntPtr wch, out uint attrs, out short color_pair, IntPtr opts);
 
         /// <summary>
         /// The getcchar  function gets  a wide-character string and
@@ -2873,9 +2855,28 @@ namespace NCurses.Core.Interop
         /// <param name="wch">a reference to store the string (initialized as StringBuilder(5))</param>
         /// <param name="attrs">a reference to store the attributes in</param>
         /// <param name="color_pair">a reference to store the color pair in</param>
-        public static void getcchar(NCURSES_CH_T wcval, StringBuilder wch, out uint attrs, out short color_pair)
+        public static void getcchar(NCursesWCHAR wcval, StringBuilder wch, out uint attrs, out short color_pair)
         {
-            NCursesException.Verify(ncurses_getcchar(wcval, wch, out attrs, out color_pair, IntPtr.Zero), "getcchar");
+            IntPtr wPtr, strPtr = IntPtr.Zero;
+            int pointerSize = 0;
+            using (wcval.ToPointer(out wPtr))
+            {
+                try
+                {
+                    strPtr = Marshal.AllocHGlobal((pointerSize = Constants.SIZEOF_WCHAR_T * wch.Capacity));
+                    GC.AddMemoryPressure(pointerSize);
+                    NCursesException.Verify(ncurses_getcchar(wPtr, strPtr, out attrs, out color_pair, IntPtr.Zero), "getcchar");
+                    wch.Append(MarshalStringFromNativeWideString(strPtr, wch.Capacity));
+                }
+                finally
+                {
+                    if(strPtr != IntPtr.Zero)
+                        Marshal.FreeHGlobal(strPtr);
+
+                    if (pointerSize > 0)
+                        GC.RemoveMemoryPressure(pointerSize);
+                }
+            }
         }
         #endregion
 
@@ -2923,8 +2924,10 @@ namespace NCurses.Core.Interop
         /// </summary>
         /// <param name="opts">an application must provide a null pointer as opts</param>
         /// <returns>Constants.ERR on error or Constants.OK on success</returns>
-        [DllImport(Constants.DLLNAME, EntryPoint = "setcchar", CharSet = CharSet.Unicode)]
-        internal extern static int ncurses_setcchar(out NCURSES_CH_T wcval, string wch, uint attrs, short color_pair, IntPtr opts);
+        //[DllImport(Constants.DLLNAME, EntryPoint = "setcchar", CharSet = CharSet.Unicode)]
+        //internal extern static int ncurses_setcchar(out NCURSES_CH_T wcval, string wch, uint attrs, short color_pair, IntPtr opts);
+        [DllImport(Constants.DLLNAME, EntryPoint = "setcchar")]
+        internal extern static int ncurses_setcchar(IntPtr wcval, IntPtr wch, uint attrs, short color_pair, IntPtr opts);
 
         /// <summary>
         /// The setcchar function initializes the location pointed to
@@ -2945,9 +2948,16 @@ namespace NCurses.Core.Interop
         /// <param name="wch">a reference to store the string</param>
         /// <param name="attrs">a reference to store the attributes in</param>
         /// <param name="color_pair">a reference to store the color pair in</param>
-        public static void setcchar(out NCURSES_CH_T wcval, string wch, uint attrs, short color_pair)
+        public static void setcchar(out NCursesWCHAR wcval, string wch, uint attrs, short color_pair)
         {
-            NCursesException.Verify(ncurses_setcchar(out wcval, wch, attrs, color_pair, IntPtr.Zero), "setcchar");
+            wcval = new NCursesWCHAR();
+            IntPtr wPtr;
+            using (wcval.ToPointer(out wPtr))
+            {
+                MarshalNativeWideStringAndExecuteAction((strPtr) =>
+                    NCursesException.Verify(ncurses_setcchar(wPtr, strPtr, attrs, color_pair, IntPtr.Zero), "setcchar"),
+                    wch, false);
+            }
         }
         #endregion
 
@@ -3065,8 +3075,28 @@ namespace NCurses.Core.Interop
         /// see <see cref="unctrl"/>
         /// </summary>
         /// <returns>printable representation of the character</returns>
+        //[DllImport(Constants.DLLNAME, EntryPoint = "wunctrl")]
+        //internal extern static string wunctrl(NCURSES_CH_T ch);
         [DllImport(Constants.DLLNAME, EntryPoint = "wunctrl")]
-        internal extern static string wunctrl(NCURSES_CH_T ch);
+        internal extern static IntPtr ncurses_wunctrl(IntPtr ch);
+
+        public static string wunctrl(NCursesWCHAR wch)
+        {
+            IntPtr wPtr, strPtr = IntPtr.Zero;
+            using(wch.ToPointer(out wPtr))
+            {
+                try
+                {
+                    strPtr = NativeNCurses.VerifyNCursesMethod(() => ncurses_wunctrl(wPtr), "wunctrl");
+                    return MarshalStringFromNativeWideString(strPtr, Constants.SIZEOF_WCHAR_T * Constants.CCHARW_MAX);
+                }
+                finally
+                {
+                    if (strPtr != IntPtr.Zero)
+                        Marshal.FreeHGlobal(strPtr);
+                }
+            }
+        }
         #endregion
 
         #region has_mouse

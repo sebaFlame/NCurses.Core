@@ -22,11 +22,11 @@ namespace NCurses.Core.Tests
             //testRipoffLine(ref stdScr);
             //testPad(ref stdScr);
             //testColor(ref stdScr);
-            //testWrite(ref stdScr);
+            testWrite(ref stdScr);
             //testReadFromOutput(ref stdScr);
             //testInsert(ref stdScr);
             //testASC(ref stdScr);
-            testRead(ref stdScr);
+            //testRead(ref stdScr);
             //testWindowMemLeak(ref stdScr);
 
             Console.ReadKey();
@@ -129,14 +129,14 @@ namespace NCurses.Core.Tests
             //test get correct "string" from cchar_t
             short colorPair;
             uint attrs;
-            NCURSES_CH_T wch = new NCURSES_CH_T('\u263A');
+            NCursesWCHAR wch = new NCursesWCHAR('\u263A');
             wch.attr = Attrs.BOLD;
             wch.ext_color = 4;
             string wStr = NCurses.GetStringFromWideChar(wch, out attrs, out colorPair);
 
             //test get correct cchar_t from string
             string str = '\u263A'.ToString();
-            NCURSES_CH_T wch1 = NCurses.GetWideCharFromString(str, Attrs.BOLD, 4);
+            NCursesWCHAR wch1 = NCurses.GetWideCharFromString(str, Attrs.BOLD, 4);
 
             //test add ASCII char with attributes and color
             c = 'b';
@@ -254,6 +254,8 @@ namespace NCurses.Core.Tests
             stdScr.Write("\nWide ACS: ");
             stdScr.Write(Wacs.D_ULCORNER);
             stdScr.Write(Wacs.ULCORNER);
+
+            stdScr.Refresh();
         }
 
         //keypad and keyname as ansi string == actual key names (except backspace/enter)
@@ -277,11 +279,11 @@ namespace NCurses.Core.Tests
             uint newMask = NCurses.EnableMouseMask(MouseState.BUTTON1_CLICKED |
                 MouseState.BUTTON1_DOUBLE_CLICKED | MouseState.BUTTON1_TRIPLE_CLICKED, out oldMask);
 
-            while ((ch = stdScr.ReadKey()) != 'q')
-            {
-                if (NCurses.GetKeyName(ch, out key) && key == Key.MOUSE)
-                    mouseEvent = NCurses.GetMouseEvent();
-            }
+            //while ((ch = stdScr.ReadKey()) != 'q')
+            //{
+            //    if (NCurses.GetKeyName(ch, out key) && key == Key.MOUSE)
+            //        mouseEvent = NCurses.GetMouseEvent();
+            //}
         }
 
         //upto 420MB, back down to 24MB -> FINE

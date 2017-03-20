@@ -696,15 +696,17 @@ namespace NCurses.Core.Interop
             Task peekTask = Task.Run(() => nativeWindowsConsoleInputPeek(cancel.Token));
 
             char read;
-            NativeWindow.ncurses_wget_wch(window, out read);
-            cancel.Cancel();
-            peekTask.Wait();
+            //shouldn't be commented out
+            //NativeWindow.ncurses_wget_wch(window, out read);
+            //cancel.Cancel();
+            //peekTask.Wait();
 
-            int modifierKey;
-            if ((modifierKey = getModifierKey(read)) > 0)
-                return (char)modifierKey;
+            //int modifierKey;
+            //if ((modifierKey = getModifierKey(read)) > 0)
+            //    return (char)modifierKey;
 
-            return read;
+            //return read;
+            return '0';
         }
 
         private static InputRecord previousButton;

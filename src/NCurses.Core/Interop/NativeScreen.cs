@@ -2073,8 +2073,29 @@ namespace NCurses.Core.Interop
         /// see <see cref="NativeNCurses.wunctrl"/>
         /// </summary>
         /// <param name="screen">A pointer to a screen</param>
+        //[DllImport(Constants.DLLNAME, EntryPoint = "wunctrl")]
+        //internal extern static string wunctrl(IntPtr screen, NCURSES_CH_T ch);
+
         [DllImport(Constants.DLLNAME, EntryPoint = "wunctrl")]
-        internal extern static string wunctrl(IntPtr screen, NCURSES_CH_T ch);
+        internal extern static IntPtr ncurses_wunctrl(IntPtr screen, IntPtr ch);
+
+        public static string wunctrl(IntPtr screen, NCursesWCHAR wch)
+        {
+            IntPtr wPtr, strPtr = IntPtr.Zero;
+            using (wch.ToPointer(out wPtr))
+            {
+                try
+                {
+                    strPtr = NativeNCurses.VerifyNCursesMethod(() => ncurses_wunctrl(screen, wPtr), "wunctrl");
+                    return NativeNCurses.MarshalStringFromNativeWideString(strPtr, Constants.SIZEOF_WCHAR_T * Constants.CCHARW_MAX);
+                }
+                finally
+                {
+                    if (strPtr != IntPtr.Zero)
+                        Marshal.FreeHGlobal(strPtr);
+                }
+            }
+        }
         #endregion
 
         #region vid_attr_sp

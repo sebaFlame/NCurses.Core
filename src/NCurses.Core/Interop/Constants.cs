@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Runtime.InteropServices;
 
 //several constants taken from ncurses.h
 namespace NCurses.Core.Interop
@@ -13,6 +14,17 @@ namespace NCurses.Core.Interop
 
         public const int ERR = -1;
         public const int OK = 0;
+        internal static int SIZEOF_WCHAR_T { get; private set; }
+        internal const int CCHARW_MAX = 5;
+
+        //TODO: get WCHAR_T size at runtime (through libc?)
+        static Constants()
+        {
+            if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
+                SIZEOF_WCHAR_T = 2;
+            else
+                SIZEOF_WCHAR_T = 4;
+        }
 
         internal static uint NCURSES_BITS(uint mask, int shift)
         {

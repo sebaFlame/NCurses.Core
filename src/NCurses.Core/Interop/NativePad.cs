@@ -122,8 +122,10 @@ namespace NCurses.Core.Interop
         /// see <see cref="pecho_wchar"/>
         /// </summary>
         /// <returns>Constants.ERR on error or Constants.OK on success</returns>
+        //[DllImport(Constants.DLLNAME, EntryPoint = "pecho_wchar")]
+        //internal extern static int ncurses_pecho_wchar(IntPtr pad, NCURSES_CH_T wch);
         [DllImport(Constants.DLLNAME, EntryPoint = "pecho_wchar")]
-        internal extern static int ncurses_pecho_wchar(IntPtr pad, NCURSES_CH_T wch);
+        internal extern static int ncurses_pecho_wchar(IntPtr pad, IntPtr wch);
 
         /// <summary>
         /// The pechochar routine is functionally equivalent to a call
@@ -136,19 +138,35 @@ namespace NCurses.Core.Interop
         /// arguments to prefresh.
         /// <para />native method wrapped with verification and thread safety.
         /// </summary>
-        public static void pecho_wchar(IntPtr pad, NCURSES_CH_T wch)
+        public static void pecho_wchar(IntPtr pad, NCursesWCHAR wch)
         {
-            NativeNCurses.VerifyNCursesMethod(() => ncurses_pecho_wchar(pad, wch), "pecho_wchar");
+            IntPtr wPtr;
+            using (wch.ToPointer(out wPtr))
+            {
+                NativeNCurses.VerifyNCursesMethod(() => ncurses_pecho_wchar(pad, wPtr), "pecho_wchar");
+            }
         }
 
         /// <summary>
         /// see <see cref="pecho_wchar"/>
         /// <para />native method wrapped with verification and thread safety.
         /// </summary>
-        public static void pecho_wchar_t(IntPtr pad, NCURSES_CH_T wch)
+        public static void pecho_wchar_t(IntPtr pad, NCursesWCHAR wch)
         {
-            Func<IntPtr, IntPtr, int> callback = (IntPtr w, IntPtr a) => ncurses_pecho_wchar(pad, wch);
-            NativeNCurses.use_window_v(pad, Marshal.GetFunctionPointerForDelegate(new NCURSES_WINDOW_CB(callback)), "pecho_wchar");
+            IntPtr wPtr = wch.ToPointer();
+            GC.AddMemoryPressure(wch.Size);
+
+            Func<IntPtr, IntPtr, int> callback = (IntPtr w, IntPtr a) => ncurses_pecho_wchar(pad, wPtr);
+
+            try
+            {
+                NativeNCurses.use_window_v(pad, Marshal.GetFunctionPointerForDelegate(new NCURSES_WINDOW_CB(callback)), "pecho_wchar");
+            }
+            finally
+            {
+                Marshal.FreeHGlobal(wPtr);
+                GC.RemoveMemoryPressure(wch.Size);
+            }
         }
         #endregion
     }

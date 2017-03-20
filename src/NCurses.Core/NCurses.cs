@@ -300,9 +300,9 @@ namespace NCurses.Core
         /// <param name="attrs">will contain the attributes of the wide char</param>
         /// <param name="pairIndex">will contain the color pair index of the wide char</param>
         /// <returns>string containing the wide char</returns>
-        public static string GetStringFromWideChar(NCURSES_CH_T wch, out uint attrs, out short pairIndex)
+        public static string GetStringFromWideChar(NCursesWCHAR wch, out uint attrs, out short pairIndex)
         {
-            StringBuilder builder = new StringBuilder(5);
+            StringBuilder builder = new StringBuilder(Constants.CCHARW_MAX);
             NativeNCurses.getcchar(wch, builder, out attrs, out pairIndex);
             return builder.ToString();
         }
@@ -314,9 +314,9 @@ namespace NCurses.Core
         /// <param name="attrs">the attributes you want to apply to the string</param>
         /// <param name="pairIndex">the color pair index you want to apply to the string</param>
         /// <returns>the wide char represenation of the string</returns>
-        public static NCURSES_CH_T GetWideCharFromString(string wStr, uint attrs, short pairIndex)
+        public static NCursesWCHAR GetWideCharFromString(string wStr, uint attrs, short pairIndex)
         {
-            NCURSES_CH_T wch;
+            NCursesWCHAR wch;
             NativeNCurses.setcchar(out wch, wStr, Attrs.BOLD, 4);
             return wch;
         }

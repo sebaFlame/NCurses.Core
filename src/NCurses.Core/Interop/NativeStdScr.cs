@@ -103,7 +103,7 @@ namespace NCurses.Core.Interop
         /// see <see cref="addnstr"/>
         /// </summary>
         /// <returns>Constants.ERR on error or Constants.OK on success</returns>
-        [DllImport(Constants.DLLNAME, EntryPoint = "addnstr", CharSet = CharSet.Unicode)]
+        [DllImport(Constants.DLLNAME, EntryPoint = "addnstr")]
         internal extern static int ncurses_addnstr(string txt, int number);
 
         /// <summary>
@@ -1630,20 +1630,12 @@ namespace NCurses.Core.Interop
         /// <para />native method wrapped with verification.
         /// </summary>
         /// <param name="wch">The wide character to add</param>
-        public static void add_wch(NCURSES_CH_T wch)
+        public static void add_wch(NCursesWCHAR wch)
         {
-            IntPtr wPtr = Marshal.AllocHGlobal(Marshal.SizeOf(wch));
-            Marshal.StructureToPtr(wch, wPtr, true);
-            GC.AddMemoryPressure(Marshal.SizeOf(wch));
-
-            try
+            IntPtr wPtr;
+            using(wch.ToPointer(out wPtr))
             {
                 NativeNCurses.VerifyNCursesMethod(() => ncurses_add_wch(wPtr), "add_wch");
-            }
-            finally
-            {
-                Marshal.FreeHGlobal(wPtr);
-                GC.RemoveMemoryPressure(Marshal.SizeOf(wch));
             }
         }
         #endregion
@@ -1671,7 +1663,7 @@ namespace NCurses.Core.Interop
         /// </summary>
         /// <param name="wchStr">The string of complex characters you want to add</param>
         /// <param name="n">number of elements to copy</param>
-        public static void add_wchnstr(NCURSES_CH_T[] wchStr, int n)
+        public static void add_wchnstr(NCursesWCHAR[] wchStr, int n)
         {
             int totalSize = 0;
             IntPtr arrayPtr = NativeNCurses.MarshallArray(wchStr, true, out totalSize);
@@ -1703,7 +1695,7 @@ namespace NCurses.Core.Interop
         /// </summary>
         /// <param name="wchStr">The string of complex characters you want to add</param>
         /// <param name="n">number of elements to copy</param>
-        public static void add_wchstr(NCURSES_CH_T[] wchStr)
+        public static void add_wchstr(NCursesWCHAR[] wchStr)
         {
             int totalSize = 0;
             IntPtr arrayPtr = NativeNCurses.MarshallArray(wchStr, true, out totalSize);
@@ -1726,8 +1718,10 @@ namespace NCurses.Core.Interop
         /// see <see cref="addnwstr"/>
         /// </summary>
         /// <returns>Constants.ERR on error or Constants.OK on success</returns>
-        [DllImport(Constants.DLLNAME, EntryPoint = "addnwstr", CharSet = CharSet.Unicode)]
-        internal extern static int ncurses_addnwstr(string wstr, int n);
+        //[DllImport(Constants.DLLNAME, EntryPoint = "addnwstr", CharSet = CharSet.Unicode)]
+        //internal extern static int ncurses_addnwstr(string wstr, int n);
+        [DllImport(Constants.DLLNAME, EntryPoint = "addnwstr")]
+        internal extern static int ncurses_addnwstr(IntPtr wstr, int n);
 
         /// <summary>
         /// These functions  write the characters of the(null-termitated) wchar_t character string wstr on the given window.
@@ -1739,7 +1733,9 @@ namespace NCurses.Core.Interop
         /// <param name="n">number of elements to copy</param>
         public static void addnwstr(string wstr, int n)
         {
-            NativeNCurses.VerifyNCursesMethod(() => ncurses_addnwstr(wstr, n), "addnwstr");
+            NativeNCurses.MarshalNativeWideStringAndExecuteAction((ptr) =>
+                NativeNCurses.VerifyNCursesMethod(() => ncurses_addnwstr(ptr, n), "addnwstr"),
+                wstr);
         }
         #endregion
 
@@ -1748,7 +1744,9 @@ namespace NCurses.Core.Interop
         /// see <see cref="addnwstr"/>
         /// </summary>
         /// <returns>Constants.ERR on error or Constants.OK on success</returns>
-        [DllImport(Constants.DLLNAME, EntryPoint = "addwstr", CharSet = CharSet.Unicode)]
+        //[DllImport(Constants.DLLNAME, EntryPoint = "addwstr", CharSet = CharSet.Unicode)]
+        //internal extern static int ncurses_addwstr(string wstr);
+        [DllImport(Constants.DLLNAME, EntryPoint = "addwstr")]
         internal extern static int ncurses_addwstr(string wstr);
 
         /// <summary>
@@ -1758,7 +1756,9 @@ namespace NCurses.Core.Interop
         /// <param name="wstr">the string to add</param>
         public static void addwstr(string wstr)
         {
-            NativeNCurses.VerifyNCursesMethod(() => ncurses_addwstr(wstr), "addwstr");
+            NativeNCurses.MarshalNativeWideStringAndExecuteAction((ptr) =>
+                NativeNCurses.VerifyNCursesMethod(() => ncurses_addwstr(wstr), "addwstr"),
+                wstr, true);
         }
         #endregion
 
@@ -1779,20 +1779,12 @@ namespace NCurses.Core.Interop
         /// <para />native method wrapped with verification.
         /// </summary>
         /// <param name="wstr">the string to add</param>
-        public static void bkgrnd(NCURSES_CH_T wch)
+        public static void bkgrnd(NCursesWCHAR wch)
         {
-            IntPtr wPtr = Marshal.AllocHGlobal(Marshal.SizeOf(wch));
-            Marshal.StructureToPtr(wch, wPtr, true);
-            GC.AddMemoryPressure(Marshal.SizeOf(wch));
-
-            try
+            IntPtr wPtr;
+            using(wch.ToPointer(out wPtr))
             {
                 NativeNCurses.VerifyNCursesMethod(() => ncurses_bkgrnd(wPtr), "bkgrnd");
-            }
-            finally
-            {
-                Marshal.FreeHGlobal(wPtr);
-                GC.RemoveMemoryPressure(Marshal.SizeOf(wch));
             }
         }
         #endregion
@@ -1818,20 +1810,12 @@ namespace NCurses.Core.Interop
         /// line/character operations.
         /// </summary>
         /// <param name="wstr">the string to add</param>
-        public static void bkgrndset(NCURSES_CH_T wch)
+        public static void bkgrndset(NCursesWCHAR wch)
         {
-            IntPtr wPtr = Marshal.AllocHGlobal(Marshal.SizeOf(wch));
-            Marshal.StructureToPtr(wch, wPtr, true);
-            GC.AddMemoryPressure(Marshal.SizeOf(wch));
-
-            try
+            IntPtr wPtr;
+            using (wch.ToPointer(out wPtr))
             {
                 ncurses_bkgrndset(wPtr);
-            }
-            finally
-            {
-                Marshal.FreeHGlobal(wPtr);
-                GC.RemoveMemoryPressure(Marshal.SizeOf(wch));
             }
         }
         #endregion
@@ -1858,40 +1842,17 @@ namespace NCurses.Core.Interop
         /// <param name="tr">top right-hand corner</param>
         /// <param name="bl">bottom left-hand corner</param>
         /// <param name="br">bottom right-hand corner</param>
-        public static void border_set(NCURSES_CH_T ls, NCURSES_CH_T rs, NCURSES_CH_T ts, NCURSES_CH_T bs, NCURSES_CH_T tl, NCURSES_CH_T tr,
-            NCURSES_CH_T bl, NCURSES_CH_T br)
+        public static void border_set(NCursesWCHAR ls, NCursesWCHAR rs, NCursesWCHAR ts, NCursesWCHAR bs, NCursesWCHAR tl, NCursesWCHAR tr,
+            NCursesWCHAR bl, NCursesWCHAR br)
         {
-            IntPtr lsPtr = Marshal.AllocHGlobal(Marshal.SizeOf(ls));
-            Marshal.StructureToPtr(ls, lsPtr, true);
-            GC.AddMemoryPressure(Marshal.SizeOf(ls));
-
-            IntPtr rsPtr = Marshal.AllocHGlobal(Marshal.SizeOf(rs));
-            Marshal.StructureToPtr(rs, rsPtr, true);
-            GC.AddMemoryPressure(Marshal.SizeOf(rs));
-
-            IntPtr tsPtr = Marshal.AllocHGlobal(Marshal.SizeOf(ts));
-            Marshal.StructureToPtr(ts, tsPtr, true);
-            GC.AddMemoryPressure(Marshal.SizeOf(ts));
-
-            IntPtr bsPtr = Marshal.AllocHGlobal(Marshal.SizeOf(bs));
-            Marshal.StructureToPtr(bs, bsPtr, true);
-            GC.AddMemoryPressure(Marshal.SizeOf(bs));
-
-            IntPtr tlPtr = Marshal.AllocHGlobal(Marshal.SizeOf(tl));
-            Marshal.StructureToPtr(tl, tlPtr, true);
-            GC.AddMemoryPressure(Marshal.SizeOf(tl));
-
-            IntPtr trPtr = Marshal.AllocHGlobal(Marshal.SizeOf(tr));
-            Marshal.StructureToPtr(tr, trPtr, true);
-            GC.AddMemoryPressure(Marshal.SizeOf(tr));
-
-            IntPtr blPtr = Marshal.AllocHGlobal(Marshal.SizeOf(bl));
-            Marshal.StructureToPtr(bl, blPtr, true);
-            GC.AddMemoryPressure(Marshal.SizeOf(bl));
-
-            IntPtr brPtr = Marshal.AllocHGlobal(Marshal.SizeOf(br));
-            Marshal.StructureToPtr(br, brPtr, true);
-            GC.AddMemoryPressure(Marshal.SizeOf(br));
+            IntPtr lsPtr = ls.ToPointer();
+            IntPtr rsPtr = rs.ToPointer();
+            IntPtr tsPtr = ts.ToPointer();
+            IntPtr bsPtr = bs.ToPointer();
+            IntPtr tlPtr = tl.ToPointer();
+            IntPtr trPtr = tr.ToPointer();
+            IntPtr blPtr = bl.ToPointer();
+            IntPtr brPtr = br.ToPointer();
 
             try
             {
@@ -1945,20 +1906,12 @@ namespace NCurses.Core.Interop
         /// <para />native method wrapped with verification.
         /// </summary>
         /// <param name="wch">the character to echo</param>
-        public static void echo_wchar(NCURSES_CH_T wch)
+        public static void echo_wchar(NCursesWCHAR wch)
         {
-            IntPtr wPtr = Marshal.AllocHGlobal(Marshal.SizeOf(wch));
-            Marshal.StructureToPtr(wch, wPtr, true);
-            GC.AddMemoryPressure(Marshal.SizeOf(wch));
-
-            try
+            IntPtr wPtr;
+            using (wch.ToPointer(out wPtr))
             {
                 NativeNCurses.VerifyNCursesMethod(() => ncurses_echo_wchar(wPtr), "echo_wchar");
-            }
-            finally
-            {
-                Marshal.FreeHGlobal(wPtr);
-                GC.RemoveMemoryPressure(Marshal.SizeOf(wch));
             }
         }
         #endregion
@@ -1968,8 +1921,10 @@ namespace NCurses.Core.Interop
         /// see <see cref="get_wch"/>
         /// </summary>
         /// <returns>Constants.ERR on error or Constants.OK on success</returns>
-        [DllImport(Constants.DLLNAME, EntryPoint = "get_wch", CharSet = CharSet.Unicode)]
-        internal extern static int ncurses_get_wch(out char wch);
+        //[DllImport(Constants.DLLNAME, EntryPoint = "get_wch", CharSet = CharSet.Unicode)]
+        //internal extern static int ncurses_get_wch(out char wch);
+        [DllImport(Constants.DLLNAME, EntryPoint = "get_wch")]
+        internal extern static int ncurses_get_wch(IntPtr wch);
 
         /// <summary>
         /// The get_wch, wget_wch, mvget_wch, and mvwget_wch functions
@@ -1986,7 +1941,27 @@ namespace NCurses.Core.Interop
         /// <param name="wch">a reference to store the returned wide char in</param>
         public static void get_wch(out char wch)
         {
-            ncurses_get_wch(out wch);
+            //TODO: returns KEY_CODE_YES if a function key gets pressed
+            IntPtr chPtr = Marshal.AllocHGlobal(Marshal.SizeOf<uint>());
+            GC.AddMemoryPressure(Marshal.SizeOf<uint>());
+
+            try
+            {
+                NativeNCurses.VerifyNCursesMethod(() => ncurses_get_wch(chPtr), "get_wch");
+
+                byte[] arr = new byte[Marshal.SizeOf<uint>()];
+                Marshal.Copy(chPtr, arr, 0, Marshal.SizeOf<uint>());
+
+                if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
+                    wch = Encoding.Unicode.GetChars(arr)[0];
+                else
+                    wch = Encoding.UTF8.GetChars(arr)[0];
+            }
+            finally
+            {
+                Marshal.FreeHGlobal(chPtr);
+                GC.RemoveMemoryPressure(Marshal.SizeOf<uint>());
+            }
         }
         #endregion
 
@@ -1995,8 +1970,10 @@ namespace NCurses.Core.Interop
         /// see <see cref="get_wstr"/>
         /// </summary>
         /// <returns>Constants.ERR on error or Constants.OK on success</returns>
-        [DllImport(Constants.DLLNAME, EntryPoint = "get_wstr", CharSet = CharSet.Unicode)]
-        internal extern static int ncurses_get_wstr(StringBuilder wstr);
+        //[DllImport(Constants.DLLNAME, EntryPoint = "get_wstr", CharSet = CharSet.Unicode)]
+        //internal extern static int ncurses_get_wstr(StringBuilder wstr);
+        [DllImport(Constants.DLLNAME, EntryPoint = "get_wstr")]
+        internal extern static int ncurses_get_wstr(IntPtr wstr);
 
         /// <summary>
         /// The effect  of get_wstr is as though a series of calls to
@@ -2013,7 +1990,20 @@ namespace NCurses.Core.Interop
         /// <param name="wstr">a reference to store the returned wide string in</param>
         public static void get_wstr(StringBuilder wstr)
         {
-            NativeNCurses.VerifyNCursesMethod(() => ncurses_get_wstr(wstr), "get_wstr");
+            int size = Marshal.SizeOf<uint>() * wstr.Capacity;
+            IntPtr strPtr = Marshal.AllocHGlobal(size);
+            GC.AddMemoryPressure(size);
+
+            try
+            {
+                NativeNCurses.VerifyNCursesMethod(() => ncurses_get_wstr(strPtr), "get_wstr");
+                wstr.Append(NativeNCurses.MarshalStringFromNativeWideString(strPtr, wstr.Capacity));
+            }
+            finally
+            {
+                Marshal.FreeHGlobal(strPtr);
+                GC.RemoveMemoryPressure(Marshal.SizeOf<uint>());
+            }
         }
         #endregion
 
@@ -2022,8 +2012,10 @@ namespace NCurses.Core.Interop
         /// see <see cref="getbkgrnd"/>
         /// </summary>
         /// <returns>Constants.ERR on error or Constants.OK on success</returns>
+        //[DllImport(Constants.DLLNAME, EntryPoint = "getbkgrnd")]
+        //internal extern static int ncurses_getbkgrnd(ref NCURSES_CH_T wch);
         [DllImport(Constants.DLLNAME, EntryPoint = "getbkgrnd")]
-        internal extern static int ncurses_getbkgrnd(ref NCURSES_CH_T wch);
+        internal extern static int ncurses_getbkgrnd(IntPtr wch);
 
         /// <summary>
         /// The getbkgrnd function returns the given window's current
@@ -2031,9 +2023,14 @@ namespace NCurses.Core.Interop
         /// <para />native method wrapped with verification.
         /// </summary>
         /// <param name="wch">a reference to store the returned background char in</param>
-        public static void getbkgrnd(ref NCURSES_CH_T wch)
+        public static void getbkgrnd(out NCursesWCHAR wch)
         {
-            NCursesException.Verify(ncurses_getbkgrnd(ref wch), "getbkgrnd");
+            IntPtr wPtr;
+            wch = new NCursesWCHAR();
+            using(wch.ToPointer(out wPtr))
+            {
+                NCursesException.Verify(ncurses_getbkgrnd(wPtr), "getbkgrnd");
+            }
         }
         #endregion
 
@@ -2042,8 +2039,10 @@ namespace NCurses.Core.Interop
         /// see <see cref="getn_wstr"/>
         /// </summary>
         /// <returns>Constants.ERR on error or Constants.OK on success</returns>
-        [DllImport(Constants.DLLNAME, EntryPoint = "getn_wstr", CharSet = CharSet.Unicode)]
-        internal extern static int ncurses_getn_wstr(StringBuilder wstr, int n);
+        //[DllImport(Constants.DLLNAME, EntryPoint = "getn_wstr", CharSet = CharSet.Unicode)]
+        //internal extern static int ncurses_getn_wstr(StringBuilder wstr, int n);
+        [DllImport(Constants.DLLNAME, EntryPoint = "getn_wstr")]
+        internal extern static int ncurses_getn_wstr(IntPtr wstr, int n);
 
         /// <summary>
         /// see <see cref="get_wstr"/>
@@ -2052,7 +2051,20 @@ namespace NCurses.Core.Interop
         /// <param name="n">the number of wide characters to get</param>
         public static void getn_wstr(StringBuilder wstr, int n)
         {
-            NativeNCurses.VerifyNCursesMethod(() => ncurses_getn_wstr(wstr, n), "getn_wstr");
+            int size = Marshal.SizeOf<uint>() * n;
+            IntPtr strPtr = Marshal.AllocHGlobal(size);
+            GC.AddMemoryPressure(size);
+
+            try
+            {
+                NativeNCurses.VerifyNCursesMethod(() => ncurses_getn_wstr(strPtr, n), "getn_wstr");
+                wstr.Append(NativeNCurses.MarshalStringFromNativeWideString(strPtr, n));
+            }
+            finally
+            {
+                Marshal.FreeHGlobal(strPtr);
+                GC.RemoveMemoryPressure(size);
+            }
         }
         #endregion
 
@@ -2061,8 +2073,10 @@ namespace NCurses.Core.Interop
         /// see <see cref="hline_set"/>
         /// </summary>
         /// <returns>Constants.ERR on error or Constants.OK on success</returns>
+        //[DllImport(Constants.DLLNAME, EntryPoint = "hline_set")]
+        //internal extern static int ncurses_hline_set(NCURSES_CH_T wch, int n);
         [DllImport(Constants.DLLNAME, EntryPoint = "hline_set")]
-        internal extern static int ncurses_hline_set(NCURSES_CH_T wch, int n);
+        internal extern static int ncurses_hline_set(IntPtr wch, int n);
 
         /// <summary>
         /// The* line_set functions use wch to draw a line starting at
@@ -2073,9 +2087,13 @@ namespace NCurses.Core.Interop
         /// </summary>
         /// <param name="wch">the character to use as line</param>
         /// <param name="n">the lenght of the line</param>
-        public static void hline_set(NCURSES_CH_T wch, int n)
+        public static void hline_set(NCursesWCHAR wch, int n)
         {
-            NativeNCurses.VerifyNCursesMethod(() => ncurses_hline_set(wch, n), "hline_set");
+            IntPtr wPtr;
+            using(wch.ToPointer(out wPtr))
+            {
+                NativeNCurses.VerifyNCursesMethod(() => ncurses_hline_set(wPtr, n), "hline_set");
+            }
         }
         #endregion
 
@@ -2084,8 +2102,10 @@ namespace NCurses.Core.Interop
         /// see <see cref="in_wch"/>
         /// </summary>
         /// <returns>Constants.ERR on error or Constants.OK on success</returns>
+        //[DllImport(Constants.DLLNAME, EntryPoint = "in_wch")]
+        //internal extern static int ncurses_in_wch(ref NCURSES_CH_T wch);
         [DllImport(Constants.DLLNAME, EntryPoint = "in_wch")]
-        internal extern static int ncurses_in_wch(ref NCURSES_CH_T wch);
+        internal extern static int ncurses_in_wch(IntPtr wch);
 
         /// <summary>
         /// These functions extract the complex character  and rendition from  the current position in the named window into
@@ -2093,9 +2113,14 @@ namespace NCurses.Core.Interop
         /// <para />native method wrapped with verification.
         /// </summary>
         /// <param name="wcval">a reference to store the complex character in</param>
-        public static void in_wch(ref NCURSES_CH_T wcval)
+        public static void in_wch(out NCursesWCHAR wcval)
         {
-            NCursesException.Verify(ncurses_in_wch(ref wcval), "in_wch");
+            IntPtr wPtr;
+            wcval = new NCursesWCHAR();
+            using (wcval.ToPointer(out wPtr))
+            {
+                NCursesException.Verify(ncurses_in_wch(wPtr), "in_wch");
+            }
         }
         #endregion
 
@@ -2115,7 +2140,7 @@ namespace NCurses.Core.Interop
         /// <para />native method wrapped with verification.
         /// </summary>
         /// <param name="wcval">array reference to store the complex characters in</param>
-        public static void in_wchnstr(ref NCURSES_CH_T[] wcval, int n)
+        public static void in_wchnstr(ref NCursesWCHAR[] wcval, int n)
         {
             int totalSize = 0;
             IntPtr arrayPtr = NativeNCurses.MarshallArray(wcval, false, out totalSize);
@@ -2123,9 +2148,9 @@ namespace NCurses.Core.Interop
 
             try
             {
-                NativeNCurses.VerifyNCursesMethod(() => ncurses_addchnstr(arrayPtr, totalSize), "in_wchnstr");
+                NativeNCurses.VerifyNCursesMethod(() => ncurses_in_wchnstr(arrayPtr, n), "in_wchnstr");
                 for (int i = 0; i < wcval.Length; i++)
-                    wcval[i] = Marshal.PtrToStructure<NCURSES_CH_T>(arrayPtr + (i * Marshal.SizeOf<NCURSES_CH_T>()));
+                    wcval[i].ToStructure(arrayPtr + (i * wcval[i].Size));
             }
             finally
             {
@@ -2148,7 +2173,7 @@ namespace NCurses.Core.Interop
         /// <para />native method wrapped with verification.
         /// </summary>
         /// <param name="wcval">array reference to store the complex characters in</param>
-        public static void in_wchstr(ref NCURSES_CH_T[] wcval)
+        public static void in_wchstr(ref NCursesWCHAR[] wcval)
         {
             int totalSize = 0;
             IntPtr arrayPtr = NativeNCurses.MarshallArray(wcval, false, out totalSize);
@@ -2158,7 +2183,7 @@ namespace NCurses.Core.Interop
             {
                 NativeNCurses.VerifyNCursesMethod(() => ncurses_in_wchstrr(arrayPtr), "in_wchstr");
                 for (int i = 0; i < wcval.Length; i++)
-                    wcval[i] = Marshal.PtrToStructure<NCURSES_CH_T>(arrayPtr + (i * Marshal.SizeOf<NCURSES_CH_T>()));
+                    wcval[i].ToStructure(arrayPtr + (i * wcval[i].Size));
             }
             finally
             {
@@ -2173,8 +2198,10 @@ namespace NCurses.Core.Interop
         /// see <see cref="innwstr"/>
         /// </summary>
         /// <returns>Constants.ERR on error or Constants.OK on success</returns>
-        [DllImport(Constants.DLLNAME, EntryPoint = "innwstr", CharSet = CharSet.Unicode)]
-        internal extern static int ncurses_innwstr(StringBuilder str, int n);
+        //[DllImport(Constants.DLLNAME, EntryPoint = "innwstr", CharSet = CharSet.Unicode)]
+        //internal extern static int ncurses_innwstr(StringBuilder str, int n);
+        [DllImport(Constants.DLLNAME, EntryPoint = "innwstr")]
+        internal extern static int ncurses_innwstr(IntPtr str, int n);
 
         /// <summary>
         /// These routines  return  a string of wchar_t characters in
@@ -2190,7 +2217,20 @@ namespace NCurses.Core.Interop
         /// <param name="n">the number of characters to store</param>
         public static void innwstr(StringBuilder str, int n)
         {
-            NativeNCurses.VerifyNCursesMethod(() => ncurses_innwstr(str, n), "innwstr");
+            int size = Constants.SIZEOF_WCHAR_T * n;
+            IntPtr strPtr = Marshal.AllocHGlobal(size);
+            GC.AddMemoryPressure(size);
+
+            try
+            {
+                NativeNCurses.VerifyNCursesMethod(() => ncurses_innwstr(strPtr, n), "innwstr");
+                str.Append(NativeNCurses.MarshalStringFromNativeWideString(strPtr, n));
+            }
+            finally
+            {
+                Marshal.FreeHGlobal(strPtr);
+                GC.RemoveMemoryPressure(size);
+            }
         }
         #endregion
 
@@ -2199,8 +2239,10 @@ namespace NCurses.Core.Interop
         /// see <see cref="ins_nwstr"/>
         /// </summary>
         /// <returns>Constants.ERR on error or Constants.OK on success</returns>
+        //[DllImport(Constants.DLLNAME, EntryPoint = "ins_nwstr")]
+        //internal extern static int ncurses_ins_nwstr(string str, int n);
         [DllImport(Constants.DLLNAME, EntryPoint = "ins_nwstr")]
-        internal extern static int ncurses_ins_nwstr(string str, int n);
+        internal extern static int ncurses_ins_nwstr(IntPtr str, int n);
 
         /// <summary>
         /// These routines insert a wchar_t character string (as many
@@ -2218,7 +2260,9 @@ namespace NCurses.Core.Interop
         /// <param name="n">the number of characters to insert</param>
         public static void ins_nwstr(string str, int n)
         {
-            NativeNCurses.VerifyNCursesMethod(() => ncurses_ins_nwstr(str, n), "ins_nwstr");
+            NativeNCurses.MarshalNativeWideStringAndExecuteAction((strPtr) =>
+                NativeNCurses.VerifyNCursesMethod(() => ncurses_ins_nwstr(strPtr, n), "ins_nwstr"),
+                str);
         }
         #endregion
 
@@ -2227,8 +2271,10 @@ namespace NCurses.Core.Interop
         /// see <see cref="ins_wch"/>
         /// </summary>
         /// <returns>Constants.ERR on error or Constants.OK on success</returns>
+        //[DllImport(Constants.DLLNAME, EntryPoint = "ins_wch")]
+        //internal extern static int ncurses_ins_wch(NCURSES_CH_T wch);
         [DllImport(Constants.DLLNAME, EntryPoint = "ins_wch")]
-        internal extern static int ncurses_ins_wch(NCURSES_CH_T wch);
+        internal extern static int ncurses_ins_wch(IntPtr wch);
 
         /// <summary>
         /// These routines, insert the complex character wch with rendition before the character under the cursor.All charac-
@@ -2239,9 +2285,13 @@ namespace NCurses.Core.Interop
         /// <para />native method wrapped with verification.
         /// </summary>
         /// <param name="wch">the complex character to insert</param>
-        public static void ins_wch(NCURSES_CH_T wch)
+        public static void ins_wch(NCursesWCHAR wch)
         {
-            NativeNCurses.VerifyNCursesMethod(() => ncurses_ins_wch(wch), "ins_wch");
+            IntPtr wPtr;
+            using(wch.ToPointer(out wPtr))
+            {
+                NativeNCurses.VerifyNCursesMethod(() => ncurses_ins_wch(wPtr), "ins_wch");
+            }
         }
         #endregion
 
@@ -2250,8 +2300,10 @@ namespace NCurses.Core.Interop
         /// see <see cref="ins_wstr"/>
         /// </summary>
         /// <returns>Constants.ERR on error or Constants.OK on success</returns>
-        [DllImport(Constants.DLLNAME, EntryPoint = "ins_wstr", CharSet = CharSet.Unicode)]
-        internal extern static int ncurses_ins_wstr(string str);
+        //[DllImport(Constants.DLLNAME, EntryPoint = "ins_wstr", CharSet = CharSet.Unicode)]
+        //internal extern static int ncurses_ins_wstr(string str);
+        [DllImport(Constants.DLLNAME, EntryPoint = "ins_wstr")]
+        internal extern static int ncurses_ins_wstr(IntPtr str);
 
         /// <summary>
         /// see <see cref="ins_nwstr"/>
@@ -2260,7 +2312,9 @@ namespace NCurses.Core.Interop
         /// <param name="str">the string to insert</param>
         public static void ins_wstr(string str)
         {
-            NativeNCurses.VerifyNCursesMethod(() => ncurses_ins_wstr(str), "ins_wstr");
+            NativeNCurses.MarshalNativeWideStringAndExecuteAction((strPtr) =>
+                NativeNCurses.VerifyNCursesMethod(() => ncurses_ins_wstr(strPtr), "ins_wstr"),
+                str, true);
         }
         #endregion
 
@@ -2269,8 +2323,10 @@ namespace NCurses.Core.Interop
         /// see <see cref="inwstr"/>
         /// </summary>
         /// <returns>Constants.ERR on error or Constants.OK on success</returns>
-        [DllImport(Constants.DLLNAME, EntryPoint = "inwstr", CharSet = CharSet.Unicode)]
-        internal extern static int ncurses_inwstr(StringBuilder str);
+        //[DllImport(Constants.DLLNAME, EntryPoint = "inwstr", CharSet = CharSet.Unicode)]
+        //internal extern static int ncurses_inwstr(StringBuilder str);
+        [DllImport(Constants.DLLNAME, EntryPoint = "inwstr")]
+        internal extern static int ncurses_inwstr(IntPtr str);
 
         /// <summary>
         /// see <see cref="innwstr"/>
@@ -2279,7 +2335,20 @@ namespace NCurses.Core.Interop
         /// <param name="str">the string to insert</param>
         public static void inwstr(StringBuilder str)
         {
-            NativeNCurses.VerifyNCursesMethod(() => ncurses_inwstr(str), "inwstr");
+            int size = Constants.SIZEOF_WCHAR_T * str.Capacity;
+            IntPtr strPtr = Marshal.AllocHGlobal(size);
+            GC.AddMemoryPressure(size);
+
+            try
+            {
+                NativeNCurses.VerifyNCursesMethod(() => ncurses_inwstr(strPtr), "inwstr");
+                str.Append(NativeNCurses.MarshalStringFromNativeWideString(strPtr, str.Capacity));
+            }
+            finally
+            {
+                Marshal.FreeHGlobal(strPtr);
+                GC.RemoveMemoryPressure(size);
+            }
         }
         #endregion
 
@@ -2288,8 +2357,10 @@ namespace NCurses.Core.Interop
         /// see <see cref="mvadd_wch"/>
         /// </summary>
         /// <returns>Constants.ERR on error or Constants.OK on success</returns>
+        //[DllImport(Constants.DLLNAME, EntryPoint = "mvadd_wch")]
+        //internal extern static int ncurses_mvadd_wch(int y, int x, NCURSES_CH_T wch);
         [DllImport(Constants.DLLNAME, EntryPoint = "mvadd_wch")]
-        internal extern static int ncurses_mvadd_wch(int y, int x, NCURSES_CH_T wch);
+        internal extern static int ncurses_mvadd_wch(int y, int x, IntPtr wch);
 
         /// <summary>
         /// see <see cref="add_wch"/>
@@ -2297,9 +2368,13 @@ namespace NCurses.Core.Interop
         /// </summary>
         /// <param name="y">the line number to move to</param>
         /// <param name="x">the column number to move to</param>
-        public static void mvadd_wch(int y, int x, NCURSES_CH_T wch)
+        public static void mvadd_wch(int y, int x, NCursesWCHAR wch)
         {
-            NativeNCurses.VerifyNCursesMethod(() => ncurses_mvadd_wch(y, x, wch), "mvadd_wch");
+            IntPtr wPtr;
+            using (wch.ToPointer(out wPtr))
+            {
+                NativeNCurses.VerifyNCursesMethod(() => ncurses_mvadd_wch(y, x, wPtr), "mvadd_wch");
+            }
         }
         #endregion
 
@@ -2317,7 +2392,7 @@ namespace NCurses.Core.Interop
         /// </summary>
         /// <param name="y">the line number to move to</param>
         /// <param name="x">the column number to move to</param>
-        public static void mvadd_wchnstr(int y, int x, NCURSES_CH_T[] wchStr, int n)
+        public static void mvadd_wchnstr(int y, int x, NCursesWCHAR[] wchStr, int n)
         {
             int totalSize = 0;
             IntPtr arrayPtr = NativeNCurses.MarshallArray(wchStr, true, out totalSize);
@@ -2349,7 +2424,7 @@ namespace NCurses.Core.Interop
         /// </summary>
         /// <param name="y">the line number to move to</param>
         /// <param name="x">the column number to move to</param>
-        public static void mvadd_wchstr(int y, int x, NCURSES_CH_T[] wchStr)
+        public static void mvadd_wchstr(int y, int x, NCursesWCHAR[] wchStr)
         {
             int totalSize = 0;
             IntPtr arrayPtr = NativeNCurses.MarshallArray(wchStr, true, out totalSize);
@@ -2372,8 +2447,10 @@ namespace NCurses.Core.Interop
         /// see <see cref="mvaddnwstr"/>
         /// </summary>
         /// <returns>Constants.ERR on error or Constants.OK on success</returns>
+        //[DllImport(Constants.DLLNAME, EntryPoint = "mvaddnwstr")]
+        //internal extern static int ncurses_mvaddnwstr(int y, int x, string wstr, int n);
         [DllImport(Constants.DLLNAME, EntryPoint = "mvaddnwstr")]
-        internal extern static int ncurses_mvaddnwstr(int y, int x, string wstr, int n);
+        internal extern static int ncurses_mvaddnwstr(int y, int x, IntPtr wstr, int n);
 
         /// <summary>
         /// see <see cref="addnwstr"/>
@@ -2383,7 +2460,9 @@ namespace NCurses.Core.Interop
         /// <param name="x">the column number to move to</param>
         public static void mvaddnwstr(int y, int x, string wstr, int n)
         {
-            NativeNCurses.VerifyNCursesMethod(() => ncurses_mvaddnwstr(y, x, wstr, n), "mvaddnwstr");
+            NativeNCurses.MarshalNativeWideStringAndExecuteAction((ptr) =>
+                NativeNCurses.VerifyNCursesMethod(() => ncurses_mvaddnwstr(y, x, ptr, n), "mvaddnwstr"),
+                wstr);
         }
         #endregion
 
@@ -2392,8 +2471,10 @@ namespace NCurses.Core.Interop
         /// see <see cref="mvaddwstr"/>
         /// </summary>
         /// <returns>Constants.ERR on error or Constants.OK on success</returns>
+        //[DllImport(Constants.DLLNAME, EntryPoint = "mvaddwstr")]
+        //internal extern static int ncurses_mvaddwstr(int y, int x, string wstr);
         [DllImport(Constants.DLLNAME, EntryPoint = "mvaddwstr")]
-        internal extern static int ncurses_mvaddwstr(int y, int x, string wstr);
+        internal extern static int ncurses_mvaddwstr(int y, int x, IntPtr wstr);
 
         /// <summary>
         /// see <see cref="addwstr"/>
@@ -2403,7 +2484,9 @@ namespace NCurses.Core.Interop
         /// <param name="x">the column number to move to</param>
         public static void mvaddwstr(int y, int x, string wstr)
         {
-            NativeNCurses.VerifyNCursesMethod(() => ncurses_mvaddwstr(y, x, wstr), "mvaddwstr");
+            NativeNCurses.MarshalNativeWideStringAndExecuteAction((ptr) =>
+                NativeNCurses.VerifyNCursesMethod(() => ncurses_mvaddwstr(y, x, ptr), "mvaddwstr"),
+                wstr, true);
         }
         #endregion
 
@@ -2412,8 +2495,10 @@ namespace NCurses.Core.Interop
         /// see <see cref="mvget_wch"/>
         /// </summary>
         /// <returns>Constants.ERR on error or Constants.OK on success</returns>
+        //[DllImport(Constants.DLLNAME, EntryPoint = "mvget_wch")]
+        //internal extern static int ncurses_mvget_wch(int y, int x, ref char wch);
         [DllImport(Constants.DLLNAME, EntryPoint = "mvget_wch")]
-        internal extern static int ncurses_mvget_wch(int y, int x, ref char wch);
+        internal extern static int ncurses_mvget_wch(int y, int x, IntPtr wch);
 
         /// <summary>
         /// see <see cref="get_wch"/>
@@ -2421,9 +2506,28 @@ namespace NCurses.Core.Interop
         /// </summary>
         /// <param name="y">the line number to move to</param>
         /// <param name="x">the column number to move to</param>
-        public static void mvget_wch(int y, int x, ref char wch)
+        public static void mvget_wch(int y, int x, out char wch)
         {
-            NCursesException.Verify(ncurses_mvget_wch(y, x, ref wch), "mvget_wch");
+            IntPtr chPtr = Marshal.AllocHGlobal(Marshal.SizeOf<uint>());
+            GC.AddMemoryPressure(Marshal.SizeOf<uint>());
+
+            try
+            {
+                NCursesException.Verify(ncurses_mvget_wch(y, x, chPtr), "mvget_wch");
+
+                byte[] arr = new byte[Marshal.SizeOf<uint>()];
+                Marshal.Copy(chPtr, arr, 0, Marshal.SizeOf<uint>());
+
+                if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
+                    wch = Encoding.Unicode.GetChars(arr)[0];
+                else
+                    wch = Encoding.UTF8.GetChars(arr)[0];
+            }
+            finally
+            {
+                Marshal.FreeHGlobal(chPtr);
+                GC.RemoveMemoryPressure(Marshal.SizeOf<uint>());
+            }
         }
         #endregion
 
@@ -2432,8 +2536,10 @@ namespace NCurses.Core.Interop
         /// see <see cref="mvget_wstr"/>
         /// </summary>
         /// <returns>Constants.ERR on error or Constants.OK on success</returns>
-        [DllImport(Constants.DLLNAME, EntryPoint = "mvget_wstr", CharSet = CharSet.Unicode)]
-        internal extern static int ncurses_mvget_wstr(int y, int x, StringBuilder wstr);
+        //[DllImport(Constants.DLLNAME, EntryPoint = "mvget_wstr", CharSet = CharSet.Unicode)]
+        //internal extern static int ncurses_mvget_wstr(int y, int x, StringBuilder wstr);
+        [DllImport(Constants.DLLNAME, EntryPoint = "mvget_wstr")]
+        internal extern static int ncurses_mvget_wstr(int y, int x, IntPtr wstr);
 
         /// <summary>
         /// see <see cref="get_wstr"/>
@@ -2443,7 +2549,20 @@ namespace NCurses.Core.Interop
         /// <param name="x">the column number to move to</param>
         public static void mvget_wstr(int y, int x, StringBuilder wstr)
         {
-            NativeNCurses.VerifyNCursesMethod(() => ncurses_mvget_wstr(y, x, wstr), "mvget_wstr");
+            int size = Marshal.SizeOf<uint>() * wstr.Capacity;
+            IntPtr strPtr = Marshal.AllocHGlobal(size);
+            GC.AddMemoryPressure(size);
+
+            try
+            {
+                NativeNCurses.VerifyNCursesMethod(() => ncurses_mvget_wstr(y, x, strPtr), "mvget_wstr");
+                wstr.Append(NativeNCurses.MarshalStringFromNativeWideString(strPtr, wstr.Capacity));
+            }
+            finally
+            {
+                Marshal.FreeHGlobal(strPtr);
+                GC.RemoveMemoryPressure(Marshal.SizeOf<uint>());
+            }
         }
         #endregion
 
@@ -2452,8 +2571,10 @@ namespace NCurses.Core.Interop
         /// see <see cref="mvgetn_wstr"/>
         /// </summary>
         /// <returns>Constants.ERR on error or Constants.OK on success</returns>
-        [DllImport(Constants.DLLNAME, EntryPoint = "mvgetn_wstr", CharSet = CharSet.Unicode)]
-        internal extern static int ncurses_mvgetn_wstr(int y, int x, StringBuilder wstr, int n);
+        //[DllImport(Constants.DLLNAME, EntryPoint = "mvgetn_wstr", CharSet = CharSet.Unicode)]
+        //internal extern static int ncurses_mvgetn_wstr(int y, int x, StringBuilder wstr, int n);
+        [DllImport(Constants.DLLNAME, EntryPoint = "mvgetn_wstr")]
+        internal extern static int ncurses_mvgetn_wstr(int y, int x, IntPtr wstr, int n);
 
         /// <summary>
         /// see <see cref="getn_wstr"/>
@@ -2463,7 +2584,20 @@ namespace NCurses.Core.Interop
         /// <param name="x">the column number to move to</param>
         public static void mvgetn_wstr(int y, int x, StringBuilder wstr, int n)
         {
-            NativeNCurses.VerifyNCursesMethod(() => ncurses_mvgetn_wstr(y, x, wstr, n), "mvgetn_wstr");
+            int size = Marshal.SizeOf<uint>() * n;
+            IntPtr strPtr = Marshal.AllocHGlobal(size);
+            GC.AddMemoryPressure(size);
+
+            try
+            {
+                NativeNCurses.VerifyNCursesMethod(() => ncurses_mvgetn_wstr(y, x, strPtr, n), "mvgetn_wstr");
+                wstr.Append(NativeNCurses.MarshalStringFromNativeWideString(strPtr, n));
+            }
+            finally
+            {
+                Marshal.FreeHGlobal(strPtr);
+                GC.RemoveMemoryPressure(size);
+            }
         }
         #endregion
 
@@ -2472,8 +2606,10 @@ namespace NCurses.Core.Interop
         /// see <see cref="mvhline_set"/>
         /// </summary>
         /// <returns>Constants.ERR on error or Constants.OK on success</returns>
+        //[DllImport(Constants.DLLNAME, EntryPoint = "mvhline_set")]
+        //internal extern static int ncurses_mvhline_set(int y, int x, NCURSES_CH_T wch, int n);
         [DllImport(Constants.DLLNAME, EntryPoint = "mvhline_set")]
-        internal extern static int ncurses_mvhline_set(int y, int x, NCURSES_CH_T wch, int n);
+        internal extern static int ncurses_mvhline_set(int y, int x, IntPtr wch, int n);
 
         /// <summary>
         /// see <see cref="hline_set"/>
@@ -2481,9 +2617,13 @@ namespace NCurses.Core.Interop
         /// </summary>
         /// <param name="y">the line number to move to</param>
         /// <param name="x">the column number to move to</param>
-        public static void mvhline_set(int y, int x, NCURSES_CH_T wch, int n)
+        public static void mvhline_set(int y, int x, NCursesWCHAR wch, int n)
         {
-            NativeNCurses.VerifyNCursesMethod(() => ncurses_mvhline_set(y, x, wch, n), "mvhline_set");
+            IntPtr wPtr;
+            using (wch.ToPointer(out wPtr))
+            {
+                NativeNCurses.VerifyNCursesMethod(() => ncurses_mvhline_set(y, x, wPtr, n), "mvhline_set");
+            }
         }
         #endregion
 
@@ -2492,8 +2632,10 @@ namespace NCurses.Core.Interop
         /// see <see cref="mvin_wch"/>
         /// </summary>
         /// <returns>Constants.ERR on error or Constants.OK on success</returns>
+        //[DllImport(Constants.DLLNAME, EntryPoint = "mvin_wch")]
+        //internal extern static int ncurses_mvin_wch(int y, int x, ref NCURSES_CH_T wch);
         [DllImport(Constants.DLLNAME, EntryPoint = "mvin_wch")]
-        internal extern static int ncurses_mvin_wch(int y, int x, ref NCURSES_CH_T wch);
+        internal extern static int ncurses_mvin_wch(int y, int x, IntPtr wch);
 
         /// <summary>
         /// see <see cref="in_wch"/>
@@ -2501,9 +2643,13 @@ namespace NCurses.Core.Interop
         /// </summary>
         /// <param name="y">the line number to move to</param>
         /// <param name="x">the column number to move to</param>
-        public static void mvin_wch(int y, int x, ref NCURSES_CH_T wcval)
+        public static void mvin_wch(int y, int x, ref NCursesWCHAR wcval)
         {
-            NCursesException.Verify(ncurses_mvin_wch(y, x, ref wcval), "mvin_wch");
+            IntPtr wPtr;
+            using (wcval.ToPointer(out wPtr))
+            {
+                NCursesException.Verify(ncurses_mvin_wch(y, x, wPtr), "mvin_wch");
+            }
         }
         #endregion
 
@@ -2521,7 +2667,7 @@ namespace NCurses.Core.Interop
         /// </summary>
         /// <param name="y">the line number to move to</param>
         /// <param name="x">the column number to move to</param>
-        public static void mvin_wchnstr(int y, int x, ref NCURSES_CH_T[] wcval, int n)
+        public static void mvin_wchnstr(int y, int x, ref NCursesWCHAR[] wcval, int n)
         {
             if (n != wcval.Length)
                 throw new ArgumentException("lenght of the array and n should be the same");
@@ -2534,7 +2680,7 @@ namespace NCurses.Core.Interop
             {
                 NativeNCurses.VerifyNCursesMethod(() => ncurses_mvin_wchnstr(y, x, arrayPtr, totalSize), "mvin_wchnstr");
                 for (int i = 0; i < wcval.Length; i++)
-                    wcval[i] = Marshal.PtrToStructure<NCURSES_CH_T>(arrayPtr + (i * Marshal.SizeOf<NCURSES_CH_T>()));
+                    wcval[i].ToStructure(arrayPtr + (i * wcval[i].Size));
             }
             finally
             {
@@ -2551,8 +2697,10 @@ namespace NCurses.Core.Interop
         /// see <see cref="mvinnwstr"/>
         /// </summary>
         /// <returns>Constants.ERR on error or Constants.OK on success</returns>
-        [DllImport(Constants.DLLNAME, EntryPoint = "mvinnwstr", CharSet = CharSet.Unicode)]
-        internal extern static int ncurses_mvinnwstr(int y, int x, StringBuilder str, int n);
+        //[DllImport(Constants.DLLNAME, EntryPoint = "mvinnwstr", CharSet = CharSet.Unicode)]
+        //internal extern static int ncurses_mvinnwstr(int y, int x, StringBuilder str, int n);
+        [DllImport(Constants.DLLNAME, EntryPoint = "mvinnwstr")]
+        internal extern static int ncurses_mvinnwstr(int y, int x, IntPtr str, int n);
 
         /// <summary>
         /// see <see cref="innwstr"/>
@@ -2562,7 +2710,20 @@ namespace NCurses.Core.Interop
         /// <param name="x">the column number to move to</param>
         public static void mvinnwstr(int y, int x, StringBuilder str, int n)
         {
-            NativeNCurses.VerifyNCursesMethod(() => ncurses_mvinnwstr(y, x, str, n), "mvinnwstr");
+            int size = Constants.SIZEOF_WCHAR_T * n;
+            IntPtr strPtr = Marshal.AllocHGlobal(size);
+            GC.AddMemoryPressure(size);
+
+            try
+            {
+                NativeNCurses.VerifyNCursesMethod(() => ncurses_mvinnwstr(y, x, strPtr, n), "mvinnwstr");
+                str.Append(NativeNCurses.MarshalStringFromNativeWideString(strPtr, n));
+            }
+            finally
+            {
+                Marshal.FreeHGlobal(strPtr);
+                GC.RemoveMemoryPressure(size);
+            }
         }
         #endregion
 
@@ -2571,8 +2732,10 @@ namespace NCurses.Core.Interop
         /// see <see cref="mvins_nwstr"/>
         /// </summary>
         /// <returns>Constants.ERR on error or Constants.OK on success</returns>
+        //[DllImport(Constants.DLLNAME, EntryPoint = "mvins_nwstr")]
+        //internal extern static int ncurses_mvins_nwstr(int y, int x, string str, int n);
         [DllImport(Constants.DLLNAME, EntryPoint = "mvins_nwstr")]
-        internal extern static int ncurses_mvins_nwstr(int y, int x, string str, int n);
+        internal extern static int ncurses_mvins_nwstr(int y, int x, IntPtr str, int n);
 
         /// <summary>
         /// see <see cref="ins_nwstr"/>
@@ -2582,7 +2745,9 @@ namespace NCurses.Core.Interop
         /// <param name="x">the column number to move to</param>
         public static void mvins_nwstr(int y, int x, string str, int n)
         {
-            NativeNCurses.VerifyNCursesMethod(() => ncurses_mvins_nwstr(y, x, str, n), "mvins_nwstr");
+            NativeNCurses.MarshalNativeWideStringAndExecuteAction((strPtr) =>
+                NativeNCurses.VerifyNCursesMethod(() => ncurses_mvins_nwstr(y, x, strPtr, n), "mvins_nwstr"),
+                str);
         }
         #endregion
 
@@ -2591,8 +2756,10 @@ namespace NCurses.Core.Interop
         /// see <see cref="mvins_wch"/>
         /// </summary>
         /// <returns>Constants.ERR on error or Constants.OK on success</returns>
+        //[DllImport(Constants.DLLNAME, EntryPoint = "mvins_wch")]
+        //internal extern static int ncurses_mvins_wch(int y, int x, NCURSES_CH_T wch);
         [DllImport(Constants.DLLNAME, EntryPoint = "mvins_wch")]
-        internal extern static int ncurses_mvins_wch(int y, int x, NCURSES_CH_T wch);
+        internal extern static int ncurses_mvins_wch(int y, int x, IntPtr wch);
 
         /// <summary>
         /// see <see cref="ins_wch"/>
@@ -2600,9 +2767,13 @@ namespace NCurses.Core.Interop
         /// </summary>
         /// <param name="y">the line number to move to</param>
         /// <param name="x">the column number to move to</param>
-        public static void mvins_wch(int y, int x, NCURSES_CH_T wch)
+        public static void mvins_wch(int y, int x, NCursesWCHAR wch)
         {
-            NativeNCurses.VerifyNCursesMethod(() => ncurses_mvins_wch(y, x, wch), "mvins_wch");
+            IntPtr wPtr;
+            using (wch.ToPointer(out wPtr))
+            {
+                NativeNCurses.VerifyNCursesMethod(() => ncurses_mvins_wch(y, x, wPtr), "mvins_wch");
+            }
         }
         #endregion
 
@@ -2611,8 +2782,10 @@ namespace NCurses.Core.Interop
         /// see <see cref="mvins_wstr"/>
         /// </summary>
         /// <returns>Constants.ERR on error or Constants.OK on success</returns>
+        //[DllImport(Constants.DLLNAME, EntryPoint = "mvins_wstr")]
+        //internal extern static int ncurses_mvins_wstr(int y, int x, string str);
         [DllImport(Constants.DLLNAME, EntryPoint = "mvins_wstr")]
-        internal extern static int ncurses_mvins_wstr(int y, int x, string str);
+        internal extern static int ncurses_mvins_wstr(int y, int x, IntPtr str);
 
         /// <summary>
         /// see <see cref="ins_wstr"/>
@@ -2622,7 +2795,9 @@ namespace NCurses.Core.Interop
         /// <param name="x">the column number to move to</param>
         public static void mvins_wstr(int y, int x, string str)
         {
-            NativeNCurses.VerifyNCursesMethod(() => ncurses_mvins_wstr(y, x, str), "mvins_wstr");
+            NativeNCurses.MarshalNativeWideStringAndExecuteAction((strPtr) =>
+                NativeNCurses.VerifyNCursesMethod(() => ncurses_mvins_wstr(y, x, strPtr), "mvins_wstr"),
+                str, true);
         }
         #endregion
 
@@ -2631,8 +2806,10 @@ namespace NCurses.Core.Interop
         /// see <see cref="mvinwstr"/>
         /// </summary>
         /// <returns>Constants.ERR on error or Constants.OK on success</returns>
-        [DllImport(Constants.DLLNAME, EntryPoint = "mvinwstr", CharSet = CharSet.Unicode)]
-        internal extern static int ncurses_mvinwstr(int y, int x, StringBuilder str);
+        //[DllImport(Constants.DLLNAME, EntryPoint = "mvinwstr", CharSet = CharSet.Unicode)]
+        //internal extern static int ncurses_mvinwstr(int y, int x, StringBuilder str);
+        [DllImport(Constants.DLLNAME, EntryPoint = "mvinwstr")]
+        internal extern static int ncurses_mvinwstr(int y, int x, IntPtr str);
 
         /// <summary>
         /// see <see cref="inwstr"/>
@@ -2642,7 +2819,20 @@ namespace NCurses.Core.Interop
         /// <param name="x">the column number to move to</param>
         public static void mvinwstr(int y, int x, StringBuilder str)
         {
-            NativeNCurses.VerifyNCursesMethod(() => ncurses_mvinwstr(y, x, str), "mvinwstr");
+            int size = Constants.SIZEOF_WCHAR_T * str.Capacity;
+            IntPtr strPtr = Marshal.AllocHGlobal(size);
+            GC.AddMemoryPressure(size);
+
+            try
+            {
+                NativeNCurses.VerifyNCursesMethod(() => ncurses_mvinwstr(y, x, strPtr), "mvinwstr");
+                str.Append(NativeNCurses.MarshalStringFromNativeWideString(strPtr, str.Capacity));
+            }
+            finally
+            {
+                Marshal.FreeHGlobal(strPtr);
+                GC.RemoveMemoryPressure(size);
+            }
         }
         #endregion
 
@@ -2651,8 +2841,10 @@ namespace NCurses.Core.Interop
         /// see <see cref="mvvline_set"/>
         /// </summary>
         /// <returns>Constants.ERR on error or Constants.OK on success</returns>
+        //[DllImport(Constants.DLLNAME, EntryPoint = "mvvline_set")]
+        //internal extern static int ncurses_mvvline_set(int y, int x, NCURSES_CH_T wch, int n);
         [DllImport(Constants.DLLNAME, EntryPoint = "mvvline_set")]
-        internal extern static int ncurses_mvvline_set(int y, int x, NCURSES_CH_T wch, int n);
+        internal extern static int ncurses_mvvline_set(int y, int x, IntPtr wch, int n);
 
         /// <summary>
         /// see <see cref="vline_set"/>
@@ -2660,9 +2852,13 @@ namespace NCurses.Core.Interop
         /// </summary>
         /// <param name="y">the line number to move to</param>
         /// <param name="x">the column number to move to</param>
-        public static void mvvline_set(int y, int x, NCURSES_CH_T wch, int n)
+        public static void mvvline_set(int y, int x, NCursesWCHAR wch, int n)
         {
-            NativeNCurses.VerifyNCursesMethod(() => ncurses_mvvline_set(y, x, wch, n), "mvvline_set");
+            IntPtr wPtr;
+            using (wch.ToPointer(out wPtr))
+            {
+                NativeNCurses.VerifyNCursesMethod(() => ncurses_mvvline_set(y, x, wPtr, n), "mvvline_set");
+            }
         }
         #endregion
 
@@ -2671,16 +2867,22 @@ namespace NCurses.Core.Interop
         /// see <see cref="vline_set"/>
         /// </summary>
         /// <returns>Constants.ERR on error or Constants.OK on success</returns>
+        //[DllImport(Constants.DLLNAME, EntryPoint = "vline_set")]
+        //internal extern static int ncurses_vline_set(NCURSES_CH_T wch, int n);
         [DllImport(Constants.DLLNAME, EntryPoint = "vline_set")]
-        internal extern static int ncurses_vline_set(NCURSES_CH_T wch, int n);
+        internal extern static int ncurses_vline_set(IntPtr wch, int n);
 
         /// <summary>
         /// see <see cref="hline_set"/>
         /// <para />native method wrapped with verification.
         /// </summary>
-        public static void vline_set(NCURSES_CH_T wch, int n)
+        public static void vline_set(NCursesWCHAR wch, int n)
         {
-            NativeNCurses.VerifyNCursesMethod(() => ncurses_vline_set(wch, n), "vline_set");
+            IntPtr wPtr;
+            using (wch.ToPointer(out wPtr))
+            {
+                NativeNCurses.VerifyNCursesMethod(() => ncurses_vline_set(wPtr, n), "vline_set");
+            }
         }
         #endregion
     }
