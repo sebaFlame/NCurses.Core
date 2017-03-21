@@ -308,7 +308,7 @@ namespace NCurses.Core.Interop
             ctorIl.Emit(OpCodes.Ldarg_0);
             ctorIl.Emit(OpCodes.Ldfld, charField);
             ctorIl.Emit(OpCodes.Ldc_I4_0);
-            mInfo = typeof(Array).GetTypeInfo().GetMethod("CopyTo");
+            mInfo = typeof(Array).GetTypeInfo().GetMethod("CopyTo", new Type[] { typeof(Array), typeof(Int32) });
             ctorIl.Emit(OpCodes.Callvirt, mInfo);
             ctorIl.Emit(OpCodes.Nop);
             ctorIl.Emit(OpCodes.Ret);

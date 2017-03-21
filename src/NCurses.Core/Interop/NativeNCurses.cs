@@ -379,12 +379,9 @@ namespace NCurses.Core.Interop
                     bool completed = true;
                     int charsUsed, bytesUsed;
 
-                    for (int i = 0; completed && i < (addNullTerminator ? charArray.Length - Constants.SIZEOF_WCHAR_T : charArray.Length); i++)
+                    for (int i = 0; i < charArray.Length; i++)
                         Encoding.UTF8.GetEncoder().Convert(charArray, i, 1, wstrArray, 
                             i * Constants.SIZEOF_WCHAR_T, Constants.SIZEOF_WCHAR_T, false, out charsUsed, out bytesUsed, out completed);
-
-                    if (!completed)
-                        throw new InvalidOperationException("Failed to convert string to a wide char array.");
 
                     IntPtr wstrPtr = Marshal.AllocHGlobal(wstrArray.Length);
                     Marshal.Copy(wstrArray, 0, wstrPtr, wstrArray.Length);
@@ -417,14 +414,11 @@ namespace NCurses.Core.Interop
 
             Marshal.Copy(ptr, wstrArray, 0, length);
 
-            for (int i = 0; completed && i < charArray.Length; i++)
+            for (int i = 0; i < charArray.Length; i++)
                 Encoding.UTF8.GetDecoder().Convert(wstrArray, i * Constants.SIZEOF_WCHAR_T, Constants.SIZEOF_WCHAR_T,
-                     charArray, i, 1, false, out charsUsed, out bytesUsed, out completed);
+                     charArray, i, 1, false, out bytesUsed, out charsUsed, out completed);
 
-            if (!completed)
-                throw new InvalidOperationException("Failed to convert wide char array to string.");
-
-            return new string(charArray);
+            return new string(charArray).TrimEnd('\0');
         }
         #endregion
 
