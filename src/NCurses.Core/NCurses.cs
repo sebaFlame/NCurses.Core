@@ -49,11 +49,12 @@ namespace NCurses.Core
         /// <param name="assignWindow">a method to assign the ripped off line during <see cref="Start"/>, also gets passed the amount of columns</param>
         public static void RipOffLine(int direction, Action<Window, int> assignWindow)
         {
+            if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
+                throw new InvalidOperationException("RipOffLine is not supported on windows.");
+
             Func<IntPtr, int, IntPtr, int> initCallback = (IntPtr win, int cols, IntPtr func) =>
             {
                 assignWindow(new Window(win, true), cols);
-                if(func != IntPtr.Zero)
-                    Marshal.FreeHGlobal(func);
                 return Constants.OK;
             };
             NativeNCurses.ripoffline(direction, initCallback);

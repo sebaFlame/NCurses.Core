@@ -411,7 +411,7 @@ namespace NCurses.Core.Interop
             byte[] wstrArray = new byte[Constants.SIZEOF_WCHAR_T * length];
 
             Marshal.Copy(ptr, wstrArray, 0, length);
-            return Encoding.UTF32.GetString(wstrArray).TrimEnd('\0');
+            return Encoding.UTF32.GetString(wstrArray).Split('\0')[0];
         }
         #endregion
 

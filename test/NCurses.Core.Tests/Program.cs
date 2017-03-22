@@ -48,6 +48,7 @@ namespace NCurses.Core.Tests
         {
             Pad newPad = new Pad(200, 200);
             newPad.Scroll = true;
+            newPad.KeyPad = true;
 
             for (int i = 0; i < 200; i++)
                 newPad.WriteLine("{0}Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.", i.ToString().PadLeft(3, ' '));
@@ -60,17 +61,17 @@ namespace NCurses.Core.Tests
             int c;
             while ((c = newPad.ReadKey()) != Constants.ERR)
             {
-                if (c == 73) // page up
+                if (c == (int)Key.PPAGE) // page up
                 {
                     if ((currentLine -= 50) < 0)
                         currentLine = 0;
                 }
-                else if (c == 81)
+                else if (c == (int)Key.NPAGE)
                 {
                     if ((currentLine += 50) > (newPad.MaxLine - 50))
                         currentLine = newPad.MaxLine - 50;
                 }
-                else if (c == 409)
+                else if (c == 'q')
                     break;
 
                 newPad.NoOutRefresh(currentLine, 0, 0, 0, 49, 119);
@@ -279,11 +280,11 @@ namespace NCurses.Core.Tests
             uint newMask = NCurses.EnableMouseMask(MouseState.BUTTON1_CLICKED |
                 MouseState.BUTTON1_DOUBLE_CLICKED | MouseState.BUTTON1_TRIPLE_CLICKED, out oldMask);
 
-            //while ((ch = stdScr.ReadKey()) != 'q')
-            //{
-            //    if (NCurses.GetKeyName(ch, out key) && key == Key.MOUSE)
-            //        mouseEvent = NCurses.GetMouseEvent();
-            //}
+            while ((ch = stdScr.ReadKey()) != 'q')
+            {
+                if (NCurses.GetKey(ch, out key) && key == Key.MOUSE)
+                    mouseEvent = NCurses.GetMouseEvent();
+            }
         }
 
         //upto 420MB, back down to 24MB -> FINE
@@ -298,7 +299,7 @@ namespace NCurses.Core.Tests
                 NCurses.InitDefaultPairs();
             }
 
-            for (int i = 0; i < 10000; i++)
+            for (int i = 0; i < 100; i++)
             {
                 lstWindow.Add(win = new Window());
                 win.BackGround = 'g' | Attrs.BOLD | NCurses.ColorPair(3);
