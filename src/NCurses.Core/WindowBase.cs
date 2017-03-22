@@ -262,9 +262,9 @@ namespace NCurses.Core
         public void Write(string str)
         {
             if (NCurses.UnicodeSupported)
-                NativeWindow.waddnwstr(this.WindowPtr, str, str.Length);
+                NativeWindow.waddwstr(this.WindowPtr, str);
             else
-                NativeWindow.waddnstr(this.WindowPtr, str, str.Length);
+                NativeWindow.waddstr(this.WindowPtr, str);
         }
 
         /// <summary>
@@ -278,9 +278,9 @@ namespace NCurses.Core
         public void Write(int nline, int ncol, string str)
         {
             if (NCurses.UnicodeSupported)
-                NativeWindow.mvwaddnwstr(this.WindowPtr, nline, ncol, str, str.Length);
+                NativeWindow.mvwaddwstr(this.WindowPtr, nline, ncol, str);
             else
-                NativeWindow.mvwaddnstr(this.WindowPtr, nline, ncol, str, str.Length);
+                NativeWindow.mvwaddstr(this.WindowPtr, nline, ncol, str);
         }
 
         /// <summary>

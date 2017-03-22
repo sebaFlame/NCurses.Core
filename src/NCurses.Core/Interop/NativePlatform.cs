@@ -737,7 +737,7 @@ namespace NCurses.Core.Interop
         [DllImport("libdl.so")]
         internal static extern int dlclose(IntPtr libHandle);
 
-        [DllImport("libc.so")]
+        [DllImport("libc.so.6")]
         internal static extern string setlocale(int category, string locale);
     }
 }

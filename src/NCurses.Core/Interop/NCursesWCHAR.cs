@@ -160,7 +160,7 @@ namespace NCurses.Core.Interop
             if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
                 return Encoding.Unicode.GetChars(this.chars)[0];
             else
-                return Encoding.UTF8.GetChars(this.chars)[0];
+                return Encoding.UTF32.GetChars(this.chars)[0];
         }
 
         #region dynamic type creation
@@ -240,7 +240,7 @@ namespace NCurses.Core.Interop
             ctorIl.Emit(OpCodes.Newobj, ctor);
             ctorIl.Emit(OpCodes.Throw);
             ctorIl.MarkLabel(lbl1);
-            mInfo = typeof(Encoding).GetTypeInfo().GetProperty(RuntimeInformation.IsOSPlatform(OSPlatform.Windows) ? "Unicode" : "UTF8").GetMethod;
+            mInfo = typeof(Encoding).GetTypeInfo().GetProperty(RuntimeInformation.IsOSPlatform(OSPlatform.Windows) ? "Unicode" : "UTF32").GetMethod;
             ctorIl.Emit(OpCodes.Call, mInfo);
             mInfo = typeof(Encoding).GetTypeInfo().GetMethod("GetEncoder");
             ctorIl.Emit(OpCodes.Callvirt, mInfo);
@@ -444,7 +444,7 @@ namespace NCurses.Core.Interop
             if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
                 return Encoding.Unicode.GetChars(CH_win.chars)[0];
             else
-                return Encoding.UTF8.GetChars(CH_nix.chars)[0];
+                return Encoding.UTF32.GetChars(CH_nix.chars)[0];
         }
     }
 
@@ -507,7 +507,7 @@ namespace NCurses.Core.Interop
             if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
                 throw new InvalidOperationException("Incorrect struct for this platform");
 
-            Encoding.UTF8.GetEncoder().Convert(new char[] { ch }, 0, 1, this.chars, 0, 20, false, out charsUsed, out bytesUsed, out completed);
+            Encoding.UTF32.GetEncoder().Convert(new char[] { ch }, 0, 1, this.chars, 0, 20, false, out charsUsed, out bytesUsed, out completed);
             if (!completed)
                 throw new InvalidOperationException("Failed to convert character for marshaling");
         }

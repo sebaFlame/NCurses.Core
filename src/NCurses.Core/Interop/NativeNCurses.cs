@@ -374,17 +374,19 @@ namespace NCurses.Core.Interop
                 }
                 else
                 {
-                    char[] charArray = wStr.ToCharArray();
-                    byte[] wstrArray = new byte[(charArray.Length * Constants.SIZEOF_WCHAR_T) + (addNullTerminator ? Constants.SIZEOF_WCHAR_T : 0)];
-                    bool completed = true;
-                    int charsUsed, bytesUsed;
+                    byte[] tmpArray = Encoding.UTF32.GetBytes(wStr);
+                    byte[] wstrArray;
 
-                    for (int i = 0; i < charArray.Length; i++)
-                        Encoding.UTF8.GetEncoder().Convert(charArray, i, 1, wstrArray, 
-                            i * Constants.SIZEOF_WCHAR_T, Constants.SIZEOF_WCHAR_T, false, out charsUsed, out bytesUsed, out completed);
+                    if (addNullTerminator)
+                    {
+                        wstrArray = new byte[tmpArray.Length + Constants.SIZEOF_WCHAR_T];
+                        tmpArray.CopyTo(wstrArray, 0);
+                    }
+                    else
+                        wstrArray = tmpArray;
 
-                    IntPtr wstrPtr = Marshal.AllocHGlobal(wstrArray.Length);
-                    Marshal.Copy(wstrArray, 0, wstrPtr, wstrArray.Length);
+                    ptr = Marshal.AllocHGlobal(wstrArray.Length);
+                    Marshal.Copy(wstrArray, 0, ptr, wstrArray.Length);
                     pointerSize = wstrArray.Length;
                 }
 
@@ -407,18 +409,9 @@ namespace NCurses.Core.Interop
                 return Marshal.PtrToStringUni(ptr);
 
             byte[] wstrArray = new byte[Constants.SIZEOF_WCHAR_T * length];
-            char[] charArray = new char[length];
-
-            bool completed = true;
-            int charsUsed, bytesUsed;
 
             Marshal.Copy(ptr, wstrArray, 0, length);
-
-            for (int i = 0; i < charArray.Length; i++)
-                Encoding.UTF8.GetDecoder().Convert(wstrArray, i * Constants.SIZEOF_WCHAR_T, Constants.SIZEOF_WCHAR_T,
-                     charArray, i, 1, false, out bytesUsed, out charsUsed, out completed);
-
-            return new string(charArray).TrimEnd('\0');
+            return Encoding.UTF32.GetString(wstrArray).TrimEnd('\0');
         }
         #endregion
 

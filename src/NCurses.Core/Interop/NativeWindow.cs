@@ -3668,7 +3668,7 @@ namespace NCurses.Core.Interop
                 if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
                     wch = Encoding.Unicode.GetChars(arr)[0];
                 else
-                    wch = Encoding.UTF8.GetChars(arr)[0];
+                    wch = Encoding.UTF32.GetChars(arr)[0];
             }
             finally
             {
@@ -4563,7 +4563,7 @@ namespace NCurses.Core.Interop
                 if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
                     wch = Encoding.Unicode.GetChars(arr)[0];
                 else
-                    wch = Encoding.UTF8.GetChars(arr)[0];
+                    wch = Encoding.UTF32.GetChars(arr)[0];
             }
             finally
             {
@@ -4592,7 +4592,7 @@ namespace NCurses.Core.Interop
                 if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
                     wch = Encoding.Unicode.GetChars(arr)[0];
                 else
-                    wch = Encoding.UTF8.GetChars(arr)[0];
+                    wch = Encoding.UTF32.GetChars(arr)[0];
             }
             finally
             {
