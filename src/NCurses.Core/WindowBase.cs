@@ -639,7 +639,7 @@ namespace NCurses.Core
         /// doesn't move the cursor
         /// </summary>
         /// <returns>the read character</returns>
-        public char ReadChar()
+        public char GetChar()
         {
             char ch;
             if (NCurses.UnicodeSupported)
@@ -665,7 +665,7 @@ namespace NCurses.Core
         /// <param name="attrs">attributes applied to the character</param>
         /// <param name="pair">pair number applied to the character</param>
         /// <returns>the read character</returns>
-        public char ReadChar(out uint attrs, out short pair)
+        public char GetChar(out uint attrs, out short pair)
         {
             char ch;
             if (NCurses.UnicodeSupported)
@@ -693,7 +693,7 @@ namespace NCurses.Core
         /// doesn't move the cursor
         /// </summary>
         /// <returns>the read string</returns>
-        public string ReadString()
+        public string GetString()
         {
             StringBuilder builder = new StringBuilder(1024);
             if (NCurses.UnicodeSupported)
@@ -710,7 +710,7 @@ namespace NCurses.Core
         /// </summary>
         /// <param name="count">the number of characters to read</param>
         /// <returns>the read string</returns>
-        public string ReadString(int count)
+        public string GetString(int count)
         {
             StringBuilder builder = new StringBuilder(count);
             if (NCurses.UnicodeSupported)
@@ -726,7 +726,7 @@ namespace NCurses.Core
         /// </summary>
         /// <param name="lstAttributes">a list to save the attributes in</param>
         /// <returns>the read string</returns>
-        public string ReadString(IList<Tuple<uint, short>> lstAttributes)
+        public string GetString(IList<Tuple<uint, short>> lstAttributes)
         {
             if (lstAttributes == null)
                 throw new ArgumentNullException("No list passed to save the attributes");
@@ -763,7 +763,7 @@ namespace NCurses.Core
         /// <param name="count">the number of characters to read</param>
         /// <param name="lstAttributes">a list to save the attributes in</param>
         /// <returns>the read string</returns>
-        public string ReadString(int count, IList<Tuple<uint, short>> lstAttributes)
+        public string GetString(int count, IList<Tuple<uint, short>> lstAttributes)
         {
             if (lstAttributes == null)
                 throw new ArgumentNullException("No list passed to save the attributes");

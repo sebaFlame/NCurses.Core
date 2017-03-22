@@ -2928,7 +2928,7 @@ namespace NCurses.Core.Interop
         /// Additional nonspacing characters are ignored.</para>
         /// <para>The string may  contain a  single control character
         /// instead.  In that case, no nonspacing  characters are
-        /// allowed. Color attributes will be OR'd into <see cref="NCURSES_CH_T.attr"/> .
+        /// allowed. Color attributes will be OR'd into <see cref="NCursesWCHAR.attr"/> .
         /// <para />native method wrapped with verification.
         /// </summary>
         /// <param name="wcval">the NCURSES_CH_T to get all properties from</param>
@@ -2943,7 +2943,7 @@ namespace NCurses.Core.Interop
             {
                 MarshalNativeWideStringAndExecuteAction((strPtr) =>
                     NCursesException.Verify(ncurses_setcchar(wPtr, strPtr, attrs, color_pair, IntPtr.Zero), "setcchar"),
-                    wch, false);
+                    wch, true);
             }
         }
         #endregion

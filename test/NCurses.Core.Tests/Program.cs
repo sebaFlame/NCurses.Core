@@ -176,11 +176,11 @@ namespace NCurses.Core.Tests
             stdScr.Write(chars1, Attrs.BOLD, 4);
 
             //ASCII char test
-            char ch = stdScr.ReadChar();
+            char ch = stdScr.GetChar();
             uint attrs;
             short pair;
-            ch = stdScr.ReadChar(out attrs, out pair);
-            string str = stdScr.ReadString();
+            ch = stdScr.GetChar(out attrs, out pair);
+            string str = stdScr.GetString();
 
             //test add unicode character array
             char[] chars = new char[] { '\u0490', '\u0491', '\u0492', '\u0493', '\u0494', '\u0495', '\u0496', '\u0497', '\u0498', '\u0499'
@@ -188,8 +188,8 @@ namespace NCurses.Core.Tests
             stdScr.Write(chars, Attrs.BOLD, 4);
 
             //unicode char test
-            ch = stdScr.ReadChar();
-            str = stdScr.ReadString();
+            ch = stdScr.GetChar();
+            str = stdScr.GetString();
         }
 
         private static void testInsert(ref Window stdScr)
