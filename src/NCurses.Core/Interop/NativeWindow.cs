@@ -12,20 +12,13 @@ namespace NCurses.Core.Interop
     {
         #region waddch
         /// <summary>
-        /// see <see cref="waddch"/>
-        /// </summary>
-        /// <returns>Constants.ERR on error or Constants.OK on success</returns>
-        [DllImport(Constants.DLLNAME, EntryPoint = "waddch")]
-        internal extern static int ncurses_waddch(IntPtr window, uint ch);
-
-        /// <summary>
         /// see <see cref="NativeStdScr.addch"/>
         /// <para />native method wrapped with verification.
         /// </summary>
         /// <param name="window">A pointer to a window</param>
         public static void waddch(IntPtr window, uint ch)
         {
-            NativeNCurses.VerifyNCursesMethod(() => ncurses_waddch(window, ch), "waddch");
+            NativeNCurses.VerifyNCursesMethod(() => NativeNCurses.NCursesWrapper.waddch(window, ch), "waddch");
         }
 
         /// <summary>
@@ -34,7 +27,7 @@ namespace NCurses.Core.Interop
         /// </summary>
         public static void waddch_t(IntPtr window, uint ch)
         {
-            Func<IntPtr, IntPtr, int> callback = (IntPtr w, IntPtr a) => ncurses_waddch(window, ch);
+            Func<IntPtr, IntPtr, int> callback = (IntPtr w, IntPtr a) => NativeNCurses.NCursesWrapper.waddch(window, ch);
             NativeNCurses.use_window_v(window, Marshal.GetFunctionPointerForDelegate(new NCURSES_WINDOW_CB(callback)), "waddch");
         }
         #endregion
@@ -47,7 +40,7 @@ namespace NCurses.Core.Interop
         //    GC.AddMemoryPressure(Marshal.SizeOf(ch));
         //    try
         //    {
-        //        return NCurses.ncurses_use_window(window, Marshal.GetFunctionPointerForDelegate<NCURSES_WINDOW_CB>(waddch_t_callback), IntPtr.Zero);
+        //        return NCurses.NativeNCurses.NCursesWrapper.use_window(window, Marshal.GetFunctionPointerForDelegate<NCURSES_WINDOW_CB>(waddch_t_callback), IntPtr.Zero);
         //    }
         //    finally
         //    {
@@ -59,18 +52,11 @@ namespace NCurses.Core.Interop
         //public static int waddch_t_callback(IntPtr window, IntPtr args)
         //{
         //    uint ch = Marshal.PtrToStructure<uint>(args);
-        //    return ncurses_waddch(window, ch);
+        //    return NativeNCurses.NCursesWrapper.waddch(window, ch);
         //}
         #endregion
 
         #region waddchnstr
-        /// <summary>
-        /// see <see cref="waddchnstr"/>
-        /// </summary>
-        /// <returns>Constants.ERR on error or Constants.OK on success</returns>
-        [DllImport(Constants.DLLNAME, EntryPoint = "waddchnstr")]
-        internal extern static int ncurses_waddchnstr(IntPtr window, IntPtr txt, int number);
-
         /// <summary>
         /// see <see cref="NativeStdScr.addchnstr"/>
         /// <para />native method wrapped with verification.
@@ -84,7 +70,7 @@ namespace NCurses.Core.Interop
 
             try
             {
-                NativeNCurses.VerifyNCursesMethod(() => ncurses_waddchnstr(window, arrayPtr, number), "waddchnstr");
+                NativeNCurses.VerifyNCursesMethod(() => NativeNCurses.NCursesWrapper.waddchnstr(window, arrayPtr, number), "waddchnstr");
             }
             finally
             {
@@ -103,7 +89,7 @@ namespace NCurses.Core.Interop
             IntPtr arrayPtr = NativeNCurses.MarshallArray(txt, true, out totalSize);
             GC.AddMemoryPressure(totalSize);
 
-            Func<IntPtr, IntPtr, int> callback = (IntPtr w, IntPtr a) => ncurses_waddchnstr(window, arrayPtr, number);
+            Func<IntPtr, IntPtr, int> callback = (IntPtr w, IntPtr a) => NativeNCurses.NCursesWrapper.waddchnstr(window, arrayPtr, number);
 
             try
             {
@@ -119,13 +105,6 @@ namespace NCurses.Core.Interop
 
         #region waddchstr
         /// <summary>
-        /// see <see cref="waddchstr"/>
-        /// </summary>
-        /// <returns>Constants.ERR on error or Constants.OK on success</returns>
-        [DllImport(Constants.DLLNAME, EntryPoint = "waddchstr")]
-        internal extern static int ncurses_waddchstr(IntPtr window, IntPtr txt);
-
-        /// <summary>
         /// see <see cref="NativeStdScr.addchstr"/>
         /// <para />native method wrapped with verification.
         /// </summary>
@@ -138,7 +117,7 @@ namespace NCurses.Core.Interop
 
             try
             {
-                NativeNCurses.VerifyNCursesMethod(() => ncurses_waddchstr(window, arrayPtr), "waddchstr");
+                NativeNCurses.VerifyNCursesMethod(() => NativeNCurses.NCursesWrapper.waddchstr(window, arrayPtr), "waddchstr");
             }
             finally
             {
@@ -157,7 +136,7 @@ namespace NCurses.Core.Interop
             IntPtr arrayPtr = NativeNCurses.MarshallArray(txt, true, out totalSize);
             GC.AddMemoryPressure(totalSize);
 
-            Func<IntPtr, IntPtr, int> callback = (IntPtr w, IntPtr a) => ncurses_waddchstr(window, arrayPtr);
+            Func<IntPtr, IntPtr, int> callback = (IntPtr w, IntPtr a) => NativeNCurses.NCursesWrapper.waddchstr(window, arrayPtr);
 
             try
             {
@@ -173,20 +152,13 @@ namespace NCurses.Core.Interop
 
         #region waddnstr
         /// <summary>
-        /// see <see cref="waddnstr"/>
-        /// </summary>
-        /// <returns>Constants.ERR on error or Constants.OK on success</returns>
-        [DllImport(Constants.DLLNAME, EntryPoint = "waddnstr")]
-        internal extern static int ncurses_waddnstr(IntPtr window, string txt, int number);
-
-        /// <summary>
         /// see <see cref="NativeStdScr.addnstr"/>
         /// <para />native method wrapped with verification.
         /// </summary>
         /// <param name="window">A pointer to a window</param>
         public static void waddnstr(IntPtr window, string txt, int number)
         {
-            NativeNCurses.VerifyNCursesMethod(() => ncurses_waddnstr(window, txt, number), "waddnstr");
+            NativeNCurses.VerifyNCursesMethod(() => NativeNCurses.NCursesWrapper.waddnstr(window, txt, number), "waddnstr");
         }
 
         /// <summary>
@@ -195,20 +167,12 @@ namespace NCurses.Core.Interop
         /// </summary>
         public static void waddnstr_t(IntPtr window, string txt, int number)
         {
-            Func<IntPtr, IntPtr, int> callback = (IntPtr w, IntPtr a) => ncurses_waddnstr(window, txt, number);
+            Func<IntPtr, IntPtr, int> callback = (IntPtr w, IntPtr a) => NativeNCurses.NCursesWrapper.waddnstr(window, txt, number);
             NativeNCurses.use_window_v(window, Marshal.GetFunctionPointerForDelegate(new NCURSES_WINDOW_CB(callback)), "waddnstr");
         }
         #endregion
 
         #region waddstr
-        /// <summary>
-        /// see <see cref="waddstr"/>
-        /// </summary>
-        /// <param name="txt">string to add</param>
-        /// <returns>Constants.ERR on error or Constants.OK on success</returns>
-        [DllImport(Constants.DLLNAME, EntryPoint = "waddstr")]
-        internal extern static int ncurses_waddstr(IntPtr window, string txt);
-
         /// <summary>
         /// see <see cref="NativeStdScr.addstr"/>
         /// <para />native method wrapped with verification.
@@ -216,7 +180,7 @@ namespace NCurses.Core.Interop
         /// <param name="window">A pointer to a window</param>
         public static void waddstr(IntPtr window, string txt)
         {
-            NativeNCurses.VerifyNCursesMethod(() => ncurses_waddstr(window, txt), "waddstr");
+            NativeNCurses.VerifyNCursesMethod(() => NativeNCurses.NCursesWrapper.waddstr(window, txt), "waddstr");
         }
 
         /// <summary>
@@ -225,19 +189,12 @@ namespace NCurses.Core.Interop
         /// </summary>
         public static void waddstr_t(IntPtr window, string txt)
         {
-            Func<IntPtr, IntPtr, int> callback = (IntPtr w, IntPtr a) => ncurses_waddstr(window, txt);
+            Func<IntPtr, IntPtr, int> callback = (IntPtr w, IntPtr a) => NativeNCurses.NCursesWrapper.waddstr(window, txt);
             NativeNCurses.use_window_v(window, Marshal.GetFunctionPointerForDelegate(new NCURSES_WINDOW_CB(callback)), "waddstr");
         }
         #endregion
 
         #region wattroff
-        /// <summary>
-        /// see <see cref="wattroff("/>
-        /// </summary>
-        /// <returns>Constants.ERR on error or Constants.OK on success</returns>
-        [DllImport(Constants.DLLNAME, EntryPoint = "wattroff")]
-        internal extern static int ncurses_wattroff(IntPtr window, int attrs);
-
         /// <summary>
         /// see <see cref="NativeStdScr.attroff"/>
         /// <para />native method wrapped with verification.
@@ -245,7 +202,7 @@ namespace NCurses.Core.Interop
         /// <param name="window">A pointer to a window</param>
         public static void wattroff(IntPtr window, int attrs)
         {
-            NativeNCurses.VerifyNCursesMethod(() => ncurses_wattroff(window, attrs), "wattroff");
+            NativeNCurses.VerifyNCursesMethod(() => NativeNCurses.NCursesWrapper.wattroff(window, attrs), "wattroff");
         }
 
         /// <summary>
@@ -254,19 +211,12 @@ namespace NCurses.Core.Interop
         /// </summary>
         public static void wattroff_t(IntPtr window, int attrs)
         {
-            Func<IntPtr, IntPtr, int> callback = (IntPtr w, IntPtr a) => ncurses_wattroff(window, attrs);
+            Func<IntPtr, IntPtr, int> callback = (IntPtr w, IntPtr a) => NativeNCurses.NCursesWrapper.wattroff(window, attrs);
             NativeNCurses.use_window_v(window, Marshal.GetFunctionPointerForDelegate(new NCURSES_WINDOW_CB(callback)), "wattroff");
         }
         #endregion
 
         #region wattron
-        /// <summary>
-        /// see <see cref="wattron"/>
-        /// </summary>
-        /// <returns>Constants.ERR on error or Constants.OK on success</returns>
-        [DllImport(Constants.DLLNAME, EntryPoint = "wattron")]
-        internal extern static int ncurses_wattron(IntPtr window, int attrs);
-
         /// <summary>
         /// see <see cref="NativeStdScr.attron"/>
         /// <para />native method wrapped with verification.
@@ -274,7 +224,7 @@ namespace NCurses.Core.Interop
         /// <param name="window">A pointer to a window</param>
         public static void wattron(IntPtr window, int attrs)
         {
-            NativeNCurses.VerifyNCursesMethod(() => ncurses_wattron(window, attrs), "wattron");
+            NativeNCurses.VerifyNCursesMethod(() => NativeNCurses.NCursesWrapper.wattron(window, attrs), "wattron");
         }
 
         /// <summary>
@@ -283,19 +233,12 @@ namespace NCurses.Core.Interop
         /// </summary>
         public static void wattron_t(IntPtr window, int attrs)
         {
-            Func<IntPtr, IntPtr, int> callback = (IntPtr w, IntPtr a) => ncurses_wattron(window, attrs);
+            Func<IntPtr, IntPtr, int> callback = (IntPtr w, IntPtr a) => NativeNCurses.NCursesWrapper.wattron(window, attrs);
             NativeNCurses.use_window_v(window, Marshal.GetFunctionPointerForDelegate(new NCURSES_WINDOW_CB(callback)), "wattron");
         }
         #endregion
 
         #region wattrset
-        /// <summary>
-        /// see <see cref="wattrset"/>
-        /// </summary>
-        /// <returns>Constants.ERR on error or Constants.OK on success</returns>
-        [DllImport(Constants.DLLNAME, EntryPoint = "wattrset")]
-        internal extern static int ncurses_wattrset(IntPtr window, int attrs);
-
         /// <summary>
         /// see <see cref="NativeStdScr.attrset"/>
         /// <para />native method wrapped with verification.
@@ -303,7 +246,7 @@ namespace NCurses.Core.Interop
         /// <param name="window">A pointer to a window</param>
         public static void wattrset(IntPtr window, int attrs)
         {
-            NativeNCurses.VerifyNCursesMethod(() => ncurses_wattrset(window, attrs), "wattrset");
+            NativeNCurses.VerifyNCursesMethod(() => NativeNCurses.NCursesWrapper.wattrset(window, attrs), "wattrset");
         }
 
         /// <summary>
@@ -312,20 +255,12 @@ namespace NCurses.Core.Interop
         /// </summary>
         public static void wattrset_t(IntPtr window, int attrs)
         {
-            Func<IntPtr, IntPtr, int> callback = (IntPtr w, IntPtr a) => ncurses_wattrset(window, attrs);
+            Func<IntPtr, IntPtr, int> callback = (IntPtr w, IntPtr a) => NativeNCurses.NCursesWrapper.wattrset(window, attrs);
             NativeNCurses.use_window_v(window, Marshal.GetFunctionPointerForDelegate(new NCURSES_WINDOW_CB(callback)), "wattrset");
         }
         #endregion
 
         #region wattr_on
-        /// <summary>
-        /// see <see cref="wattr_on"/>
-        /// </summary>
-        /// <param name="opts">X/Open specified  an  additional  parameter <paramref name="opts"/> which is unused in all implementations.</param>
-        /// <returns>Constants.ERR on error or Constants.OK on success</returns>
-        [DllImport(Constants.DLLNAME, EntryPoint = "wattr_on")]
-        internal extern static int ncurses_wattr_on(IntPtr window, uint attrs, IntPtr opts);
-
         /// <summary>
         /// see <see cref="NativeStdScr.attr_on"/>
         /// <para />native method wrapped with verification.
@@ -333,7 +268,7 @@ namespace NCurses.Core.Interop
         /// <param name="window">A pointer to a window</param>
         public static void wattr_on(IntPtr window, uint attrs)
         {
-            NativeNCurses.VerifyNCursesMethod(() => ncurses_wattr_on(window, attrs, IntPtr.Zero), "wattr_on");
+            NativeNCurses.VerifyNCursesMethod(() => NativeNCurses.NCursesWrapper.wattr_on(window, attrs, IntPtr.Zero), "wattr_on");
         }
 
         /// <summary>
@@ -342,20 +277,12 @@ namespace NCurses.Core.Interop
         /// </summary>
         public static void wattr_on_t(IntPtr window, uint attrs)
         {
-            Func<IntPtr, IntPtr, int> callback = (IntPtr w, IntPtr a) => ncurses_wattr_on(window, attrs, IntPtr.Zero);
+            Func<IntPtr, IntPtr, int> callback = (IntPtr w, IntPtr a) => NativeNCurses.NCursesWrapper.wattr_on(window, attrs, IntPtr.Zero);
             NativeNCurses.use_window_v(window, Marshal.GetFunctionPointerForDelegate(new NCURSES_WINDOW_CB(callback)), "wattr_on");
         }
         #endregion
 
         #region wattr_off
-        /// <summary>
-        /// see <see cref="wattr_off"/>
-        /// </summary>
-        /// <param name="opts">X/Open specified  an  additional  parameter <paramref name="opts"/> which is unused in all implementations.</param>
-        /// <returns>Constants.ERR on error or Constants.OK on success</returns>
-        [DllImport(Constants.DLLNAME, EntryPoint = "wattr_off")]
-        internal extern static int ncurses_wattr_off(IntPtr window, uint attrs, IntPtr opts);
-
         /// <summary>
         /// see <see cref="NativeStdScr.attr_off"/>
         /// <para />native method wrapped with verification.
@@ -363,7 +290,7 @@ namespace NCurses.Core.Interop
         /// <param name="window">A pointer to a window</param>
         public static void wattr_off(IntPtr window, uint attrs)
         {
-            NativeNCurses.VerifyNCursesMethod(() => ncurses_wattr_off(window, attrs, IntPtr.Zero), "wattr_off");
+            NativeNCurses.VerifyNCursesMethod(() => NativeNCurses.NCursesWrapper.wattr_off(window, attrs, IntPtr.Zero), "wattr_off");
         }
 
         /// <summary>
@@ -372,20 +299,12 @@ namespace NCurses.Core.Interop
         /// </summary>
         public static void wattr_off_t(IntPtr window, uint attrs)
         {
-            Func<IntPtr, IntPtr, int> callback = (IntPtr w, IntPtr a) => ncurses_wattr_off(window, attrs, IntPtr.Zero);
+            Func<IntPtr, IntPtr, int> callback = (IntPtr w, IntPtr a) => NativeNCurses.NCursesWrapper.wattr_off(window, attrs, IntPtr.Zero);
             NativeNCurses.use_window_v(window, Marshal.GetFunctionPointerForDelegate(new NCURSES_WINDOW_CB(callback)), "wattr_off");
         }
         #endregion
 
         #region wattr_set
-        /// <summary>
-        /// see <see cref="wattr_set"/>
-        /// </summary>
-        /// <param name="opts">X/Open specified  an  additional  parameter <paramref name="opts"/> which is unused in all implementations.</param>
-        /// <returns>Constants.ERR on error or Constants.OK on success</returns>
-        [DllImport(Constants.DLLNAME, EntryPoint = "wattr_set")]
-        internal extern static int ncurses_wattr_set(IntPtr window, uint attrs, short pair, IntPtr opts);
-
         /// <summary>
         /// see <see cref="NativeStdScr.attr_set"/>
         /// <para />native method wrapped with verification.
@@ -393,7 +312,7 @@ namespace NCurses.Core.Interop
         /// <param name="window">A pointer to a window</param>
         public static void wattr_set(IntPtr window, uint attrs, short pair)
         {
-            NativeNCurses.VerifyNCursesMethod(() => ncurses_wattr_set(window, attrs, pair, IntPtr.Zero), "wattr_set");
+            NativeNCurses.VerifyNCursesMethod(() => NativeNCurses.NCursesWrapper.wattr_set(window, attrs, pair, IntPtr.Zero), "wattr_set");
         }
 
         /// <summary>
@@ -402,28 +321,12 @@ namespace NCurses.Core.Interop
         /// </summary>
         public static void wattr_set_t(IntPtr window, uint attrs, short pair)
         {
-            Func<IntPtr, IntPtr, int> callback = (IntPtr w, IntPtr a) => ncurses_wattr_set(window, attrs, pair, IntPtr.Zero);
+            Func<IntPtr, IntPtr, int> callback = (IntPtr w, IntPtr a) => NativeNCurses.NCursesWrapper.wattr_set(window, attrs, pair, IntPtr.Zero);
             NativeNCurses.use_window_v(window, Marshal.GetFunctionPointerForDelegate(new NCURSES_WINDOW_CB(callback)), "wattr_set");
         }
         #endregion
 
         #region wattr_get
-        /// <summary>
-        /// see <see cref="wattr_get"/>
-        /// </summary>
-        /// <param name="opts">X/Open specified  an  additional  parameter <paramref name="opts"/> which is unused in all implementations.</param>
-        /// <returns>Constants.ERR on error or Constants.OK on success</returns>
-        [DllImport(Constants.DLLNAME, EntryPoint = "wattr_get")]
-        internal extern static int ncurses_wattr_get(IntPtr window, out uint attrs, out short pair, IntPtr opts);
-
-        /// <summary>
-        /// see <see cref="wattr_get"/>
-        /// </summary>
-        /// <param name="opts">X/Open specified  an  additional  parameter <paramref name="opts"/> which is unused in all implementations.</param>
-        /// <returns>Constants.ERR on error or Constants.OK on success</returns>
-        [DllImport(Constants.DLLNAME, EntryPoint = "wattr_get")]
-        internal extern static int ncurses_wattr_get(IntPtr window, IntPtr attrs, IntPtr pair, IntPtr opts);
-
         /// <summary>
         /// see <see cref="NativeStdScr.attr_get"/>
         /// <para />native method wrapped with verification.
@@ -431,7 +334,7 @@ namespace NCurses.Core.Interop
         /// <param name="window">A pointer to a window</param>
         public static void wattr_get(IntPtr window, out uint attrs, out short pair)
         {
-            NCursesException.Verify(ncurses_wattr_get(window, out attrs, out pair, IntPtr.Zero), "wattr_get");
+            NCursesException.Verify(NativeNCurses.NCursesWrapper.wattr_get(window, out attrs, out pair, IntPtr.Zero), "wattr_get");
         }
 
         /// <summary>
@@ -448,7 +351,7 @@ namespace NCurses.Core.Interop
             Marshal.StructureToPtr(pair, pPtr, true);
             GC.AddMemoryPressure(Marshal.SizeOf(pair));
 
-            Func<IntPtr, IntPtr, int> callback = (IntPtr w, IntPtr a) => ncurses_wattr_get(window, aPtr, pPtr, IntPtr.Zero);
+            Func<IntPtr, IntPtr, int> callback = (IntPtr w, IntPtr a) => NativeNCurses.NCursesWrapper.wattr_get(window, aPtr, pPtr, IntPtr.Zero);
 
             try
             {
@@ -467,20 +370,13 @@ namespace NCurses.Core.Interop
 
         #region wbkgd
         /// <summary>
-        /// see <see cref="wbkgd"/>
-        /// </summary>
-        /// <returns>Constants.ERR on error or Constants.OK on success</returns>
-        [DllImport(Constants.DLLNAME, EntryPoint = "wbkgd")]
-        internal extern static int ncurses_wbkgd(IntPtr window, uint bkgd);
-
-        /// <summary>
         /// see <see cref="NativeStdScr.bkgd"/>
         /// <para />native method wrapped with verification.
         /// </summary>
         /// <param name="window">A pointer to a window</param>
         public static void wbkgd(IntPtr window, uint bkgd)
         {
-            NativeNCurses.VerifyNCursesMethod(() => ncurses_wbkgd(window, bkgd), "wbkgd");
+            NativeNCurses.VerifyNCursesMethod(() => NativeNCurses.NCursesWrapper.wbkgd(window, bkgd), "wbkgd");
         }
 
         /// <summary>
@@ -489,7 +385,7 @@ namespace NCurses.Core.Interop
         /// </summary>
         public static void wbkgd_t(IntPtr window, uint bkgd)
         {
-            Func<IntPtr, IntPtr, int> callback = (IntPtr w, IntPtr a) => ncurses_wbkgd(window, bkgd);
+            Func<IntPtr, IntPtr, int> callback = (IntPtr w, IntPtr a) => NativeNCurses.NCursesWrapper.wbkgd(window, bkgd);
             NativeNCurses.use_window_v(window, Marshal.GetFunctionPointerForDelegate(new NCURSES_WINDOW_CB(callback)), "wbkgd");
         }
         #endregion
@@ -499,18 +395,13 @@ namespace NCurses.Core.Interop
         /// see <see cref="NativeStdScr.bkgdset"/>
         /// </summary>
         /// <param name="window">A pointer to a window</param>
-        [DllImport(Constants.DLLNAME, EntryPoint = "wbkgdset")]
-        public extern static void wbkgdset(IntPtr window, uint bkgd);
+        public static void wbkgdset(IntPtr window, uint bkgd)
+        {
+            NativeNCurses.NCursesWrapper.wbkgdset(window, bkgd);
+        }
         #endregion
 
         #region wborder
-        /// <summary>
-        /// see <see cref="wborder"/>
-        /// </summary>
-        /// <returns>Constants.ERR on error or Constants.OK on success</returns>
-        [DllImport(Constants.DLLNAME, EntryPoint = "wborder")]
-        internal extern static int ncurses_wborder(IntPtr window, uint ls, uint rs, uint ts, uint bs, uint tl, uint tr, uint bl, uint br);
-
         /// <summary>
         /// see <see cref="NativeStdScr.border"/>
         /// <para />native method wrapped with verification.
@@ -518,7 +409,7 @@ namespace NCurses.Core.Interop
         /// <param name="window">A pointer to a window</param>
         public static void wborder(IntPtr window, uint ls, uint rs, uint ts, uint bs, uint tl, uint tr, uint bl, uint br)
         {
-            NativeNCurses.VerifyNCursesMethod(() => ncurses_wborder(window, ls, rs, ts, bs, tl, tr, bl, br), "wborder");
+            NativeNCurses.VerifyNCursesMethod(() => NativeNCurses.NCursesWrapper.wborder(window, ls, rs, ts, bs, tl, tr, bl, br), "wborder");
         }
 
         /// <summary>
@@ -527,19 +418,12 @@ namespace NCurses.Core.Interop
         /// </summary>
         public static void wborder_t(IntPtr window, uint ls, uint rs, uint ts, uint bs, uint tl, uint tr, uint bl, uint br)
         {
-            Func<IntPtr, IntPtr, int> callback = (IntPtr w, IntPtr a) => ncurses_wborder(window, ls, rs, ts, bs, tl, tr, bl, br);
+            Func<IntPtr, IntPtr, int> callback = (IntPtr w, IntPtr a) => NativeNCurses.NCursesWrapper.wborder(window, ls, rs, ts, bs, tl, tr, bl, br);
             NativeNCurses.use_window_v(window, Marshal.GetFunctionPointerForDelegate(new NCURSES_WINDOW_CB(callback)), "wborder");
         }
         #endregion
 
         #region box
-        /// <summary>
-        /// see <see cref="box"/>
-        /// </summary>
-        /// <returns>Constants.ERR on error or Constants.OK on success</returns>
-        [DllImport(Constants.DLLNAME, EntryPoint = "box")]
-        internal extern static int ncurses_box(IntPtr window, uint verch, uint horch);
-
         /// <summary>
         /// box(win, verch, horch) is a shorthand  for  the following
         /// call:  wborder(win, verch, verch, horch, horch, 0, 0, 0, 0).
@@ -550,7 +434,7 @@ namespace NCurses.Core.Interop
         /// <param name="horch">horizontal character (ts, bs)</param>
         public static void box(IntPtr window, uint verch, uint horch)
         {
-            NativeNCurses.VerifyNCursesMethod(() => ncurses_box(window, verch, horch), "box");
+            NativeNCurses.VerifyNCursesMethod(() => NativeNCurses.NCursesWrapper.box(window, verch, horch), "box");
         }
 
         /// <summary>
@@ -559,20 +443,12 @@ namespace NCurses.Core.Interop
         /// </summary>
         public static void box_t(IntPtr window, uint verch, uint horch)
         {
-            Func<IntPtr, IntPtr, int> callback = (IntPtr w, IntPtr a) => ncurses_box(window, verch, horch);
+            Func<IntPtr, IntPtr, int> callback = (IntPtr w, IntPtr a) => NativeNCurses.NCursesWrapper.box(window, verch, horch);
             NativeNCurses.use_window_v(window, Marshal.GetFunctionPointerForDelegate(new NCURSES_WINDOW_CB(callback)), "box");
         }
         #endregion
 
         #region wchgat
-        /// <summary>
-        /// see <see cref="wchgat"/>
-        /// </summary>
-        /// <param name="opts">X/Open specified  an  additional  parameter <paramref name="opts"/> which is unused in all implementations.</param>
-        /// <returns>Constants.ERR on error or Constants.OK on success</returns>
-        [DllImport(Constants.DLLNAME, EntryPoint = "wchgat")]
-        internal extern static int ncurses_wchgat(IntPtr window, int number, uint attrs, short pair, IntPtr opts);
-
         /// <summary>
         /// see <see cref="NativeStdScr.chgat"/>
         /// <para />native method wrapped with verification.
@@ -580,7 +456,7 @@ namespace NCurses.Core.Interop
         /// <param name="window">A pointer to a window</param>
         public static void wchgat(IntPtr window, int number, uint attrs, short pair)
         {
-            NativeNCurses.VerifyNCursesMethod(() => ncurses_wchgat(window, number, attrs, pair, IntPtr.Zero), "wchgat");
+            NativeNCurses.VerifyNCursesMethod(() => NativeNCurses.NCursesWrapper.wchgat(window, number, attrs, pair, IntPtr.Zero), "wchgat");
         }
 
         /// <summary>
@@ -589,19 +465,12 @@ namespace NCurses.Core.Interop
         /// </summary>
         public static void wchgat_t(IntPtr window, int number, uint attrs, short pair)
         {
-            Func<IntPtr, IntPtr, int> callback = (IntPtr w, IntPtr a) => ncurses_wchgat(window, number, attrs, pair, IntPtr.Zero);
+            Func<IntPtr, IntPtr, int> callback = (IntPtr w, IntPtr a) => NativeNCurses.NCursesWrapper.wchgat(window, number, attrs, pair, IntPtr.Zero);
             NativeNCurses.use_window_v(window, Marshal.GetFunctionPointerForDelegate(new NCURSES_WINDOW_CB(callback)), "wchgat");
         }
         #endregion
 
         #region wclear
-        /// <summary>
-        /// see <see cref="wclear"/>
-        /// </summary>
-        /// <returns>Constants.ERR on error or Constants.OK on success</returns>
-        [DllImport(Constants.DLLNAME, EntryPoint = "wclear")]
-        internal extern static int ncurses_wclear(IntPtr window);
-
         /// <summary>
         /// see <see cref="NativeStdScr.clear"/>
         /// <para />native method wrapped with verification.
@@ -609,7 +478,7 @@ namespace NCurses.Core.Interop
         /// <param name="window">A pointer to a window</param>
         public static void wclear(IntPtr window)
         {
-            NativeNCurses.VerifyNCursesMethod(() => ncurses_wclear(window), "wclear");
+            NativeNCurses.VerifyNCursesMethod(() => NativeNCurses.NCursesWrapper.wclear(window), "wclear");
         }
 
         /// <summary>
@@ -618,19 +487,12 @@ namespace NCurses.Core.Interop
         /// </summary>
         public static void wclear_t(IntPtr window)
         {
-            Func<IntPtr, IntPtr, int> callback = (IntPtr w, IntPtr a) => ncurses_wclear(window);
+            Func<IntPtr, IntPtr, int> callback = (IntPtr w, IntPtr a) => NativeNCurses.NCursesWrapper.wclear(window);
             NativeNCurses.use_window_v(window, Marshal.GetFunctionPointerForDelegate(new NCURSES_WINDOW_CB(callback)), "wclear");
         }
         #endregion
 
         #region clearok
-        /// <summary>
-        /// see <see cref="clearok"/>
-        /// </summary>
-        /// <returns>Constants.ERR on error or Constants.OK on success</returns>
-        [DllImport(Constants.DLLNAME, EntryPoint = "clearok")]
-        internal extern static int ncurses_clearok(IntPtr window, bool bf);
-
         /// <summary>
         /// If clearok is called with TRUE as argument, the next call
         /// to wrefresh with this window will clear the  screen completely and  redraw the entire screen from scratch.This
@@ -645,7 +507,7 @@ namespace NCurses.Core.Interop
         /// <param name="bf">true if you want to force a full redraw</param>
         public static void clearok(IntPtr window, bool bf)
         {
-            NativeNCurses.VerifyNCursesMethod(() => ncurses_clearok(window, bf), "clearok");
+            NativeNCurses.VerifyNCursesMethod(() => NativeNCurses.NCursesWrapper.clearok(window, bf), "clearok");
         }
 
         /// <summary>
@@ -654,19 +516,12 @@ namespace NCurses.Core.Interop
         /// </summary>
         public static void clearok_t(IntPtr window, bool bf)
         {
-            Func<IntPtr, IntPtr, int> callback = (IntPtr w, IntPtr a) => ncurses_clearok(window, bf);
+            Func<IntPtr, IntPtr, int> callback = (IntPtr w, IntPtr a) => NativeNCurses.NCursesWrapper.clearok(window, bf);
             NativeNCurses.use_window_v(window, Marshal.GetFunctionPointerForDelegate(new NCURSES_WINDOW_CB(callback)), "clearok");
         }
         #endregion
 
         #region wclrtobot
-        /// <summary>
-        /// see <see cref="wclrtobot"/>
-        /// </summary>
-        /// <returns>Constants.ERR on error or Constants.OK on success</returns>
-        [DllImport(Constants.DLLNAME, EntryPoint = "wclrtobot")]
-        internal extern static int ncurses_wclrtobot(IntPtr window);
-
         /// <summary>
         /// see <see cref="NativeStdScr.clrtobot"/>
         /// <para />native method wrapped with verification.
@@ -674,7 +529,7 @@ namespace NCurses.Core.Interop
         /// <param name="window">A pointer to a window</param>
         public static void wclrtobot(IntPtr window)
         {
-            NativeNCurses.VerifyNCursesMethod(() => ncurses_wclrtobot(window), "wclrtobot");
+            NativeNCurses.VerifyNCursesMethod(() => NativeNCurses.NCursesWrapper.wclrtobot(window), "wclrtobot");
         }
 
         /// <summary>
@@ -683,19 +538,12 @@ namespace NCurses.Core.Interop
         /// </summary>
         public static void wclrtobot_t(IntPtr window)
         {
-            Func<IntPtr, IntPtr, int> callback = (IntPtr w, IntPtr a) => ncurses_wclrtobot(window);
+            Func<IntPtr, IntPtr, int> callback = (IntPtr w, IntPtr a) => NativeNCurses.NCursesWrapper.wclrtobot(window);
             NativeNCurses.use_window_v(window, Marshal.GetFunctionPointerForDelegate(new NCURSES_WINDOW_CB(callback)), "wclrtobot");
         }
         #endregion
 
         #region wclrtoeol
-        /// <summary>
-        /// see <see cref="wclrtoeol"/>
-        /// </summary>
-        /// <returns>Constants.ERR on error or Constants.OK on success</returns>
-        [DllImport(Constants.DLLNAME, EntryPoint = "wclrtoeol")]
-        internal extern static int ncurses_wclrtoeol(IntPtr window);
-
         /// <summary>
         /// see <see cref="NativeStdScr.clrtoeol"/>
         /// <para />native method wrapped with verification.
@@ -703,7 +551,7 @@ namespace NCurses.Core.Interop
         /// <param name="window">A pointer to a window</param>
         public static void wclrtoeol(IntPtr window)
         {
-            NativeNCurses.VerifyNCursesMethod(() => ncurses_wclrtoeol(window), "wclrtoeol");
+            NativeNCurses.VerifyNCursesMethod(() => NativeNCurses.NCursesWrapper.wclrtoeol(window), "wclrtoeol");
         }
 
         /// <summary>
@@ -713,20 +561,12 @@ namespace NCurses.Core.Interop
         /// <param name="window">A pointer to a window</param>
         public static void wclrtoeol_t(IntPtr window)
         {
-            Func<IntPtr, IntPtr, int> callback = (IntPtr w, IntPtr a) => ncurses_wclrtoeol(window);
+            Func<IntPtr, IntPtr, int> callback = (IntPtr w, IntPtr a) => NativeNCurses.NCursesWrapper.wclrtoeol(window);
             NativeNCurses.use_window_v(window, Marshal.GetFunctionPointerForDelegate(new NCURSES_WINDOW_CB(callback)), "wclrtoeol");
         }
         #endregion
 
         #region wcolor_set
-        /// <summary>
-        /// see <see cref="wcolor_set"/>
-        /// </summary>
-        /// <param name="opts">reserved for future use. applications must supply a  null pointer.</param>
-        /// <returns>Constants.ERR on error or Constants.OK on success</returns>
-        [DllImport(Constants.DLLNAME, EntryPoint = "wcolor_set")]
-        internal extern static int ncurses_wcolor_set(IntPtr window, short pair, IntPtr opts);
-
         /// <summary>
         /// see <see cref="NativeStdScr.color_set"/>
         /// <para />native method wrapped with verification.
@@ -734,7 +574,7 @@ namespace NCurses.Core.Interop
         /// <param name="window">A pointer to a window</param>
         public static void wcolor_set(IntPtr window, short pair)
         {
-            NativeNCurses.VerifyNCursesMethod(() => ncurses_wcolor_set(window, pair, IntPtr.Zero), "wcolor_set");
+            NativeNCurses.VerifyNCursesMethod(() => NativeNCurses.NCursesWrapper.wcolor_set(window, pair, IntPtr.Zero), "wcolor_set");
         }
 
         /// <summary>
@@ -743,19 +583,12 @@ namespace NCurses.Core.Interop
         /// </summary>
         public static void wcolor_set_t(IntPtr window, short pair)
         {
-            Func<IntPtr, IntPtr, int> callback = (IntPtr w, IntPtr a) => ncurses_wcolor_set(window, pair, IntPtr.Zero);
+            Func<IntPtr, IntPtr, int> callback = (IntPtr w, IntPtr a) => NativeNCurses.NCursesWrapper.wcolor_set(window, pair, IntPtr.Zero);
             NativeNCurses.use_window_v(window, Marshal.GetFunctionPointerForDelegate(new NCURSES_WINDOW_CB(callback)), "wcolor_set");
         }
         #endregion
 
         #region wdelch
-        /// <summary>
-        /// see <see cref="wdelch"/>
-        /// </summary>
-        /// <returns>Constants.ERR on error or Constants.OK on success</returns>
-        [DllImport(Constants.DLLNAME, EntryPoint = "wdelch")]
-        internal extern static int ncurses_wdelch(IntPtr window);
-
         /// <summary>
         /// see <see cref="NativeStdScr.delch"/>
         /// <para />native method wrapped with verification.
@@ -763,7 +596,7 @@ namespace NCurses.Core.Interop
         /// <param name="window">A pointer to a window</param>
         public static void wdelch(IntPtr window)
         {
-            NativeNCurses.VerifyNCursesMethod(() => ncurses_wdelch(window), "wdelch");
+            NativeNCurses.VerifyNCursesMethod(() => NativeNCurses.NCursesWrapper.wdelch(window), "wdelch");
         }
 
         /// <summary>
@@ -772,19 +605,12 @@ namespace NCurses.Core.Interop
         /// </summary>
         public static void wdelch_t(IntPtr window)
         {
-            Func<IntPtr, IntPtr, int> callback = (IntPtr w, IntPtr a) => ncurses_wdelch(window);
+            Func<IntPtr, IntPtr, int> callback = (IntPtr w, IntPtr a) => NativeNCurses.NCursesWrapper.wdelch(window);
             NativeNCurses.use_window_v(window, Marshal.GetFunctionPointerForDelegate(new NCURSES_WINDOW_CB(callback)), "wdelch");
         }
         #endregion
 
         #region wdeleteln
-        /// <summary>
-        /// see <see cref="wdeleteln"/>
-        /// </summary>
-        /// <returns>Constants.ERR on error or Constants.OK on success</returns>
-        [DllImport(Constants.DLLNAME, EntryPoint = "wdeleteln")]
-        internal extern static int ncurses_wdeleteln(IntPtr window);
-
         /// <summary>
         /// see <see cref="NativeStdScr.deleteln"/>
         /// <para />native method wrapped with verification.
@@ -792,7 +618,7 @@ namespace NCurses.Core.Interop
         /// <param name="window">A pointer to a window</param>
         public static void wdeleteln(IntPtr window)
         {
-            NativeNCurses.VerifyNCursesMethod(() => ncurses_wdeleteln(window), "wdeleteln");
+            NativeNCurses.VerifyNCursesMethod(() => NativeNCurses.NCursesWrapper.wdeleteln(window), "wdeleteln");
         }
 
         /// <summary>
@@ -801,19 +627,12 @@ namespace NCurses.Core.Interop
         /// </summary>
         public static void wdeleteln_t(IntPtr window)
         {
-            Func<IntPtr, IntPtr, int> callback = (IntPtr w, IntPtr a) => ncurses_wdeleteln(window);
+            Func<IntPtr, IntPtr, int> callback = (IntPtr w, IntPtr a) => NativeNCurses.NCursesWrapper.wdeleteln(window);
             NativeNCurses.use_window_v(window, Marshal.GetFunctionPointerForDelegate(new NCURSES_WINDOW_CB(callback)), "wdeleteln");
         }
         #endregion
 
         #region wechochar
-        /// <summary>
-        /// see <see cref="wechochar"/>
-        /// </summary>
-        /// <returns>Constants.ERR on error or Constants.OK on success</returns>
-        [DllImport(Constants.DLLNAME, EntryPoint = "wechochar")]
-        internal extern static int ncurses_wechochar(IntPtr window, uint ch);
-
         /// <summary>
         /// see <see cref="NativeStdScr.echochar"/>
         /// <para />native method wrapped with verification.
@@ -821,7 +640,7 @@ namespace NCurses.Core.Interop
         /// <param name="window">A pointer to a window</param>
         public static void wechochar(IntPtr window, uint ch)
         {
-            NativeNCurses.VerifyNCursesMethod(() => ncurses_wechochar(window, ch), "wechochar");
+            NativeNCurses.VerifyNCursesMethod(() => NativeNCurses.NCursesWrapper.wechochar(window, ch), "wechochar");
         }
 
         /// <summary>
@@ -830,19 +649,12 @@ namespace NCurses.Core.Interop
         /// </summary>
         public static void wechochar_t(IntPtr window, uint ch)
         {
-            Func<IntPtr, IntPtr, int> callback = (IntPtr w, IntPtr a) => ncurses_wechochar(window, ch);
+            Func<IntPtr, IntPtr, int> callback = (IntPtr w, IntPtr a) => NativeNCurses.NCursesWrapper.wechochar(window, ch);
             NativeNCurses.use_window_v(window, Marshal.GetFunctionPointerForDelegate(new NCURSES_WINDOW_CB(callback)), "wechochar");
         }
         #endregion
 
         #region werase
-        /// <summary>
-        /// see <see cref="werase"/>
-        /// </summary>
-        /// <returns>Constants.ERR on error or Constants.OK on success</returns>
-        [DllImport(Constants.DLLNAME, EntryPoint = "werase")]
-        internal extern static int ncurses_werase(IntPtr window);
-
         /// <summary>
         /// see <see cref="NativeStdScr.erase"/>
         /// <para />native method wrapped with verification.
@@ -850,7 +662,7 @@ namespace NCurses.Core.Interop
         /// <param name="window">A pointer to a window</param>
         public static void werase(IntPtr window)
         {
-            NativeNCurses.VerifyNCursesMethod(() => ncurses_werase(window), "werase");
+            NativeNCurses.VerifyNCursesMethod(() => NativeNCurses.NCursesWrapper.werase(window), "werase");
         }
 
         /// <summary>
@@ -860,7 +672,7 @@ namespace NCurses.Core.Interop
         /// <param name="window">A pointer to a window</param>
         public static void werase_t(IntPtr window)
         {
-            Func<IntPtr, IntPtr, int> callback = (IntPtr w, IntPtr a) => ncurses_werase(window);
+            Func<IntPtr, IntPtr, int> callback = (IntPtr w, IntPtr a) => NativeNCurses.NCursesWrapper.werase(window);
             NativeNCurses.use_window_v(window, Marshal.GetFunctionPointerForDelegate(new NCURSES_WINDOW_CB(callback)), "werase");
         }
         #endregion
@@ -871,19 +683,13 @@ namespace NCurses.Core.Interop
         /// </summary>
         /// <param name="window">A pointer to a window</param>
         /// <returns>Current window background character/attribute pair</returns>
-        [DllImport(Constants.DLLNAME, EntryPoint = "getbkgd")]
-        public extern static uint getbkgd(IntPtr window);
+        public static uint getbkgd(IntPtr window)
+        {
+            return NativeNCurses.NCursesWrapper.getbkgd(window);
+        }
         #endregion
 
         #region wgetch
-        /// <summary>
-        /// see <see cref="<getch"/>
-        /// </summary>
-        /// <param name="window">A pointer to a window</param>
-        /// <returns>Constants.ERR on error or the read key code</returns>
-        [DllImport(Constants.DLLNAME, EntryPoint = "wgetch")]
-        internal extern static int ncurses_wgetch(IntPtr window);
-
         private static bool receivedModkey;
 
         /// <summary>
@@ -900,18 +706,11 @@ namespace NCurses.Core.Interop
             //    return NativeWindows.NativeWindowsConsoleCharInput(window);
             //}
             //else
-                return ncurses_wgetch(window);
+                return NativeNCurses.NCursesWrapper.wgetch(window);
         }
         #endregion
 
         #region wgetnstr
-        /// <summary>
-        /// see <see cref="wgetnstr"/>
-        /// </summary>
-        /// <returns>Constants.ERR on error or Constants.OK on success</returns>
-        [DllImport(Constants.DLLNAME, EntryPoint = "wgetnstr")]
-        internal extern static int ncurses_wgetnstr(IntPtr window, StringBuilder builder, int count);
-
         /// <summary>
         /// see <see cref="NativeStdScr.getnstr"/>
         /// <para />native method wrapped with verification.
@@ -919,18 +718,11 @@ namespace NCurses.Core.Interop
         /// <param name="window">A pointer to a window</param>
         public static void wgetnstr(IntPtr window, StringBuilder builder, int count)
         {
-            NativeNCurses.VerifyNCursesMethod(() => ncurses_wgetnstr(window, builder, count), "wgetnstr");
+            NativeNCurses.VerifyNCursesMethod(() => NativeNCurses.NCursesWrapper.wgetnstr(window, builder, count), "wgetnstr");
         }
         #endregion
 
         #region wgetstr
-        /// <summary>
-        /// see <see cref="wgetstr"/>
-        /// </summary>
-        /// <returns>Constants.ERR on error or Constants.OK on success</returns>
-        [DllImport(Constants.DLLNAME, EntryPoint = "wgetstr")]
-        internal extern static int ncurses_wgetstr(IntPtr window, StringBuilder str);
-
         /// <summary>
         /// see <see cref="NativeStdScr.getstr"/>
         /// <para />native method wrapped with verification.
@@ -938,18 +730,11 @@ namespace NCurses.Core.Interop
         /// <param name="window">A pointer to a window</param>
         public static void wgetstr(IntPtr window, StringBuilder builder)
         {
-            NativeNCurses.VerifyNCursesMethod(() => ncurses_wgetstr(window, builder), "wgetstr");
+            NativeNCurses.VerifyNCursesMethod(() => NativeNCurses.NCursesWrapper.wgetstr(window, builder), "wgetstr");
         }
         #endregion
 
         #region whline
-        /// <summary>
-        /// see <see cref="whline"/>
-        /// </summary>
-        /// <returns>Constants.ERR on error or Constants.OK on success</returns>
-        [DllImport(Constants.DLLNAME, EntryPoint = "whline")]
-        internal extern static int ncurses_whline(IntPtr window, uint ch, int count);
-
         /// <summary>
         /// see <see cref="NativeStdScr.hline"/>
         /// <para />native method wrapped with verification.
@@ -957,7 +742,7 @@ namespace NCurses.Core.Interop
         /// <param name="window">A pointer to a window</param>
         public static void whline(IntPtr window, uint ch, int count)
         {
-            NativeNCurses.VerifyNCursesMethod(() => ncurses_whline(window, ch, count), "whline");
+            NativeNCurses.VerifyNCursesMethod(() => NativeNCurses.NCursesWrapper.whline(window, ch, count), "whline");
         }
 
         /// <summary>
@@ -966,7 +751,7 @@ namespace NCurses.Core.Interop
         /// </summary>
         public static void whline_t(IntPtr window, uint ch, int count)
         {
-            Func<IntPtr, IntPtr, int> callback = (IntPtr w, IntPtr a) => ncurses_whline(window, ch, count);
+            Func<IntPtr, IntPtr, int> callback = (IntPtr w, IntPtr a) => NativeNCurses.NCursesWrapper.whline(window, ch, count);
             NativeNCurses.use_window_v(window, Marshal.GetFunctionPointerForDelegate(new NCURSES_WINDOW_CB(callback)), "whline");
         }
         #endregion
@@ -980,8 +765,10 @@ namespace NCurses.Core.Interop
         /// </summary>
         /// <param name="window">A pointer to a window</param>
         /// <param name="bf">enable/disable use of character insertion and deletion</param>
-        [DllImport(Constants.DLLNAME, EntryPoint = "idcok")]
-        public extern static void idcok(IntPtr window, bool bf);
+        public static void idcok(IntPtr window, bool bf)
+        {
+            NativeNCurses.NCursesWrapper.idcok(window, bf);
+        }
         #endregion
 
         #region idlok
@@ -998,8 +785,10 @@ namespace NCurses.Core.Interop
         /// <param name="window">A pointer to a window</param>
         /// <param name="bf"></param>
         /// <returns>Always returns Constants.OK</returns>
-        [DllImport(Constants.DLLNAME, EntryPoint = "idlok")]
-        public extern static int idlok(IntPtr window, bool bf);
+        public static int idlok(IntPtr window, bool bf)
+        {
+            return NativeNCurses.NCursesWrapper.idlok(window, bf);
+        }
         #endregion
 
         #region immedok
@@ -1011,8 +800,10 @@ namespace NCurses.Core.Interop
         /// </summary>
         /// <param name="window">A pointer to a window</param>
         /// <param name="bf">true if you wanne enble refresh on addch</param>
-        [DllImport(Constants.DLLNAME, EntryPoint = "immedok")]
-        public extern static void immedok(IntPtr window, bool bf);
+        public static void immedok(IntPtr window, bool bf)
+        {
+            NativeNCurses.NCursesWrapper.immedok(window, bf);
+        }
         #endregion
 
         #region winch
@@ -1021,18 +812,13 @@ namespace NCurses.Core.Interop
         /// </summary>
         /// <param name="window">A pointer to a window</param>
         /// <returns>characther with attributes at current position</returns>
-        [DllImport(Constants.DLLNAME, EntryPoint = "winch")]
-        public extern static uint winch(IntPtr window);
+        public static uint winch(IntPtr window)
+        {
+            return NativeNCurses.NCursesWrapper.winch(window);
+        }
         #endregion
 
         #region winchnstr
-        /// <summary>
-        /// see <see cref="winchnstr"/>
-        /// </summary>
-        /// <returns>Constants.ERR on error or Constants.OK on success</returns>
-        [DllImport(Constants.DLLNAME, EntryPoint = "winchnstr")]
-        internal extern static int ncurses_winchnstr(IntPtr window, IntPtr txt, int count);
-
         /// <summary>
         /// see <see cref="NativeStdScr.inchnstr"/>
         /// <para />native method wrapped with verification.
@@ -1046,7 +832,7 @@ namespace NCurses.Core.Interop
 
             try
             {
-                NativeNCurses.VerifyNCursesMethod(() => ncurses_winchnstr(window, arrayPtr, count), "winchnstr");
+                NativeNCurses.VerifyNCursesMethod(() => NativeNCurses.NCursesWrapper.winchnstr(window, arrayPtr, count), "winchnstr");
                 for (int i = 0; i < txt.Length; i++)
                     txt[i] = (uint)Marshal.ReadInt32(arrayPtr + (i * sizeof(uint)));
             }
@@ -1068,7 +854,7 @@ namespace NCurses.Core.Interop
             IntPtr arrayPtr = NativeNCurses.MarshallArray(txt, true, out totalSize);
             GC.AddMemoryPressure(totalSize);
 
-            Func<IntPtr, IntPtr, int> callback = (IntPtr w, IntPtr a) => ncurses_winchnstr(window, arrayPtr, count);
+            Func<IntPtr, IntPtr, int> callback = (IntPtr w, IntPtr a) => NativeNCurses.NCursesWrapper.winchnstr(window, arrayPtr, count);
 
             try
             {
@@ -1086,13 +872,6 @@ namespace NCurses.Core.Interop
 
         #region winchstr
         /// <summary>
-        /// see <see cref="winchnstr"/>
-        /// </summary>
-        /// <returns>Constants.ERR on error or Constants.OK on success</returns>
-        [DllImport(Constants.DLLNAME, EntryPoint = "winchstr")]
-        internal extern static int ncurses_winchstr(IntPtr window, IntPtr txt);
-
-        /// <summary>
         /// see <see cref="NativeStdScr.inchstr"/>
         /// <para />native method wrapped with verification.
         /// </summary>
@@ -1105,7 +884,7 @@ namespace NCurses.Core.Interop
 
             try
             {
-                NativeNCurses.VerifyNCursesMethod(() => ncurses_winchstr(window, arrayPtr), "winchstr");
+                NativeNCurses.VerifyNCursesMethod(() => NativeNCurses.NCursesWrapper.winchstr(window, arrayPtr), "winchstr");
                 for (int i = 0; i < txt.Length; i++)
                     txt[i] = (uint)Marshal.ReadInt32(arrayPtr + (i * sizeof(uint)));
             }
@@ -1126,7 +905,7 @@ namespace NCurses.Core.Interop
             IntPtr arrayPtr = NativeNCurses.MarshallArray(txt, true, out totalSize);
             GC.AddMemoryPressure(totalSize);
 
-            Func<IntPtr, IntPtr, int> callback = (IntPtr w, IntPtr a) => ncurses_winchstr(window, arrayPtr);
+            Func<IntPtr, IntPtr, int> callback = (IntPtr w, IntPtr a) => NativeNCurses.NCursesWrapper.winchstr(window, arrayPtr);
 
             try
             {
@@ -1142,20 +921,13 @@ namespace NCurses.Core.Interop
 
         #region winnstr
         /// <summary>
-        /// see <see cref="winnstr"/>
-        /// </summary>
-        /// <returns>Constants.ERR on error or Constants.OK on success</returns>
-        [DllImport(Constants.DLLNAME, EntryPoint = "winnstr")]
-        internal extern static int ncurses_winnstr(IntPtr window, StringBuilder str, int n);
-
-        /// <summary>
         /// see <see cref="NativeStdScr.innstr"/>
         /// <para />native method wrapped with verification.
         /// </summary>
         /// <param name="window">A pointer to a window</param>
         public static void winnstr(IntPtr window, StringBuilder str, int n)
         {
-            NativeNCurses.VerifyNCursesMethod(() => ncurses_winnstr(window, str, n), "winnstr");
+            NativeNCurses.VerifyNCursesMethod(() => NativeNCurses.NCursesWrapper.winnstr(window, str, n), "winnstr");
         }
 
         /// <summary>
@@ -1164,19 +936,12 @@ namespace NCurses.Core.Interop
         /// </summary>
         public static void winnstr_t(IntPtr window, StringBuilder str, int n)
         {
-            Func<IntPtr, IntPtr, int> callback = (IntPtr w, IntPtr a) => ncurses_winnstr(window, str, n);
+            Func<IntPtr, IntPtr, int> callback = (IntPtr w, IntPtr a) => NativeNCurses.NCursesWrapper.winnstr(window, str, n);
             NativeNCurses.use_window_v(window, Marshal.GetFunctionPointerForDelegate(new NCURSES_WINDOW_CB(callback)), "winnstr");
         }
         #endregion
 
         #region winsch
-        /// <summary>
-        /// see <see cref="winsch"/>
-        /// </summary>
-        /// <returns>Constants.ERR on error or Constants.OK on success</returns>
-        [DllImport(Constants.DLLNAME, EntryPoint = "winsch")]
-        internal extern static int ncurses_winsch(IntPtr window, uint ch);
-
         /// <summary>
         /// see <see cref="NativeStdScr.insch"/>
         /// <para />native method wrapped with verification.
@@ -1184,7 +949,7 @@ namespace NCurses.Core.Interop
         /// <param name="window">A pointer to a window</param>
         public static void winsch(IntPtr window, uint ch)
         {
-            NativeNCurses.VerifyNCursesMethod(() => ncurses_winsch(window, ch), "winsch");
+            NativeNCurses.VerifyNCursesMethod(() => NativeNCurses.NCursesWrapper.winsch(window, ch), "winsch");
         }
 
         /// <summary>
@@ -1193,19 +958,12 @@ namespace NCurses.Core.Interop
         /// </summary>
         public static void winsch_t(IntPtr window, uint ch)
         {
-            Func<IntPtr, IntPtr, int> callback = (IntPtr w, IntPtr a) => ncurses_winsch(window, ch);
+            Func<IntPtr, IntPtr, int> callback = (IntPtr w, IntPtr a) => NativeNCurses.NCursesWrapper.winsch(window, ch);
             NativeNCurses.use_window_v(window, Marshal.GetFunctionPointerForDelegate(new NCURSES_WINDOW_CB(callback)), "winsch");
         }
         #endregion
 
         #region winsdelln
-        /// <summary>
-        /// see <see cref="winsdelln"/>
-        /// </summary>
-        /// <returns>Constants.ERR on error or Constants.OK on success</returns>
-        [DllImport(Constants.DLLNAME, EntryPoint = "winsdelln")]
-        internal extern static int ncurses_winsdelln(IntPtr window, int n);
-
         /// <summary>
         /// see <see cref="NativeStdScr.insdelln"/>
         /// <para />native method wrapped with verification.
@@ -1213,7 +971,7 @@ namespace NCurses.Core.Interop
         /// <param name="window">A pointer to a window</param>
         public static void winsdelln(IntPtr window, int n)
         {
-            NativeNCurses.VerifyNCursesMethod(() => ncurses_winsdelln(window, n), "winsdelln");
+            NativeNCurses.VerifyNCursesMethod(() => NativeNCurses.NCursesWrapper.winsdelln(window, n), "winsdelln");
         }
 
         /// <summary>
@@ -1222,19 +980,12 @@ namespace NCurses.Core.Interop
         /// </summary>
         public static void winsdelln_t(IntPtr window, int n)
         {
-            Func<IntPtr, IntPtr, int> callback = (IntPtr w, IntPtr a) => ncurses_winsdelln(window, n);
+            Func<IntPtr, IntPtr, int> callback = (IntPtr w, IntPtr a) => NativeNCurses.NCursesWrapper.winsdelln(window, n);
             NativeNCurses.use_window_v(window, Marshal.GetFunctionPointerForDelegate(new NCURSES_WINDOW_CB(callback)), "winsdelln");
         }
         #endregion
 
         #region winsertln
-        /// <summary>
-        /// see <see cref="winsertln"/>
-        /// </summary>
-        /// <returns>Constants.ERR on error or Constants.OK on success</returns>
-        [DllImport(Constants.DLLNAME, EntryPoint = "winsertln")]
-        internal extern static int ncurses_winsertln(IntPtr window);
-
         /// <summary>
         /// see <see cref="NativeStdScr.insertln"/>
         /// <para />native method wrapped with verification.
@@ -1242,7 +993,7 @@ namespace NCurses.Core.Interop
         /// <param name="window">A pointer to a window</param>
         public static void winsertln(IntPtr window)
         {
-            NativeNCurses.VerifyNCursesMethod(() => ncurses_winsertln(window), "winsertln");
+            NativeNCurses.VerifyNCursesMethod(() => NativeNCurses.NCursesWrapper.winsertln(window), "winsertln");
         }
 
         /// <summary>
@@ -1251,19 +1002,12 @@ namespace NCurses.Core.Interop
         /// </summary>
         public static void winsertln_t(IntPtr window)
         {
-            Func<IntPtr, IntPtr, int> callback = (IntPtr w, IntPtr a) => ncurses_winsertln(window);
+            Func<IntPtr, IntPtr, int> callback = (IntPtr w, IntPtr a) => NativeNCurses.NCursesWrapper.winsertln(window);
             NativeNCurses.use_window_v(window, Marshal.GetFunctionPointerForDelegate(new NCURSES_WINDOW_CB(callback)), "winsertln");
         }
         #endregion
 
         #region winsnstr
-        /// <summary>
-        /// see <see cref="winsnstr"/>
-        /// </summary>
-        /// <returns>Constants.ERR on error or Constants.OK on success</returns>
-        [DllImport(Constants.DLLNAME, EntryPoint = "winsnstr")]
-        internal extern static int ncurses_winsnstr(IntPtr window, string str, int n);
-
         /// <summary>
         /// see <see cref="NativeStdScr.insnstr"/>
         /// <para />native method wrapped with verification.
@@ -1271,7 +1015,7 @@ namespace NCurses.Core.Interop
         /// <param name="window">A pointer to a window</param>
         public static void winsnstr(IntPtr window, string str, int n)
         {
-            NativeNCurses.VerifyNCursesMethod(() => ncurses_winsnstr(window, str, n), "winsnstr");
+            NativeNCurses.VerifyNCursesMethod(() => NativeNCurses.NCursesWrapper.winsnstr(window, str, n), "winsnstr");
         }
 
         /// <summary>
@@ -1280,19 +1024,12 @@ namespace NCurses.Core.Interop
         /// </summary>
         public static void winsnstr_t(IntPtr window, string str, int n)
         {
-            Func<IntPtr, IntPtr, int> callback = (IntPtr w, IntPtr a) => ncurses_winsnstr(window, str, n);
+            Func<IntPtr, IntPtr, int> callback = (IntPtr w, IntPtr a) => NativeNCurses.NCursesWrapper.winsnstr(window, str, n);
             NativeNCurses.use_window_v(window, Marshal.GetFunctionPointerForDelegate(new NCURSES_WINDOW_CB(callback)), "winsnstr");
         }
         #endregion
 
         #region winsstr
-        /// <summary>
-        /// see <see cref="winsstr"/>
-        /// </summary>
-        /// <returns>Constants.ERR on error or Constants.OK on success</returns>
-        [DllImport(Constants.DLLNAME, EntryPoint = "winsstr")]
-        internal extern static int ncurses_winsstr(IntPtr window, string str);
-
         /// <summary>
         /// see <see cref="NativeStdScr.insstr"/>
         /// <para />native method wrapped with verification.
@@ -1300,7 +1037,7 @@ namespace NCurses.Core.Interop
         /// <param name="window">A pointer to a window</param>
         public static void winsstr(IntPtr window, string str)
         {
-            NativeNCurses.VerifyNCursesMethod(() => ncurses_winsstr(window, str), "winsstr");
+            NativeNCurses.VerifyNCursesMethod(() => NativeNCurses.NCursesWrapper.winsstr(window, str), "winsstr");
         }
 
         /// <summary>
@@ -1309,19 +1046,12 @@ namespace NCurses.Core.Interop
         /// </summary>
         public static void winsstr_t(IntPtr window, string str)
         {
-            Func<IntPtr, IntPtr, int> callback = (IntPtr w, IntPtr a) => ncurses_winsstr(window, str);
+            Func<IntPtr, IntPtr, int> callback = (IntPtr w, IntPtr a) => NativeNCurses.NCursesWrapper.winsstr(window, str);
             NativeNCurses.use_window_v(window, Marshal.GetFunctionPointerForDelegate(new NCURSES_WINDOW_CB(callback)), "winsstr");
         }
         #endregion
 
         #region winstr
-        /// <summary>
-        /// see <see cref="winstr"/>
-        /// </summary>
-        /// <returns>Constants.ERR on error or Constants.OK on success</returns>
-        [DllImport(Constants.DLLNAME, EntryPoint = "winstr")]
-        internal extern static int ncurses_winstr(IntPtr window, StringBuilder str);
-
         /// <summary>
         /// see <see cref="NativeStdScr.instr"/>
         /// <para />native method wrapped with verification.
@@ -1329,7 +1059,7 @@ namespace NCurses.Core.Interop
         /// <param name="window">A pointer to a window</param>
         public static void winstr(IntPtr window, StringBuilder str)
         {
-            NativeNCurses.VerifyNCursesMethod(() => ncurses_winstr(window, str), "winstr");
+            NativeNCurses.VerifyNCursesMethod(() => NativeNCurses.NCursesWrapper.winstr(window, str), "winstr");
         }
 
         /// <summary>
@@ -1338,7 +1068,7 @@ namespace NCurses.Core.Interop
         /// </summary>
         public static void winstr_t(IntPtr window, StringBuilder str)
         {
-            Func<IntPtr, IntPtr, int> callback = (IntPtr w, IntPtr a) => ncurses_winstr(window, str);
+            Func<IntPtr, IntPtr, int> callback = (IntPtr w, IntPtr a) => NativeNCurses.NCursesWrapper.winstr(window, str);
             NativeNCurses.use_window_v(window, Marshal.GetFunctionPointerForDelegate(new NCURSES_WINDOW_CB(callback)), "winstr");
         }
         #endregion
@@ -1353,8 +1083,10 @@ namespace NCurses.Core.Interop
         /// <param name="window">A pointer to a window</param>
         /// <param name="line">The number of the line to check</param>
         /// <returns>true if line has been changed</returns>
-        [DllImport(Constants.DLLNAME, EntryPoint = "is_linetouched")]
-        public extern static bool is_linetouched(IntPtr window, int line);
+        public static bool is_linetouched(IntPtr window, int line)
+        {
+            return NativeNCurses.NCursesWrapper.is_linetouched(window, line);
+        }
         #endregion
 
         #region is_wintouched
@@ -1366,18 +1098,13 @@ namespace NCurses.Core.Interop
         /// </summary>
         /// <param name="window">A pointer to a window</param>
         /// <returns>true if window has been changed</returns>
-        [DllImport(Constants.DLLNAME, EntryPoint = "is_wintouched")]
-        public extern static bool is_wintouched(IntPtr window);
+        public static bool is_wintouched(IntPtr window)
+        {
+            return NativeNCurses.NCursesWrapper.is_wintouched(window);
+        }
         #endregion
 
         #region keypad
-        /// <summary>
-        /// see <see cref="keypad"/>
-        /// </summary>
-        /// <returns>Constants.ERR on error or Constants.OK on success</returns>
-        [DllImport(Constants.DLLNAME, EntryPoint = "keypad")]
-        internal extern static int ncurses_keypad(IntPtr window, bool bf);
-
         /// <summary>
         /// The keypad option enables the keypad of the user's terminal.If enabled(bf is TRUE), the user can press a func-
         /// tion key(such as an arrow key) and wgetch(3x) returns a
@@ -1394,7 +1121,7 @@ namespace NCurses.Core.Interop
         /// <param name="bf">enable/disable keypad</param>
         public static void keypad(IntPtr window, bool bf)
         {
-            NativeNCurses.VerifyNCursesMethod(() => ncurses_keypad(window, bf), "keypad");
+            NativeNCurses.VerifyNCursesMethod(() => NativeNCurses.NCursesWrapper.keypad(window, bf), "keypad");
         }
 
         /// <summary>
@@ -1403,19 +1130,12 @@ namespace NCurses.Core.Interop
         /// </summary>
         public static void keypad_t(IntPtr window, bool bf)
         {
-            Func<IntPtr, IntPtr, int> callback = (IntPtr w, IntPtr a) => ncurses_keypad(window, bf);
+            Func<IntPtr, IntPtr, int> callback = (IntPtr w, IntPtr a) => NativeNCurses.NCursesWrapper.keypad(window, bf);
             NativeNCurses.use_window_v(window, Marshal.GetFunctionPointerForDelegate(new NCURSES_WINDOW_CB(callback)), "winstr");
         }
         #endregion
 
         #region leaveok
-        /// <summary>
-        /// see <see cref="leaveok"/>
-        /// </summary>
-        /// <returns>Constants.ERR on error or Constants.OK on success</returns>
-        [DllImport(Constants.DLLNAME, EntryPoint = "leaveok")]
-        internal extern static int ncurses_leaveok(IntPtr window, bool bf);
-
         /// <summary>
         /// Normally, the hardware cursor is left at the location  of
         /// the window cursor being refreshed.The leaveok option allows the cursor to be left wherever the update happens  to
@@ -1427,7 +1147,7 @@ namespace NCurses.Core.Interop
         /// <param name="bf">enable/disable</param>
         public static void leaveok(IntPtr window, bool bf)
         {
-            NativeNCurses.VerifyNCursesMethod(() => ncurses_leaveok(window, bf), "leaveok");
+            NativeNCurses.VerifyNCursesMethod(() => NativeNCurses.NCursesWrapper.leaveok(window, bf), "leaveok");
         }
 
         /// <summary>
@@ -1436,19 +1156,12 @@ namespace NCurses.Core.Interop
         /// </summary>
         public static void leaveok_t(IntPtr window, bool bf)
         {
-            Func<IntPtr, IntPtr, int> callback = (IntPtr w, IntPtr a) => ncurses_leaveok(window, bf);
+            Func<IntPtr, IntPtr, int> callback = (IntPtr w, IntPtr a) => NativeNCurses.NCursesWrapper.leaveok(window, bf);
             NativeNCurses.use_window_v(window, Marshal.GetFunctionPointerForDelegate(new NCURSES_WINDOW_CB(callback)), "leaveok");
         }
         #endregion
 
         #region wmove
-        /// <summary>
-        /// see <see cref="wmove"/>
-        /// </summary>
-        /// <returns>Constants.ERR on error or Constants.OK on success</returns>
-        [DllImport(Constants.DLLNAME, EntryPoint = "wmove")]
-        internal extern static int ncurses_wmove(IntPtr window, int y, int x);
-
         /// <summary>
         /// see <see cref="NativeStdScr.move"/>
         /// <para />native method wrapped with verification.
@@ -1456,7 +1169,7 @@ namespace NCurses.Core.Interop
         /// <param name="window">A pointer to a window</param>
         public static void wmove(IntPtr window, int y, int x)
         {
-            NativeNCurses.VerifyNCursesMethod(() => ncurses_wmove(window, y, x), "wmove");
+            NativeNCurses.VerifyNCursesMethod(() => NativeNCurses.NCursesWrapper.wmove(window, y, x), "wmove");
         }
 
         /// <summary>
@@ -1465,19 +1178,12 @@ namespace NCurses.Core.Interop
         /// </summary>
         public static void wmove_t(IntPtr window, int y, int x)
         {
-            Func<IntPtr, IntPtr, int> callback = (IntPtr w, IntPtr a) => ncurses_wmove(window, y, x);
+            Func<IntPtr, IntPtr, int> callback = (IntPtr w, IntPtr a) => NativeNCurses.NCursesWrapper.wmove(window, y, x);
             NativeNCurses.use_window_v(window, Marshal.GetFunctionPointerForDelegate(new NCURSES_WINDOW_CB(callback)), "wmove");
         }
         #endregion
 
         #region mvwaddch
-        /// <summary>
-        /// see <see cref="mvwaddch(IntPtr, int, int, uint)"/>
-        /// </summary>
-        /// <returns>Constants.ERR on error or Constants.OK on success</returns>
-        [DllImport(Constants.DLLNAME, EntryPoint = "mvwaddch")]
-        internal extern static int ncurses_mvwaddch(IntPtr window, int y, int x, uint ch);
-
         /// <summary>
         /// move cursor position to line <paramref name="y"/> and column <paramref name="x"/> and add character, see <see cref="waddch(IntPtr, uint)"/>
         /// <para />native method wrapped with verification.
@@ -1485,7 +1191,7 @@ namespace NCurses.Core.Interop
         /// <param name="window">A pointer to a window</param>
         public static void mvwaddch(IntPtr window, int y, int x, uint ch)
         {
-            NativeNCurses.VerifyNCursesMethod(() => ncurses_mvwaddch(window, y, x, ch), "mvwaddch");
+            NativeNCurses.VerifyNCursesMethod(() => NativeNCurses.NCursesWrapper.mvwaddch(window, y, x, ch), "mvwaddch");
         }
 
         /// <summary>
@@ -1494,19 +1200,12 @@ namespace NCurses.Core.Interop
         /// </summary>
         public static void mvwaddch_t(IntPtr window, int y, int x, uint ch)
         {
-            Func<IntPtr, IntPtr, int> callback = (IntPtr w, IntPtr a) => ncurses_mvwaddch(window, y, x, ch);
+            Func<IntPtr, IntPtr, int> callback = (IntPtr w, IntPtr a) => NativeNCurses.NCursesWrapper.mvwaddch(window, y, x, ch);
             NativeNCurses.use_window_v(window, Marshal.GetFunctionPointerForDelegate(new NCURSES_WINDOW_CB(callback)), "mvwaddch");
         }
         #endregion
 
         #region mvwaddchnstr
-        /// <summary>
-        /// see <see cref="mvwaddchnstr(IntPtr, int, int, IntPtr, int)"/>
-        /// </summary>
-        /// <returns>Constants.ERR on error or Constants.OK on success</returns>
-        [DllImport(Constants.DLLNAME, EntryPoint = "mvwaddchnstr")]
-        internal extern static int ncurses_mvwaddchnstr(IntPtr window, int y, int x, IntPtr chstr, int n);
-
         /// <summary>
         /// move cursor position to line <paramref name="y"/> and column <paramref name="x"/> and see <see cref="waddchnstr(IntPtr, IntPtr, int)"/>
         /// <para />native method wrapped with verification.
@@ -1514,7 +1213,7 @@ namespace NCurses.Core.Interop
         /// <param name="window">A pointer to a window</param>
         public static void mvwaddchnstr(IntPtr window, int y, int x, IntPtr chstr, int n)
         {
-            NativeNCurses.VerifyNCursesMethod(() => ncurses_mvwaddchnstr(window, y, x, chstr, n), "mvwaddchnstr");
+            NativeNCurses.VerifyNCursesMethod(() => NativeNCurses.NCursesWrapper.mvwaddchnstr(window, y, x, chstr, n), "mvwaddchnstr");
         }
 
         /// <summary>
@@ -1523,19 +1222,12 @@ namespace NCurses.Core.Interop
         /// </summary>
         public static void mvwaddchnstr_t(IntPtr window, int y, int x, IntPtr chstr, int n)
         {
-            Func<IntPtr, IntPtr, int> callback = (IntPtr w, IntPtr a) => ncurses_mvwaddchnstr(window, y, x, chstr, n);
+            Func<IntPtr, IntPtr, int> callback = (IntPtr w, IntPtr a) => NativeNCurses.NCursesWrapper.mvwaddchnstr(window, y, x, chstr, n);
             NativeNCurses.use_window_v(window, Marshal.GetFunctionPointerForDelegate(new NCURSES_WINDOW_CB(callback)), "mvwaddchnstr");
         }
         #endregion
 
         #region mvwaddchstr
-        /// <summary>
-        /// see <see cref="mvwaddchstr(IntPtr, int, int, IntPtr)"/>
-        /// </summary>
-        /// <returns>Constants.ERR on error or Constants.OK on success</returns>
-        [DllImport(Constants.DLLNAME, EntryPoint = "mvwaddchstr")]
-        internal extern static int ncurses_mvwaddchstr(IntPtr window, int y, int x, IntPtr chstr);
-
         /// <summary>
         /// move cursor position to line <paramref name="y"/> and column <paramref name="x"/> and see <see cref="waddchstr(IntPtr, IntPtr)"/>
         /// <para />native method wrapped with verification.
@@ -1543,7 +1235,7 @@ namespace NCurses.Core.Interop
         /// <param name="window">A pointer to a window</param>
         public static void mvwaddchstr(IntPtr window, int y, int x, IntPtr chstr)
         {
-            NativeNCurses.VerifyNCursesMethod(() => ncurses_mvwaddchstr(window, y, x, chstr), "mvwaddchstr");
+            NativeNCurses.VerifyNCursesMethod(() => NativeNCurses.NCursesWrapper.mvwaddchstr(window, y, x, chstr), "mvwaddchstr");
         }
 
         /// <summary>
@@ -1552,19 +1244,12 @@ namespace NCurses.Core.Interop
         /// </summary>
         public static void mvwaddchstr_t(IntPtr window, int y, int x, IntPtr chstr)
         {
-            Func<IntPtr, IntPtr, int> callback = (IntPtr w, IntPtr a) => ncurses_mvwaddchstr(window, y, x, chstr);
+            Func<IntPtr, IntPtr, int> callback = (IntPtr w, IntPtr a) => NativeNCurses.NCursesWrapper.mvwaddchstr(window, y, x, chstr);
             NativeNCurses.use_window_v(window, Marshal.GetFunctionPointerForDelegate(new NCURSES_WINDOW_CB(callback)), "mvwaddchstr");
         }
         #endregion
 
         #region mvwaddnstr
-        /// <summary>
-        /// see <see cref="mvwaddnstr(IntPtr, int, int, string, int)"/>
-        /// </summary>
-        /// <returns>Constants.ERR on error or Constants.OK on success</returns>
-        [DllImport(Constants.DLLNAME, EntryPoint = "mvwaddnstr")]
-        internal extern static int ncurses_mvwaddnstr(IntPtr window, int y, int x, string txt, int n);
-
         /// <summary>
         /// move cursor position to line <paramref name="y"/> and column <paramref name="x"/> and see <see cref="waddnstr(IntPtr, string, int)"/>
         /// <para />native method wrapped with verification.
@@ -1572,7 +1257,7 @@ namespace NCurses.Core.Interop
         /// <param name="window">A pointer to a window</param>
         public static void mvwaddnstr(IntPtr window, int y, int x, string txt, int n)
         {
-            NativeNCurses.VerifyNCursesMethod(() => ncurses_mvwaddnstr(window, y, x, txt, n), "mvwaddnstr");
+            NativeNCurses.VerifyNCursesMethod(() => NativeNCurses.NCursesWrapper.mvwaddnstr(window, y, x, txt, n), "mvwaddnstr");
         }
 
         /// <summary>
@@ -1581,19 +1266,12 @@ namespace NCurses.Core.Interop
         /// </summary>
         public static void mvwaddnstr_t(IntPtr window, int y, int x, string txt, int n)
         {
-            Func<IntPtr, IntPtr, int> callback = (IntPtr w, IntPtr a) => ncurses_mvwaddnstr(window, y, x, txt, n);
+            Func<IntPtr, IntPtr, int> callback = (IntPtr w, IntPtr a) => NativeNCurses.NCursesWrapper.mvwaddnstr(window, y, x, txt, n);
             NativeNCurses.use_window_v(window, Marshal.GetFunctionPointerForDelegate(new NCURSES_WINDOW_CB(callback)), "mvwaddchstr");
         }
         #endregion
 
         #region mvwaddstr
-        /// <summary>
-        /// see <see cref="mvwaddstr(IntPtr, int, int, string)"/>
-        /// </summary>
-        /// <returns>Constants.ERR on error or Constants.OK on success</returns>
-        [DllImport(Constants.DLLNAME, EntryPoint = "mvwaddstr")]
-        internal extern static int ncurses_mvwaddstr(IntPtr window, int y, int x, string txt);
-
         /// <summary>
         /// move cursor position to line <paramref name="y"/> and column <paramref name="x"/> and see <see cref="waddstr(IntPtr, string)"/>
         /// <para />native method wrapped with verification.
@@ -1601,7 +1279,7 @@ namespace NCurses.Core.Interop
         /// <param name="window">A pointer to a window</param>
         public static void mvwaddstr(IntPtr window, int y, int x, string txt)
         {
-            NativeNCurses.VerifyNCursesMethod(() => ncurses_mvwaddstr(window, y, x, txt), "mvwaddstr");
+            NativeNCurses.VerifyNCursesMethod(() => NativeNCurses.NCursesWrapper.mvwaddstr(window, y, x, txt), "mvwaddstr");
         }
 
         /// <summary>
@@ -1610,19 +1288,12 @@ namespace NCurses.Core.Interop
         /// </summary>
         public static void mvwaddstr_t(IntPtr window, int y, int x, string txt)
         {
-            Func<IntPtr, IntPtr, int> callback = (IntPtr w, IntPtr a) => ncurses_mvwaddstr(window, y, x, txt);
+            Func<IntPtr, IntPtr, int> callback = (IntPtr w, IntPtr a) => NativeNCurses.NCursesWrapper.mvwaddstr(window, y, x, txt);
             NativeNCurses.use_window_v(window, Marshal.GetFunctionPointerForDelegate(new NCURSES_WINDOW_CB(callback)), "mvwaddstr");
         }
         #endregion
 
         #region mvwchgat
-        /// <summary>
-        /// see <see cref="mvwchgat(IntPtr, int, int, int, uint, short)"/>
-        /// </summary>
-        /// <returns>Constants.ERR on error or Constants.OK on success</returns>
-        [DllImport(Constants.DLLNAME, EntryPoint = "mvwchgat")]
-        internal extern static int ncurses_mvwchgat(IntPtr window, int y, int x, int number, uint attrs, short pair);
-
         /// <summary>
         /// move cursor position to line <paramref name="y"/> and column <paramref name="x"/> and see <see cref="wchgat(IntPtr, int, uint, short)"/>
         /// <para />native method wrapped with verification.
@@ -1632,7 +1303,7 @@ namespace NCurses.Core.Interop
         /// <param name="x">the column number to move to</param>
         public static void mvwchgat(IntPtr window, int y, int x, int number, uint attrs, short pair)
         {
-            NativeNCurses.VerifyNCursesMethod(() => ncurses_mvwchgat(window, y, x, number, attrs, pair), "mvwchgat");
+            NativeNCurses.VerifyNCursesMethod(() => NativeNCurses.NCursesWrapper.mvwchgat(window, y, x, number, attrs, pair), "mvwchgat");
         }
 
         /// <summary>
@@ -1641,19 +1312,12 @@ namespace NCurses.Core.Interop
         /// </summary>
         public static void mvwchgat_t(IntPtr window, int y, int x, int number, uint attrs, short pair)
         {
-            Func<IntPtr, IntPtr, int> callback = (IntPtr w, IntPtr a) => ncurses_mvwchgat(window, y, x, number, attrs, pair);
+            Func<IntPtr, IntPtr, int> callback = (IntPtr w, IntPtr a) => NativeNCurses.NCursesWrapper.mvwchgat(window, y, x, number, attrs, pair);
             NativeNCurses.use_window_v(window, Marshal.GetFunctionPointerForDelegate(new NCURSES_WINDOW_CB(callback)), "mvwaddstr");
         }
         #endregion
 
         #region mvwdelch
-        /// <summary>
-        /// see <see cref="mvwdelch(IntPtr, int, int)"/>
-        /// </summary>
-        /// <returns>Constants.ERR on error or Constants.OK on success</returns>
-        [DllImport(Constants.DLLNAME, EntryPoint = "mvwdelch")]
-        internal extern static int ncurses_mvwdelch(IntPtr window, int y, int x);
-
         /// <summary>
         /// move cursor position to line <paramref name="y"/> and column <paramref name="x"/> and see <see cref="wdelch"/>
         /// <para />native method wrapped with verification.
@@ -1663,7 +1327,7 @@ namespace NCurses.Core.Interop
         /// <param name="x">the column number to move to</param>
         public static void mvwdelch(IntPtr window, int y, int x)
         {
-            NativeNCurses.VerifyNCursesMethod(() => ncurses_mvwdelch(window, y, x), "mvwdelch");
+            NativeNCurses.VerifyNCursesMethod(() => NativeNCurses.NCursesWrapper.mvwdelch(window, y, x), "mvwdelch");
         }
 
         /// <summary>
@@ -1672,19 +1336,12 @@ namespace NCurses.Core.Interop
         /// </summary>
         public static void mvwdelch_t(IntPtr window, int y, int x)
         {
-            Func<IntPtr, IntPtr, int> callback = (IntPtr w, IntPtr a) => ncurses_mvwdelch(window, y, x);
+            Func<IntPtr, IntPtr, int> callback = (IntPtr w, IntPtr a) => NativeNCurses.NCursesWrapper.mvwdelch(window, y, x);
             NativeNCurses.use_window_v(window, Marshal.GetFunctionPointerForDelegate(new NCURSES_WINDOW_CB(callback)), "mvwdelch");
         }
         #endregion
 
         #region mvwgetch
-        /// <summary>
-        /// see <see cref="mvwgetch(IntPtr, int, int)"/>
-        /// </summary>
-        /// <returns>Constants.ERR on error or Constants.OK on success</returns>
-        [DllImport(Constants.DLLNAME, EntryPoint = "mvwgetch")]
-        internal extern static int ncurses_mvwgetch(IntPtr window, int y, int x);
-
         /// <summary>
         /// move cursor position to line <paramref name="y"/> and column <paramref name="x"/> and see <see cref="wgetch"/>
         /// <para />native method wrapped with verification.
@@ -1694,7 +1351,7 @@ namespace NCurses.Core.Interop
         /// <param name="x">the column number to move to</param>
         public static void mvwgetch(IntPtr window, int y, int x)
         {
-            NativeNCurses.VerifyNCursesMethod(() => ncurses_mvwgetch(window, y, x), "mvwgetch");
+            NativeNCurses.VerifyNCursesMethod(() => NativeNCurses.NCursesWrapper.mvwgetch(window, y, x), "mvwgetch");
         }
 
         /// <summary>
@@ -1703,19 +1360,12 @@ namespace NCurses.Core.Interop
         /// </summary>
         public static void mvwgetch_t(IntPtr window, int y, int x)
         {
-            Func<IntPtr, IntPtr, int> callback = (IntPtr w, IntPtr a) => ncurses_mvwgetch(window, y, x);
+            Func<IntPtr, IntPtr, int> callback = (IntPtr w, IntPtr a) => NativeNCurses.NCursesWrapper.mvwgetch(window, y, x);
             NativeNCurses.use_window_v(window, Marshal.GetFunctionPointerForDelegate(new NCURSES_WINDOW_CB(callback)), "mvwgetch");
         }
         #endregion
 
         #region mvwgetnstr
-        /// <summary>
-        /// see <see cref="mvwgetnstr(IntPtr, int, int, StringBuilder, int)"/>
-        /// </summary>
-        /// <returns>Constants.ERR on error or Constants.OK on success</returns>
-        [DllImport(Constants.DLLNAME, EntryPoint = "mvwgetnstr")]
-        internal extern static int ncurses_mvwgetnstr(IntPtr window, int y, int x, StringBuilder str, int count);
-
         /// <summary>
         /// move cursor position to line <paramref name="y"/> and column <paramref name="x"/> and see <see cref="wgetnstr(IntPtr, StringBuilder, int)"/>
         /// <para />native method wrapped with verification.
@@ -1725,7 +1375,7 @@ namespace NCurses.Core.Interop
         /// <param name="x">the column number to move to</param>
         public static void mvwgetnstr(IntPtr window, int y, int x, StringBuilder str, int count)
         {
-            NativeNCurses.VerifyNCursesMethod(() => ncurses_mvwgetnstr(window, y, x, str, count), "mvwgetnstr");
+            NativeNCurses.VerifyNCursesMethod(() => NativeNCurses.NCursesWrapper.mvwgetnstr(window, y, x, str, count), "mvwgetnstr");
         }
 
         /// <summary>
@@ -1734,19 +1384,12 @@ namespace NCurses.Core.Interop
         /// </summary>
         public static void mvwgetnstr_t(IntPtr window, int y, int x, StringBuilder str, int count)
         {
-            Func<IntPtr, IntPtr, int> callback = (IntPtr w, IntPtr a) => ncurses_mvwgetnstr(window, y, x, str, count);
+            Func<IntPtr, IntPtr, int> callback = (IntPtr w, IntPtr a) => NativeNCurses.NCursesWrapper.mvwgetnstr(window, y, x, str, count);
             NativeNCurses.use_window_v(window, Marshal.GetFunctionPointerForDelegate(new NCURSES_WINDOW_CB(callback)), "mvwgetnstr");
         }
         #endregion
 
         #region mvwgetstr
-        /// <summary>
-        /// see <see cref="mvwgetstr(IntPtr, int, int, StringBuilder)"/>
-        /// </summary>
-        /// <returns>Constants.ERR on error or Constants.OK on success</returns>
-        [DllImport(Constants.DLLNAME, EntryPoint = "mvwgetstr")]
-        internal extern static int ncurses_mvwgetstr(IntPtr window, int y, int x, StringBuilder str);
-
         /// <summary>
         /// move cursor position to line <paramref name="y"/> and column <paramref name="x"/> and see <see cref="wgetstr(IntPtr, StringBuilder)"/>
         /// <para />native method wrapped with verification.
@@ -1756,7 +1399,7 @@ namespace NCurses.Core.Interop
         /// <param name="x">the column number to move to</param>
         public static void mvwgetstr(IntPtr window, int y, int x, StringBuilder str)
         {
-            NativeNCurses.VerifyNCursesMethod(() => ncurses_mvwgetstr(window, y, x, str), "mvwgetstr");
+            NativeNCurses.VerifyNCursesMethod(() => NativeNCurses.NCursesWrapper.mvwgetstr(window, y, x, str), "mvwgetstr");
         }
 
         /// <summary>
@@ -1765,19 +1408,12 @@ namespace NCurses.Core.Interop
         /// </summary>
         public static void mvwgetstr_t(IntPtr window, int y, int x, StringBuilder str)
         {
-            Func<IntPtr, IntPtr, int> callback = (IntPtr w, IntPtr a) => ncurses_mvwgetstr(window, y, x, str);
+            Func<IntPtr, IntPtr, int> callback = (IntPtr w, IntPtr a) => NativeNCurses.NCursesWrapper.mvwgetstr(window, y, x, str);
             NativeNCurses.use_window_v(window, Marshal.GetFunctionPointerForDelegate(new NCURSES_WINDOW_CB(callback)), "mvwgetstr");
         }
         #endregion
 
         #region mvwhline
-        /// <summary>
-        /// see <see cref="mvwhline(IntPtr, int, int, uint, int)"/>
-        /// </summary>
-        /// <returns>Constants.ERR on error or Constants.OK on success</returns>
-        [DllImport(Constants.DLLNAME, EntryPoint = "mvwhline")]
-        internal extern static int ncurses_mvwhline(IntPtr window, int y, int x, uint ch, int count);
-
         /// <summary>
         /// move cursor position to line <paramref name="y"/> and column <paramref name="x"/> and see <see cref="whline(IntPtr, uint, int)"/>
         /// <para />native method wrapped with verification.
@@ -1787,7 +1423,7 @@ namespace NCurses.Core.Interop
         /// <param name="x">the column number to move to</param>
         public static void mvwhline(IntPtr window, int y, int x, uint ch, int count)
         {
-            NativeNCurses.VerifyNCursesMethod(() => ncurses_mvwhline(window, y, x, ch, count), "mvwhline");
+            NativeNCurses.VerifyNCursesMethod(() => NativeNCurses.NCursesWrapper.mvwhline(window, y, x, ch, count), "mvwhline");
         }
 
         /// <summary>
@@ -1796,7 +1432,7 @@ namespace NCurses.Core.Interop
         /// </summary>
         public static void mvwhline_t(IntPtr window, int y, int x, uint ch, int count)
         {
-            Func<IntPtr, IntPtr, int> callback = (IntPtr w, IntPtr a) => ncurses_mvwhline(window, y, x, ch, count);
+            Func<IntPtr, IntPtr, int> callback = (IntPtr w, IntPtr a) => NativeNCurses.NCursesWrapper.mvwhline(window, y, x, ch, count);
             NativeNCurses.use_window_v(window, Marshal.GetFunctionPointerForDelegate(new NCURSES_WINDOW_CB(callback)), "mvwhline");
         }
         #endregion
@@ -1805,18 +1441,13 @@ namespace NCurses.Core.Interop
         /// <summary>
         /// see <see cref="NativeStdScr.mvinch(int, int)"/>
         /// </summary>
-        [DllImport(Constants.DLLNAME, EntryPoint = "mvwinch")]
-        public extern static uint ncurses_mvwinch(IntPtr window, int y, int x);
+        public static uint mvwinch(IntPtr window, int y, int x)
+        {
+            return NativeNCurses.NCursesWrapper.mvwinch(window, y, x);
+        }
         #endregion
 
         #region mvwinchnstr
-        /// <summary>
-        /// see <see cref="mvwinchnstr(IntPtr, int, int, IntPtr, int)"/>
-        /// </summary>
-        /// <returns>Constants.ERR on error or Constants.OK on success</returns>
-        [DllImport(Constants.DLLNAME, EntryPoint = "mvwinchnstr")]
-        internal extern static int ncurses_mvwinchnstr(IntPtr window, int y, int x, IntPtr txt, int count);
-
         /// <summary>
         /// move cursor position to line <paramref name="y"/> and column <paramref name="x"/> and see <see cref="winchnstr(IntPtr, IntPtr, int)"/>
         /// <para />native method wrapped with verification.
@@ -1830,7 +1461,7 @@ namespace NCurses.Core.Interop
 
             try
             {
-                NativeNCurses.VerifyNCursesMethod(() => ncurses_mvwinchnstr(window, y, x, arrayPtr, count), "mvwinchnstr");
+                NativeNCurses.VerifyNCursesMethod(() => NativeNCurses.NCursesWrapper.mvwinchnstr(window, y, x, arrayPtr, count), "mvwinchnstr");
             }
             finally
             {
@@ -1849,7 +1480,7 @@ namespace NCurses.Core.Interop
             IntPtr arrayPtr = NativeNCurses.MarshallArray(txt, true, out totalSize);
             GC.AddMemoryPressure(totalSize);
 
-            Func<IntPtr, IntPtr, int> callback = (IntPtr w, IntPtr a) => ncurses_mvwinchnstr(window, y, x, arrayPtr, count);
+            Func<IntPtr, IntPtr, int> callback = (IntPtr w, IntPtr a) => NativeNCurses.NCursesWrapper.mvwinchnstr(window, y, x, arrayPtr, count);
 
             try
             {
@@ -1865,13 +1496,6 @@ namespace NCurses.Core.Interop
 
         #region mvwinchstr
         /// <summary>
-        /// see <see cref="mvwinchstr(IntPtr, int, int, IntPtr)"/>
-        /// </summary>
-        /// <returns>Constants.ERR on error or Constants.OK on success</returns>
-        [DllImport(Constants.DLLNAME, EntryPoint = "mvwinchstr")]
-        internal extern static int ncurses_mvwinchstr(IntPtr window, int y, int x, IntPtr txt);
-
-        /// <summary>
         /// move cursor position to line <paramref name="y"/> and column <paramref name="x"/> and see <see cref="winchstr(IntPtr, IntPtr)"/>
         /// <para />native method wrapped with verification.
         /// </summary>
@@ -1886,7 +1510,7 @@ namespace NCurses.Core.Interop
 
             try
             {
-                NativeNCurses.VerifyNCursesMethod(() => ncurses_mvwinchstr(window, y, x, arrayPtr), "mvwinchstr");
+                NativeNCurses.VerifyNCursesMethod(() => NativeNCurses.NCursesWrapper.mvwinchstr(window, y, x, arrayPtr), "mvwinchstr");
             }
             finally
             {
@@ -1905,7 +1529,7 @@ namespace NCurses.Core.Interop
             IntPtr arrayPtr = NativeNCurses.MarshallArray(txt, true, out totalSize);
             GC.AddMemoryPressure(totalSize);
 
-            Func<IntPtr, IntPtr, int> callback = (IntPtr w, IntPtr a) => ncurses_mvwinchstr(window, y, x, arrayPtr);
+            Func<IntPtr, IntPtr, int> callback = (IntPtr w, IntPtr a) => NativeNCurses.NCursesWrapper.mvwinchstr(window, y, x, arrayPtr);
 
             try
             {
@@ -1921,13 +1545,6 @@ namespace NCurses.Core.Interop
 
         #region mvwinnstr
         /// <summary>
-        /// see <see cref="mvwinnstr"/>
-        /// </summary>
-        /// <returns>Constants.ERR on error or Constants.OK on success</returns>
-        [DllImport(Constants.DLLNAME, EntryPoint = "mvwinnstr")]
-        internal extern static int ncurses_mvwinnstr(IntPtr window, int y, int x, StringBuilder str, int n);
-
-        /// <summary>
         /// move cursor position to line <paramref name="y"/> and column <paramref name="x"/> and see <see cref="winnstr(IntPtr, StringBuilder, int)"/>
         /// <para />native method wrapped with verification.
         /// </summary>
@@ -1936,7 +1553,7 @@ namespace NCurses.Core.Interop
         /// <param name="x">the column number to move to</param>
         public static void mvwinnstr(IntPtr window, int y, int x, StringBuilder str, int n)
         {
-            NativeNCurses.VerifyNCursesMethod(() => ncurses_mvwinnstr(window, y, x, str, n), "mvwinnstr");
+            NativeNCurses.VerifyNCursesMethod(() => NativeNCurses.NCursesWrapper.mvwinnstr(window, y, x, str, n), "mvwinnstr");
         }
 
         /// <summary>
@@ -1945,19 +1562,12 @@ namespace NCurses.Core.Interop
         /// </summary>
         public static void mvwinnstr_t(IntPtr window, int y, int x, StringBuilder str, int n)
         {
-            Func<IntPtr, IntPtr, int> callback = (IntPtr w, IntPtr a) => ncurses_mvwinnstr(window, y, x, str, n);
+            Func<IntPtr, IntPtr, int> callback = (IntPtr w, IntPtr a) => NativeNCurses.NCursesWrapper.mvwinnstr(window, y, x, str, n);
             NativeNCurses.use_window_v(window, Marshal.GetFunctionPointerForDelegate(new NCURSES_WINDOW_CB(callback)), "mvwinnstr");
         }
         #endregion
 
         #region mvwinsch
-        /// <summary>
-        /// see <see cref="mvwinsch(IntPtr, int, int, uint)"/>
-        /// </summary>
-        /// <returns>Constants.ERR on error or Constants.OK on success</returns>
-        [DllImport(Constants.DLLNAME, EntryPoint = "mvwinsch")]
-        internal extern static int ncurses_mvwinsch(IntPtr window, int y, int x, uint ch);
-
         /// <summary>
         /// move cursor position to line <paramref name="y"/> and column <paramref name="x"/> and see <see cref="winsch(IntPtr, uint)"/>
         /// <para />native method wrapped with verification.
@@ -1967,7 +1577,7 @@ namespace NCurses.Core.Interop
         /// <param name="x">the column number to move to</param>
         public static void mvwinsch(IntPtr window, int y, int x, uint ch)
         {
-            NativeNCurses.VerifyNCursesMethod(() => ncurses_mvwinsch(window, y, x, ch), "mvwinsch");
+            NativeNCurses.VerifyNCursesMethod(() => NativeNCurses.NCursesWrapper.mvwinsch(window, y, x, ch), "mvwinsch");
         }
 
         /// <summary>
@@ -1976,19 +1586,12 @@ namespace NCurses.Core.Interop
         /// </summary>
         public static void mvwinsch_t(IntPtr window, int y, int x, uint ch)
         {
-            Func<IntPtr, IntPtr, int> callback = (IntPtr w, IntPtr a) => ncurses_mvwinsch(window, y, x, ch);
+            Func<IntPtr, IntPtr, int> callback = (IntPtr w, IntPtr a) => NativeNCurses.NCursesWrapper.mvwinsch(window, y, x, ch);
             NativeNCurses.use_window_v(window, Marshal.GetFunctionPointerForDelegate(new NCURSES_WINDOW_CB(callback)), "mvwinsch");
         }
         #endregion
 
         #region mvwinsnstr
-        /// <summary>
-        /// see <see cref="mvwinsnstr(IntPtr, int, int, string, int)"/>
-        /// </summary>
-        /// <returns>Constants.ERR on error or Constants.OK on success</returns>
-        [DllImport(Constants.DLLNAME, EntryPoint = "mvwinsnstr")]
-        internal extern static int ncurses_mvwinsnstr(IntPtr window, int y, int x, string str, int n);
-
         /// <summary>
         /// move cursor position to line <paramref name="y"/> and column <paramref name="x"/> and see <see cref="winsnstr(IntPtr, string, int)"/>
         /// <para />native method wrapped with verification.
@@ -1998,7 +1601,7 @@ namespace NCurses.Core.Interop
         /// <param name="x">the column number to move to</param>
         public static void mvwinsnstr(IntPtr window, int y, int x, string str, int n)
         {
-            NativeNCurses.VerifyNCursesMethod(() => ncurses_mvwinsnstr(window, y, x, str, n), "mvwinsnstr");
+            NativeNCurses.VerifyNCursesMethod(() => NativeNCurses.NCursesWrapper.mvwinsnstr(window, y, x, str, n), "mvwinsnstr");
         }
 
         /// <summary>
@@ -2007,19 +1610,12 @@ namespace NCurses.Core.Interop
         /// </summary>
         public static void mvwinsnstr_t(IntPtr window, int y, int x, string str, int n)
         {
-            Func<IntPtr, IntPtr, int> callback = (IntPtr w, IntPtr a) => ncurses_mvwinsnstr(window, y, x, str, n);
+            Func<IntPtr, IntPtr, int> callback = (IntPtr w, IntPtr a) => NativeNCurses.NCursesWrapper.mvwinsnstr(window, y, x, str, n);
             NativeNCurses.use_window_v(window, Marshal.GetFunctionPointerForDelegate(new NCURSES_WINDOW_CB(callback)), "mvwinsnstr");
         }
         #endregion
 
         #region mvwinsstr
-        /// <summary>
-        /// see <see cref="mvwinsstr(IntPtr, int, int, string)"/>
-        /// </summary>
-        /// <returns>Constants.ERR on error or Constants.OK on success</returns>
-        [DllImport(Constants.DLLNAME, EntryPoint = "mvwinsstr")]
-        internal extern static int ncurses_mvwinsstr(IntPtr window, int y, int x, string str);
-
         /// <summary>
         /// move cursor position to line <paramref name="y"/> and column <paramref name="x"/> and see <see cref="winsstr(IntPtr, string)"/>
         /// <para />native method wrapped with verification.
@@ -2029,7 +1625,7 @@ namespace NCurses.Core.Interop
         /// <param name="x">the column number to move to</param>
         public static void mvwinsstr(IntPtr window, int y, int x, string str)
         {
-            NativeNCurses.VerifyNCursesMethod(() => ncurses_mvwinsstr(window, y, x, str), "mvwinsstr");
+            NativeNCurses.VerifyNCursesMethod(() => NativeNCurses.NCursesWrapper.mvwinsstr(window, y, x, str), "mvwinsstr");
         }
 
         /// <summary>
@@ -2038,19 +1634,12 @@ namespace NCurses.Core.Interop
         /// </summary>
         public static void mvwinsstr_t(IntPtr window, int y, int x, string str)
         {
-            Func<IntPtr, IntPtr, int> callback = (IntPtr w, IntPtr a) => ncurses_mvwinsstr(window, y, x, str);
+            Func<IntPtr, IntPtr, int> callback = (IntPtr w, IntPtr a) => NativeNCurses.NCursesWrapper.mvwinsstr(window, y, x, str);
             NativeNCurses.use_window_v(window, Marshal.GetFunctionPointerForDelegate(new NCURSES_WINDOW_CB(callback)), "mvwinsstr");
         }
         #endregion
 
         #region mvwinstr
-        /// <summary>
-        /// see <see cref="mvwinstr(IntPtr, int, int, StringBuilder)"/>
-        /// </summary>
-        /// <returns>Constants.ERR on error or Constants.OK on success</returns>
-        [DllImport(Constants.DLLNAME, EntryPoint = "mvwinstr")]
-        internal extern static int ncurses_mvwinstr(IntPtr window, int y, int x, StringBuilder str);
-
         /// <summary>
         /// move cursor position to line <paramref name="y"/> and column <paramref name="x"/> and see <see cref="winstr(IntPtr, StringBuilder)"/>
         /// <para />native method wrapped with verification.
@@ -2058,7 +1647,7 @@ namespace NCurses.Core.Interop
         /// <param name="window">A pointer to a window</param>
         public static void mvwinstr(IntPtr window, int y, int x, StringBuilder str)
         {
-            NativeNCurses.VerifyNCursesMethod(() => ncurses_mvwinstr(window, y, x, str), "mvwinstr");
+            NativeNCurses.VerifyNCursesMethod(() => NativeNCurses.NCursesWrapper.mvwinstr(window, y, x, str), "mvwinstr");
         }
 
         /// <summary>
@@ -2067,19 +1656,12 @@ namespace NCurses.Core.Interop
         /// </summary>
         public static void mvwinstr_t(IntPtr window, int y, int x, StringBuilder str)
         {
-            Func<IntPtr, IntPtr, int> callback = (IntPtr w, IntPtr a) => ncurses_mvwinstr(window, y, x, str);
+            Func<IntPtr, IntPtr, int> callback = (IntPtr w, IntPtr a) => NativeNCurses.NCursesWrapper.mvwinstr(window, y, x, str);
             NativeNCurses.use_window_v(window, Marshal.GetFunctionPointerForDelegate(new NCURSES_WINDOW_CB(callback)), "mvwinstr");
         }
         #endregion
 
         #region mvwprintw
-        /// <summary>
-        /// see <see cref="mvwprintw(IntPtr, int, int, string, object[])"/>
-        /// </summary>
-        /// <returns>Constants.ERR on error or Constants.OK on success</returns>
-        [DllImport(Constants.DLLNAME, EntryPoint = "mvwprintw")]
-        internal extern static int ncurses_mvwprintw(IntPtr window, int y, int x, string format, object[] var);
-
         /// <summary>
         /// move cursor position to line <paramref name="y"/> and column <paramref name="x"/> and see <see cref="wprintw(IntPtr, string, object[])"/>
         /// <para />native method wrapped with verification.
@@ -2087,7 +1669,7 @@ namespace NCurses.Core.Interop
         /// <param name="window">A pointer to a window</param>
         public static void mvwprintw(IntPtr window, int y, int x, string format, params object[] var)
         {
-            NativeNCurses.VerifyNCursesMethod(() => ncurses_mvwprintw(window, y, x, format, var), "mvwprintw");
+            NativeNCurses.VerifyNCursesMethod(() => NativeNCurses.NCursesWrapper.mvwprintw(window, y, x, format, var), "mvwprintw");
         }
 
         /// <summary>
@@ -2096,19 +1678,12 @@ namespace NCurses.Core.Interop
         /// </summary>
         public static void mvwprintw_t(IntPtr window, int y, int x, string format, params object[] var)
         {
-            Func<IntPtr, IntPtr, int> callback = (IntPtr w, IntPtr a) => ncurses_mvwprintw(window, y, x, format, var);
+            Func<IntPtr, IntPtr, int> callback = (IntPtr w, IntPtr a) => NativeNCurses.NCursesWrapper.mvwprintw(window, y, x, format, var);
             NativeNCurses.use_window_v(window, Marshal.GetFunctionPointerForDelegate(new NCURSES_WINDOW_CB(callback)), "mvwprintw");
         }
         #endregion
 
         #region mvwscanw
-        /// <summary>
-        /// see <see cref="mvwscanw"/>
-        /// </summary>
-        /// <returns>Constants.ERR on error or Constants.OK on success</returns>
-        [DllImport(Constants.DLLNAME, EntryPoint = "mvwscanw")]
-        internal extern static int ncurses_mvwscanw(IntPtr window, int y, int x, StringBuilder format, object[] var);
-
         /// <summary>
         /// move cursor position to line <paramref name="y"/> and column <paramref name="x"/> and see <see cref="wscanw(IntPtr, StringBuilder, object[])"/>
         /// <para />native method wrapped with verification.
@@ -2116,7 +1691,7 @@ namespace NCurses.Core.Interop
         /// <param name="window">A pointer to a window</param>
         public static void mvwscanw(IntPtr window, int y, int x, StringBuilder format, params object[] var)
         {
-            NativeNCurses.VerifyNCursesMethod(() => ncurses_mvwscanw(window, y, x, format, var), "mvwscanw");
+            NativeNCurses.VerifyNCursesMethod(() => NativeNCurses.NCursesWrapper.mvwscanw(window, y, x, format, var), "mvwscanw");
         }
 
         /// <summary>
@@ -2125,19 +1700,12 @@ namespace NCurses.Core.Interop
         /// </summary>
         public static void mvwscanw_t(IntPtr window, int y, int x, StringBuilder format, params object[] var)
         {
-            Func<IntPtr, IntPtr, int> callback = (IntPtr w, IntPtr a) => ncurses_mvwscanw(window, y, x, format, var);
+            Func<IntPtr, IntPtr, int> callback = (IntPtr w, IntPtr a) => NativeNCurses.NCursesWrapper.mvwscanw(window, y, x, format, var);
             NativeNCurses.use_window_v(window, Marshal.GetFunctionPointerForDelegate(new NCURSES_WINDOW_CB(callback)), "mvwscanw");
         }
         #endregion
 
         #region mvwvline
-        /// <summary>
-        /// see <see cref="mvwvline(IntPtr, int, int, uint, int)"/>
-        /// </summary>
-        /// <returns>Constants.ERR on error or Constants.OK on success</returns>
-        [DllImport(Constants.DLLNAME, EntryPoint = "mvwvline")]
-        internal extern static int ncurses_mvwvline(IntPtr window, int y, int x, uint ch, int n);
-
         /// <summary>
         /// move cursor position to line <paramref name="y"/> and column <paramref name="x"/> and see <see cref="wvline(IntPtr, uint, int)"/>
         /// <para />native method wrapped with verification.
@@ -2146,7 +1714,7 @@ namespace NCurses.Core.Interop
         /// <param name="x">the column number to move to</param>
         public static void mvwvline(IntPtr window, int y, int x, uint ch, int n)
         {
-            NativeNCurses.VerifyNCursesMethod(() => ncurses_mvwvline(window, y, x, ch, n), "mvwvline");
+            NativeNCurses.VerifyNCursesMethod(() => NativeNCurses.NCursesWrapper.mvwvline(window, y, x, ch, n), "mvwvline");
         }
 
         /// <summary>
@@ -2155,19 +1723,12 @@ namespace NCurses.Core.Interop
         /// </summary>
         public static void mvwvline_t(IntPtr window, int y, int x, uint ch, int n)
         {
-            Func<IntPtr, IntPtr, int> callback = (IntPtr w, IntPtr a) => ncurses_mvwvline(window, y, x, ch, n);
+            Func<IntPtr, IntPtr, int> callback = (IntPtr w, IntPtr a) => NativeNCurses.NCursesWrapper.mvwvline(window, y, x, ch, n);
             NativeNCurses.use_window_v(window, Marshal.GetFunctionPointerForDelegate(new NCURSES_WINDOW_CB(callback)), "mvwvline");
         }
         #endregion
 
         #region nodelay
-        /// <summary>
-        /// see <see cref="nodelay(IntPtr, bool)"/>
-        /// </summary>
-        /// <returns>Constants.ERR on error or Constants.OK on success</returns>
-        [DllImport(Constants.DLLNAME, EntryPoint = "nodelay")]
-        internal extern static int ncurses_nodelay(IntPtr window, bool bf);
-
         /// <summary>
         /// The nodelay option causes getch to be a non-blocking call.
         /// If no input is ready, getch returns ERR. If disabled(bf
@@ -2178,7 +1739,7 @@ namespace NCurses.Core.Interop
         /// <param name="bf">enable/disable</param>
         public static void nodelay(IntPtr window, bool bf)
         {
-            NativeNCurses.VerifyNCursesMethod(() => ncurses_nodelay(window, bf), "nodelay");
+            NativeNCurses.VerifyNCursesMethod(() => NativeNCurses.NCursesWrapper.nodelay(window, bf), "nodelay");
         }
 
         /// <summary>
@@ -2187,19 +1748,12 @@ namespace NCurses.Core.Interop
         /// </summary>
         public static void nodelay_t(IntPtr window, bool bf)
         {
-            Func<IntPtr, IntPtr, int> callback = (IntPtr w, IntPtr a) => ncurses_nodelay(window, bf);
+            Func<IntPtr, IntPtr, int> callback = (IntPtr w, IntPtr a) => NativeNCurses.NCursesWrapper.nodelay(window, bf);
             NativeNCurses.use_window_v(window, Marshal.GetFunctionPointerForDelegate(new NCURSES_WINDOW_CB(callback)), "nodelay");
         }
         #endregion
 
         #region notimeout
-        /// <summary>
-        /// see <see cref="notimeout(IntPtr, bool)"/>
-        /// </summary>
-        /// <returns>Constants.ERR on error or Constants.OK on success</returns>
-        [DllImport(Constants.DLLNAME, EntryPoint = "notimeout")]
-        internal extern static int ncurses_notimeout(IntPtr window, bool bf);
-
         /// <summary>
         /// <para />native method wrapped with verification.
         /// </summary>
@@ -2207,7 +1761,7 @@ namespace NCurses.Core.Interop
         /// <param name="bf">enable/disable</param>
         public static void notimeout(IntPtr window, bool bf)
         {
-            NativeNCurses.VerifyNCursesMethod(() => ncurses_notimeout(window, bf), "notimeout");
+            NativeNCurses.VerifyNCursesMethod(() => NativeNCurses.NCursesWrapper.notimeout(window, bf), "notimeout");
         }
 
         /// <summary>
@@ -2216,19 +1770,12 @@ namespace NCurses.Core.Interop
         /// </summary>
         public static void notimeout_t(IntPtr window, bool bf)
         {
-            Func<IntPtr, IntPtr, int> callback = (IntPtr w, IntPtr a) => ncurses_notimeout(window, bf);
+            Func<IntPtr, IntPtr, int> callback = (IntPtr w, IntPtr a) => NativeNCurses.NCursesWrapper.notimeout(window, bf);
             NativeNCurses.use_window_v(window, Marshal.GetFunctionPointerForDelegate(new NCURSES_WINDOW_CB(callback)), "notimeout");
         }
         #endregion
 
         #region wredrawwin
-        /// <summary>
-        /// see <see cref="wredrawwin(IntPtr)"/>
-        /// </summary>
-        /// <returns>Constants.ERR on error or Constants.OK on success</returns>
-        [DllImport(Constants.DLLNAME, EntryPoint = "wredrawwin")]
-        internal extern static int ncurses_wredrawwin(IntPtr window);
-
         /// <summary>
         /// see <see cref="NativeStdScr.redrawwin"/>
         /// <para />native method wrapped with verification.
@@ -2236,7 +1783,7 @@ namespace NCurses.Core.Interop
         /// <param name="window">A pointer to a window</param>
         public static void wredrawwin(IntPtr window)
         {
-            NativeNCurses.VerifyNCursesMethod(() => ncurses_wredrawwin(window), "wredrawwin");
+            NativeNCurses.VerifyNCursesMethod(() => NativeNCurses.NCursesWrapper.wredrawwin(window), "wredrawwin");
         }
 
         /// <summary>
@@ -2245,26 +1792,19 @@ namespace NCurses.Core.Interop
         /// </summary>
         public static void wredrawwin_t(IntPtr window)
         {
-            Func<IntPtr, IntPtr, int> callback = (IntPtr w, IntPtr a) => ncurses_wredrawwin(window);
+            Func<IntPtr, IntPtr, int> callback = (IntPtr w, IntPtr a) => NativeNCurses.NCursesWrapper.wredrawwin(window);
             NativeNCurses.use_window_v(window, Marshal.GetFunctionPointerForDelegate(new NCURSES_WINDOW_CB(callback)), "wredrawwin");
         }
         #endregion
 
         #region wrefresh
         /// <summary>
-        /// see <see cref="wrefresh(IntPtr)"/>
-        /// </summary>
-        /// <returns>Constants.ERR on error or Constants.OK on success</returns>
-        [DllImport(Constants.DLLNAME, EntryPoint = "wrefresh")]
-        internal extern static int ncurses_wrefresh(IntPtr window);
-
-        /// <summary>
         /// see <see cref="NativeStdScr.refresh"/>
         /// </summary>
         /// <param name="window">A pointer to a window</param>
         public static void wrefresh(IntPtr window)
         {
-            NativeNCurses.VerifyNCursesMethod(() => ncurses_wrefresh(window), "wrefresh");
+            NativeNCurses.VerifyNCursesMethod(() => NativeNCurses.NCursesWrapper.wrefresh(window), "wrefresh");
         }
 
         /// <summary>
@@ -2273,19 +1813,12 @@ namespace NCurses.Core.Interop
         /// </summary>
         public static void wrefresh_t(IntPtr window)
         {
-            Func<IntPtr, IntPtr, int> callback = (IntPtr w, IntPtr a) => ncurses_wrefresh(window);
+            Func<IntPtr, IntPtr, int> callback = (IntPtr w, IntPtr a) => NativeNCurses.NCursesWrapper.wrefresh(window);
             NativeNCurses.use_window_v(window, Marshal.GetFunctionPointerForDelegate(new NCURSES_WINDOW_CB(callback)), "wrefresh");
         }
         #endregion
 
         #region wprintw
-        /// <summary>
-        /// see <see cref="wprintw(IntPtr, string, object[])"/>
-        /// </summary>
-        /// <returns>Constants.ERR on error or Constants.OK on success</returns>
-        [DllImport(Constants.DLLNAME, EntryPoint = "wprintw")]
-        internal extern static int ncurses_wprintw(IntPtr window, string format, object[] var);
-
         /// <summary>
         /// see <see cref="NativeStdScr.printw(string, object[])"/>
         /// <para />native method wrapped with verification.
@@ -2293,7 +1826,7 @@ namespace NCurses.Core.Interop
         /// <param name="window">A pointer to a window</param>
         public static void wprintw(IntPtr window, string format, params object[] var)
         {
-            NativeNCurses.VerifyNCursesMethod(() => ncurses_wprintw(window, format, var), "wprintw");
+            NativeNCurses.VerifyNCursesMethod(() => NativeNCurses.NCursesWrapper.wprintw(window, format, var), "wprintw");
         }
 
         /// <summary>
@@ -2302,19 +1835,12 @@ namespace NCurses.Core.Interop
         /// </summary>
         public static void wprintw_t(IntPtr window, string format, params object[] var)
         {
-            Func<IntPtr, IntPtr, int> callback = (IntPtr w, IntPtr a) => ncurses_wprintw(window, format, var);
+            Func<IntPtr, IntPtr, int> callback = (IntPtr w, IntPtr a) => NativeNCurses.NCursesWrapper.wprintw(window, format, var);
             NativeNCurses.use_window_v(window, Marshal.GetFunctionPointerForDelegate(new NCURSES_WINDOW_CB(callback)), "wprintw");
         }
         #endregion
 
         #region wscanw
-        /// <summary>
-        /// see <see cref="wscanw"/>
-        /// </summary>
-        /// <returns>Constants.ERR on error or Constants.OK on success</returns>
-        [DllImport(Constants.DLLNAME, EntryPoint = "wprintw")]
-        internal extern static int ncurses_wscanw(IntPtr window, StringBuilder format, object[] var);
-
         /// <summary>
         /// see <see cref="NativeStdScr.scanw"/>
         /// <para />native method wrapped with verification.
@@ -2322,7 +1848,7 @@ namespace NCurses.Core.Interop
         /// <param name="window">A pointer to a window</param>
         public static void wscanw(IntPtr window, StringBuilder format, params object[] var)
         {
-            NativeNCurses.VerifyNCursesMethod(() => ncurses_wscanw(window, format, var), "wscanw");
+            NativeNCurses.VerifyNCursesMethod(() => NativeNCurses.NCursesWrapper.wscanw(window, format, var), "wscanw");
         }
 
         /// <summary>
@@ -2331,19 +1857,12 @@ namespace NCurses.Core.Interop
         /// </summary>
         public static void wscanw_t(IntPtr window, StringBuilder format, params object[] var)
         {
-            Func<IntPtr, IntPtr, int> callback = (IntPtr w, IntPtr a) => ncurses_wscanw(window, format, var);
+            Func<IntPtr, IntPtr, int> callback = (IntPtr w, IntPtr a) => NativeNCurses.NCursesWrapper.wscanw(window, format, var);
             NativeNCurses.use_window_v(window, Marshal.GetFunctionPointerForDelegate(new NCURSES_WINDOW_CB(callback)), "wscanw");
         }
         #endregion
 
         #region wscrl
-        /// <summary>
-        /// see <see cref="wscrl(IntPtr, int)"/>
-        /// </summary>
-        /// <returns>Constants.ERR on error or Constants.OK on success</returns>
-        [DllImport(Constants.DLLNAME, EntryPoint = "wscrl")]
-        internal extern static int ncurses_wscrl(IntPtr window, int n);
-
         /// <summary>
         /// see <see cref="NativeStdScr.scrl(int)"/>
         /// <para />native method wrapped with verification.
@@ -2351,7 +1870,7 @@ namespace NCurses.Core.Interop
         /// <param name="window">A pointer to a window</param>
         public static void wscrl(IntPtr window, int n)
         {
-            NativeNCurses.VerifyNCursesMethod(() => ncurses_wscrl(window, n), "wscrl");
+            NativeNCurses.VerifyNCursesMethod(() => NativeNCurses.NCursesWrapper.wscrl(window, n), "wscrl");
         }
 
         /// <summary>
@@ -2360,19 +1879,12 @@ namespace NCurses.Core.Interop
         /// </summary>
         public static void wscrl_t(IntPtr window, int n)
         {
-            Func<IntPtr, IntPtr, int> callback = (IntPtr w, IntPtr a) => ncurses_wscrl(window, n);
+            Func<IntPtr, IntPtr, int> callback = (IntPtr w, IntPtr a) => NativeNCurses.NCursesWrapper.wscrl(window, n);
             NativeNCurses.use_window_v(window, Marshal.GetFunctionPointerForDelegate(new NCURSES_WINDOW_CB(callback)), "wscrl");
         }
         #endregion
 
         #region scroll
-        /// <summary>
-        /// see <see cref="scroll(IntPtr)"/>
-        /// </summary>
-        /// <returns>Constants.ERR on error or Constants.OK on success</returns>
-        [DllImport(Constants.DLLNAME, EntryPoint = "scroll")]
-        internal extern static int ncurses_scroll(IntPtr window);
-
         /// <summary>
         /// The scroll  routine scrolls the window up one line.This
         /// involves moving the lines in the window  data structure.
@@ -2384,7 +1896,7 @@ namespace NCurses.Core.Interop
         /// <param name="window">A pointer to a window</param>
         public static void scroll(IntPtr window)
         {
-            NativeNCurses.VerifyNCursesMethod(() => ncurses_scroll(window), "scroll");
+            NativeNCurses.VerifyNCursesMethod(() => NativeNCurses.NCursesWrapper.scroll(window), "scroll");
         }
 
         /// <summary>
@@ -2393,19 +1905,12 @@ namespace NCurses.Core.Interop
         /// </summary>
         public static void scroll_t(IntPtr window)
         {
-            Func<IntPtr, IntPtr, int> callback = (IntPtr w, IntPtr a) => ncurses_scroll(window);
+            Func<IntPtr, IntPtr, int> callback = (IntPtr w, IntPtr a) => NativeNCurses.NCursesWrapper.scroll(window);
             NativeNCurses.use_window_v(window, Marshal.GetFunctionPointerForDelegate(new NCURSES_WINDOW_CB(callback)), "scroll");
         }
         #endregion
 
         #region scrollok
-        /// <summary>
-        /// see <see cref="scrollok(IntPtr, bool)"/>
-        /// </summary>
-        /// <returns>Constants.ERR on error or Constants.OK on success</returns>
-        [DllImport(Constants.DLLNAME, EntryPoint = "scrollok")]
-        internal extern static int ncurses_scrollok(IntPtr window, bool bf);
-
         /// <summary>
         /// The scrollok option controls what happens when the cursor
         /// of a window is  moved off  the edge  of the  window or
@@ -2422,7 +1927,7 @@ namespace NCurses.Core.Interop
         /// <param name="bf">enable/disable scrolling</param>
         public static void scrollok(IntPtr window, bool bf)
         {
-            NativeNCurses.VerifyNCursesMethod(() => ncurses_scrollok(window, bf), "scrollok");
+            NativeNCurses.VerifyNCursesMethod(() => NativeNCurses.NCursesWrapper.scrollok(window, bf), "scrollok");
         }
 
         /// <summary>
@@ -2432,19 +1937,12 @@ namespace NCurses.Core.Interop
         /// <param name="window">A pointer to a window</param>
         public static void scrollok_t(IntPtr window, bool bf)
         {
-            Func<IntPtr, IntPtr, int> callback = (IntPtr w, IntPtr a) => ncurses_scrollok(window, bf);
+            Func<IntPtr, IntPtr, int> callback = (IntPtr w, IntPtr a) => NativeNCurses.NCursesWrapper.scrollok(window, bf);
             NativeNCurses.use_window_v(window, Marshal.GetFunctionPointerForDelegate(new NCURSES_WINDOW_CB(callback)), "scrollok");
         }
         #endregion
 
         #region wsetscrreg
-        /// <summary>
-        /// see <see cref="wsetscrreg(IntPtr, int, int)"/>
-        /// </summary>
-        /// <returns>Constants.ERR on error or Constants.OK on success</returns>
-        [DllImport(Constants.DLLNAME, EntryPoint = "wsetscrreg")]
-        internal extern static int ncurses_wsetscrreg(IntPtr window, int top, int bot);
-
         /// <summary>
         /// see <see cref="NativeStdScr.setscrreg(int, int)"/>
         /// <para />native method wrapped with verification.
@@ -2452,7 +1950,7 @@ namespace NCurses.Core.Interop
         /// <param name="window">A pointer to a window</param>
         public static void wsetscrreg(IntPtr window, int top, int bot)
         {
-            NativeNCurses.VerifyNCursesMethod(() => ncurses_wsetscrreg(window, top, bot), "wsetscrreg");
+            NativeNCurses.VerifyNCursesMethod(() => NativeNCurses.NCursesWrapper.wsetscrreg(window, top, bot), "wsetscrreg");
         }
 
         /// <summary>
@@ -2462,19 +1960,12 @@ namespace NCurses.Core.Interop
         /// <param name="window">A pointer to a window</param>
         public static void wsetscrreg_t(IntPtr window, int top, int bot)
         {
-            Func<IntPtr, IntPtr, int> callback = (IntPtr w, IntPtr a) => ncurses_wsetscrreg(window, top, bot);
+            Func<IntPtr, IntPtr, int> callback = (IntPtr w, IntPtr a) => NativeNCurses.NCursesWrapper.wsetscrreg(window, top, bot);
             NativeNCurses.use_window_v(window, Marshal.GetFunctionPointerForDelegate(new NCURSES_WINDOW_CB(callback)), "wsetscrreg");
         }
         #endregion
 
         #region wstandout
-        /// <summary>
-        /// see <see cref="wstandout"/>
-        /// </summary>
-        /// <returns>Constants.ERR on error or Constants.OK on success</returns>
-        [DllImport(Constants.DLLNAME, EntryPoint = "wstandout")]
-        internal extern static int ncurses_wstandout(IntPtr window);
-
         /// <summary>
         /// see <see cref="NativeStdScr.standout"/>
         /// <para />native method wrapped with verification.
@@ -2482,7 +1973,7 @@ namespace NCurses.Core.Interop
         /// <param name="window">A pointer to a window</param>
         public static void wstandout(IntPtr window)
         {
-            NativeNCurses.VerifyNCursesMethod(() => ncurses_wstandout(window), "wstandout");
+            NativeNCurses.VerifyNCursesMethod(() => NativeNCurses.NCursesWrapper.wstandout(window), "wstandout");
         }
 
         /// <summary>
@@ -2491,19 +1982,12 @@ namespace NCurses.Core.Interop
         /// </summary>
         public static void wstandout_t(IntPtr window)
         {
-            Func<IntPtr, IntPtr, int> callback = (IntPtr w, IntPtr a) => ncurses_wstandout(window);
+            Func<IntPtr, IntPtr, int> callback = (IntPtr w, IntPtr a) => NativeNCurses.NCursesWrapper.wstandout(window);
             NativeNCurses.use_window_v(window, Marshal.GetFunctionPointerForDelegate(new NCURSES_WINDOW_CB(callback)), "wstandout");
         }
         #endregion
 
         #region wstandend
-        /// <summary>
-        /// see <see cref="wstandend"/>
-        /// </summary>
-        /// <returns>Constants.ERR on error or Constants.OK on success</returns>
-        [DllImport(Constants.DLLNAME, EntryPoint = "wstandend")]
-        internal extern static int ncurses_wstandend(IntPtr window);
-
         /// <summary>
         /// see <see cref="wstandout"/>
         /// <para />native method wrapped with verification.
@@ -2511,7 +1995,7 @@ namespace NCurses.Core.Interop
         /// <param name="window">A pointer to a window</param>
         public static void wstandend(IntPtr window)
         {
-            NativeNCurses.VerifyNCursesMethod(() => ncurses_wstandend(window), "wstandend");
+            NativeNCurses.VerifyNCursesMethod(() => NativeNCurses.NCursesWrapper.wstandend(window), "wstandend");
         }
 
         /// <summary>
@@ -2520,19 +2004,12 @@ namespace NCurses.Core.Interop
         /// </summary>
         public static void wstandend_t(IntPtr window)
         {
-            Func<IntPtr, IntPtr, int> callback = (IntPtr w, IntPtr a) => ncurses_wstandend(window);
+            Func<IntPtr, IntPtr, int> callback = (IntPtr w, IntPtr a) => NativeNCurses.NCursesWrapper.wstandend(window);
             NativeNCurses.use_window_v(window, Marshal.GetFunctionPointerForDelegate(new NCURSES_WINDOW_CB(callback)), "wstandend");
         }
         #endregion
 
         #region syncok
-        /// <summary>
-        /// see <see cref="syncok"/>
-        /// </summary>
-        /// <returns>Constants.ERR on error or Constants.OK on success</returns>
-        [DllImport(Constants.DLLNAME, EntryPoint = "syncok")]
-        internal extern static int ncurses_syncok(IntPtr window, bool bf);
-
         /// <summary>
         /// Calling wsyncup touches all locations in ancestors of  win
         /// that  are changed in win.If syncok is called with second
@@ -2542,7 +2019,7 @@ namespace NCurses.Core.Interop
         /// <param name="window">A pointer to a window</param>
         public static void syncok(IntPtr window, bool bf)
         {
-            NativeNCurses.VerifyNCursesMethod(() => ncurses_syncok(window, bf), "syncok");
+            NativeNCurses.VerifyNCursesMethod(() => NativeNCurses.NCursesWrapper.syncok(window, bf), "syncok");
         }
 
         /// <summary>
@@ -2551,7 +2028,7 @@ namespace NCurses.Core.Interop
         /// </summary>
         public static void syncok_t(IntPtr window, bool bf)
         {
-            Func<IntPtr, IntPtr, int> callback = (IntPtr w, IntPtr a) => ncurses_syncok(window, bf);
+            Func<IntPtr, IntPtr, int> callback = (IntPtr w, IntPtr a) => NativeNCurses.NCursesWrapper.syncok(window, bf);
             NativeNCurses.use_window_v(window, Marshal.GetFunctionPointerForDelegate(new NCURSES_WINDOW_CB(callback)), "syncok");
         }
         #endregion
@@ -2560,18 +2037,13 @@ namespace NCurses.Core.Interop
         /// <summary>
         /// see <see cref="NativeStdScr.timeout"/>
         /// </summary>
-        [DllImport(Constants.DLLNAME, EntryPoint = "wtimeout")]
-        public extern static void wtimeout(int delay);
+        public static void wtimeout(int delay)
+        {
+            NativeNCurses.NCursesWrapper.wtimeout(delay);
+        }
         #endregion
 
         #region touchline
-        /// <summary>
-        /// see <see cref="touchline"/>
-        /// </summary>
-        /// <returns>Constants.ERR on error or Constants.OK on success</returns>
-        [DllImport(Constants.DLLNAME, EntryPoint = "touchline")]
-        internal extern static int ncurses_touchline(IntPtr window, int start, int count);
-
         /// <summary>
         //// The touchwin and touchline routines throw away all  optimization information about which parts of the window have
         /// been touched, by pretending that the  entire window  has
@@ -2586,7 +2058,7 @@ namespace NCurses.Core.Interop
         /// <param name="window">A pointer to a window</param>
         public static void touchline(IntPtr window, int start, int count)
         {
-            NativeNCurses.VerifyNCursesMethod(() => ncurses_touchline(window, start, count), "touchline");
+            NativeNCurses.VerifyNCursesMethod(() => NativeNCurses.NCursesWrapper.touchline(window, start, count), "touchline");
         }
 
         /// <summary>
@@ -2595,19 +2067,12 @@ namespace NCurses.Core.Interop
         /// </summary>
         public static void touchline_t(IntPtr window, int start, int count)
         {
-            Func<IntPtr, IntPtr, int> callback = (IntPtr w, IntPtr a) => ncurses_touchline(window, start, count);
+            Func<IntPtr, IntPtr, int> callback = (IntPtr w, IntPtr a) => NativeNCurses.NCursesWrapper.touchline(window, start, count);
             NativeNCurses.use_window_v(window, Marshal.GetFunctionPointerForDelegate(new NCURSES_WINDOW_CB(callback)), "touchline");
         }
         #endregion
 
         #region touchwin
-        /// <summary>
-        /// see <see cref="touchwin"/>
-        /// </summary>
-        /// <returns>Constants.ERR on error or Constants.OK on success</returns>
-        [DllImport(Constants.DLLNAME, EntryPoint = "touchwin")]
-        internal extern static int ncurses_touchwin(IntPtr window);
-
         /// <summary>
         /// see <see cref="touchline"/>
         /// <para />native method wrapped with verification.
@@ -2615,7 +2080,7 @@ namespace NCurses.Core.Interop
         /// <param name="window">A pointer to a window</param>
         public static void touchwin(IntPtr window)
         {
-            NativeNCurses.VerifyNCursesMethod(() => ncurses_touchwin(window), "touchwin");
+            NativeNCurses.VerifyNCursesMethod(() => NativeNCurses.NCursesWrapper.touchwin(window), "touchwin");
         }
 
         /// <summary>
@@ -2624,19 +2089,12 @@ namespace NCurses.Core.Interop
         /// </summary>
         public static void touchwin_t(IntPtr window)
         {
-            Func<IntPtr, IntPtr, int> callback = (IntPtr w, IntPtr a) => ncurses_touchwin(window);
+            Func<IntPtr, IntPtr, int> callback = (IntPtr w, IntPtr a) => NativeNCurses.NCursesWrapper.touchwin(window);
             NativeNCurses.use_window_v(window, Marshal.GetFunctionPointerForDelegate(new NCURSES_WINDOW_CB(callback)), "touchwin");
         }
         #endregion
 
         #region untouchwin
-        /// <summary>
-        /// see <see cref="untouchwin"/>
-        /// </summary>
-        /// <returns>Constants.ERR on error or Constants.OK on success</returns>
-        [DllImport(Constants.DLLNAME, EntryPoint = "untouchwin")]
-        internal extern static int ncurses_untouchwin(IntPtr window);
-
         /// <summary>
         /// The untouchwin routine marks all lines in  the window  as
         /// unchanged since the last call to wrefresh.
@@ -2645,7 +2103,7 @@ namespace NCurses.Core.Interop
         /// <param name="window">A pointer to a window</param>
         public static void untouchwin(IntPtr window)
         {
-            NativeNCurses.VerifyNCursesMethod(() => ncurses_untouchwin(window), "untouchwin");
+            NativeNCurses.VerifyNCursesMethod(() => NativeNCurses.NCursesWrapper.untouchwin(window), "untouchwin");
         }
 
         /// <summary>
@@ -2654,19 +2112,12 @@ namespace NCurses.Core.Interop
         /// </summary>
         public static void untouchwin_t(IntPtr window)
         {
-            Func<IntPtr, IntPtr, int> callback = (IntPtr w, IntPtr a) => ncurses_untouchwin(window);
+            Func<IntPtr, IntPtr, int> callback = (IntPtr w, IntPtr a) => NativeNCurses.NCursesWrapper.untouchwin(window);
             NativeNCurses.use_window_v(window, Marshal.GetFunctionPointerForDelegate(new NCURSES_WINDOW_CB(callback)), "untouchwin");
         }
         #endregion
 
         #region wvline
-        /// <summary>
-        /// see <see cref="wvline(IntPtr, uint, int)"/>
-        /// </summary>
-        /// <returns>Constants.ERR on error or Constants.OK on success</returns>
-        [DllImport(Constants.DLLNAME, EntryPoint = "wvline")]
-        internal extern static int ncurses_wvline(IntPtr window, uint ch, int n);
-
         /// <summary>
         /// see <see cref="NativeStdScr.vline(uint, int)"/>
         /// <para />native method wrapped with verification.
@@ -2674,7 +2125,7 @@ namespace NCurses.Core.Interop
         /// <param name="window">A pointer to a window</param>
         public static void wvline(IntPtr window, uint ch, int n)
         {
-            NativeNCurses.VerifyNCursesMethod(() => ncurses_wvline(window, ch, n), "wvline");
+            NativeNCurses.VerifyNCursesMethod(() => NativeNCurses.NCursesWrapper.wvline(window, ch, n), "wvline");
         }
 
         /// <summary>
@@ -2683,7 +2134,7 @@ namespace NCurses.Core.Interop
         /// </summary>
         public static void wvline_t(IntPtr window, uint ch, int n)
         {
-            Func<IntPtr, IntPtr, int> callback = (IntPtr w, IntPtr a) => ncurses_wvline(window, ch, n);
+            Func<IntPtr, IntPtr, int> callback = (IntPtr w, IntPtr a) => NativeNCurses.NCursesWrapper.wvline(window, ch, n);
             NativeNCurses.use_window_v(window, Marshal.GetFunctionPointerForDelegate(new NCURSES_WINDOW_CB(callback)), "wvline");
         }
         #endregion
@@ -2705,8 +2156,10 @@ namespace NCurses.Core.Interop
         /// cursor position of the window.
         /// </summary>
         /// <param name="window">A pointer to a window</param>
-        [DllImport(Constants.DLLNAME, EntryPoint = "wcursyncup")]
-        public extern static void wcursyncup(IntPtr window);
+        public static void wcursyncup(IntPtr window)
+        {
+            NativeNCurses.NCursesWrapper.wcursyncup(window);
+        }
         #endregion
 
         #region wsyncdown
@@ -2717,18 +2170,13 @@ namespace NCurses.Core.Interop
         /// be necessary to call it manually.
         /// </summary>
         /// <param name="window">A pointer to a window</param>
-        [DllImport(Constants.DLLNAME, EntryPoint = "wsyncdown")]
-        public extern static void wsyncdown(IntPtr window);
+        public static void wsyncdown(IntPtr window)
+        {
+            NativeNCurses.NCursesWrapper.wsyncdown(window);
+        }
         #endregion
 
         #region wnoutrefresh
-        /// <summary>
-        /// see <see cref="wnoutrefresh"/>
-        /// </summary>
-        /// <returns>Constants.ERR on error or Constants.OK on success</returns>
-        [DllImport(Constants.DLLNAME, EntryPoint = "wnoutrefresh")]
-        internal extern static int ncurses_wnoutrefresh(IntPtr window);
-
         /// <summary>
         /// The wnoutrefresh and doupdate routines allow multiple updates with more efficiency than wrefresh alone.
         /// In addition to  all the window structures, curses keeps two data
@@ -2741,7 +2189,7 @@ namespace NCurses.Core.Interop
         /// <param name="window">A pointer to a window</param>
         public static void wnoutrefresh(IntPtr window)
         {
-            NativeNCurses.VerifyNCursesMethod(() => ncurses_wnoutrefresh(window), "wnoutrefresh");
+            NativeNCurses.VerifyNCursesMethod(() => NativeNCurses.NCursesWrapper.wnoutrefresh(window), "wnoutrefresh");
         }
 
         /// <summary>
@@ -2750,19 +2198,12 @@ namespace NCurses.Core.Interop
         /// </summary>
         public static void wnoutrefresh_t(IntPtr window)
         {
-            Func<IntPtr, IntPtr, int> callback = (IntPtr w, IntPtr a) => ncurses_wnoutrefresh(window);
+            Func<IntPtr, IntPtr, int> callback = (IntPtr w, IntPtr a) => NativeNCurses.NCursesWrapper.wnoutrefresh(window);
             NativeNCurses.use_window_v(window, Marshal.GetFunctionPointerForDelegate(new NCURSES_WINDOW_CB(callback)), "wnoutrefresh");
         }
         #endregion
 
         #region wredrawln
-        /// <summary>
-        /// see <see cref="wredrawln"/>
-        /// </summary>
-        /// <returns>Constants.ERR on error or Constants.OK on success</returns>
-        [DllImport(Constants.DLLNAME, EntryPoint = "wredrawln")]
-        internal extern static int ncurses_wredrawln(IntPtr window, int beg_line, int num_lines);
-
         /// <summary>
         /// The wredrawln routine indicates to curses that some screen
         /// lines are corrupted and should be thrown away before  anything  is  written over  them.It touches the indicated
@@ -2773,7 +2214,7 @@ namespace NCurses.Core.Interop
         /// <param name="window">A pointer to a window</param>
         public static void wredrawln(IntPtr window, int beg_line, int num_lines)
         {
-            NativeNCurses.VerifyNCursesMethod(() => ncurses_wredrawln(window, beg_line, num_lines), "wredrawln");
+            NativeNCurses.VerifyNCursesMethod(() => NativeNCurses.NCursesWrapper.wredrawln(window, beg_line, num_lines), "wredrawln");
         }
 
         /// <summary>
@@ -2782,7 +2223,7 @@ namespace NCurses.Core.Interop
         /// </summary>
         public static void wredrawln_t(IntPtr window, int beg_line, int num_lines)
         {
-            Func<IntPtr, IntPtr, int> callback = (IntPtr w, IntPtr a) => ncurses_wredrawln(window, beg_line, num_lines);
+            Func<IntPtr, IntPtr, int> callback = (IntPtr w, IntPtr a) => NativeNCurses.NCursesWrapper.wredrawln(window, beg_line, num_lines);
             NativeNCurses.use_window_v(window, Marshal.GetFunctionPointerForDelegate(new NCURSES_WINDOW_CB(callback)), "wredrawln");
         }
         #endregion
@@ -2794,18 +2235,13 @@ namespace NCurses.Core.Interop
         /// argument TRUE then wsyncup is called automatically whenever there is a change in the window.
         /// </summary>
         /// <param name="window">A pointer to a window</param>
-        [DllImport(Constants.DLLNAME, EntryPoint = "wsyncup")]
-        public extern static void wsyncup(IntPtr window);
+        public static void wsyncup(IntPtr window)
+        {
+            NativeNCurses.NCursesWrapper.wsyncup(window);
+        }
         #endregion
 
         #region wtouchln
-        /// <summary>
-        /// see <see cref="wtouchln"/>
-        /// </summary>
-        /// <returns>Constants.ERR on error or Constants.OK on success</returns>
-        [DllImport(Constants.DLLNAME, EntryPoint = "wtouchln")]
-        internal extern static int ncurses_wtouchln(IntPtr window, int y, int n, int changed);
-
         /// <summary>
         /// The wtouchln routine makes <paramref name="n"/> lines in the window, starting
         /// at line <paramref name="y"/>, look as if they have(<paramref name="changed"/>= 1)  or have  not
@@ -2818,7 +2254,7 @@ namespace NCurses.Core.Interop
         /// <param name="changed">1 if changed, 0 if not changed</param>
         public static void wtouchln(IntPtr window, int y, int n, int changed)
         {
-            NativeNCurses.VerifyNCursesMethod(() => ncurses_wtouchln(window, y, n, changed), "wtouchln");
+            NativeNCurses.VerifyNCursesMethod(() => NativeNCurses.NCursesWrapper.wtouchln(window, y, n, changed), "wtouchln");
         }
 
         /// <summary>
@@ -2827,7 +2263,7 @@ namespace NCurses.Core.Interop
         /// </summary>
         public static void wtouchln_t(IntPtr window, int y, int n, int changed)
         {
-            Func<IntPtr, IntPtr, int> callback = (IntPtr w, IntPtr a) => ncurses_wtouchln(window, y, n, changed);
+            Func<IntPtr, IntPtr, int> callback = (IntPtr w, IntPtr a) => NativeNCurses.NCursesWrapper.wtouchln(window, y, n, changed);
             NativeNCurses.use_window_v(window, Marshal.GetFunctionPointerForDelegate(new NCURSES_WINDOW_CB(callback)), "wtouchln");
         }
         #endregion
@@ -2837,8 +2273,10 @@ namespace NCurses.Core.Interop
         /// returns attributes
         /// </summary>
         /// <returns>attributes</returns>
-        [DllImport(Constants.DLLNAME, EntryPoint = "getattrs")]
-        public extern static int getattrs(IntPtr window);
+        public static int getattrs(IntPtr window)
+        {
+            return NativeNCurses.NCursesWrapper.getattrs(window);
+        }
         #endregion
 
         #region getcurx
@@ -2846,8 +2284,10 @@ namespace NCurses.Core.Interop
         /// The getcury and getcurx functions return the same data as getyx.
         /// </summary>
         /// <returns>attributes</returns>
-        [DllImport(Constants.DLLNAME, EntryPoint = "getcurx")]
-        public extern static int getcurx(IntPtr window);
+        public static int getcurx(IntPtr window)
+        {
+            return NativeNCurses.NCursesWrapper.getcurx(window);
+        }
         #endregion
 
         #region getcury
@@ -2855,8 +2295,10 @@ namespace NCurses.Core.Interop
         /// The getcury and getcurx functions return the same data as getyx.
         /// </summary>
         /// <returns>attributes</returns>
-        [DllImport(Constants.DLLNAME, EntryPoint = "getcury")]
-        public extern static int getcury(IntPtr window);
+        public static int getcury(IntPtr window)
+        {
+            return NativeNCurses.NCursesWrapper.getcury(window);
+        }
         #endregion
 
         #region getbegx
@@ -2864,8 +2306,10 @@ namespace NCurses.Core.Interop
         /// The getbegy and getbegx functions return the same data  as  getbegyx.
         /// </summary>
         /// <returns>attributes</returns>
-        [DllImport(Constants.DLLNAME, EntryPoint = "getbegx")]
-        public extern static int getbegx(IntPtr window);
+        public static int getbegx(IntPtr window)
+        {
+            return NativeNCurses.NCursesWrapper.getbegx(window);
+        }
         #endregion
 
         #region getbegy
@@ -2873,8 +2317,10 @@ namespace NCurses.Core.Interop
         /// The getbegy and getbegx functions return the same data  as  getbegyx.
         /// </summary>
         /// <returns>attributes</returns>
-        [DllImport(Constants.DLLNAME, EntryPoint = "getbegy")]
-        public extern static int getbegy(IntPtr window);
+        public static int getbegy(IntPtr window)
+        {
+            return NativeNCurses.NCursesWrapper.getbegy(window);
+        }
         #endregion
 
         #region getmaxx
@@ -2882,8 +2328,10 @@ namespace NCurses.Core.Interop
         /// The getmaxy and getmaxx functions return the same data  as getmaxyx.
         /// </summary>
         /// <returns>attributes</returns>
-        [DllImport(Constants.DLLNAME, EntryPoint = "getmaxx")]
-        public extern static int getmaxx(IntPtr window);
+        public static int getmaxx(IntPtr window)
+        {
+            return NativeNCurses.NCursesWrapper.getmaxx(window);
+        }
         #endregion
 
         #region getmaxy
@@ -2891,8 +2339,10 @@ namespace NCurses.Core.Interop
         /// The getmaxy and getmaxx functions return the same data  as getmaxyx.
         /// </summary>
         /// <returns>attributes</returns>
-        [DllImport(Constants.DLLNAME, EntryPoint = "getmaxy")]
-        public extern static int getmaxy(IntPtr window);
+        public static int getmaxy(IntPtr window)
+        {
+            return NativeNCurses.NCursesWrapper.getmaxy(window);
+        }
         #endregion
 
         #region getparx
@@ -2900,8 +2350,10 @@ namespace NCurses.Core.Interop
         /// The getpary and getparx functions return the same data as getparyx.
         /// </summary>
         /// <returns>attributes</returns>
-        [DllImport(Constants.DLLNAME, EntryPoint = "getparx")]
-        public extern static int getparx(IntPtr window);
+        public static int getparx(IntPtr window)
+        {
+            return NativeNCurses.NCursesWrapper.getparx(window);
+        }
         #endregion
 
         #region getpary
@@ -2909,18 +2361,13 @@ namespace NCurses.Core.Interop
         /// The getpary and getparx functions return the same data as getparyx.
         /// </summary>
         /// <returns>attributes</returns>
-        [DllImport(Constants.DLLNAME, EntryPoint = "getpary")]
-        public extern static int getpary(IntPtr window);
+        public static int getpary(IntPtr window)
+        {
+            return NativeNCurses.NCursesWrapper.getpary(window);
+        }
         #endregion
 
         #region wresize
-        /// <summary>
-        /// see <see cref="wresize"/>
-        /// </summary>
-        /// <returns>Constants.ERR on error or Constants.OK on success</returns>
-        [DllImport(Constants.DLLNAME, EntryPoint = "wresize")]
-        internal extern static int ncurses_wresize(IntPtr window, int lines, int columns);
-
         /// <summary>
         /// This  is  an extension to the curses library.It reallocates storage for an ncurses window to adjust its
         /// dimensions to  the specified  values.If either dimension is
@@ -2933,7 +2380,7 @@ namespace NCurses.Core.Interop
         /// <param name="columns">new size in columns</param>
         public static void wresize(IntPtr window, int lines, int columns)
         {
-            NativeNCurses.VerifyNCursesMethod(() => ncurses_wresize(window, lines, columns), "wresize");
+            NativeNCurses.VerifyNCursesMethod(() => NativeNCurses.NCursesWrapper.wresize(window, lines, columns), "wresize");
         }
 
         /// <summary>
@@ -2942,19 +2389,12 @@ namespace NCurses.Core.Interop
         /// </summary>
         public static void wresize_t(IntPtr window, int lines, int columns)
         {
-            Func<IntPtr, IntPtr, int> callback = (IntPtr w, IntPtr a) => ncurses_wresize(window, lines, columns);
+            Func<IntPtr, IntPtr, int> callback = (IntPtr w, IntPtr a) => NativeNCurses.NCursesWrapper.wresize(window, lines, columns);
             NativeNCurses.use_window_v(window, Marshal.GetFunctionPointerForDelegate(new NCURSES_WINDOW_CB(callback)), "wresize");
         }
         #endregion
 
         #region wgetparent
-        /// <summary>
-        /// see <see cref="wgetparent"/>
-        /// </summary>
-        /// <returns>Constants.ERR on error or Constants.OK on success</returns>
-        [DllImport(Constants.DLLNAME, EntryPoint = "wgetparent")]
-        internal extern static IntPtr ncurses_wgetparent(IntPtr window);
-
         /// <summary>
         /// returns the parent WINDOW pointer for subwindows,  or NLL for windows having no parent.
         /// <para />native method wrapped with verification.
@@ -2962,7 +2402,7 @@ namespace NCurses.Core.Interop
         /// <param name="window">A pointer to a window</param>
         public static IntPtr wgetparent(IntPtr window)
         {
-            return NativeNCurses.VerifyNCursesMethod(() => ncurses_wgetparent(window), "wgetparent");
+            return NativeNCurses.VerifyNCursesMethod(() => NativeNCurses.NCursesWrapper.wgetparent(window), "wgetparent");
         }
         #endregion
 
@@ -2971,8 +2411,10 @@ namespace NCurses.Core.Interop
         /// returns the value set in clearok
         /// </summary>
         /// <param name="window">A pointer to a window</param>
-        [DllImport(Constants.DLLNAME, EntryPoint = "is_cleared")]
-        public extern static bool is_cleared(IntPtr window);
+        public static bool is_cleared(IntPtr window)
+        {
+            return NativeNCurses.NCursesWrapper.is_cleared(window);
+        }
         #endregion
 
         #region is_idcok
@@ -2980,8 +2422,10 @@ namespace NCurses.Core.Interop
         /// returns the value set in idcok
         /// </summary>
         /// <param name="window">A pointer to a window</param>
-        [DllImport(Constants.DLLNAME, EntryPoint = "is_idcok")]
-        public extern static bool is_idcok(IntPtr window);
+        public static bool is_idcok(IntPtr window)
+        {
+            return NativeNCurses.NCursesWrapper.is_idcok(window);
+        }
         #endregion
 
         #region is_idlok
@@ -2989,8 +2433,10 @@ namespace NCurses.Core.Interop
         /// returns the value set in idlok
         /// </summary>
         /// <param name="window">A pointer to a window</param>
-        [DllImport(Constants.DLLNAME, EntryPoint = "is_idlok")]
-        public extern static bool is_idlok(IntPtr window);
+        public static bool is_idlok(IntPtr window)
+        {
+            return NativeNCurses.NCursesWrapper.is_idlok(window);
+        }
         #endregion
 
         #region is_immedok
@@ -2998,8 +2444,10 @@ namespace NCurses.Core.Interop
         /// returns the value set in immedok
         /// </summary>
         /// <param name="window">A pointer to a window</param>
-        [DllImport(Constants.DLLNAME, EntryPoint = "is_immedok")]
-        public extern static bool is_immedok(IntPtr window);
+        public static bool is_immedok(IntPtr window)
+        {
+            return NativeNCurses.NCursesWrapper.is_immedok(window);
+        }
         #endregion
 
         #region is_keypad
@@ -3007,8 +2455,10 @@ namespace NCurses.Core.Interop
         /// returns the value set in keypad
         /// </summary>
         /// <param name="window">A pointer to a window</param>
-        [DllImport(Constants.DLLNAME, EntryPoint = "is_keypad")]
-        public extern static bool is_keypad(IntPtr window);
+        public static bool is_keypad(IntPtr window)
+        {
+            return NativeNCurses.NCursesWrapper.is_keypad(window);
+        }
         #endregion
 
         #region is_leaveok
@@ -3016,8 +2466,10 @@ namespace NCurses.Core.Interop
         /// returns the value set in leaveok
         /// </summary>
         /// <param name="window">A pointer to a window</param>
-        [DllImport(Constants.DLLNAME, EntryPoint = "is_leaveok")]
-        public extern static bool is_leaveok(IntPtr window);
+        public static bool is_leaveok(IntPtr window)
+        {
+            return NativeNCurses.NCursesWrapper.is_leaveok(window);
+        }
         #endregion
 
         #region is_nodelay
@@ -3025,8 +2477,10 @@ namespace NCurses.Core.Interop
         /// returns the value set in nodelay
         /// </summary>
         /// <param name="window">A pointer to a window</param>
-        [DllImport(Constants.DLLNAME, EntryPoint = "is_nodelay")]
-        public extern static bool is_nodelay(IntPtr window);
+        public static bool is_nodelay(IntPtr window)
+        {
+            return NativeNCurses.NCursesWrapper.is_nodelay(window);
+        }
         #endregion
 
         #region is_notimeout
@@ -3034,8 +2488,10 @@ namespace NCurses.Core.Interop
         /// returns the value set in notimeout
         /// </summary>
         /// <param name="window">A pointer to a window</param>
-        [DllImport(Constants.DLLNAME, EntryPoint = "is_notimeout")]
-        public extern static bool is_notimeout(IntPtr window);
+        public static bool is_notimeout(IntPtr window)
+        {
+            return NativeNCurses.NCursesWrapper.is_notimeout(window);
+        }
         #endregion
 
         #region is_pad
@@ -3043,8 +2499,10 @@ namespace NCurses.Core.Interop
         /// returns TRUE if the window is a pad i.e., created by <see cref="NativeNCurses.newpad"/>
         /// </summary>
         /// <param name="window">A pointer to a window</param>
-        [DllImport(Constants.DLLNAME, EntryPoint = "is_pad")]
-        public extern static bool is_pad(IntPtr window);
+        public static bool is_pad(IntPtr window)
+        {
+            return NativeNCurses.NCursesWrapper.is_pad(window);
+        }
         #endregion
 
         #region is_scrollok
@@ -3052,8 +2510,10 @@ namespace NCurses.Core.Interop
         /// returns the value set in scrollok
         /// </summary>
         /// <param name="window">A pointer to a window</param>
-        [DllImport(Constants.DLLNAME, EntryPoint = "is_scrollok")]
-        public extern static bool is_scrollok(IntPtr window);
+        public static bool is_scrollok(IntPtr window)
+        {
+            return NativeNCurses.NCursesWrapper.is_scrollok(window);
+        }
         #endregion
 
         #region is_subwin
@@ -3061,8 +2521,10 @@ namespace NCurses.Core.Interop
         /// returns TRUE if the window is a subwindow, i.e., created by subwin or derwin
         /// </summary>
         /// <param name="window">A pointer to a window</param>
-        [DllImport(Constants.DLLNAME, EntryPoint = "is_subwin")]
-        public extern static bool is_subwin(IntPtr window);
+        public static bool is_subwin(IntPtr window)
+        {
+            return NativeNCurses.NCursesWrapper.is_subwin(window);
+        }
         #endregion
 
         #region is_syncok
@@ -3070,8 +2532,10 @@ namespace NCurses.Core.Interop
         /// returns the value set in syncok
         /// </summary>
         /// <param name="window">A pointer to a window</param>
-        [DllImport(Constants.DLLNAME, EntryPoint = "is_syncok")]
-        public extern static bool is_syncok(IntPtr window);
+        public static bool is_syncok(IntPtr window)
+        {
+            return NativeNCurses.NCursesWrapper.is_syncok(window);
+        }
         #endregion
 
         #region wgetdelay
@@ -3079,18 +2543,13 @@ namespace NCurses.Core.Interop
         /// returns the delay timeout as set in wtimeout.
         /// </summary>
         /// <param name="window">A pointer to a window</param>
-        [DllImport(Constants.DLLNAME, EntryPoint = "wgetdelay")]
-        public extern static int wgetdelay(IntPtr window);
+        public static int wgetdelay(IntPtr window)
+        {
+            return NativeNCurses.NCursesWrapper.wgetdelay(window);
+        }
         #endregion
 
         #region wgetscrreg
-        /// <summary>
-        /// see <see cref="wgetscrreg"/>
-        /// </summary>
-        /// <returns>Constants.ERR on error or Constants.OK on success</returns>
-        [DllImport(Constants.DLLNAME, EntryPoint = "wgetscrreg")]
-        internal extern static int ncurses_wgetscrreg(IntPtr window, IntPtr lines, IntPtr columns);
-
         /// <summary>
         /// returns the  top and  bottom rows for the scrolling margin as set in wsetscrreg.
         /// </summary>
@@ -3109,7 +2568,7 @@ namespace NCurses.Core.Interop
 
             try
             {
-                return NativeNCurses.VerifyNCursesMethod(() => ncurses_wgetscrreg(window, tPtr, bPtr), "wgetscrreg");
+                return NativeNCurses.VerifyNCursesMethod(() => NativeNCurses.NCursesWrapper.wgetscrreg(window, tPtr, bPtr), "wgetscrreg");
             }
             finally
             {
@@ -3124,13 +2583,6 @@ namespace NCurses.Core.Interop
 
         #region wadd_wch
         /// <summary>
-        /// see <see cref="wadd_wch"/>
-        /// </summary>
-        /// <returns>Constants.ERR on error or Constants.OK on success</returns>
-        [DllImport(Constants.DLLNAME, EntryPoint = "wadd_wch")]
-        internal extern static int ncurses_wadd_wch(IntPtr window, IntPtr wch);
-
-        /// <summary>
         /// see <see cref="NativeStdScr.add_wch"/>
         /// <para />native method wrapped with verification.
         /// </summary>
@@ -3140,7 +2592,7 @@ namespace NCurses.Core.Interop
             IntPtr wPtr;
             using (wch.ToPointer(out wPtr))
             {
-                NativeNCurses.VerifyNCursesMethod(() => ncurses_wadd_wch(window, wPtr), "wadd_wch");
+                NativeNCurses.VerifyNCursesMethod(() => NativeNCurses.NCursesWrapper.wadd_wch(window, wPtr), "wadd_wch");
             }
         }
 
@@ -3153,7 +2605,7 @@ namespace NCurses.Core.Interop
             IntPtr wPtr = wch.ToPointer();
             GC.AddMemoryPressure(wch.Size);
 
-            Func<IntPtr, IntPtr, int> callback = (IntPtr w, IntPtr a) => ncurses_wadd_wch(window, wPtr);
+            Func<IntPtr, IntPtr, int> callback = (IntPtr w, IntPtr a) => NativeNCurses.NCursesWrapper.wadd_wch(window, wPtr);
 
             try
             {
@@ -3169,13 +2621,6 @@ namespace NCurses.Core.Interop
 
         #region wadd_wchnstr
         /// <summary>
-        /// see <see cref="wadd_wchnstr"/>
-        /// </summary>
-        /// <returns>Constants.ERR on error or Constants.OK on success</returns>
-        [DllImport(Constants.DLLNAME, EntryPoint = "wadd_wchnstr")]
-        internal extern static int ncurses_wadd_wchnstr(IntPtr window, IntPtr wchStr, int n);
-
-        /// <summary>
         /// see <see cref="NativeStdScr.add_wchnstr"/>
         /// <para />native method wrapped with verification.
         /// </summary>
@@ -3188,7 +2633,7 @@ namespace NCurses.Core.Interop
 
             try
             {
-                NativeNCurses.VerifyNCursesMethod(() => ncurses_wadd_wchnstr(window, arrayPtr, n), "wadd_wchnstr");
+                NativeNCurses.VerifyNCursesMethod(() => NativeNCurses.NCursesWrapper.wadd_wchnstr(window, arrayPtr, n), "wadd_wchnstr");
             }
             finally
             {
@@ -3207,7 +2652,7 @@ namespace NCurses.Core.Interop
             IntPtr arrayPtr = NativeNCurses.MarshallArray(wchStr, true, out totalSize);
             GC.AddMemoryPressure(totalSize);
 
-            Func<IntPtr, IntPtr, int> callback = (IntPtr w, IntPtr a) => ncurses_wadd_wchnstr(window, arrayPtr, n);
+            Func<IntPtr, IntPtr, int> callback = (IntPtr w, IntPtr a) => NativeNCurses.NCursesWrapper.wadd_wchnstr(window, arrayPtr, n);
 
             try
             {
@@ -3223,13 +2668,6 @@ namespace NCurses.Core.Interop
 
         #region wadd_wchstr
         /// <summary>
-        /// see <see cref="wadd_wchstr"/>
-        /// </summary>
-        /// <returns>Constants.ERR on error or Constants.OK on success</returns>
-        [DllImport(Constants.DLLNAME, EntryPoint = "wadd_wchstr")]
-        internal extern static int ncurses_wadd_wchstr(IntPtr window, IntPtr wchStr);
-
-        /// <summary>
         /// see <see cref="NativeStdScr.add_wchstr"/>
         /// <para />native method wrapped with verification.
         /// </summary>
@@ -3242,7 +2680,7 @@ namespace NCurses.Core.Interop
 
             try
             {
-                NativeNCurses.VerifyNCursesMethod(() => ncurses_wadd_wchstr(window, arrayPtr), "wadd_wchstr");
+                NativeNCurses.VerifyNCursesMethod(() => NativeNCurses.NCursesWrapper.wadd_wchstr(window, arrayPtr), "wadd_wchstr");
             }
             finally
             {
@@ -3261,7 +2699,7 @@ namespace NCurses.Core.Interop
             IntPtr arrayPtr = NativeNCurses.MarshallArray(wchStr, true, out totalSize);
             GC.AddMemoryPressure(totalSize);
 
-            Func<IntPtr, IntPtr, int> callback = (IntPtr w, IntPtr a) => ncurses_wadd_wchstr(window, arrayPtr);
+            Func<IntPtr, IntPtr, int> callback = (IntPtr w, IntPtr a) => NativeNCurses.NCursesWrapper.wadd_wchstr(window, arrayPtr);
 
             try
             {
@@ -3277,16 +2715,6 @@ namespace NCurses.Core.Interop
 
         #region waddnwstr
         /// <summary>
-        /// see <see cref="waddnwstr"/>
-        /// </summary>
-        /// <returns>Constants.ERR on error or Constants.OK on success</returns>
-        //[DllImport(Constants.DLLNAME, EntryPoint = "waddnwstr", CharSet = CharSet.Unicode)]
-        //internal extern static int ncurses_waddnwstr(IntPtr window, string wstr, int n);
-
-        [DllImport(Constants.DLLNAME, EntryPoint = "waddnwstr")]
-        internal extern static int ncurses_waddnwstr(IntPtr window, IntPtr wstr, int n);
-
-        /// <summary>
         /// see <see cref="NativeStdScr.addnwstr"/>
         /// <para />native method wrapped with verification.
         /// </summary>
@@ -3294,7 +2722,7 @@ namespace NCurses.Core.Interop
         public static void waddnwstr(IntPtr window, string wstr, int n)
         {
             NativeNCurses.MarshalNativeWideStringAndExecuteAction((ptr) =>
-                NativeNCurses.VerifyNCursesMethod(() => ncurses_waddnwstr(window, ptr, n), "waddnwstr"),
+                NativeNCurses.VerifyNCursesMethod(() => NativeNCurses.NCursesWrapper.waddnwstr(window, ptr, n), "waddnwstr"),
                 wstr);
         }
 
@@ -3307,7 +2735,7 @@ namespace NCurses.Core.Interop
             Func<IntPtr, IntPtr, int> callback = (IntPtr w, IntPtr a) =>
             {
                 int ret = 0;
-                NativeNCurses.MarshalNativeWideStringAndExecuteAction((ptr) => ret = ncurses_waddnwstr(window, ptr, n), wstr);
+                NativeNCurses.MarshalNativeWideStringAndExecuteAction((ptr) => ret = NativeNCurses.NCursesWrapper.waddnwstr(window, ptr, n), wstr);
                 return ret;
             };
             NativeNCurses.use_window_v(window, Marshal.GetFunctionPointerForDelegate(new NCURSES_WINDOW_CB(callback)), "waddnwstr");
@@ -3316,16 +2744,6 @@ namespace NCurses.Core.Interop
 
         #region waddwstr
         /// <summary>
-        /// see <see cref="waddwstr"/>
-        /// </summary>
-        /// <returns>Constants.ERR on error or Constants.OK on success</returns>
-        //[DllImport(Constants.DLLNAME, EntryPoint = "waddwstr", CharSet = CharSet.Unicode)]
-        //internal extern static int ncurses_waddwstr(IntPtr window, string wstr);
-
-        [DllImport(Constants.DLLNAME, EntryPoint = "waddwstr")]
-        internal extern static int ncurses_waddwstr(IntPtr window, IntPtr wstr);
-
-        /// <summary>
         /// see <see cref="NativeStdScr.addwstr"/>
         /// <para />native method wrapped with verification.
         /// </summary>
@@ -3333,7 +2751,7 @@ namespace NCurses.Core.Interop
         public static void waddwstr(IntPtr window, string wstr)
         {
             NativeNCurses.MarshalNativeWideStringAndExecuteAction((ptr) =>
-                NativeNCurses.VerifyNCursesMethod(() => ncurses_waddwstr(window, ptr), "waddwstr"),
+                NativeNCurses.VerifyNCursesMethod(() => NativeNCurses.NCursesWrapper.waddwstr(window, ptr), "waddwstr"),
                 wstr, true);
         }
 
@@ -3346,7 +2764,7 @@ namespace NCurses.Core.Interop
             Func<IntPtr, IntPtr, int> callback = (IntPtr w, IntPtr a) =>
             {
                 int ret = 0;
-                NativeNCurses.MarshalNativeWideStringAndExecuteAction((ptr) => ret = ncurses_waddwstr(window, ptr), wstr);
+                NativeNCurses.MarshalNativeWideStringAndExecuteAction((ptr) => ret = NativeNCurses.NCursesWrapper.waddwstr(window, ptr), wstr);
                 return ret;
             };
             NativeNCurses.use_window_v(window, Marshal.GetFunctionPointerForDelegate(new NCURSES_WINDOW_CB(callback)), "waddwstr");
@@ -3354,13 +2772,6 @@ namespace NCurses.Core.Interop
         #endregion
 
         #region wbkgrnd
-        /// <summary>
-        /// see <see cref="wbkgrnd"/>
-        /// </summary>
-        /// <returns>Constants.ERR on error or Constants.OK on success</returns>
-        [DllImport(Constants.DLLNAME, EntryPoint = "wbkgrnd")]
-        internal extern static int ncurses_bkgrnd(IntPtr window, IntPtr wch);
-
         /// <summary>
         /// see <see cref="NativeStdScr.bkgrnd"/>
         /// <para />native method wrapped with verification.
@@ -3371,7 +2782,7 @@ namespace NCurses.Core.Interop
             IntPtr wPtr;
             using (wch.ToPointer(out wPtr))
             {
-                NativeNCurses.VerifyNCursesMethod(() => ncurses_bkgrnd(window, wPtr), "wbkgrnd");
+                NativeNCurses.VerifyNCursesMethod(() => NativeNCurses.NCursesWrapper.bkgrnd(window, wPtr), "wbkgrnd");
             }
         }
 
@@ -3384,7 +2795,7 @@ namespace NCurses.Core.Interop
             IntPtr wPtr = wch.ToPointer();
             GC.AddMemoryPressure(wch.Size);
 
-            Func<IntPtr, IntPtr, int> callback = (IntPtr w, IntPtr a) => ncurses_bkgrnd(window, wPtr);
+            Func<IntPtr, IntPtr, int> callback = (IntPtr w, IntPtr a) => NativeNCurses.NCursesWrapper.bkgrnd(window, wPtr);
 
             try
             {
@@ -3400,13 +2811,6 @@ namespace NCurses.Core.Interop
 
         #region wbkgrndset
         /// <summary>
-        /// see <see cref="wbkgrndset"/>
-        /// </summary>
-        /// <returns>Constants.ERR on error or Constants.OK on success</returns>
-        [DllImport(Constants.DLLNAME, EntryPoint = "wbkgrndset")]
-        internal extern static void ncurses_wbkgrndset(IntPtr window, IntPtr wch);
-
-        /// <summary>
         /// see <see cref="NativeStdScr.bkgrndset"/>
         /// </summary>
         /// <param name="window">A pointer to a window</param>
@@ -3415,19 +2819,12 @@ namespace NCurses.Core.Interop
             IntPtr wPtr;
             using (wch.ToPointer(out wPtr))
             {
-                ncurses_wbkgrndset(window, wPtr);
+                NativeNCurses.NCursesWrapper.wbkgrndset(window, wPtr);
             }
         }
         #endregion
 
         #region wborder_set
-        /// <summary>
-        /// see <see cref="wborder_set"/>
-        /// </summary>
-        /// <returns>Constants.ERR on error or Constants.OK on success</returns>
-        [DllImport(Constants.DLLNAME, EntryPoint = "wborder_set")]
-        internal extern static int ncurses_wborder_set(IntPtr window, IntPtr ls, IntPtr rs, IntPtr ts, IntPtr bs, IntPtr tl, IntPtr tr, IntPtr bl, IntPtr br);
-
         /// <summary>
         /// see <see cref="NativeStdScr.border_set"/>
         /// </summary>
@@ -3446,7 +2843,7 @@ namespace NCurses.Core.Interop
 
             try
             {
-                NativeNCurses.VerifyNCursesMethod(() => ncurses_wborder_set(window, lsPtr, rsPtr, tsPtr, bsPtr, tlPtr, trPtr, blPtr, brPtr), "wborder_set");
+                NativeNCurses.VerifyNCursesMethod(() => NativeNCurses.NCursesWrapper.wborder_set(window, lsPtr, rsPtr, tsPtr, bsPtr, tlPtr, trPtr, blPtr, brPtr), "wborder_set");
             }
             finally
             {
@@ -3492,7 +2889,7 @@ namespace NCurses.Core.Interop
             IntPtr blPtr = bl.ToPointer();
             IntPtr brPtr = br.ToPointer();
 
-            Func<IntPtr, IntPtr, int> callback = (IntPtr w, IntPtr a) => ncurses_wborder_set(window, lsPtr, rsPtr, tsPtr, bsPtr, tlPtr, trPtr, blPtr, brPtr);
+            Func<IntPtr, IntPtr, int> callback = (IntPtr w, IntPtr a) => NativeNCurses.NCursesWrapper.wborder_set(window, lsPtr, rsPtr, tsPtr, bsPtr, tlPtr, trPtr, blPtr, brPtr);
 
             try
             {
@@ -3529,13 +2926,6 @@ namespace NCurses.Core.Interop
 
         #region box_set
         /// <summary>
-        /// see <see cref="box_set"/>
-        /// </summary>
-        /// <returns>Constants.ERR on error or Constants.OK on success</returns>
-        [DllImport(Constants.DLLNAME, EntryPoint = "box_set")]
-        internal extern static int ncurses_box_set(IntPtr window, IntPtr verch, IntPtr horch);
-
-        /// <summary>
         /// box_set(win, verch, horch); is a shorthand for the follow ing call:
         /// wborder_set(win, verch, verch, horch, horch, NULL, NULL, NULL, NULL);
         /// <para />native method wrapped with verification.
@@ -3551,7 +2941,7 @@ namespace NCurses.Core.Interop
 
             try
             {
-                NativeNCurses.VerifyNCursesMethod(() => ncurses_box_set(window, vPtr, hPtr), "box_set");
+                NativeNCurses.VerifyNCursesMethod(() => NativeNCurses.NCursesWrapper.box_set(window, vPtr, hPtr), "box_set");
             }
             finally
             {
@@ -3575,7 +2965,7 @@ namespace NCurses.Core.Interop
             IntPtr hPtr = horch.ToPointer();
             GC.AddMemoryPressure(horch.Size);
 
-            Func<IntPtr, IntPtr, int> callback = (IntPtr w, IntPtr a) => ncurses_box_set(window, vPtr, hPtr);
+            Func<IntPtr, IntPtr, int> callback = (IntPtr w, IntPtr a) => NativeNCurses.NCursesWrapper.box_set(window, vPtr, hPtr);
 
             try
             {
@@ -3594,13 +2984,6 @@ namespace NCurses.Core.Interop
 
         #region wecho_wchar
         /// <summary>
-        /// see <see cref="wecho_wchar"/>
-        /// </summary>
-        /// <returns>Constants.ERR on error or Constants.OK on success</returns>
-        [DllImport(Constants.DLLNAME, EntryPoint = "wecho_wchar")]
-        internal extern static int ncurses_wecho_wchar(IntPtr window, IntPtr wch);
-
-        /// <summary>
         /// seee <see cref="NativeStdScr.echo_wchar"/>
         /// <para />native method wrapped with verification.
         /// </summary>
@@ -3610,7 +2993,7 @@ namespace NCurses.Core.Interop
             IntPtr wPtr;
             using (wch.ToPointer(out wPtr))
             {
-                NativeNCurses.VerifyNCursesMethod(() => ncurses_wecho_wchar(window, wPtr), "wecho_wchar");
+                NativeNCurses.VerifyNCursesMethod(() => NativeNCurses.NCursesWrapper.wecho_wchar(window, wPtr), "wecho_wchar");
             }
         }
 
@@ -3623,7 +3006,7 @@ namespace NCurses.Core.Interop
             IntPtr wPtr = wch.ToPointer();
             GC.AddMemoryPressure(wch.Size);
 
-            Func<IntPtr, IntPtr, int> callback = (IntPtr w, IntPtr a) => ncurses_wecho_wchar(window, wPtr);
+            Func<IntPtr, IntPtr, int> callback = (IntPtr w, IntPtr a) => NativeNCurses.NCursesWrapper.wecho_wchar(window, wPtr);
 
             try
             {
@@ -3639,15 +3022,6 @@ namespace NCurses.Core.Interop
 
         #region wget_wch
         /// <summary>
-        /// see <see cref="wget_wch"/>
-        /// </summary>
-        /// <returns>Constants.ERR on error or Constants.OK on success</returns>
-        //[DllImport(Constants.DLLNAME, EntryPoint = "wget_wch", CharSet = CharSet.Unicode)]
-        //internal extern static int ncurses_wget_wch(IntPtr window, out char wch);
-        [DllImport(Constants.DLLNAME, EntryPoint = "wget_wch")]
-        internal extern static int ncurses_wget_wch(IntPtr window, IntPtr wch);
-
-        /// <summary>
         /// see <see cref="NativeStdScr.get_wch"/>
         /// <para />native method wrapped with verification.
         /// </summary>
@@ -3660,7 +3034,7 @@ namespace NCurses.Core.Interop
 
             try
             {
-                NativeNCurses.VerifyNCursesMethod(() => ncurses_wget_wch(window, chPtr), "get_wch");
+                NativeNCurses.VerifyNCursesMethod(() => NativeNCurses.NCursesWrapper.wget_wch(window, chPtr), "get_wch");
 
                 byte[] arr = new byte[Marshal.SizeOf<uint>()];
                 Marshal.Copy(chPtr, arr, 0, Marshal.SizeOf<uint>());
@@ -3680,15 +3054,6 @@ namespace NCurses.Core.Interop
 
         #region wget_wstr
         /// <summary>
-        /// see <see cref="wget_wstr"/>
-        /// </summary>
-        /// <returns>Constants.ERR on error or Constants.OK on success</returns>
-        //[DllImport(Constants.DLLNAME, EntryPoint = "wget_wstr", CharSet = CharSet.Unicode)]
-        //internal extern static int ncurses_wget_wstr(IntPtr window, StringBuilder wstr);
-        [DllImport(Constants.DLLNAME, EntryPoint = "wget_wstr")]
-        internal extern static int ncurses_wget_wstr(IntPtr window, IntPtr wstr);
-
-        /// <summary>
         /// see <see cref="NativeStdScr.get_wstr"/>
         /// <para />native method wrapped with verification.
         /// </summary>
@@ -3701,7 +3066,7 @@ namespace NCurses.Core.Interop
 
             try
             {
-                NativeNCurses.VerifyNCursesMethod(() => ncurses_wget_wstr(window, strPtr), "wget_wstr");
+                NativeNCurses.VerifyNCursesMethod(() => NativeNCurses.NCursesWrapper.wget_wstr(window, strPtr), "wget_wstr");
                 wstr.Append(NativeNCurses.MarshalStringFromNativeWideString(strPtr, wstr.Capacity));
             }
             finally
@@ -3723,7 +3088,7 @@ namespace NCurses.Core.Interop
 
             try
             {
-                Func<IntPtr, IntPtr, int> callback = (IntPtr w, IntPtr a) => ncurses_wget_wstr(window, strPtr);
+                Func<IntPtr, IntPtr, int> callback = (IntPtr w, IntPtr a) => NativeNCurses.NCursesWrapper.wget_wstr(window, strPtr);
                 NativeNCurses.use_window_v(window, Marshal.GetFunctionPointerForDelegate(new NCURSES_WINDOW_CB(callback)), "wget_wstr");
             }
             finally
@@ -3736,20 +3101,6 @@ namespace NCurses.Core.Interop
 
         #region wgetbkgrnd
         /// <summary>
-        /// see <see cref="wgetbkgrnd"/>
-        /// </summary>
-        /// <returns>Constants.ERR on error or Constants.OK on success</returns>
-        //[DllImport(Constants.DLLNAME, EntryPoint = "wgetbkgrnd")]
-        //internal extern static int ncurses_wgetbkgrnd(IntPtr window, out NCURSES_CH_T wch);
-
-        /// <summary>
-        /// see <see cref="wgetbkgrnd"/>
-        /// </summary>
-        /// <returns>Constants.ERR on error or Constants.OK on success</returns>
-        [DllImport(Constants.DLLNAME, EntryPoint = "wgetbkgrnd")]
-        internal extern static int ncurses_wgetbkgrnd(IntPtr window, IntPtr wch);
-
-        /// <summary>
         /// see <see cref="NativeStdScr.getbkgrnd"/>
         /// <para />native method wrapped with verification.
         /// </summary>
@@ -3760,7 +3111,7 @@ namespace NCurses.Core.Interop
             wch = new NCursesWCHAR();
             using (wch.ToPointer(out wPtr))
             {
-                NCursesException.Verify(ncurses_wgetbkgrnd(window, wPtr), "wgetbkgrnd");
+                NCursesException.Verify(NativeNCurses.NCursesWrapper.wgetbkgrnd(window, wPtr), "wgetbkgrnd");
             }
         }
 
@@ -3773,7 +3124,7 @@ namespace NCurses.Core.Interop
             IntPtr wPtr = (wch = new NCursesWCHAR()).ToPointer();
             GC.AddMemoryPressure(wch.Size);
 
-            Func<IntPtr, IntPtr, int> callback = (IntPtr w, IntPtr a) => ncurses_wgetbkgrnd(window, a);
+            Func<IntPtr, IntPtr, int> callback = (IntPtr w, IntPtr a) => NativeNCurses.NCursesWrapper.wgetbkgrnd(window, a);
 
             try
             {
@@ -3790,15 +3141,6 @@ namespace NCurses.Core.Interop
 
         #region wgetn_wstr
         /// <summary>
-        /// see <see cref="wgetn_wstr"/>
-        /// </summary>
-        /// <returns>Constants.ERR on error or Constants.OK on success</returns>
-        //[DllImport(Constants.DLLNAME, EntryPoint = "wgetn_wstr", CharSet = CharSet.Unicode)]
-        //internal extern static int ncurses_wgetn_wstr(IntPtr window, StringBuilder wstr, int n);
-        [DllImport(Constants.DLLNAME, EntryPoint = "wgetn_wstr")]
-        internal extern static int ncurses_wgetn_wstr(IntPtr window, IntPtr wstr, int n);
-
-        /// <summary>
         /// see <see cref="NativeStdScr.getn_wstr"/>
         /// <para />native method wrapped with verification.
         /// </summary>
@@ -3811,7 +3153,7 @@ namespace NCurses.Core.Interop
 
             try
             {
-                NativeNCurses.VerifyNCursesMethod(() => ncurses_wgetn_wstr(window, strPtr, n), "wgetn_wstr");
+                NativeNCurses.VerifyNCursesMethod(() => NativeNCurses.NCursesWrapper.wgetn_wstr(window, strPtr, n), "wgetn_wstr");
                 wstr.Append(NativeNCurses.MarshalStringFromNativeWideString(strPtr, n));
             }
             finally
@@ -3831,7 +3173,7 @@ namespace NCurses.Core.Interop
             IntPtr strPtr = Marshal.AllocHGlobal(size);
             GC.AddMemoryPressure(size);
 
-            Func<IntPtr, IntPtr, int> callback = (IntPtr w, IntPtr a) => ncurses_wgetn_wstr(window, strPtr, n);
+            Func<IntPtr, IntPtr, int> callback = (IntPtr w, IntPtr a) => NativeNCurses.NCursesWrapper.wgetn_wstr(window, strPtr, n);
 
             try
             {
@@ -3847,15 +3189,6 @@ namespace NCurses.Core.Interop
 
         #region whline_set
         /// <summary>
-        /// see <see cref="whline_set"/>
-        /// </summary>
-        /// <returns>Constants.ERR on error or Constants.OK on success</returns>
-        //[DllImport(Constants.DLLNAME, EntryPoint = "whline_set")]
-        //internal extern static int ncurses_whline_set(IntPtr window, NCURSES_CH_T wch, int n);
-        [DllImport(Constants.DLLNAME, EntryPoint = "whline_set")]
-        internal extern static int ncurses_whline_set(IntPtr window, IntPtr wch, int n);
-
-        /// <summary>
         /// see <see cref="NativeStdScr.hline_set"/>
         /// <para />native method wrapped with verification.
         /// </summary>
@@ -3865,7 +3198,7 @@ namespace NCurses.Core.Interop
             IntPtr wPtr;
             using (wch.ToPointer(out wPtr))
             {
-                NativeNCurses.VerifyNCursesMethod(() => ncurses_whline_set(window, wPtr, n), "whline_set");
+                NativeNCurses.VerifyNCursesMethod(() => NativeNCurses.NCursesWrapper.whline_set(window, wPtr, n), "whline_set");
             }
         }
 
@@ -3878,7 +3211,7 @@ namespace NCurses.Core.Interop
             IntPtr wPtr = wch.ToPointer();
             GC.AddMemoryPressure(wch.Size);
 
-            Func<IntPtr, IntPtr, int> callback = (IntPtr w, IntPtr a) => ncurses_whline_set(window, wPtr, n);
+            Func<IntPtr, IntPtr, int> callback = (IntPtr w, IntPtr a) => NativeNCurses.NCursesWrapper.whline_set(window, wPtr, n);
             try
             {
                 NativeNCurses.use_window_v(window, Marshal.GetFunctionPointerForDelegate(new NCURSES_WINDOW_CB(callback)), "whline_set");
@@ -3893,20 +3226,6 @@ namespace NCurses.Core.Interop
 
         #region win_wch
         /// <summary>
-        /// see <see cref="win_wch"/>
-        /// </summary>
-        /// <returns>Constants.ERR on error or Constants.OK on success</returns>
-        //[DllImport(Constants.DLLNAME, EntryPoint = "win_wch")]
-        //internal extern static int ncurses_win_wch(IntPtr window, out NCURSES_CH_T wch);
-
-        /// <summary>
-        /// see <see cref="win_wch"/>
-        /// </summary>
-        /// <returns>Constants.ERR on error or Constants.OK on success</returns>
-        [DllImport(Constants.DLLNAME, EntryPoint = "win_wch")]
-        internal extern static int ncurses_win_wch(IntPtr window, IntPtr wch);
-
-        /// <summary>
         /// see <see cref="NativeStdScr.in_wch"/>
         /// <para />native method wrapped with verification.
         /// </summary>
@@ -3917,7 +3236,7 @@ namespace NCurses.Core.Interop
             wcval = new NCursesWCHAR();
             using (wcval.ToPointer(out wPtr))
             {
-                NCursesException.Verify(ncurses_win_wch(window, wPtr), "win_wch");
+                NCursesException.Verify(NativeNCurses.NCursesWrapper.win_wch(window, wPtr), "win_wch");
             }
         }
 
@@ -3931,7 +3250,7 @@ namespace NCurses.Core.Interop
             IntPtr wPtr = wcval.ToPointer();
             GC.AddMemoryPressure(wcval.Size);
 
-            Func<IntPtr, IntPtr, int> callback = (IntPtr w, IntPtr a) => ncurses_win_wch(window, a);
+            Func<IntPtr, IntPtr, int> callback = (IntPtr w, IntPtr a) => NativeNCurses.NCursesWrapper.win_wch(window, a);
 
             try
             {
@@ -3948,13 +3267,6 @@ namespace NCurses.Core.Interop
 
         #region win_wchnstr
         /// <summary>
-        /// see <see cref="win_wchnstr"/>
-        /// </summary>
-        /// <returns>Constants.ERR on error or Constants.OK on success</returns>
-        [DllImport(Constants.DLLNAME, EntryPoint = "win_wchnstr")]
-        internal extern static int ncurses_win_wchnstr(IntPtr window, IntPtr wch, int n);
-
-        /// <summary>
         /// see <see cref="NativeStdScr.in_wchnstr"/>
         /// <para />native method wrapped with verification.
         /// </summary>
@@ -3967,7 +3279,7 @@ namespace NCurses.Core.Interop
 
             try
             {
-                NativeNCurses.VerifyNCursesMethod(() => ncurses_win_wchnstr(window, arrayPtr, totalSize), "win_wchnstr");
+                NativeNCurses.VerifyNCursesMethod(() => NativeNCurses.NCursesWrapper.win_wchnstr(window, arrayPtr, totalSize), "win_wchnstr");
                 for (int i = 0; i < wcval.Length; i++)
                     wcval[i].ToStructure(arrayPtr + (i * wcval[i].Size));
             }
@@ -3989,7 +3301,7 @@ namespace NCurses.Core.Interop
             IntPtr arrayPtr = NativeNCurses.MarshallArray(wcval, false, out totalSize);
             GC.AddMemoryPressure(totalSize);
 
-            Func<IntPtr, IntPtr, int> callback = (IntPtr w, IntPtr a) => ncurses_win_wchnstr(window, arrayPtr, totalSize);
+            Func<IntPtr, IntPtr, int> callback = (IntPtr w, IntPtr a) => NativeNCurses.NCursesWrapper.win_wchnstr(window, arrayPtr, totalSize);
 
             try
             {
@@ -4007,13 +3319,6 @@ namespace NCurses.Core.Interop
 
         #region win_wchstr
         /// <summary>
-        /// see <see cref="win_wchstr"/>
-        /// </summary>
-        /// <returns>Constants.ERR on error or Constants.OK on success</returns>
-        [DllImport(Constants.DLLNAME, EntryPoint = "win_wchstr")]
-        internal extern static int ncurses_win_wchstr(IntPtr window, IntPtr wch);
-
-        /// <summary>
         /// see <see cref="NativeStdScr.in_wchstr"/>
         /// <para />native method wrapped with verification.
         /// </summary>
@@ -4026,7 +3331,7 @@ namespace NCurses.Core.Interop
 
             try
             {
-                NativeNCurses.VerifyNCursesMethod(() => ncurses_win_wchstr(window, arrayPtr), "win_wchstr");
+                NativeNCurses.VerifyNCursesMethod(() => NativeNCurses.NCursesWrapper.win_wchstr(window, arrayPtr), "win_wchstr");
                 for (int i = 0; i < wcval.Length; i++)
                     wcval[i].ToStructure(arrayPtr + (i * wcval[i].Size));
             }
@@ -4048,7 +3353,7 @@ namespace NCurses.Core.Interop
             IntPtr arrayPtr = NativeNCurses.MarshallArray(wcval, false, out totalSize);
             GC.AddMemoryPressure(totalSize);
 
-            Func<IntPtr, IntPtr, int> callback = (IntPtr w, IntPtr a) => ncurses_win_wchstr(window, arrayPtr);
+            Func<IntPtr, IntPtr, int> callback = (IntPtr w, IntPtr a) => NativeNCurses.NCursesWrapper.win_wchstr(window, arrayPtr);
 
             try
             {
@@ -4066,15 +3371,6 @@ namespace NCurses.Core.Interop
 
         #region winnwstr
         /// <summary>
-        /// see <see cref="winnwstr"/>
-        /// </summary>
-        /// <returns>Constants.ERR on error or Constants.OK on success</returns>
-        //[DllImport(Constants.DLLNAME, EntryPoint = "winnwstr", CharSet = CharSet.Unicode)]
-        //internal extern static int ncurses_winnwstr(IntPtr window, StringBuilder str, int n);
-        [DllImport(Constants.DLLNAME, EntryPoint = "winnwstr")]
-        internal extern static int ncurses_winnwstr(IntPtr window, IntPtr str, int n);
-
-        /// <summary>
         /// see <see cref="NativeStdScr.innwstr"/>
         /// <para />native method wrapped with verification.
         /// </summary>
@@ -4087,7 +3383,7 @@ namespace NCurses.Core.Interop
 
             try
             {
-                NativeNCurses.VerifyNCursesMethod(() => ncurses_winnwstr(window, strPtr, n), "winnwstr");
+                NativeNCurses.VerifyNCursesMethod(() => NativeNCurses.NCursesWrapper.winnwstr(window, strPtr, n), "winnwstr");
                 str.Append(NativeNCurses.MarshalStringFromNativeWideString(strPtr, n));
             }
             finally
@@ -4107,7 +3403,7 @@ namespace NCurses.Core.Interop
             IntPtr strPtr = Marshal.AllocHGlobal(size);
             GC.AddMemoryPressure(size);
 
-            Func<IntPtr, IntPtr, int> callback = (IntPtr w, IntPtr a) => ncurses_winnwstr(window, strPtr, n);
+            Func<IntPtr, IntPtr, int> callback = (IntPtr w, IntPtr a) => NativeNCurses.NCursesWrapper.winnwstr(window, strPtr, n);
 
             try
             {
@@ -4123,15 +3419,6 @@ namespace NCurses.Core.Interop
 
         #region wins_nwstr
         /// <summary>
-        /// see <see cref="wins_nwstr"/>
-        /// </summary>
-        /// <returns>Constants.ERR on error or Constants.OK on success</returns>
-        //[DllImport(Constants.DLLNAME, EntryPoint = "wins_nwstr", CharSet = CharSet.Unicode)]
-        //internal extern static int ncurses_wins_nwstr(IntPtr window, string str, int n);
-        [DllImport(Constants.DLLNAME, EntryPoint = "wins_nwstr")]
-        internal extern static int ncurses_wins_nwstr(IntPtr window, IntPtr str, int n);
-
-        /// <summary>
         /// see <see cref="NativeStdScr.ins_nwstr"/>
         /// <para />native method wrapped with verification.
         /// </summary>
@@ -4139,7 +3426,7 @@ namespace NCurses.Core.Interop
         public static void wins_nwstr(IntPtr window, string str, int n)
         {
             NativeNCurses.MarshalNativeWideStringAndExecuteAction((strPtr) =>
-                NativeNCurses.VerifyNCursesMethod(() => ncurses_wins_nwstr(window, strPtr, n), "wins_nwstr"),
+                NativeNCurses.VerifyNCursesMethod(() => NativeNCurses.NCursesWrapper.wins_nwstr(window, strPtr, n), "wins_nwstr"),
                 str);
         }
 
@@ -4152,7 +3439,7 @@ namespace NCurses.Core.Interop
             Func<IntPtr, IntPtr, int> callback = (IntPtr w, IntPtr a) =>
             {
                 int ret = 0;
-                NativeNCurses.MarshalNativeWideStringAndExecuteAction((ptr) => ret = ncurses_wins_nwstr(window, ptr, n), str);
+                NativeNCurses.MarshalNativeWideStringAndExecuteAction((ptr) => ret = NativeNCurses.NCursesWrapper.wins_nwstr(window, ptr, n), str);
                 return ret;
             };
             NativeNCurses.use_window_v(window, Marshal.GetFunctionPointerForDelegate(new NCURSES_WINDOW_CB(callback)), "wins_nwstr");
@@ -4160,13 +3447,7 @@ namespace NCurses.Core.Interop
         #endregion
 
         #region wins_wch
-        /// <summary>
-        /// see <see cref="wins_wch"/>
-        /// </summary>
-        /// <returns>Constants.ERR on error or Constants.OK on success</returns>
-        [DllImport(Constants.DLLNAME, EntryPoint = "wins_wch")]
-        internal extern static int ncurses_wins_wch(IntPtr window, IntPtr wch);
-
+        
         /// <summary>
         /// see <see cref="NativeStdScr.ins_wch"/>
         /// <para />native method wrapped with verification.
@@ -4177,7 +3458,7 @@ namespace NCurses.Core.Interop
             IntPtr wPtr;
             using (wch.ToPointer(out wPtr))
             {
-                NativeNCurses.VerifyNCursesMethod(() => ncurses_wins_wch(window, wPtr), "wins_wch");
+                NativeNCurses.VerifyNCursesMethod(() => NativeNCurses.NCursesWrapper.wins_wch(window, wPtr), "wins_wch");
             }
         }
 
@@ -4190,7 +3471,7 @@ namespace NCurses.Core.Interop
             IntPtr wPtr = wch.ToPointer();
             GC.AddMemoryPressure(wch.Size);
 
-            Func<IntPtr, IntPtr, int> callback = (IntPtr w, IntPtr a) => ncurses_wins_wch(window, wPtr);
+            Func<IntPtr, IntPtr, int> callback = (IntPtr w, IntPtr a) => NativeNCurses.NCursesWrapper.wins_wch(window, wPtr);
             try
             {
                 NativeNCurses.use_window_v(window, Marshal.GetFunctionPointerForDelegate(new NCURSES_WINDOW_CB(callback)), "wins_wch");
@@ -4205,15 +3486,6 @@ namespace NCurses.Core.Interop
 
         #region wins_wstr
         /// <summary>
-        /// see <see cref="wins_wstr"/>
-        /// </summary>
-        /// <returns>Constants.ERR on error or Constants.OK on success</returns>
-        //[DllImport(Constants.DLLNAME, EntryPoint = "wins_wstr", CharSet = CharSet.Unicode)]
-        //internal extern static int ncurses_wins_wstr(IntPtr window, string str);
-        [DllImport(Constants.DLLNAME, EntryPoint = "wins_wstr")]
-        internal extern static int ncurses_wins_wstr(IntPtr window, IntPtr str);
-
-        /// <summary>
         /// see <see cref="NativeStdScr.ins_wstr"/>
         /// <para />native method wrapped with verification.
         /// </summary>
@@ -4221,7 +3493,7 @@ namespace NCurses.Core.Interop
         public static void wins_wstr(IntPtr window, string str)
         {
             NativeNCurses.MarshalNativeWideStringAndExecuteAction((strPtr) =>
-                NativeNCurses.VerifyNCursesMethod(() => ncurses_wins_wstr(window, strPtr), "wins_wstr"),
+                NativeNCurses.VerifyNCursesMethod(() => NativeNCurses.NCursesWrapper.wins_wstr(window, strPtr), "wins_wstr"),
                 str, true);
         }
 
@@ -4234,7 +3506,7 @@ namespace NCurses.Core.Interop
             Func<IntPtr, IntPtr, int> callback = (IntPtr w, IntPtr a) =>
             {
                 int ret = 0;
-                NativeNCurses.MarshalNativeWideStringAndExecuteAction((ptr) => ret = ncurses_wins_wstr(window, ptr), str);
+                NativeNCurses.MarshalNativeWideStringAndExecuteAction((ptr) => ret = NativeNCurses.NCursesWrapper.wins_wstr(window, ptr), str);
                 return ret;
             };
             NativeNCurses.use_window_v(window, Marshal.GetFunctionPointerForDelegate(new NCURSES_WINDOW_CB(callback)), "wins_wstr");
@@ -4242,15 +3514,6 @@ namespace NCurses.Core.Interop
         #endregion
 
         #region winwstr
-        /// <summary>
-        /// see <see cref="winwstr"/>
-        /// </summary>
-        /// <returns>Constants.ERR on error or Constants.OK on success</returns>
-        //[DllImport(Constants.DLLNAME, EntryPoint = "winwstr", CharSet = CharSet.Unicode)]
-        //internal extern static int ncurses_winwstr(IntPtr window, StringBuilder str);
-        [DllImport(Constants.DLLNAME, EntryPoint = "winwstr")]
-        internal extern static int ncurses_winwstr(IntPtr window, IntPtr str);
-
         /// <summary>
         /// see <see cref="NativeStdScr.inwstr"/>
         /// <para />native method wrapped with verification.
@@ -4264,7 +3527,7 @@ namespace NCurses.Core.Interop
 
             try
             {
-                NativeNCurses.VerifyNCursesMethod(() => ncurses_winwstr(window, strPtr), "winwstr");
+                NativeNCurses.VerifyNCursesMethod(() => NativeNCurses.NCursesWrapper.winwstr(window, strPtr), "winwstr");
                 str.Append(NativeNCurses.MarshalStringFromNativeWideString(strPtr, str.Capacity));
             }
             finally
@@ -4284,7 +3547,7 @@ namespace NCurses.Core.Interop
             IntPtr strPtr = Marshal.AllocHGlobal(size);
             GC.AddMemoryPressure(size);
 
-            Func<IntPtr, IntPtr, int> callback = (IntPtr w, IntPtr a) => ncurses_winwstr(window, strPtr);
+            Func<IntPtr, IntPtr, int> callback = (IntPtr w, IntPtr a) => NativeNCurses.NCursesWrapper.winwstr(window, strPtr);
 
             try
             {
@@ -4300,15 +3563,6 @@ namespace NCurses.Core.Interop
 
         #region mvwadd_wch
         /// <summary>
-        /// see <see cref="mvwadd_wch"/>
-        /// </summary>
-        /// <returns>Constants.ERR on error or Constants.OK on success</returns>
-        //[DllImport(Constants.DLLNAME, EntryPoint = "mvwadd_wch")]
-        //internal extern static int ncurses_mvwadd_wch(IntPtr window, int y, int x, NCURSES_CH_T wch);
-        [DllImport(Constants.DLLNAME, EntryPoint = "mvwadd_wch")]
-        internal extern static int ncurses_mvwadd_wch(IntPtr window, int y, int x, IntPtr wch);
-
-        /// <summary>
         /// see <see cref="NativeStdScr.mvadd_wch"/>
         /// <para />native method wrapped with verification.
         /// </summary>
@@ -4318,7 +3572,7 @@ namespace NCurses.Core.Interop
             IntPtr wPtr;
             using (wch.ToPointer(out wPtr))
             {
-                NativeNCurses.VerifyNCursesMethod(() => ncurses_mvwadd_wch(window, y, x, wPtr), "mvwadd_wch");
+                NativeNCurses.VerifyNCursesMethod(() => NativeNCurses.NCursesWrapper.mvwadd_wch(window, y, x, wPtr), "mvwadd_wch");
             }
         }
 
@@ -4331,7 +3585,7 @@ namespace NCurses.Core.Interop
             IntPtr wPtr = wch.ToPointer();
             GC.AddMemoryPressure(wch.Size);
 
-            Func<IntPtr, IntPtr, int> callback = (IntPtr w, IntPtr a) => ncurses_mvwadd_wch(window, y, x, wPtr);
+            Func<IntPtr, IntPtr, int> callback = (IntPtr w, IntPtr a) => NativeNCurses.NCursesWrapper.mvwadd_wch(window, y, x, wPtr);
 
             try
             {
@@ -4347,13 +3601,6 @@ namespace NCurses.Core.Interop
 
         #region mvwadd_wchnstr
         /// <summary>
-        /// see <see cref="mvwadd_wchnstr"/>
-        /// </summary>
-        /// <returns>Constants.ERR on error or Constants.OK on success</returns>
-        [DllImport(Constants.DLLNAME, EntryPoint = "mvwadd_wchnstr")]
-        internal extern static int ncurses_mvwadd_wchnstr(IntPtr window, int y, int x, IntPtr wch, int n);
-
-        /// <summary>
         /// see <see cref="NativeStdScr.mvadd_wchnstr"/>
         /// <para />native method wrapped with verification.
         /// </summary>
@@ -4366,7 +3613,7 @@ namespace NCurses.Core.Interop
 
             try
             {
-                NativeNCurses.VerifyNCursesMethod(() => ncurses_mvwadd_wchnstr(window, y, x, arrayPtr, n), "mvwadd_wchnstr");
+                NativeNCurses.VerifyNCursesMethod(() => NativeNCurses.NCursesWrapper.mvwadd_wchnstr(window, y, x, arrayPtr, n), "mvwadd_wchnstr");
             }
             finally
             {
@@ -4385,7 +3632,7 @@ namespace NCurses.Core.Interop
             IntPtr arrayPtr = NativeNCurses.MarshallArray(wchStr, true, out totalSize);
             GC.AddMemoryPressure(totalSize);
 
-            Func<IntPtr, IntPtr, int> callback = (IntPtr w, IntPtr a) => ncurses_mvwadd_wchnstr(window, y, x, arrayPtr, n);
+            Func<IntPtr, IntPtr, int> callback = (IntPtr w, IntPtr a) => NativeNCurses.NCursesWrapper.mvwadd_wchnstr(window, y, x, arrayPtr, n);
 
             try
             {
@@ -4401,13 +3648,6 @@ namespace NCurses.Core.Interop
 
         #region mvwadd_wchstr
         /// <summary>
-        /// see <see cref="mvwadd_wchstr"/>
-        /// </summary>
-        /// <returns>Constants.ERR on error or Constants.OK on success</returns>
-        [DllImport(Constants.DLLNAME, EntryPoint = "mvwadd_wchstr")]
-        internal extern static int ncurses_mvwadd_wchstr(IntPtr window, int y, int x, IntPtr wchStr);
-
-        /// <summary>
         /// see <see cref="NativeStdScr.mvadd_wchstr"/>
         /// <para />native method wrapped with verification.
         /// </summary>
@@ -4420,7 +3660,7 @@ namespace NCurses.Core.Interop
 
             try
             {
-                NativeNCurses.VerifyNCursesMethod(() => ncurses_mvwadd_wchstr(window, y, x, arrayPtr), "mvwadd_wchstr");
+                NativeNCurses.VerifyNCursesMethod(() => NativeNCurses.NCursesWrapper.mvwadd_wchstr(window, y, x, arrayPtr), "mvwadd_wchstr");
             }
             finally
             {
@@ -4439,7 +3679,7 @@ namespace NCurses.Core.Interop
             IntPtr arrayPtr = NativeNCurses.MarshallArray(wchStr, true, out totalSize);
             GC.AddMemoryPressure(totalSize);
 
-            Func<IntPtr, IntPtr, int> callback = (IntPtr w, IntPtr a) => ncurses_mvwadd_wchstr(window, y, x, arrayPtr);
+            Func<IntPtr, IntPtr, int> callback = (IntPtr w, IntPtr a) => NativeNCurses.NCursesWrapper.mvwadd_wchstr(window, y, x, arrayPtr);
 
             try
             {
@@ -4455,16 +3695,6 @@ namespace NCurses.Core.Interop
 
         #region mvwaddnwstr
         /// <summary>
-        /// see <see cref="mvwaddnwstr"/>
-        /// </summary>
-        /// <returns>Constants.ERR on error or Constants.OK on success</returns>
-        //[DllImport(Constants.DLLNAME, EntryPoint = "mvwaddnwstr", CharSet = CharSet.Unicode)]
-        //internal extern static int ncurses_mvwaddnwstr(IntPtr window, int y, int x, string wstr, int n);
-
-        [DllImport(Constants.DLLNAME, EntryPoint = "mvwaddnwstr")]
-        internal extern static int ncurses_mvwaddnwstr(IntPtr window, int y, int x, IntPtr wstr, int n);
-
-        /// <summary>
         /// see <see cref="NativeStdScr.mvaddnwstr"/>
         /// <para />native method wrapped with verification.
         /// </summary>
@@ -4472,7 +3702,7 @@ namespace NCurses.Core.Interop
         public static void mvwaddnwstr(IntPtr window, int y, int x, string wstr, int n)
         {
             NativeNCurses.MarshalNativeWideStringAndExecuteAction((ptr) =>
-                NativeNCurses.VerifyNCursesMethod(() => ncurses_mvwaddnwstr(window, y, x, ptr, n), "mvwaddnwstr"),
+                NativeNCurses.VerifyNCursesMethod(() => NativeNCurses.NCursesWrapper.mvwaddnwstr(window, y, x, ptr, n), "mvwaddnwstr"),
                 wstr);
         }
 
@@ -4485,7 +3715,7 @@ namespace NCurses.Core.Interop
             Func<IntPtr, IntPtr, int> callback = (IntPtr w, IntPtr a) =>
             {
                 int ret = 0;
-                NativeNCurses.MarshalNativeWideStringAndExecuteAction((ptr) => ret = ncurses_mvwaddnwstr(window, y, x, ptr, n), wstr);
+                NativeNCurses.MarshalNativeWideStringAndExecuteAction((ptr) => ret = NativeNCurses.NCursesWrapper.mvwaddnwstr(window, y, x, ptr, n), wstr);
                 return ret;
             };
             NativeNCurses.use_window_v(window, Marshal.GetFunctionPointerForDelegate(new NCURSES_WINDOW_CB(callback)), "mvwaddnwstr");
@@ -4494,13 +3724,6 @@ namespace NCurses.Core.Interop
 
         #region mvwaddwstr
         /// <summary>
-        /// see <see cref="mvwaddwstr"/>
-        /// </summary>
-        /// <returns>Constants.ERR on error or Constants.OK on success</returns>
-        [DllImport(Constants.DLLNAME, EntryPoint = "mvwaddwstr")]
-        internal extern static int ncurses_mvwaddwstr(IntPtr window, int y, int x, IntPtr wstr);
-
-        /// <summary>
         /// see <see cref="NativeStdScr.mvaddwstr"/>
         /// <para />native method wrapped with verification.
         /// </summary>
@@ -4508,7 +3731,7 @@ namespace NCurses.Core.Interop
         public static void mvwaddwstr(IntPtr window, int y, int x, string wstr)
         {
             NativeNCurses.MarshalNativeWideStringAndExecuteAction((ptr) =>
-                NativeNCurses.VerifyNCursesMethod(() => ncurses_mvwaddwstr(window, y, x, ptr), "mvwaddwstr"),
+                NativeNCurses.VerifyNCursesMethod(() => NativeNCurses.NCursesWrapper.mvwaddwstr(window, y, x, ptr), "mvwaddwstr"),
                 wstr, true);
         }
 
@@ -4521,7 +3744,7 @@ namespace NCurses.Core.Interop
             Func<IntPtr, IntPtr, int> callback = (IntPtr w, IntPtr a) =>
             {
                 int ret = 0;
-                NativeNCurses.MarshalNativeWideStringAndExecuteAction((ptr) => ret = ncurses_mvwaddwstr(window, y, x, ptr), wstr);
+                NativeNCurses.MarshalNativeWideStringAndExecuteAction((ptr) => ret = NativeNCurses.NCursesWrapper.mvwaddwstr(window, y, x, ptr), wstr);
                 return ret;
             };
             NativeNCurses.use_window_v(window, Marshal.GetFunctionPointerForDelegate(new NCURSES_WINDOW_CB(callback)), "mvwaddwstr");
@@ -4529,20 +3752,6 @@ namespace NCurses.Core.Interop
         #endregion
 
         #region mvwget_wch
-        /// <summary>
-        /// see <see cref="mvwget_wch"/>
-        /// </summary>
-        /// <returns>Constants.ERR on error or Constants.OK on success</returns>
-        //[DllImport(Constants.DLLNAME, EntryPoint = "mvwget_wch")]
-        //internal extern static int ncurses_mvwget_wch(IntPtr window, int y, int x, ref char wch);
-
-        /// <summary>
-        /// see <see cref="mvwget_wch"/>
-        /// </summary>
-        /// <returns>Constants.ERR on error or Constants.OK on success</returns>
-        [DllImport(Constants.DLLNAME, EntryPoint = "mvwget_wch")]
-        internal extern static int ncurses_mvwget_wch(IntPtr window, int y, int x, IntPtr wch);
-
         /// <summary>
         /// see <see cref="NativeStdScr.mvget_wch"/>
         /// <para />native method wrapped with verification.
@@ -4555,7 +3764,7 @@ namespace NCurses.Core.Interop
 
             try
             {
-                NCursesException.Verify(ncurses_mvwget_wch(window, y, x, chPtr), "mvwget_wch");
+                NCursesException.Verify(NativeNCurses.NCursesWrapper.mvwget_wch(window, y, x, chPtr), "mvwget_wch");
 
                 byte[] arr = new byte[Marshal.SizeOf<uint>()];
                 Marshal.Copy(chPtr, arr, 0, Marshal.SizeOf<uint>());
@@ -4583,7 +3792,7 @@ namespace NCurses.Core.Interop
 
             try
             {
-                Func<IntPtr, IntPtr, int> callback = (IntPtr w, IntPtr a) => ncurses_mvwget_wch(window, y, x, chPtr);
+                Func<IntPtr, IntPtr, int> callback = (IntPtr w, IntPtr a) => NativeNCurses.NCursesWrapper.mvwget_wch(window, y, x, chPtr);
                 NativeNCurses.use_window_v(window, Marshal.GetFunctionPointerForDelegate(new NCURSES_WINDOW_CB(callback)), "mvwget_wch");
 
                 byte[] arr = new byte[Marshal.SizeOf<uint>()];
@@ -4604,15 +3813,6 @@ namespace NCurses.Core.Interop
 
         #region mvwget_wstr
         /// <summary>
-        /// see <see cref="mvwget_wstr"/>
-        /// </summary>
-        /// <returns>Constants.ERR on error or Constants.OK on success</returns>
-        //[DllImport(Constants.DLLNAME, EntryPoint = "mvwget_wstr", CharSet = CharSet.Unicode)]
-        //internal extern static int ncurses_mvwget_wstr(IntPtr window, int y, int x, StringBuilder wstr);
-        [DllImport(Constants.DLLNAME, EntryPoint = "mvwget_wstr")]
-        internal extern static int ncurses_mvwget_wstr(IntPtr window, int y, int x, IntPtr wstr);
-
-        /// <summary>
         /// see <see cref="NativeStdScr.mvget_wstr"/>
         /// <para />native method wrapped with verification.
         /// </summary>
@@ -4625,7 +3825,7 @@ namespace NCurses.Core.Interop
 
             try
             {
-                NativeNCurses.VerifyNCursesMethod(() => ncurses_mvwget_wstr(window, y, x, strPtr), "mvwget_wstr");
+                NativeNCurses.VerifyNCursesMethod(() => NativeNCurses.NCursesWrapper.mvwget_wstr(window, y, x, strPtr), "mvwget_wstr");
                 wstr.Append(NativeNCurses.MarshalStringFromNativeWideString(strPtr, wstr.Capacity));
             }
             finally
@@ -4645,7 +3845,7 @@ namespace NCurses.Core.Interop
             IntPtr strPtr = Marshal.AllocHGlobal(size);
             GC.AddMemoryPressure(size);
 
-            Func<IntPtr, IntPtr, int> callback = (IntPtr w, IntPtr a) => ncurses_mvwget_wstr(window, y, x, strPtr);
+            Func<IntPtr, IntPtr, int> callback = (IntPtr w, IntPtr a) => NativeNCurses.NCursesWrapper.mvwget_wstr(window, y, x, strPtr);
 
             try
             {
@@ -4662,15 +3862,6 @@ namespace NCurses.Core.Interop
 
         #region mvwgetn_wstr
         /// <summary>
-        /// see <see cref="mvwgetn_wstr"/>
-        /// </summary>
-        /// <returns>Constants.ERR on error or Constants.OK on success</returns>
-        //[DllImport(Constants.DLLNAME, EntryPoint = "mvwgetn_wstr", CharSet = CharSet.Unicode)]
-        //internal extern static int ncurses_mvwgetn_wstr(IntPtr window, int y, int x, StringBuilder wstr, int n);
-        [DllImport(Constants.DLLNAME, EntryPoint = "mvwgetn_wstr")]
-        internal extern static int ncurses_mvwgetn_wstr(IntPtr window, int y, int x, IntPtr wstr, int n);
-
-        /// <summary>
         /// see <see cref="NativeStdScr.mvgetn_wstr"/>
         /// <para />native method wrapped with verification.
         /// </summary>
@@ -4683,7 +3874,7 @@ namespace NCurses.Core.Interop
 
             try
             {
-                NativeNCurses.VerifyNCursesMethod(() => ncurses_mvwgetn_wstr(window, y, x, strPtr, n), "mvwgetn_wstr");
+                NativeNCurses.VerifyNCursesMethod(() => NativeNCurses.NCursesWrapper.mvwgetn_wstr(window, y, x, strPtr, n), "mvwgetn_wstr");
                 wstr.Append(NativeNCurses.MarshalStringFromNativeWideString(strPtr, n));
             }
             finally
@@ -4703,7 +3894,7 @@ namespace NCurses.Core.Interop
             IntPtr strPtr = Marshal.AllocHGlobal(size);
             GC.AddMemoryPressure(size);
 
-            Func<IntPtr, IntPtr, int> callback = (IntPtr w, IntPtr a) => ncurses_mvwgetn_wstr(window, y, x, strPtr, n);
+            Func<IntPtr, IntPtr, int> callback = (IntPtr w, IntPtr a) => NativeNCurses.NCursesWrapper.mvwgetn_wstr(window, y, x, strPtr, n);
 
             try
             {
@@ -4720,13 +3911,6 @@ namespace NCurses.Core.Interop
 
         #region mvwhline_set
         /// <summary>
-        /// see <see cref="mvwhline_set"/>
-        /// </summary>
-        /// <returns>Constants.ERR on error or Constants.OK on success</returns>
-        [DllImport(Constants.DLLNAME, EntryPoint = "mvwhline_set")]
-        internal extern static int ncurses_mvwhline_set(IntPtr window, int y, int x, IntPtr wch, int n);
-
-        /// <summary>
         /// see <see cref="NativeStdScr.mvhline_set"/>
         /// <para />native method wrapped with verification.
         /// </summary>
@@ -4736,7 +3920,7 @@ namespace NCurses.Core.Interop
             IntPtr wPtr;
             using (wch.ToPointer(out wPtr))
             {
-                NativeNCurses.VerifyNCursesMethod(() => ncurses_mvwhline_set(window, y, x, wPtr, n), "mvwhline_set");
+                NativeNCurses.VerifyNCursesMethod(() => NativeNCurses.NCursesWrapper.mvwhline_set(window, y, x, wPtr, n), "mvwhline_set");
             }
         }
 
@@ -4749,7 +3933,7 @@ namespace NCurses.Core.Interop
             IntPtr wPtr = wch.ToPointer();
             GC.AddMemoryPressure(wch.Size);
 
-            Func<IntPtr, IntPtr, int> callback = (IntPtr w, IntPtr a) => ncurses_mvwhline_set(window, y, x, wPtr, n);
+            Func<IntPtr, IntPtr, int> callback = (IntPtr w, IntPtr a) => NativeNCurses.NCursesWrapper.mvwhline_set(window, y, x, wPtr, n);
 
             try
             {
@@ -4765,20 +3949,6 @@ namespace NCurses.Core.Interop
 
         #region mvwin_wch
         /// <summary>
-        /// see <see cref="mvin_wch"/>
-        /// </summary>
-        /// <returns>Constants.ERR on error or Constants.OK on success</returns>
-        //[DllImport(Constants.DLLNAME, EntryPoint = "mvwin_wch")]
-        //internal extern static int ncurses_mvwin_wch(IntPtr window, int y, int x, ref NCURSES_CH_T wch);
-
-        /// <summary>
-        /// see <see cref="mvin_wch"/>
-        /// </summary>
-        /// <returns>Constants.ERR on error or Constants.OK on success</returns>
-        [DllImport(Constants.DLLNAME, EntryPoint = "mvwin_wch")]
-        internal extern static int ncurses_mvwin_wch(IntPtr window, int y, int x, IntPtr wch);
-
-        /// <summary>
         /// see <see cref="NativeStdScr.mvin_wch"/>
         /// <para />native method wrapped with verification.
         /// </summary>
@@ -4788,7 +3958,7 @@ namespace NCurses.Core.Interop
             IntPtr wPtr;
             using (wcval.ToPointer(out wPtr))
             {
-                NCursesException.Verify(ncurses_mvwin_wch(window, y, x, wPtr), "mvwin_wch");
+                NCursesException.Verify(NativeNCurses.NCursesWrapper.mvwin_wch(window, y, x, wPtr), "mvwin_wch");
             }
         }
 
@@ -4801,7 +3971,7 @@ namespace NCurses.Core.Interop
             IntPtr wPtr = wcval.ToPointer();
             GC.AddMemoryPressure(wcval.Size);
 
-            Func<IntPtr, IntPtr, int> callback = (IntPtr w, IntPtr a) => ncurses_mvwin_wch(window, y, x, wPtr);
+            Func<IntPtr, IntPtr, int> callback = (IntPtr w, IntPtr a) => NativeNCurses.NCursesWrapper.mvwin_wch(window, y, x, wPtr);
 
             try
             {
@@ -4818,13 +3988,6 @@ namespace NCurses.Core.Interop
 
         #region mvwin_wchnstr
         /// <summary>
-        /// see <see cref="mvwin_wchnstr"/>
-        /// </summary>
-        /// <returns>Constants.ERR on error or Constants.OK on success</returns>
-        [DllImport(Constants.DLLNAME, EntryPoint = "mvwin_wchnstr")]
-        internal extern static int ncurses_mvwin_wchnstr(IntPtr window, int y, int x, IntPtr wch, int n);
-
-        /// <summary>
         /// see <see cref="NativeStdScr.mvin_wchnstr"/>
         /// <para />native method wrapped with verification.
         /// </summary>
@@ -4840,7 +4003,7 @@ namespace NCurses.Core.Interop
 
             try
             {
-                NativeNCurses.VerifyNCursesMethod(() => ncurses_mvwin_wchnstr(window, y, x, arrayPtr, totalSize), "mvwin_wchnstr");
+                NativeNCurses.VerifyNCursesMethod(() => NativeNCurses.NCursesWrapper.mvwin_wchnstr(window, y, x, arrayPtr, totalSize), "mvwin_wchnstr");
                 for (int i = 0; i < wcval.Length; i++)
                     wcval[i].ToStructure(arrayPtr + (i * wcval[i].Size));
             }
@@ -4864,7 +4027,7 @@ namespace NCurses.Core.Interop
             IntPtr arrayPtr = NativeNCurses.MarshallArray(wcval, false, out totalSize);
             GC.AddMemoryPressure(totalSize);
 
-            Func<IntPtr, IntPtr, int> callback = (IntPtr w, IntPtr a) => ncurses_mvwin_wchnstr(window, y, x, arrayPtr, totalSize);
+            Func<IntPtr, IntPtr, int> callback = (IntPtr w, IntPtr a) => NativeNCurses.NCursesWrapper.mvwin_wchnstr(window, y, x, arrayPtr, totalSize);
 
             try
             {
@@ -4882,15 +4045,6 @@ namespace NCurses.Core.Interop
 
         #region mvwinnwstr
         /// <summary>
-        /// see <see cref="mvwinnwstr"/>
-        /// </summary>
-        /// <returns>Constants.ERR on error or Constants.OK on success</returns>
-        //[DllImport(Constants.DLLNAME, EntryPoint = "mvwinnwstr", CharSet = CharSet.Unicode)]
-        //internal extern static int ncurses_mvwinnwstr(IntPtr window, int y, int x, StringBuilder str, int n);
-        [DllImport(Constants.DLLNAME, EntryPoint = "mvwinnwstr")]
-        internal extern static int ncurses_mvwinnwstr(IntPtr window, int y, int x, IntPtr str, int n);
-
-        /// <summary>
         /// see <see cref="NativeStdScr.mvinnwstr"/>
         /// <para />native method wrapped with verification.
         /// </summary>
@@ -4903,7 +4057,7 @@ namespace NCurses.Core.Interop
 
             try
             {
-                NativeNCurses.VerifyNCursesMethod(() => ncurses_mvwinnwstr(window, y, x, strPtr, n), "mvwinnwstr");
+                NativeNCurses.VerifyNCursesMethod(() => NativeNCurses.NCursesWrapper.mvwinnwstr(window, y, x, strPtr, n), "mvwinnwstr");
                 str.Append(NativeNCurses.MarshalStringFromNativeWideString(strPtr, n));
             }
             finally
@@ -4923,7 +4077,7 @@ namespace NCurses.Core.Interop
             IntPtr strPtr = Marshal.AllocHGlobal(size);
             GC.AddMemoryPressure(size);
 
-            Func<IntPtr, IntPtr, int> callback = (IntPtr w, IntPtr a) => ncurses_mvwinnwstr(window, y, x, strPtr, n);
+            Func<IntPtr, IntPtr, int> callback = (IntPtr w, IntPtr a) => NativeNCurses.NCursesWrapper.mvwinnwstr(window, y, x, strPtr, n);
 
             try
             {
@@ -4940,13 +4094,6 @@ namespace NCurses.Core.Interop
 
         #region mvwins_nwstr
         /// <summary>
-        /// see <see cref="mvwins_nwstr"/>
-        /// </summary>
-        /// <returns>Constants.ERR on error or Constants.OK on success</returns>
-        [DllImport(Constants.DLLNAME, EntryPoint = "mvwins_nwstr")]
-        internal extern static int ncurses_mvwins_nwstr(IntPtr window, int y, int x, IntPtr str, int n);
-
-        /// <summary>
         /// see <see cref="NativeStdScr.mvins_nwstr"/>
         /// <para />native method wrapped with verification.
         /// </summary>
@@ -4954,7 +4101,7 @@ namespace NCurses.Core.Interop
         public static void mvwins_nwstr(IntPtr window, int y, int x, string str, int n)
         {
             NativeNCurses.MarshalNativeWideStringAndExecuteAction((strPtr) =>
-                NativeNCurses.VerifyNCursesMethod(() => ncurses_mvwins_nwstr(window, y, x, strPtr, n), "mvwins_nwstr"),
+                NativeNCurses.VerifyNCursesMethod(() => NativeNCurses.NCursesWrapper.mvwins_nwstr(window, y, x, strPtr, n), "mvwins_nwstr"),
                 str);
         }
 
@@ -4967,7 +4114,7 @@ namespace NCurses.Core.Interop
             Func<IntPtr, IntPtr, int> callback = (IntPtr w, IntPtr a) =>
             {
                 int ret = 0;
-                NativeNCurses.MarshalNativeWideStringAndExecuteAction((ptr) => ret = ncurses_mvwins_nwstr(window, y, x, ptr, n), str);
+                NativeNCurses.MarshalNativeWideStringAndExecuteAction((ptr) => ret = NativeNCurses.NCursesWrapper.mvwins_nwstr(window, y, x, ptr, n), str);
                 return ret;
             };
             NativeNCurses.use_window_v(window, Marshal.GetFunctionPointerForDelegate(new NCURSES_WINDOW_CB(callback)), "mvwins_nwstr");
@@ -4975,15 +4122,6 @@ namespace NCurses.Core.Interop
         #endregion
 
         #region mvwins_wch
-        /// <summary>
-        /// see <see cref="mvwins_wch"/>
-        /// </summary>
-        /// <returns>Constants.ERR on error or Constants.OK on success</returns>
-        //[DllImport(Constants.DLLNAME, EntryPoint = "mvwins_wch")]
-        //internal extern static int ncurses_mvwins_wch(IntPtr window, int y, int x, NCURSES_CH_T wch);
-        [DllImport(Constants.DLLNAME, EntryPoint = "mvwins_wch")]
-        internal extern static int ncurses_mvwins_wch(IntPtr window, int y, int x, IntPtr wch);
-
         /// <summary>
         /// see <see cref="NativeStdScr.mvins_wch"/>
         /// <para />native method wrapped with verification.
@@ -4994,7 +4132,7 @@ namespace NCurses.Core.Interop
             IntPtr wPtr;
             using (wch.ToPointer(out wPtr))
             {
-                NativeNCurses.VerifyNCursesMethod(() => ncurses_mvwins_wch(window, y, x, wPtr), "mvwins_wch");
+                NativeNCurses.VerifyNCursesMethod(() => NativeNCurses.NCursesWrapper.mvwins_wch(window, y, x, wPtr), "mvwins_wch");
             }
         }
 
@@ -5007,7 +4145,7 @@ namespace NCurses.Core.Interop
             IntPtr wPtr = wch.ToPointer();
             GC.AddMemoryPressure(wch.Size);
 
-            Func<IntPtr, IntPtr, int> callback = (IntPtr w, IntPtr a) => ncurses_mvwins_wch(window, y, x, wPtr);
+            Func<IntPtr, IntPtr, int> callback = (IntPtr w, IntPtr a) => NativeNCurses.NCursesWrapper.mvwins_wch(window, y, x, wPtr);
 
             try
             {
@@ -5023,15 +4161,6 @@ namespace NCurses.Core.Interop
 
         #region mvwins_wstr
         /// <summary>
-        /// see <see cref="mvins_wstr"/>
-        /// </summary>
-        /// <returns>Constants.ERR on error or Constants.OK on success</returns>
-        //[DllImport(Constants.DLLNAME, EntryPoint = "mvwins_wstr")]
-        //internal extern static int ncurses_mvwins_wstr(IntPtr window, int y, int x, string str);
-        [DllImport(Constants.DLLNAME, EntryPoint = "mvwins_wstr")]
-        internal extern static int ncurses_mvwins_wstr(IntPtr window, int y, int x, IntPtr str);
-
-        /// <summary>
         /// see <see cref="NativeStdScr.mvins_wstr"/>
         /// <para />native method wrapped with verification.
         /// </summary>
@@ -5039,7 +4168,7 @@ namespace NCurses.Core.Interop
         public static void mvwins_wstr(IntPtr window, int y, int x, string str)
         {
             NativeNCurses.MarshalNativeWideStringAndExecuteAction((strPtr) =>
-                NativeNCurses.VerifyNCursesMethod(() => ncurses_mvwins_wstr(window, y, x, strPtr), "mvwins_wstr"),
+                NativeNCurses.VerifyNCursesMethod(() => NativeNCurses.NCursesWrapper.mvwins_wstr(window, y, x, strPtr), "mvwins_wstr"),
                 str, true);
         }
 
@@ -5052,7 +4181,7 @@ namespace NCurses.Core.Interop
             Func<IntPtr, IntPtr, int> callback = (IntPtr w, IntPtr a) =>
             {
                 int ret = 0;
-                NativeNCurses.MarshalNativeWideStringAndExecuteAction((ptr) => ret = ncurses_mvwins_wstr(window, y, x, ptr), str);
+                NativeNCurses.MarshalNativeWideStringAndExecuteAction((ptr) => ret = NativeNCurses.NCursesWrapper.mvwins_wstr(window, y, x, ptr), str);
                 return ret;
             };
             NativeNCurses.use_window_v(window, Marshal.GetFunctionPointerForDelegate(new NCURSES_WINDOW_CB(callback)), "mvwins_wstr");
@@ -5060,15 +4189,6 @@ namespace NCurses.Core.Interop
         #endregion
 
         #region mvwinwstr
-        /// <summary>
-        /// see <see cref="mvwinwstr"/>
-        /// </summary>
-        /// <returns>Constants.ERR on error or Constants.OK on success</returns>
-        //[DllImport(Constants.DLLNAME, EntryPoint = "mvwinwstr", CharSet = CharSet.Unicode)]
-        //internal extern static int ncurses_mvwinwstr(IntPtr window, int y, int x, StringBuilder str);
-        [DllImport(Constants.DLLNAME, EntryPoint = "mvwinwstr")]
-        internal extern static int ncurses_mvwinwstr(IntPtr window, int y, int x, IntPtr str);
-
         /// <summary>
         /// see <see cref="NativeStdScr.mvinwstr"/>
         /// <para />native method wrapped with verification.
@@ -5082,7 +4202,7 @@ namespace NCurses.Core.Interop
 
             try
             {
-                NativeNCurses.VerifyNCursesMethod(() => ncurses_mvwinwstr(window, y, x, strPtr), "mvwinwstr");
+                NativeNCurses.VerifyNCursesMethod(() => NativeNCurses.NCursesWrapper.mvwinwstr(window, y, x, strPtr), "mvwinwstr");
                 str.Append(NativeNCurses.MarshalStringFromNativeWideString(strPtr, str.Capacity));
             }
             finally
@@ -5102,7 +4222,7 @@ namespace NCurses.Core.Interop
             IntPtr strPtr = Marshal.AllocHGlobal(size);
             GC.AddMemoryPressure(size);
 
-            Func<IntPtr, IntPtr, int> callback = (IntPtr w, IntPtr a) => ncurses_mvwinwstr(window, y, x, strPtr);
+            Func<IntPtr, IntPtr, int> callback = (IntPtr w, IntPtr a) => NativeNCurses.NCursesWrapper.mvwinwstr(window, y, x, strPtr);
 
             try
             {
@@ -5119,15 +4239,6 @@ namespace NCurses.Core.Interop
 
         #region mvwvline_set
         /// <summary>
-        /// see <see cref="mvwvline_set"/>
-        /// </summary>
-        /// <returns>Constants.ERR on error or Constants.OK on success</returns>
-        //[DllImport(Constants.DLLNAME, EntryPoint = "mvwvline_set")]
-        //internal extern static int ncurses_mvwvline_set(IntPtr window, int y, int x, NCURSES_CH_T wch, int n);
-        [DllImport(Constants.DLLNAME, EntryPoint = "mvwvline_set")]
-        internal extern static int ncurses_mvwvline_set(IntPtr window, int y, int x, IntPtr wch, int n);
-
-        /// <summary>
         /// see <see cref="NativeStdScr.mvvline_set"/>
         /// <para />native method wrapped with verification.
         /// </summary>
@@ -5137,7 +4248,7 @@ namespace NCurses.Core.Interop
             IntPtr wPtr;
             using (wch.ToPointer(out wPtr))
             {
-                NativeNCurses.VerifyNCursesMethod(() => ncurses_mvwvline_set(window, y, x, wPtr, n), "mvwvline_set");
+                NativeNCurses.VerifyNCursesMethod(() => NativeNCurses.NCursesWrapper.mvwvline_set(window, y, x, wPtr, n), "mvwvline_set");
             }
         }
 
@@ -5150,7 +4261,7 @@ namespace NCurses.Core.Interop
             IntPtr wPtr = wch.ToPointer();
             GC.AddMemoryPressure(wch.Size);
 
-            Func<IntPtr, IntPtr, int> callback = (IntPtr w, IntPtr a) => ncurses_mvwvline_set(window, y, x, wPtr, n);
+            Func<IntPtr, IntPtr, int> callback = (IntPtr w, IntPtr a) => NativeNCurses.NCursesWrapper.mvwvline_set(window, y, x, wPtr, n);
 
             try
             {
@@ -5166,15 +4277,6 @@ namespace NCurses.Core.Interop
 
         #region wvline_set
         /// <summary>
-        /// see <see cref="wvline_set"/>
-        /// </summary>
-        /// <returns>Constants.ERR on error or Constants.OK on success</returns>
-        //[DllImport(Constants.DLLNAME, EntryPoint = "wvline_set")]
-        //internal extern static int ncurses_wvline_set(IntPtr window, NCURSES_CH_T wch, int n);
-        [DllImport(Constants.DLLNAME, EntryPoint = "wvline_set")]
-        internal extern static int ncurses_wvline_set(IntPtr window, IntPtr wch, int n);
-
-        /// <summary>
         /// see <see cref="NativeStdScr.vline_set"/>
         /// <para />native method wrapped with verification.
         /// </summary>
@@ -5184,7 +4286,7 @@ namespace NCurses.Core.Interop
             IntPtr wPtr;
             using (wch.ToPointer(out wPtr))
             {
-                NativeNCurses.VerifyNCursesMethod(() => ncurses_wvline_set(window, wPtr, n), "wvline_set");
+                NativeNCurses.VerifyNCursesMethod(() => NativeNCurses.NCursesWrapper.wvline_set(window, wPtr, n), "wvline_set");
             }
         }
 
@@ -5197,7 +4299,7 @@ namespace NCurses.Core.Interop
             IntPtr wPtr = wch.ToPointer();
             GC.AddMemoryPressure(wch.Size);
 
-            Func<IntPtr, IntPtr, int> callback = (IntPtr w, IntPtr a) => ncurses_wvline_set(window, wPtr, n);
+            Func<IntPtr, IntPtr, int> callback = (IntPtr w, IntPtr a) => NativeNCurses.NCursesWrapper.wvline_set(window, wPtr, n);
 
             try
             {
@@ -5223,8 +4325,10 @@ namespace NCurses.Core.Interop
         /// <param name="y">number of line</param>
         /// <param name="x">number of column</param>
         /// <returns>true if coordinates are withing window/returns>
-        [DllImport(Constants.DLLNAME, EntryPoint = "wenclose")]
-        public extern static bool wenclose(IntPtr window, int y, int x);
+        public static bool wenclose(IntPtr window, int y, int x)
+        {
+            return NativeNCurses.NCursesWrapper.wenclose(window, y, x);
+        }
         #endregion
 
         #region wmouse_trafo
@@ -5239,8 +4343,10 @@ namespace NCurses.Core.Interop
         /// <param name="pX">reference to the number of columns to transform/param>
         /// <param name="to_screen">true if you want to transform to screen coordinates</param>
         /// <returns>true if transform succeeded/returns>
-        [DllImport(Constants.DLLNAME, EntryPoint = "wmouse_trafo")]
-        public extern static bool wmouse_trafo(IntPtr win, ref int pY, ref int pX, bool to_screen);
+        public static bool wmouse_trafo(IntPtr win, ref int pY, ref int pX, bool to_screen)
+        {
+            return NativeNCurses.NCursesWrapper.wmouse_trafo(win, ref pY, ref pX, to_screen);
+        }
         #endregion
     }
 }

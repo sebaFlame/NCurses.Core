@@ -667,7 +667,7 @@ namespace NCurses.Core.Interop
             CancellationTokenSource cancel = new CancellationTokenSource();
             Task peekTask = Task.Run(() => nativeWindowsConsoleInputPeek(cancel.Token));
 
-            int read = NativeWindow.ncurses_wgetch(window);
+            int read = NativeNCurses.NCursesWrapper.wgetch(window);
             cancel.Cancel();
             peekTask.Wait();
 

@@ -113,13 +113,15 @@ namespace NCurses.Core.Tests
 
             NCurses.Echo = false;
 
-            //test add ASCII char with attributes
+            ////test add ASCII char with attributes
             uint c = 'a';
             c |= Attrs.BOLD;
             stdScr.Write(c);
+            stdScr.Refresh();
 
             //test add unicode char
             stdScr.Write('\u263A');
+            stdScr.Refresh();
 
             if (NCurses.HasColor)
             {
@@ -127,7 +129,7 @@ namespace NCurses.Core.Tests
                 NCurses.InitDefaultPairs();
             }
 
-            //test get correct "string" from cchar_t
+            ////test get correct "string" from cchar_t
             short colorPair;
             uint attrs;
             NCursesWCHAR wch = new NCursesWCHAR('\u263A');
@@ -144,22 +146,25 @@ namespace NCurses.Core.Tests
             c |= Attrs.BOLD;
             c |= NCurses.ColorPair(3);
             stdScr.Write(c);
+            stdScr.Refresh();
 
             //test add unicode char with attributes and color
             stdScr.Write('\u263A', Attrs.BOLD, 4);
+            stdScr.Refresh();
 
             //test add unicode string
             stdScr.Write("bleh\u263A");
+            stdScr.Refresh();
 
             //test add ascii character array
             uint[] chars1 = new uint[] { 'a', 'b', 'c', 'd', 'e', 'f', 'g', 'h', 'i', 'j', 'k', 'l', 'm', 'n', 'o', 'p' };
             stdScr.Write(chars1, Attrs.BOLD, 4);
+            stdScr.Refresh();
 
             //test add unicode character array
             char[] chars = new char[] { '\u0490', '\u0491', '\u0492', '\u0493', '\u0494', '\u0495', '\u0496', '\u0497', '\u0498', '\u0499'
                 , '\u049A', '\u049B', '\u049C', '\u049D', '\u049E', '\u049F' };
             stdScr.Write(chars, Attrs.BOLD, 4);
-
             stdScr.Refresh();
         }
 

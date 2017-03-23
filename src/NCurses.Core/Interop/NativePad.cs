@@ -7,13 +7,6 @@ namespace NCurses.Core.Interop
     {
         #region pechochar
         /// <summary>
-        /// see <see cref="pechochar(IntPtr, uint)"/>
-        /// </summary>
-        /// <returns>Constants.ERR on error or Constants.OK on success</returns>
-        [DllImport(Constants.DLLNAME, EntryPoint = "pechochar")]
-        internal extern static int ncurses_pechochar(IntPtr pad, uint ch);
-
-        /// <summary>
         /// The pechochar routine is functionally equivalent to a call
         /// to addch followed by a call to refresh(3x), a call to waddch followed by a call to wrefresh, or a  call to  waddch
         /// followed by a call to prefresh.The knowledge that only a
@@ -28,7 +21,7 @@ namespace NCurses.Core.Interop
         /// <param name="ch">the character you want to echo</param>
         public static void pechochar(IntPtr pad, uint ch)
         {
-            NativeNCurses.VerifyNCursesMethod(() => ncurses_pechochar(pad, ch), "pechochar");
+            NativeNCurses.VerifyNCursesMethod(() => NativeNCurses.NCursesWrapper.pechochar(pad, ch), "pechochar");
         }
 
         /// <summary>
@@ -37,19 +30,12 @@ namespace NCurses.Core.Interop
         /// </summary>
         public static void pechochar_t(IntPtr pad, uint ch)
         {
-            Func<IntPtr, IntPtr, int> callback = (IntPtr w, IntPtr a) => ncurses_pechochar(pad, ch);
+            Func<IntPtr, IntPtr, int> callback = (IntPtr w, IntPtr a) => NativeNCurses.NCursesWrapper.pechochar(pad, ch);
             NativeNCurses.use_window_v(pad, Marshal.GetFunctionPointerForDelegate(new NCURSES_WINDOW_CB(callback)), "pechochar");
         }
         #endregion
 
         #region pnoutrefresh
-        /// <summary>
-        /// see <see cref="pnoutrefresh"/>
-        /// </summary>
-        /// <returns>Constants.ERR on error or Constants.OK on success</returns>
-        [DllImport(Constants.DLLNAME, EntryPoint = "pnoutrefresh")]
-        internal extern static int ncurses_pnoutrefresh(IntPtr pad, int pminrow, int pmincol, int sminrow, int smincol, int smaxrow, int smaxcol);
-
         /// <summary>
         /// The prefresh  and pnoutrefresh routines are analogous to
         /// wrefresh and wnoutrefresh except that they relate to  pads
@@ -75,7 +61,7 @@ namespace NCurses.Core.Interop
         /// <param name="smaxcol">minimum column number of the screen where to display</param>
         public static void pnoutrefresh(IntPtr pad, int pminrow, int pmincol, int sminrow, int smincol, int smaxrow, int smaxcol)
         {
-            NativeNCurses.VerifyNCursesMethod(() => ncurses_pnoutrefresh(pad, pminrow, pmincol, sminrow, smincol, smaxrow, smaxcol), "pnoutrefresh");
+            NativeNCurses.VerifyNCursesMethod(() => NativeNCurses.NCursesWrapper.pnoutrefresh(pad, pminrow, pmincol, sminrow, smincol, smaxrow, smaxcol), "pnoutrefresh");
         }
 
         /// <summary>
@@ -84,26 +70,19 @@ namespace NCurses.Core.Interop
         /// </summary>
         public static void pnoutrefresh_t(IntPtr pad, int pminrow, int pmincol, int sminrow, int smincol, int smaxrow, int smaxcol)
         {
-            Func<IntPtr, IntPtr, int> callback = (IntPtr w, IntPtr a) => ncurses_pnoutrefresh(pad, pminrow, pmincol, sminrow, smincol, smaxrow, smaxcol);
+            Func<IntPtr, IntPtr, int> callback = (IntPtr w, IntPtr a) => NativeNCurses.NCursesWrapper.pnoutrefresh(pad, pminrow, pmincol, sminrow, smincol, smaxrow, smaxcol);
             NativeNCurses.use_window_v(pad, Marshal.GetFunctionPointerForDelegate(new NCURSES_WINDOW_CB(callback)), "pnoutrefresh");
         }
         #endregion
 
         #region prefresh
         /// <summary>
-        /// see <see cref="prefresh(IntPtr, int, int, int, int, int, int)"/>
-        /// </summary>
-        /// <returns>Constants.ERR on error or Constants.OK on success</returns>
-        [DllImport(Constants.DLLNAME, EntryPoint = "prefresh")]
-        internal extern static int ncurses_prefresh(IntPtr pad, int pminrow, int pmincol, int sminrow, int smincol, int smaxrow, int smaxcol);
-
-        /// <summary>
         /// see <see cref="pnoutrefresh(IntPtr, int, int, int, int, int, int)"/>
         /// <para />native method wrapped with verification and thread safety.
         /// </summary>
         public static void prefresh(IntPtr pad, int pminrow, int pmincol, int sminrow, int smincol, int smaxrow, int smaxcol)
         {
-            NativeNCurses.VerifyNCursesMethod(() => ncurses_prefresh(pad, pminrow, pmincol, sminrow, smincol, smaxrow, smaxcol), "prefresh");
+            NativeNCurses.VerifyNCursesMethod(() => NativeNCurses.NCursesWrapper.prefresh(pad, pminrow, pmincol, sminrow, smincol, smaxrow, smaxcol), "prefresh");
         }
 
         /// <summary>
@@ -112,21 +91,12 @@ namespace NCurses.Core.Interop
         /// </summary>
         public static void prefresh_t(IntPtr pad, int pminrow, int pmincol, int sminrow, int smincol, int smaxrow, int smaxcol)
         {
-            Func<IntPtr, IntPtr, int> callback = (IntPtr w, IntPtr a) => ncurses_prefresh(pad, pminrow, pmincol, sminrow, smincol, smaxrow, smaxcol);
+            Func<IntPtr, IntPtr, int> callback = (IntPtr w, IntPtr a) => NativeNCurses.NCursesWrapper.prefresh(pad, pminrow, pmincol, sminrow, smincol, smaxrow, smaxcol);
             NativeNCurses.use_window_v(pad, Marshal.GetFunctionPointerForDelegate(new NCURSES_WINDOW_CB(callback)), "prefresh");
         }
         #endregion
 
         #region pecho_wchar
-        /// <summary>
-        /// see <see cref="pecho_wchar"/>
-        /// </summary>
-        /// <returns>Constants.ERR on error or Constants.OK on success</returns>
-        //[DllImport(Constants.DLLNAME, EntryPoint = "pecho_wchar")]
-        //internal extern static int ncurses_pecho_wchar(IntPtr pad, NCURSES_CH_T wch);
-        [DllImport(Constants.DLLNAME, EntryPoint = "pecho_wchar")]
-        internal extern static int ncurses_pecho_wchar(IntPtr pad, IntPtr wch);
-
         /// <summary>
         /// The pechochar routine is functionally equivalent to a call
         /// to addch followed by a call to refresh(3x), a call to waddch followed by a call to wrefresh, or a  call to  waddch
@@ -143,7 +113,7 @@ namespace NCurses.Core.Interop
             IntPtr wPtr;
             using (wch.ToPointer(out wPtr))
             {
-                NativeNCurses.VerifyNCursesMethod(() => ncurses_pecho_wchar(pad, wPtr), "pecho_wchar");
+                NativeNCurses.VerifyNCursesMethod(() => NativeNCurses.NCursesWrapper.pecho_wchar(pad, wPtr), "pecho_wchar");
             }
         }
 
@@ -156,7 +126,7 @@ namespace NCurses.Core.Interop
             IntPtr wPtr = wch.ToPointer();
             GC.AddMemoryPressure(wch.Size);
 
-            Func<IntPtr, IntPtr, int> callback = (IntPtr w, IntPtr a) => ncurses_pecho_wchar(pad, wPtr);
+            Func<IntPtr, IntPtr, int> callback = (IntPtr w, IntPtr a) => NativeNCurses.NCursesWrapper.pecho_wchar(pad, wPtr);
 
             try
             {

@@ -13,6 +13,17 @@ namespace NCurses.Core.Interop
         internal static uint[] Acs_Map = new uint[128];
         internal static char[] Wacs_Map = new char[128];
 
+        private static INCursesWrapper wrapper;
+        public static INCursesWrapper NCursesWrapper
+        {
+            get
+            {
+                if(wrapper == null)
+                    wrapper = (INCursesWrapper)Activator.CreateInstance(DynamicTypeBuilder.CreateNCursesWrapper(Constants.DLLNAME));
+                return wrapper;
+            }
+        }
+
         #region verification
         /// <summary>
         /// Verify any NCurses method returning a Constants.ERR or Constants.OK
@@ -40,16 +51,7 @@ namespace NCurses.Core.Interop
         #endregion
 
         #region thread-safety
-        /// <summary>
-        /// provides unmanaged thread-safety for WINDOW methods.
-        /// </summary>
-        /// <param name="window">A pointer to the window</param>
-        /// <param name="callback">A pointer to a callback function using NCURSES_WINDOW_CB</param>
-        /// <param name="args">A pointer to the arguments</param>
-        /// <returns>Constants.ERR on error or Constants.OK on success</returns>
-        [DllImport(Constants.DLLNAME, EntryPoint = "use_window")]
-        internal extern static int ncurses_use_window(IntPtr window, IntPtr callback, IntPtr args);
-
+        
         /// <summary>
         /// Execute a thread-safe WINDOW method with verification.
         /// </summary>
@@ -60,7 +62,7 @@ namespace NCurses.Core.Interop
         {
             try
             {
-                return VerifyNCursesMethod(() => ncurses_use_window(window, callback, args), method);
+                return VerifyNCursesMethod(() => NCursesWrapper.use_window(window, callback, args), method);
             }
             finally
             {
@@ -83,7 +85,7 @@ namespace NCurses.Core.Interop
         {
             try
             {
-                return VerifyNCursesMethod(() => ncurses_use_window(window, callback, IntPtr.Zero), method);
+                return VerifyNCursesMethod(() => NCursesWrapper.use_window(window, callback, IntPtr.Zero), method);
             }
             finally
             {
@@ -102,7 +104,7 @@ namespace NCurses.Core.Interop
         {
             try
             {
-                return ncurses_use_window(window, callback, args);
+                return NCursesWrapper.use_window(window, callback, args);
             }
             finally
             {
@@ -125,7 +127,7 @@ namespace NCurses.Core.Interop
         {
             try
             {
-                return ncurses_use_window(window, callback, IntPtr.Zero);
+                return NCursesWrapper.use_window(window, callback, IntPtr.Zero);
             }
             finally
             {
@@ -142,19 +144,10 @@ namespace NCurses.Core.Interop
         public static int use_window_v(IntPtr window, Func<IntPtr, int> callback)
         {
             Func<IntPtr, IntPtr, int> c = (IntPtr w, IntPtr a) => callback(w);
-            return VerifyNCursesMethod(() => ncurses_use_window(window, Marshal.GetFunctionPointerForDelegate(new NCURSES_WINDOW_CB(c)), IntPtr.Zero), "UserCallback");
+            return VerifyNCursesMethod(() => NCursesWrapper.use_window(window, Marshal.GetFunctionPointerForDelegate(new NCURSES_WINDOW_CB(c)), IntPtr.Zero), "UserCallback");
         }
 
-        /// <summary>
-        /// provides unmanaged thread-safety for SCREEN methods.
-        /// </summary>
-        /// <param name="screen">A pointer to the screen</param>
-        /// <param name="callback">A pointer to a callback function using NCURSES_SCREEN_CB</param>
-        /// <param name="args">A pointer to the arguments</param>
-        /// <returns>Constants.ERR on error or Constants.OK on success</returns>
-        [DllImport(Constants.DLLNAME, EntryPoint = "use_screen")]
-        internal extern static int ncurses_use_screen(IntPtr screen, IntPtr callback, IntPtr args);
-
+        
         /// <summary>
         /// Execute a thread-safe SCREEN method with verification.
         /// </summary>
@@ -165,7 +158,7 @@ namespace NCurses.Core.Interop
         {
             try
             {
-                return VerifyNCursesMethod(() => ncurses_use_screen(screen, callback, args), method);
+                return VerifyNCursesMethod(() => NCursesWrapper.use_screen(screen, callback, args), method);
             }
             finally
             {
@@ -188,7 +181,7 @@ namespace NCurses.Core.Interop
         {
             try
             {
-                return VerifyNCursesMethod(() => ncurses_use_screen(screen, callback, IntPtr.Zero), method);
+                return VerifyNCursesMethod(() => NCursesWrapper.use_screen(screen, callback, IntPtr.Zero), method);
             }
             finally
             {
@@ -207,7 +200,7 @@ namespace NCurses.Core.Interop
         {
             try
             {
-                return ncurses_use_screen(screen, callback, args);
+                return NCursesWrapper.use_screen(screen, callback, args);
             }
             finally
             {
@@ -230,7 +223,7 @@ namespace NCurses.Core.Interop
         {
             try
             {
-                return ncurses_use_screen(screen, callback, IntPtr.Zero);
+                return NCursesWrapper.use_screen(screen, callback, IntPtr.Zero);
             }
             finally
             {
@@ -256,7 +249,7 @@ namespace NCurses.Core.Interop
                 libPtr = NativeWindows.LoadLibrary(Constants.DLLNAME);
             else
                 libPtr = NativeLinux.dlopen(
-                    Constants.DLLNAME.EndsWith(".so", StringComparison.OrdinalIgnoreCase) ? 
+                    Constants.DLLNAME.Contains(".so") ? 
                         Constants.DLLNAME : string.Format("{0}.so", Constants.DLLNAME),
                     2);
 
@@ -420,25 +413,20 @@ namespace NCurses.Core.Interop
         /// returns the output speed of the terminal.
         /// </summary>
         /// <returns>The number returned is in  bits per  second,  for example 9600, and is an integer.</returns>
-        [DllImport(Constants.DLLNAME, EntryPoint = "baudrate")]
-        public extern static int baudrate();
+        public static int baudrate()
+        {
+            return NCursesWrapper.baudrate();
+        }
         #endregion
 
         #region beep
-        /// <summary>
-        /// sounds an  audible  alarm  on  the terminal,  if  possible;
-        /// </summary>
-        /// <returns>Constants.ERR on error or Constants.OK on success</returns>
-        [DllImport(Constants.DLLNAME, EntryPoint = "beep")]
-        internal extern static int ncurses_beep();
-
         /// <summary>
         /// sounds an  audible  alarm  on  the terminal,  if  possible;
         /// native method wrapped with verification.
         /// </summary>
         public static void beep()
         {
-            VerifyNCursesMethod(() => ncurses_beep(), "beep");
+            VerifyNCursesMethod(() => NCursesWrapper.beep(), "beep");
         }
         #endregion
 
@@ -447,18 +435,13 @@ namespace NCurses.Core.Interop
         /// check if the  terminal  supports  colors and can change their definitions
         /// </summary>
         /// <returns>returns true if the  terminal  supports  colors and can change their definitions</returns>
-        [DllImport(Constants.DLLNAME, EntryPoint = "can_change_color")]
-        public extern static bool can_change_color();
+        public static bool can_change_color()
+        {
+            return NCursesWrapper.can_change_color();
+        }
         #endregion
 
         #region cbreak
-        /// <summary>
-        /// see <see cref="cbreak"/>
-        /// </summary>
-        /// <returns>Constants.ERR on error or Constants.OK on success</returns>
-        [DllImport(Constants.DLLNAME, EntryPoint = "cbreak")]
-        internal extern static int ncurses_cbreak();
-
         /// <summary>
         /// Normally, the tty driver buffers typed characters until a
         /// newline or  carriage return is typed.The cbreak routine
@@ -470,36 +453,22 @@ namespace NCurses.Core.Interop
         /// </summary>
         public static void cbreak()
         {
-            VerifyNCursesMethod(() => ncurses_cbreak(), "cbreak");
+            VerifyNCursesMethod(() => NCursesWrapper.cbreak(), "cbreak");
         }
         #endregion
 
         #region nocbreak
-        /// <summary>
-        /// see <see cref="nocbreak"/>
-        /// </summary>
-        /// <returns>Constants.ERR on error or Constants.OK on success</returns>
-        [DllImport(Constants.DLLNAME, EntryPoint = "nocbreak")]
-        internal extern static int ncurses_nocbreak();
-
         /// <summary>
         /// returns the terminal to normal(cooked) mode
         /// <para />native method wrapped with verification.
         /// </summary>
         public static void nocbreak()
         {
-            VerifyNCursesMethod(() => ncurses_nocbreak(), "nocbreak");
+            VerifyNCursesMethod(() => NCursesWrapper.nocbreak(), "nocbreak");
         }
         #endregion
 
         #region color_content
-        /// <summary>
-        /// see <see cref="color_content"/>
-        /// </summary>
-        /// <returns>Constants.ERR on error or Constants.OK on success</returns>
-        [DllImport(Constants.DLLNAME, EntryPoint = "color_content")]
-        internal extern static int ncurses_color_content(short color, IntPtr red, IntPtr green, IntPtr blue);
-
         /// <summary>
         /// The color_content routine gives programmers a way to find
         /// the intensity of the red, green, and blue(RGB) components
@@ -533,7 +502,7 @@ namespace NCurses.Core.Interop
 
             try
             {
-                VerifyNCursesMethod(() => ncurses_color_content(color, rPtr, gPtr, bPtr), "color_content");
+                VerifyNCursesMethod(() => NCursesWrapper.color_content(color, rPtr, gPtr, bPtr), "color_content");
             }
             finally
             {
@@ -556,18 +525,13 @@ namespace NCurses.Core.Interop
         /// </summary>
         /// <param name="pair">A color pair index</param>
         /// <returns>The attribute of the specified color pair</returns>
-        [DllImport(Constants.DLLNAME, EntryPoint = "COLOR_PAIR")]
-        public extern static int COLOR_PAIR(int pair);
+        public static int COLOR_PAIR(int pair)
+        {
+            return NCursesWrapper.COLOR_PAIR(pair);
+        }
         #endregion
 
         #region copywin
-        /// <summary>
-        /// see <see cref="copywin"/>
-        /// </summary>
-        /// <returns>Constants.ERR on error or Constants.OK on success</returns>
-        [DllImport(Constants.DLLNAME, EntryPoint = "copywin")]
-        internal extern static int ncurses_copywin(IntPtr srcwin, IntPtr dstwin, int sminrow, int smincol, int dminrow, int dmincol, int dmaxrow, int dmaxcol, int overlay);
-
         /// <summary>
         /// Text where the two windows overlap gets copied to destination within the rectangle defined
         /// <para />native method wrapped with verification.
@@ -584,7 +548,7 @@ namespace NCurses.Core.Interop
         public static void copywin(IntPtr srcwin, IntPtr dstwin, int sminrow, int smincol, int dminrow, int dmincol, int dmaxrow, int dmaxcol, int overlay)
         {
             NativeNCurses.VerifyNCursesMethod(() =>
-                ncurses_copywin(srcwin, dstwin, sminrow, smincol, dminrow, dmincol, dmaxrow, dmaxcol, overlay), "copywin");
+                NCursesWrapper.copywin(srcwin, dstwin, sminrow, smincol, dminrow, dmincol, dmaxrow, dmaxcol, overlay), "copywin");
         }
 
         /// <summary>
@@ -594,19 +558,12 @@ namespace NCurses.Core.Interop
         public static void copywin_t(IntPtr srcwin, IntPtr dstwin, int sminrow, int smincol, int dminrow, int dmincol, int dmaxrow, int dmaxcol, int overlay)
         {
             Func<IntPtr, IntPtr, int> callback = (IntPtr w, IntPtr a) =>
-                ncurses_copywin(srcwin, dstwin, sminrow, smincol, dminrow, dmincol, dmaxrow, dmaxcol, overlay);
+                NCursesWrapper.copywin(srcwin, dstwin, sminrow, smincol, dminrow, dmincol, dmaxrow, dmaxcol, overlay);
             NativeNCurses.use_window_v(srcwin, Marshal.GetFunctionPointerForDelegate(new NCURSES_WINDOW_CB(callback)), "copywin");
         }
         #endregion
 
         #region curs_set
-        /// <summary>
-        /// see <see cref="curs_set"/>
-        /// </summary>
-        /// <returns>Constants.ERR on error or Constants.OK on success</returns>
-        [DllImport(Constants.DLLNAME, EntryPoint = "curs_set")]
-        internal extern static int ncurses_curs_set(int visibility);
-
         /// <summary>
         /// sets the cursor visbility
         /// <para />native method wrapped with verification.
@@ -614,7 +571,7 @@ namespace NCurses.Core.Interop
         /// <param name="visibility">invisible, normal, or very visible for visibility equal to 0, 1, or 2 respectively</param>
         public static void curs_set(int visibility)
         {
-            VerifyNCursesMethod(() => ncurses_curs_set(visibility), "curs_set");
+            VerifyNCursesMethod(() => NCursesWrapper.curs_set(visibility), "curs_set");
         }
         #endregion
 
@@ -627,8 +584,10 @@ namespace NCurses.Core.Interop
         /// This is done automatically by initscr.
         /// </summary>
         /// <returns>Always returns Constants.OK</returns>
-        [DllImport(Constants.DLLNAME, EntryPoint = "def_prog_mode")]
-        public extern static int def_prog_mode();
+        public static int def_prog_mode()
+        {
+            return NCursesWrapper.def_prog_mode();
+        }
         #endregion
 
         #region def_shell_mode
@@ -640,23 +599,13 @@ namespace NCurses.Core.Interop
         /// This is done automatically by initscr.
         /// </summary>
         /// <returns>Always returns Constants.OK</returns>
-        [DllImport(Constants.DLLNAME, EntryPoint = "def_shell_mode")]
-        public extern static int def_shell_mode();
+        public static int def_shell_mode()
+        {
+            return NCursesWrapper.def_shell_mode();
+        }
         #endregion
 
         #region delay_output
-        /// <summary>
-        /// The delay_output  routine inserts an <paramref name="ms"/> millisecond pause
-        /// in output. This routine should not  be used  extensively
-        /// because  padding characters  are used  rather than a CPU
-        /// pause.If no padding character is  specified,  this  uses
-        /// napms to perform the delay.
-        /// </summary>
-        /// <param name="ms">the amount of milliseconds to delay the output</param>
-        /// <returns>Constants.ERR on error or Constants.OK on success</returns>
-        [DllImport(Constants.DLLNAME, EntryPoint = "delay_output")]
-        internal extern static int ncurses_delay_output(int ms);
-
         /// <summary>
         /// The delay_output  routine inserts an <paramref name="ms"/> millisecond pause
         /// in output. This routine should not  be used  extensively
@@ -668,7 +617,7 @@ namespace NCurses.Core.Interop
         /// <param name="ms">the amount of milliseconds to delay the output</param>
         public static void delay_output(int ms)
         {
-            NativeNCurses.VerifyNCursesMethod(() => ncurses_delay_output(ms), "delay_output");
+            NativeNCurses.VerifyNCursesMethod(() => NCursesWrapper.delay_output(ms), "delay_output");
         }
         #endregion
 
@@ -679,21 +628,13 @@ namespace NCurses.Core.Interop
         /// this, so delscreen should be called after endwin if a particular SCREEN is no longer needed.
         /// </summary>
         /// <param name="screen">A pointer to a screen</param>
-        [DllImport(Constants.DLLNAME, EntryPoint = "delscreen")]
-        public extern static void delscreen(IntPtr screen);
+        public static void delscreen_sp(IntPtr screen)
+        {
+            NCursesWrapper.delscreen(screen);
+        }
         #endregion
 
         #region delwin
-        /// <summary>
-        /// Calling delwin deletes the named window,
-        /// freeing all memory associated with it(it does not actually erase the window's screen image).
-        /// Subwindows must  be  deleted  before the main window can be deleted.
-        /// </summary>
-        /// <param name="window">A pointer to a window</param>
-        /// <returns>Constants.ERR on error or Constants.OK on success</returns>
-        [DllImport(Constants.DLLNAME, EntryPoint = "delwin")]
-        internal extern static int ncurses_delwin(IntPtr window);
-
         /// <summary>
         /// Calling delwin deletes the named window,
         /// freeing all memory associated with it(it does not actually erase the window's screen image).
@@ -703,7 +644,7 @@ namespace NCurses.Core.Interop
         /// <param name="window">A pointer to a window</param>
         public static void delwin(IntPtr window)
         {
-            NativeNCurses.VerifyNCursesMethod(() => ncurses_delwin(window), "delwin");
+            NativeNCurses.VerifyNCursesMethod(() => NCursesWrapper.delwin(window), "delwin");
         }
 
         /// <summary>
@@ -715,19 +656,12 @@ namespace NCurses.Core.Interop
         /// <param name="window">A pointer to a window</param>
         public static void delwin_t(IntPtr window)
         {
-            Func<IntPtr, IntPtr, int> callback = (IntPtr w, IntPtr a) => ncurses_delwin(window);
+            Func<IntPtr, IntPtr, int> callback = (IntPtr w, IntPtr a) => NCursesWrapper.delwin(window);
             NativeNCurses.use_window_v(window, Marshal.GetFunctionPointerForDelegate(new NCURSES_WINDOW_CB(callback)), "delwin");
         }
         #endregion
 
         #region derwin
-        /// <summary>
-        /// see <see cref="derwin"/>
-        /// </summary>
-        /// <returns>A pointer to a new window</returns>
-        [DllImport(Constants.DLLNAME, EntryPoint = "derwin")]
-        internal extern static IntPtr ncurses_derwin(IntPtr window, int nlines, int ncols, int begin_y, int begin_x);
-
         /// <summary>
         /// Calling derwin is the same as calling subwin, except  that
         /// begin_y and begin_x are relative to the origin of the window orig rather than the screen.There is  no difference
@@ -742,36 +676,22 @@ namespace NCurses.Core.Interop
         /// <returns>A pointer to a new window</returns>
         public static IntPtr derwin(IntPtr window, int nlines, int ncols, int begin_y, int begin_x)
         {
-            return NativeNCurses.VerifyNCursesMethod(() => ncurses_derwin(window, nlines, ncols, begin_y, begin_x), "derwin");
+            return NativeNCurses.VerifyNCursesMethod(() => NCursesWrapper.derwin(window, nlines, ncols, begin_y, begin_x), "derwin");
         }
         #endregion
 
         #region doupdate
-        /// <summary>
-        /// see <see cref="doupdate"/>
-        /// </summary>
-        /// <returns>Constants.ERR on error or Constants.OK on success</returns>
-        [DllImport(Constants.DLLNAME, EntryPoint = "doupdate")]
-        internal extern static int ncurses_doupdate();
-
         /// <summary>
         /// update the current screen
         /// <para />native method wrapped with verification.
         /// </summary>
         public static void doupdate()
         {
-            NativeNCurses.VerifyNCursesMethod(() => ncurses_doupdate(), "doupdate");
+            NativeNCurses.VerifyNCursesMethod(() => NCursesWrapper.doupdate(), "doupdate");
         }
         #endregion
 
         #region dupwin
-        /// <summary>
-        /// see <see cref="dupwin"/>
-        /// </summary>
-        /// <returns>A pointer to a new window</returns>
-        [DllImport(Constants.DLLNAME, EntryPoint = "dupwin")]
-        internal extern static IntPtr ncurses_dupwin(IntPtr window);
-
         /// <summary>
         /// Calling  dupwin  creates  an exact duplicate of the window <paramref name="window"/>.
         /// <para />native method wrapped with verification.
@@ -786,13 +706,6 @@ namespace NCurses.Core.Interop
 
         #region echo
         /// <summary>
-        /// see <see cref="echo"/>
-        /// </summary>
-        /// <returns>Constants.ERR on error or Constants.OK on success</returns>
-        [DllImport(Constants.DLLNAME, EntryPoint = "echo")]
-        internal extern static int ncurses_echo();
-
-        /// <summary>
         /// The echo  and noecho routines control whether characters
         /// typed by the user are echoed  by getch(3x)  as  they are
         /// typed.Echoing by the tty driver is always disabled, but
@@ -806,18 +719,11 @@ namespace NCurses.Core.Interop
         /// </summary>
         public static void echo()
         {
-            NativeNCurses.VerifyNCursesMethod(() => ncurses_echo(), "echo");
+            NativeNCurses.VerifyNCursesMethod(() => NCursesWrapper.echo(), "echo");
         }
         #endregion
 
         #region endwin
-        /// <summary>
-        /// see <see cref="endwin"/>
-        /// </summary>
-        /// <returns>Constants.ERR on error or Constants.OK on success</returns>
-        [DllImport(Constants.DLLNAME, EntryPoint = "endwin")]
-        internal extern static int ncurses_endwin();
-
         /// <summary>
         /// The program must also call endwin for each terminal being
         /// used before exiting from curses. If  newterm  is  called
@@ -827,7 +733,7 @@ namespace NCurses.Core.Interop
         /// </summary>
         public static void endwin()
         {
-            NativeNCurses.VerifyNCursesMethod(() => ncurses_endwin(), "endwin");
+            NativeNCurses.VerifyNCursesMethod(() => NCursesWrapper.endwin(), "endwin");
         }
         #endregion
 
@@ -840,8 +746,10 @@ namespace NCurses.Core.Interop
         /// erenced by ch is not changed.
         /// </summary>
         /// <returns>The user's current erase character</returns>
-        [DllImport(Constants.DLLNAME, EntryPoint = "erasechar")]
-        public extern static char erasechar();
+        public static char erasechar()
+        {
+            return NCursesWrapper.erasechar();
+        }
         #endregion
 
         #region filter
@@ -852,18 +760,13 @@ namespace NCurses.Core.Interop
         /// cud, cud1, cuu1, cuu,  vpa are  disabled;  and the  home
         /// string is set to the value of cr.
         /// </summary>
-        [DllImport(Constants.DLLNAME, EntryPoint = "filter")]
-        public extern static void filter();
+        public static void filter()
+        {
+            NCursesWrapper.filter();
+        }
         #endregion
 
         #region flash
-        /// <summary>
-        /// see <see cref="flash"/>
-        /// </summary>
-        /// <returns>Constants.ERR on error or Constants.OK on success</returns>
-        [DllImport(Constants.DLLNAME, EntryPoint = "flash")]
-        internal extern static int ncurses_flash();
-
         /// <summary>
         /// The routine flash flashes the screen, and
         /// if  that  is  not possible, sounds the alert.If neither
@@ -872,18 +775,11 @@ namespace NCurses.Core.Interop
         /// </summary>
         public static void flash()
         {
-            NativeNCurses.VerifyNCursesMethod(() => ncurses_flash(), "flash");
+            NativeNCurses.VerifyNCursesMethod(() => NCursesWrapper.flash(), "flash");
         }
         #endregion
 
         #region flushinp
-        /// <summary>
-        /// see <see cref="flushinp"/>
-        /// </summary>
-        /// <returns>Constants.ERR on error or Constants.OK on success</returns>
-        [DllImport(Constants.DLLNAME, EntryPoint = "flushinp")]
-        internal extern static int ncurses_flushinp();
-
         /// <summary>
         /// The flushinp  routine throws away any typeahead that has
         /// been typed by the user and has not yet been read  by the
@@ -892,7 +788,7 @@ namespace NCurses.Core.Interop
         /// </summary>
         public static void flushinp()
         {
-            NativeNCurses.VerifyNCursesMethod(() => ncurses_flushinp(), "flushinp");
+            NativeNCurses.VerifyNCursesMethod(() => NCursesWrapper.flushinp(), "flushinp");
         }
         #endregion
 
@@ -906,13 +802,6 @@ namespace NCurses.Core.Interop
 
         #region halfdelay
         /// <summary>
-        /// see <see cref="halfdelay"/>
-        /// </summary>
-        /// <returns>Constants.ERR on error or Constants.OK on success</returns>
-        [DllImport(Constants.DLLNAME, EntryPoint = "halfdelay")]
-        internal extern static int ncurses_halfdelay(int tenths);
-
-        /// <summary>
         /// The  halfdelay  routine is used for half-delay mode, which
         /// is similar to cbreak mode in that characters typed by  the
         /// user  are immediately available to the program.However,
@@ -925,7 +814,7 @@ namespace NCurses.Core.Interop
         /// <param name="tenths">tenths tenths of seconds between 1 and 255</param>
         public static void halfdelay(int tenths)
         {
-            NativeNCurses.VerifyNCursesMethod(() => ncurses_halfdelay(tenths), "halfdelay");
+            NativeNCurses.VerifyNCursesMethod(() => NCursesWrapper.halfdelay(tenths), "halfdelay");
         }
         #endregion
 
@@ -939,8 +828,10 @@ namespace NCurses.Core.Interop
         /// tribute.
         /// </summary>
         /// <returns>true if the terminal supports colors else false</returns>
-        [DllImport(Constants.DLLNAME, EntryPoint = "has_colors")]
-        public extern static bool has_colors();
+        public static bool has_colors()
+        {
+            return NCursesWrapper.has_colors();
+        }
         #endregion
 
         #region has_ic
@@ -949,8 +840,10 @@ namespace NCurses.Core.Interop
         /// delete- character capabilities.
         /// </summary>
         /// <returns>true if terminal supports insert/delete characters</returns>
-        [DllImport(Constants.DLLNAME, EntryPoint = "has_ic")]
-        public extern static bool has_ic();
+        public static bool has_ic()
+        {
+            return NCursesWrapper.has_ic();
+        }
         #endregion
 
         #region has_il
@@ -962,18 +855,13 @@ namespace NCurses.Core.Interop
         /// scrollok.
         /// </summary>
         /// <returns>true if terminal supports insert/delete characters or can emulate them</returns>
-        [DllImport(Constants.DLLNAME, EntryPoint = "has_il")]
-        public extern static bool has_il();
+        public static bool has_il()
+        {
+            return NCursesWrapper.has_il();
+        }
         #endregion
 
         #region initscr
-        /// <summary>
-        /// see <see cref="initscr"/>
-        /// </summary>
-        /// <returns>returns a pointer to the stdscr on success</returns>
-        [DllImport(Constants.DLLNAME, EntryPoint = "initscr")]
-        internal extern static IntPtr ncurses_initscr();
-
         /// <summary>
         /// initscr is normally the first curses routine to call when
         /// initializing a program.A few special routines sometimes
@@ -988,7 +876,7 @@ namespace NCurses.Core.Interop
             if (RuntimeInformation.IsOSPlatform(OSPlatform.Linux))
                 NativeLinux.setlocale(6, ""); //6 = LC_ALL
 
-            IntPtr stdScr = NativeNCurses.VerifyNCursesMethod(() => ncurses_initscr(), "initscr");
+            IntPtr stdScr = NativeNCurses.VerifyNCursesMethod(() => NCursesWrapper.initscr(), "initscr");
 
             try
             {
@@ -1020,13 +908,6 @@ namespace NCurses.Core.Interop
 
         #region init_color
         /// <summary>
-        /// see <see cref="init_color"/>
-        /// </summary>
-        /// <returns>Constants.ERR on error or Constants.OK on success</returns>
-        [DllImport(Constants.DLLNAME, EntryPoint = "init_color")]
-        internal extern static int ncurses_init_color(short color, short r, short g, short b);
-
-        /// <summary>
         /// The init_color routine changes the definition of a  color.
         /// It takes  four arguments:  the number of the color to be
         /// changed followed by three RGB values(for the amounts  of
@@ -1044,18 +925,11 @@ namespace NCurses.Core.Interop
         /// <param name="b">The amount of blue in the range 0 through 1000</param>
         public static void init_color(short color, short r, short g, short b)
         {
-            NativeNCurses.VerifyNCursesMethod(() => ncurses_init_color(color, r, g, b), "init_color");
+            NativeNCurses.VerifyNCursesMethod(() => NCursesWrapper.init_color(color, r, g, b), "init_color");
         }
         #endregion
 
         #region init_pair
-        /// <summary>
-        /// see <see cref="init_pair"/>
-        /// </param>
-        /// <returns>Constants.ERR on error or Constants.OK on success</returns>
-        [DllImport(Constants.DLLNAME, EntryPoint = "init_pair")]
-        internal extern static int ncurses_init_pair(short pair, short f, short b);
-
         /// <summary>
         /// The init_pair  routine changes the definition of a color-
         /// pair.It takes three arguments: the number of the  color-
@@ -1074,18 +948,11 @@ namespace NCurses.Core.Interop
         /// <param name="b">A color value for the background</param>
         public static void init_pair(short pair, short f, short b)
         {
-            NativeNCurses.VerifyNCursesMethod(() => ncurses_init_pair(pair, f, b), "init_pair");
+            NativeNCurses.VerifyNCursesMethod(() => NCursesWrapper.init_pair(pair, f, b), "init_pair");
         }
         #endregion
 
         #region intrflush
-        /// <summary>
-        /// see <see cref="intrflush"/>
-        /// </summary>
-        /// <returns>Constants.ERR on error or Constants.OK on success</returns>
-        [DllImport(Constants.DLLNAME, EntryPoint = "intrflush")]
-        internal extern static int ncurses_intrflush(IntPtr win, bool bf);
-
         /// <summary>
         /// If the  intrflush option is enabled(bf is TRUE), and an
         /// interrupt key  is  pressed on  the keyboard(interrupt,
@@ -1099,7 +966,7 @@ namespace NCurses.Core.Interop
         /// <param name="bf">enbale/disable interrupt</param>
         public static void intrflush(IntPtr win, bool bf)
         {
-            NativeNCurses.VerifyNCursesMethod(() => ncurses_intrflush(win, bf), "intrflush");
+            NativeNCurses.VerifyNCursesMethod(() => NCursesWrapper.intrflush(win, bf), "intrflush");
         }
         #endregion
 
@@ -1110,17 +977,13 @@ namespace NCurses.Core.Interop
         /// otherwise.
         /// </summary>
         /// <returns>if endwin has been called</returns>
-        [DllImport(Constants.DLLNAME, EntryPoint = "isendwin")]
-        public extern static bool isendwin();
+        public static bool isendwin()
+        {
+            return NCursesWrapper.isendwin();
+        }
         #endregion
 
         #region keyname
-        /// <summary>
-        /// see <see cref="keyname"/>
-        /// </summary>
-        [DllImport(Constants.DLLNAME, EntryPoint = "keyname")]
-        internal extern static IntPtr ncurses_keyname(int c);
-
         /// <summary>
         /// The keyname routine returns a character string corresponding to the key <paramref name="c"/>
         /// </summary>
@@ -1129,7 +992,7 @@ namespace NCurses.Core.Interop
         public static string keyname(int c)
         {
             //using own marshalling, because .net can't free the allocated memory
-            IntPtr keyNamePtr = ncurses_keyname(c);
+            IntPtr keyNamePtr = NCursesWrapper.keyname(c);
             return Marshal.PtrToStringAnsi(keyNamePtr);
         }
         #endregion
@@ -1139,8 +1002,10 @@ namespace NCurses.Core.Interop
         /// returns the user's current line  kill character.
         /// </summary>
         /// <returns>the kill character</returns>
-        [DllImport(Constants.DLLNAME, EntryPoint = "killchar")]
-        public extern static char killchar();
+        public static char killchar()
+        {
+            return NCursesWrapper.killchar();
+        }
         #endregion
 
         #region longname
@@ -1155,18 +1020,13 @@ namespace NCurses.Core.Interop
         /// used with multiple terminals.
         /// </summary>
         /// <returns>the current terminal verbose description</returns>
-        [DllImport(Constants.DLLNAME, EntryPoint = "longname")]
-        public extern static string longname();
+        public static string longname()
+        {
+            return NCursesWrapper.longname();
+        }
         #endregion
 
         #region meta
-        /// <summary>
-        /// see <see cref="meta"/>
-        /// </summary>
-        /// <returns>Constants.ERR on error or Constants.OK on success</returns>
-        [DllImport(Constants.DLLNAME, EntryPoint = "meta")]
-        internal extern static int ncurses_meta(IntPtr win, bool bf);
-
         /// <summary>
         /// Initially, whether the terminal returns 7 or 8 significant
         /// bits on input depends on the control mode of the tty driver[see  termio(7)].  To force 8 bits to be returned,
@@ -1185,18 +1045,11 @@ namespace NCurses.Core.Interop
         /// <param name="bf">enable/disable</param>
         public static void meta(IntPtr win, bool bf)
         {
-            NativeNCurses.VerifyNCursesMethod(() => ncurses_meta(win, bf), "meta");
+            NativeNCurses.VerifyNCursesMethod(() => NCursesWrapper.meta(win, bf), "meta");
         }
         #endregion
 
         #region mvcur
-        /// <summary>
-        /// see <see cref="mvcur(int, int, int, int)"/>
-        /// </summary>
-        /// <returns>Constants.ERR on error or Constants.OK on success</returns>
-        [DllImport(Constants.DLLNAME, EntryPoint = "mvcur")]
-        internal extern static int ncurses_mvcur(int oldrow, int oldcol, int newrow, int newcol);
-
         /// <summary>
         /// The mvcur routine provides low-level cursor  motion.It
         /// takes  effect immediately(rather than  at the next refresh).
@@ -1208,18 +1061,11 @@ namespace NCurses.Core.Interop
         /// <param name="newcol">new column number</param>
         public static void mvcur(int oldrow, int oldcol, int newrow, int newcol)
         {
-            NativeNCurses.VerifyNCursesMethod(() => ncurses_mvcur(oldrow, oldcol, newrow, newcol), "mvcur");
+            NativeNCurses.VerifyNCursesMethod(() => NCursesWrapper.mvcur(oldrow, oldcol, newrow, newcol), "mvcur");
         }
         #endregion
 
         #region mvderwin
-        /// <summary>
-        /// see <see cref="mvderwin(IntPtr, int, int)"/>
-        /// </summary>
-        /// <returns>Constants.ERR on error or Constants.OK on success</returns>
-        [DllImport(Constants.DLLNAME, EntryPoint = "mvderwin")]
-        internal extern static int ncurses_mvderwin(IntPtr window, int par_y, int par_x);
-
         /// <summary>
         /// Calling mvderwin moves a derived window(or subwindow) inside its parent window.The screen-relative parameters of
         /// the  window are not changed.  This routine is used to display different parts of the parent  window at  the same
@@ -1231,18 +1077,11 @@ namespace NCurses.Core.Interop
         /// <param name="par_x">Column number in the parent window</param>
         public static void mvderwin(IntPtr window, int par_y, int par_x)
         {
-            NativeNCurses.VerifyNCursesMethod(() => ncurses_mvderwin(window, par_y, par_x), "derwin");
+            NativeNCurses.VerifyNCursesMethod(() => NCursesWrapper.mvderwin(window, par_y, par_x), "derwin");
         }
         #endregion
 
         #region mvwin
-        /// <summary>
-        /// see <see cref="mvwin(IntPtr, int, int)"/>
-        /// </summary>
-        /// <returns>Constants.ERR on error or Constants.OK on success</returns>
-        [DllImport(Constants.DLLNAME, EntryPoint = "mvwin")]
-        internal extern static int ncurses_mvwin(IntPtr win, int y, int x);
-
         /// <summary>
         /// Calling mvwin moves the window so that the upper left-hand
         /// corner is at position(<paramref name="x"/>, <paramref name="y"/>).  If the move would cause the
@@ -1255,19 +1094,11 @@ namespace NCurses.Core.Interop
         /// <param name="x">column number of the new upper left corner</param>
         public static void mvwin(IntPtr win, int y, int x)
         {
-            NativeNCurses.VerifyNCursesMethod(() => ncurses_mvwin(win, y, x), "mvwin");
+            NativeNCurses.VerifyNCursesMethod(() => NCursesWrapper.mvwin(win, y, x), "mvwin");
         }
         #endregion
 
         #region napms
-        /// <summary>
-        /// see <see cref="napms(int)"/>
-        /// </summary>
-        /// <param name="ms"></param>
-        /// <returns>always returns Constants.OK</returns>
-        [DllImport(Constants.DLLNAME, EntryPoint = "napms")]
-        internal extern static int ncurses_napms(int ms);
-
         /// <summary>
         /// The napms routine is used to sleep for <paramref name="ms"/> milliseconds.
         /// <para />native method wrapped with verification.
@@ -1275,17 +1106,11 @@ namespace NCurses.Core.Interop
         /// <param name="ms">The amount of milliseconds to sleep for</param>
         public static void napms(int ms)
         {
-            NativeNCurses.VerifyNCursesMethod(() => ncurses_napms(ms), "napms");
+            NativeNCurses.VerifyNCursesMethod(() => NCursesWrapper.napms(ms), "napms");
         }
         #endregion
 
         #region newpad
-        /// <summary>
-        /// see <see cref="newpad(int, int)"/>
-        /// </summary>
-        [DllImport(Constants.DLLNAME, EntryPoint = "newpad")]
-        internal extern static IntPtr ncurses_newpad(int nlines, int ncols);
-
         /// <summary>
         /// The newpad routine creates and returns a pointer to a  new
         /// pad data structure with the given number of lines, nlines,
@@ -1305,7 +1130,7 @@ namespace NCurses.Core.Interop
         /// <returns>A pointer to a new pad (window) on success</returns>
         public static IntPtr newpad(int nlines, int ncols)
         {
-            return NativeNCurses.VerifyNCursesMethod(() => ncurses_newpad(nlines, ncols), "newpad");
+            return NativeNCurses.VerifyNCursesMethod(() => NCursesWrapper.newpad(nlines, ncols), "newpad");
         }
         #endregion
 
@@ -1315,12 +1140,6 @@ namespace NCurses.Core.Interop
         */
 
         #region newwin
-        /// <summary>
-        /// see <see cref="newwin(int, int, int, int)"/>
-        /// </summary>
-        [DllImport(Constants.DLLNAME, EntryPoint = "newwin")]
-        internal extern static IntPtr ncurses_newwin(int nlines, int ncols, int begin_y, int begin_x);
-
         /// <summary>
         /// Calling newwin creates and returns a pointer to a new window with the given number of lines and columns.The upper
         /// left-hand corner of the window is at line <paramref name="begin_y"/>, column <paramref name="begin_x"/>
@@ -1334,18 +1153,11 @@ namespace NCurses.Core.Interop
         /// <returns>A pointer to a new window</returns>
         public static IntPtr newwin(int nlines, int ncols, int begin_y, int begin_x)
         {
-            return NativeNCurses.VerifyNCursesMethod(() => ncurses_newwin(nlines, ncols, begin_y, begin_x), "newwin");
+            return NativeNCurses.VerifyNCursesMethod(() => NCursesWrapper.newwin(nlines, ncols, begin_y, begin_x), "newwin");
         }
         #endregion
 
         #region nl
-        /// <summary>
-        /// see <see cref="nl"/>
-        /// </summary>
-        /// <returns>Constants.ERR on error or Constants.OK on success</returns>
-        [DllImport(Constants.DLLNAME, EntryPoint = "nl")]
-        internal extern static int ncurses_nl();
-
         /// <summary>
         /// The  nl  and  nonl routines control whether the underlying
         /// display device translates the return key into  newline on
@@ -1359,43 +1171,29 @@ namespace NCurses.Core.Interop
         /// </summary>
         public static void nl()
         {
-            NativeNCurses.VerifyNCursesMethod(() => ncurses_nl(), "nl");
+            NativeNCurses.VerifyNCursesMethod(() => NCursesWrapper.nl(), "nl");
         }
         #endregion
 
         #region noecho
-        /// <summary>
-        /// see <see cref="noecho"/>
-        /// </summary>
-        /// <returns>Constants.ERR on error or Constants.OK on success</returns>
-        [DllImport(Constants.DLLNAME, EntryPoint = "noecho")]
-        internal extern static int ncurses_noecho();
-
         /// <summary>
         /// see <see cref="echo"/>
         /// <para />native method wrapped with verification.
         /// </summary>
         public static void noecho()
         {
-            NativeNCurses.VerifyNCursesMethod(() => ncurses_noecho(), "noecho");
+            NativeNCurses.VerifyNCursesMethod(() => NCursesWrapper.noecho(), "noecho");
         }
         #endregion
 
         #region nonl
-        /// <summary>
-        /// see <see cref="nonl"/>
-        /// </summary>
-        /// <returns>Constants.ERR on error or Constants.OK on success</returns>
-        [DllImport(Constants.DLLNAME, EntryPoint = "nonl")]
-        internal extern static int ncurses_nonl();
-
         /// <summary>
         /// see <see cref="nl"/>
         /// <para />native method wrapped with verification.
         /// </summary>
         public static void nonl()
         {
-            NativeNCurses.VerifyNCursesMethod(() => ncurses_nonl(), "nonl");
+            NativeNCurses.VerifyNCursesMethod(() => NCursesWrapper.nonl(), "nonl");
         }
         #endregion
 
@@ -1403,36 +1201,24 @@ namespace NCurses.Core.Interop
         /// <summary>
         /// see <see cref="qiflush"/>
         /// </summary>
-        [DllImport(Constants.DLLNAME, EntryPoint = "noqiflush")]
-        internal extern static void noqiflush();
+        public static void noqiflush()
+        {
+            NCursesWrapper.noqiflush();
+        }
         #endregion
 
         #region noraw
-        /// <summary>
-        /// see <see cref="noraw"/>
-        /// </summary>
-        /// <returns>Constants.ERR on error or Constants.OK on success</returns>
-        [DllImport(Constants.DLLNAME, EntryPoint = "noraw")]
-        internal extern static int ncurses_noraw();
-
         /// <summary>
         /// see <see cref="nl"/>
         /// <para />native method wrapped with verification.
         /// </summary>
         public static void noraw()
         {
-            NativeNCurses.VerifyNCursesMethod(() => ncurses_noraw(), "noraw");
+            NativeNCurses.VerifyNCursesMethod(() => NCursesWrapper.noraw(), "noraw");
         }
         #endregion
 
         #region overlay
-        /// <summary>
-        /// see <see cref="overlay(IntPtr, IntPtr)"/>
-        /// </summary>
-        /// <returns>Constants.ERR on error or Constants.OK on success</returns>
-        [DllImport(Constants.DLLNAME, EntryPoint = "overlay")]
-        internal extern static int ncurses_overlay(IntPtr srcWin, IntPtr destWin);
-
         /// <summary>
         /// The overlay  and overwrite routines overlay srcwin on top
         /// of dstwin.scrwin and dstwin are not required to be  the
@@ -1445,36 +1231,22 @@ namespace NCurses.Core.Interop
         /// <param name="destWin">pointer to the destination window</param>
         public static void overlay(IntPtr srcWin, IntPtr destWin)
         {
-            NativeNCurses.VerifyNCursesMethod(() => ncurses_overlay(srcWin, destWin), "overlay");
+            NativeNCurses.VerifyNCursesMethod(() => NCursesWrapper.overlay(srcWin, destWin), "overlay");
         }
         #endregion
 
         #region overwrite
-        /// <summary>
-        /// see <see cref="overwrite(IntPtr, IntPtr)"/>
-        /// </summary>
-        /// <returns>Constants.ERR on error or Constants.OK on success</returns>
-        [DllImport(Constants.DLLNAME, EntryPoint = "overwrite")]
-        internal extern static int ncurses_overwrite(IntPtr srcWin, IntPtr destWin);
-
         /// <summary>
         /// see <see cref="overlay(IntPtr, IntPtr)"/>
         /// <para />native method wrapped with verification.
         /// </summary>
         public static void overwrite(IntPtr srcWin, IntPtr destWin)
         {
-            NativeNCurses.VerifyNCursesMethod(() => ncurses_overwrite(srcWin, destWin), "overwrite");
+            NativeNCurses.VerifyNCursesMethod(() => NCursesWrapper.overwrite(srcWin, destWin), "overwrite");
         }
         #endregion
 
         #region pair_content
-        /// <summary>
-        /// see <see cref="pair_content(short, ref short, ref short)"/>
-        /// </summary>
-        /// <returns>Constants.ERR on error or Constants.OK on success</returns>
-        [DllImport(Constants.DLLNAME, EntryPoint = "pair_content")]
-        internal extern static int ncurses_pair_content(short pair, out short fg, out short bg);
-
         /// <summary>
         /// The pair_content routine allows programmers to  find  out
         /// what colors  a given color-pair consists of.It requires
@@ -1491,7 +1263,7 @@ namespace NCurses.Core.Interop
         /// <param name="bg">a reference to the background color</param>
         public static void pair_content(short pair, out short fg, out short bg)
         {
-            NCursesException.Verify(ncurses_pair_content(pair, out fg, out bg), "pair_content");
+            NCursesException.Verify(NCursesWrapper.pair_content(pair, out fg, out bg), "pair_content");
         }
         #endregion
 
@@ -1505,8 +1277,10 @@ namespace NCurses.Core.Interop
         /// pair as a separate parameter) rather than the legacy functions such as attrset.
         /// </summary>
         /// <returns>The color defined in the attribute</returns>
-        [DllImport(Constants.DLLNAME, EntryPoint = "PAIR_NUMBER")]
-        public extern static int PAIR_NUMBER(uint attrs);
+        public static int PAIR_NUMBER(uint attrs)
+        {
+            return NCursesWrapper.PAIR_NUMBER(attrs);
+        }
         #endregion
 
         /* TODO
@@ -1523,18 +1297,13 @@ namespace NCurses.Core.Interop
         /// signal  handler  if  you want output to continue as though
         /// the interrupt had not occurred, after the handler exits.
         /// </summary>
-        [DllImport(Constants.DLLNAME, EntryPoint = "qiflush")]
-        internal extern static void qiflush();
+        public static void qiflush()
+        {
+            NCursesWrapper.qiflush();
+        }
         #endregion
 
         #region raw
-        /// <summary>
-        /// see <see cref="raw"/>
-        /// </summary>
-        /// <returns>Constants.ERR on error or Constants.OK on success</returns>
-        [DllImport(Constants.DLLNAME, EntryPoint = "raw")]
-        internal extern static int ncurses_raw();
-
         /// <summary>
         /// The raw and noraw routines place the terminal into or out
         /// of raw mode.Raw mode is similar to cbreak mode, in  that
@@ -1547,18 +1316,11 @@ namespace NCurses.Core.Interop
         /// </summary>
         public static void raw()
         {
-            NativeNCurses.VerifyNCursesMethod(() => ncurses_raw(), "raw");
+            NativeNCurses.VerifyNCursesMethod(() => NCursesWrapper.raw(), "raw");
         }
         #endregion
 
         #region resetty
-        /// <summary>
-        /// see <see cref="resetty"/>
-        /// </summary>
-        /// <returns>Constants.ERR on error or Constants.OK on success</returns>
-        [DllImport(Constants.DLLNAME, EntryPoint = "resetty")]
-        internal extern static int ncurses_resetty();
-
         /// <summary>
         /// The resetty and savetty  routines save  and restore  the
         /// state  of the  terminal modes.savetty saves the current
@@ -1568,18 +1330,11 @@ namespace NCurses.Core.Interop
         /// </summary>
         public static void resetty()
         {
-            NativeNCurses.VerifyNCursesMethod(() => ncurses_resetty(), "resetty");
+            NativeNCurses.VerifyNCursesMethod(() => NCursesWrapper.resetty(), "resetty");
         }
         #endregion
 
         #region reset_prog_mode
-        /// <summary>
-        /// see <see cref="reset_prog_mode"/>
-        /// </summary>
-        /// <returns>Constants.ERR on error or Constants.OK on success</returns>
-        [DllImport(Constants.DLLNAME, EntryPoint = "reset_prog_mode")]
-        internal extern static int ncurses_reset_prog_mode();
-
         /// <summary>
         /// The reset_prog_mode and reset_shell_mode routines restore
         /// the terminal  to "program" (in curses) or "shell" (out of
@@ -1590,36 +1345,22 @@ namespace NCurses.Core.Interop
         /// </summary>
         public static void reset_prog_mode()
         {
-            NativeNCurses.VerifyNCursesMethod(() => ncurses_reset_prog_mode(), "reset_prog_mode");
+            NativeNCurses.VerifyNCursesMethod(() => NCursesWrapper.reset_prog_mode(), "reset_prog_mode");
         }
         #endregion
 
         #region reset_shell_mode
-        /// <summary>
-        /// see <see cref="reset_shell_mode"/>
-        /// </summary>
-        /// <returns>Constants.ERR on error or Constants.OK on success</returns>
-        [DllImport(Constants.DLLNAME, EntryPoint = "reset_shell_mode")]
-        internal extern static int ncurses_reset_shell_mode();
-
         /// <summary>
         /// see <see cref="reset_prog_mode"/>
         /// <para />native method wrapped with verification.
         /// </summary>
         public static void reset_shell_mode()
         {
-            NativeNCurses.VerifyNCursesMethod(() => ncurses_reset_prog_mode(), "reset_shell_mode");
+            NativeNCurses.VerifyNCursesMethod(() => NCursesWrapper.reset_prog_mode(), "reset_shell_mode");
         }
         #endregion
 
         #region ripoffline
-        /// <summary>
-        /// see <see cref="ripoffline"/>
-        /// </summary>
-        /// <returns>Constants.ERR on error or Constants.OK on success</returns>
-        [DllImport(Constants.DLLNAME, EntryPoint = "ripoffline")]
-        internal extern static int ncurses_ripoffline(int line, IntPtr method);
-
         private delegate int ripoffDelegate(IntPtr win, int cols);
 
         /// <summary>
@@ -1637,54 +1378,33 @@ namespace NCurses.Core.Interop
             Func<IntPtr, int, int> initCallback = (IntPtr win, int cols) => init(win, cols, func);
             func = Marshal.GetFunctionPointerForDelegate(new ripoffDelegate(initCallback));
 
-            NativeNCurses.VerifyNCursesMethod(() => ncurses_ripoffline(line, func), "ripoffline");
+            NativeNCurses.VerifyNCursesMethod(() => NCursesWrapper.ripoffline(line, func), "ripoffline");
         }
         #endregion
 
         #region savetty
-        /// <summary>
-        /// see <see cref="savetty"/>
-        /// </summary>
-        /// <returns>Constants.ERR on error or Constants.OK on success</returns>
-        [DllImport(Constants.DLLNAME, EntryPoint = "savetty")]
-        internal extern static int ncurses_savetty();
-
         /// <summary>
         /// see <see cref="resetty"/>
         /// <para />native method wrapped with verification.
         /// </summary>
         public static void savetty()
         {
-            NativeNCurses.VerifyNCursesMethod(() => ncurses_resetty(), "savetty");
+            NativeNCurses.VerifyNCursesMethod(() => NCursesWrapper.resetty(), "savetty");
         }
         #endregion
 
         #region scr_dump
-        /// <summary>
-        /// see <see cref="scr_dump(string)"/>
-        /// </summary>
-        /// <returns>Constants.ERR on error or Constants.OK on success</returns>
-        [DllImport(Constants.DLLNAME, EntryPoint = "scr_dump")]
-        internal extern static int ncurses_scr_dump(string filename);
-
         /// <summary>
         /// see <see cref="src_init(string)"/>
         /// <para />native method wrapped with verification.
         /// </summary>
         public static void scr_dump(string filename)
         {
-            NativeNCurses.VerifyNCursesMethod(() => ncurses_scr_dump(filename), "scr_dump");
+            NativeNCurses.VerifyNCursesMethod(() => NCursesWrapper.scr_dump(filename), "scr_dump");
         }
         #endregion
 
         #region scr_init
-        /// <summary>
-        /// see <see cref="scr_init(string)"/>
-        /// </summary>
-        /// <returns>Constants.ERR on error or Constants.OK on success</returns>
-        [DllImport(Constants.DLLNAME, EntryPoint = "scr_init")]
-        internal extern static int ncurses_scr_init(string filename);
-
         /// <summary>
         /// The scr_init routine reads in the contents of filename and
         /// uses  them to initialize the curses data structures about
@@ -1699,19 +1419,11 @@ namespace NCurses.Core.Interop
         /// </summary>
         public static void scr_init(string filename)
         {
-            NativeNCurses.VerifyNCursesMethod(() => ncurses_scr_init(filename), "scr_init");
+            NativeNCurses.VerifyNCursesMethod(() => NCursesWrapper.scr_init(filename), "scr_init");
         }
         #endregion
 
-
         #region scr_restore
-        /// <summary>
-        /// see <see cref="scr_restore(string)"/>
-        /// </summary>
-        /// <returns>Constants.ERR on error or Constants.OK on success</returns>
-        [DllImport(Constants.DLLNAME, EntryPoint = "scr_restore")]
-        internal extern static int ncurses_scr_restore(string filename);
-
         /// <summary>
         /// The scr_restore  routine sets  the virtual screen to the
         /// contents of filename, which must have been written  using
@@ -1721,18 +1433,11 @@ namespace NCurses.Core.Interop
         /// </summary>
         public static void scr_restore(string filename)
         {
-            NativeNCurses.VerifyNCursesMethod(() => ncurses_scr_restore(filename), "scr_restore");
+            NativeNCurses.VerifyNCursesMethod(() => NCursesWrapper.scr_restore(filename), "scr_restore");
         }
         #endregion
 
         #region scr_set
-        /// <summary>
-        /// see <see cref="src_set"/>
-        /// </summary>
-        /// <returns>Constants.ERR on error or Constants.OK on success</returns>
-        [DllImport(Constants.DLLNAME, EntryPoint = "scr_set")]
-        internal extern static int ncurses_scr_set(string filename);
-
         /// <summary>
         /// The scr_set routine is a combination  of scr_restore  and
         /// scr_init.It  tells the program that the information in
@@ -1743,17 +1448,11 @@ namespace NCurses.Core.Interop
         /// </summary>
         public static void scr_set(string filename)
         {
-            NativeNCurses.VerifyNCursesMethod(() => ncurses_scr_set(filename), "scr_set");
+            NativeNCurses.VerifyNCursesMethod(() => NCursesWrapper.scr_set(filename), "scr_set");
         }
         #endregion
 
         #region set_term
-        /// <summary>
-        /// see <see cref="set_term(IntPtr)"/>
-        /// </summary>
-        [DllImport(Constants.DLLNAME, EntryPoint = "set_term")]
-        internal extern static IntPtr ncurses_set_term(IntPtr newScr);
-
         /// <summary>
         /// The set_term routine is used to switch  between different
         /// terminals.The screen reference new becomes the new current terminal.The previous terminal is returned by  the
@@ -1765,18 +1464,11 @@ namespace NCurses.Core.Interop
         /// <returns>pointer to the previous screen</returns>
         public static IntPtr set_term(IntPtr newScr)
         {
-            return NativeNCurses.VerifyNCursesMethod(() => ncurses_set_term(newScr), "set_term");
+            return NativeNCurses.VerifyNCursesMethod(() => NCursesWrapper.set_term(newScr), "set_term");
         }
         #endregion
 
         #region slk_attroff
-        /// <summary>
-        /// see <see cref="slk_attroff(uint)"/>
-        /// </summary>
-        /// <returns>Constants.ERR on error or Constants.OK on success</returns>
-        [DllImport(Constants.DLLNAME, EntryPoint = "slk_attroff")]
-        internal extern static int ncurses_slk_attroff(uint attrs);
-
         /// <summary>
         /// The slk_attron, slk_attrset, slk_attroff and slk_attr routines correspond to
         /// <see cref="NativeStdScr.attron(int)"/> , <see cref="NativeStdScr.attrset(int)"/>, <see cref="NativeStdScr.attroff(int)"/>
@@ -1790,36 +1482,22 @@ namespace NCurses.Core.Interop
         /// <param name="attr"></param>
         public static void slk_attroff(uint attrs)
         {
-            NativeNCurses.VerifyNCursesMethod(() => ncurses_slk_attroff(attrs), "slk_attroff");
+            NativeNCurses.VerifyNCursesMethod(() => NCursesWrapper.slk_attroff(attrs), "slk_attroff");
         }
         #endregion
 
         #region slk_attr_off
-        /// <summary>
-        /// see <see cref="slk_attr_off(uint)"/>
-        /// </summary>
-        /// <returns>Constants.ERR on error or Constants.OK on success</returns>
-        [DllImport(Constants.DLLNAME, EntryPoint = "slk_attr_off")]
-        internal extern static int ncurses_slk_attr_off(uint attrs, IntPtr opts);
-
         /// <summary>
         /// see <see cref="NativeStdScr.attr_off(uint)"/>  (for soft function keys)
         /// <para />native method wrapped with verification.
         /// </summary>
         public static void slk_attr_off(uint attrs)
         {
-            NativeNCurses.VerifyNCursesMethod(() => ncurses_slk_attr_off(attrs, IntPtr.Zero), "slk_attr_off");
+            NativeNCurses.VerifyNCursesMethod(() => NCursesWrapper.slk_attr_off(attrs, IntPtr.Zero), "slk_attr_off");
         }
         #endregion
 
         #region slk_attron
-        /// <summary>
-        /// see <see cref="slk_attron(uint)"/>
-        /// </summary>
-        /// <returns>Constants.ERR on error or Constants.OK on success</returns>
-        [DllImport(Constants.DLLNAME, EntryPoint = "slk_attron")]
-        internal extern static int ncurses_slk_attron(uint attrs);
-
         /// <summary>
         /// see <see cref="slk_attroff(uint)"/>
         /// <para />native method wrapped with verification.
@@ -1827,36 +1505,22 @@ namespace NCurses.Core.Interop
         /// <param name="attr"></param>
         public static void slk_attron(uint attrs)
         {
-            NativeNCurses.VerifyNCursesMethod(() => ncurses_slk_attron(attrs), "slk_attron");
+            NativeNCurses.VerifyNCursesMethod(() => NCursesWrapper.slk_attron(attrs), "slk_attron");
         }
         #endregion
 
         #region slk_attr_on
-        /// <summary>
-        /// see <see cref="slk_attr_on(uint)"/>
-        /// </summary>
-        /// <returns>Constants.ERR on error or Constants.OK on success</returns>
-        [DllImport(Constants.DLLNAME, EntryPoint = "slk_attr_on")]
-        internal extern static int ncurses_slk_attr_on(uint attrs, IntPtr opts);
-
         /// <summary>
         /// see <see cref="NativeStdScr.attr_on(uint)"/> (for soft function keys)
         /// <para />native method wrapped with verification.
         /// </summary>
         public static void slk_attr_on(uint attrs)
         {
-            NativeNCurses.VerifyNCursesMethod(() => ncurses_slk_attr_on(attrs, IntPtr.Zero), "slk_attr_on");
+            NativeNCurses.VerifyNCursesMethod(() => NCursesWrapper.slk_attr_on(attrs, IntPtr.Zero), "slk_attr_on");
         }
         #endregion
 
         #region slk_attrset
-        /// <summary>
-        /// see <see cref="slk_attrset(uint, short)"/>
-        /// </summary>
-        /// <returns>Constants.ERR on error or Constants.OK on success</returns>
-        [DllImport(Constants.DLLNAME, EntryPoint = "slk_attrset")]
-        internal extern static int ncurses_slk_attrset(uint attrs, short color_pair, IntPtr opts);
-
         /// <summary>
         /// see <see cref="slk_attroff(uint)"/>
         /// <para />native method wrapped with verification.
@@ -1864,7 +1528,7 @@ namespace NCurses.Core.Interop
         /// <param name="attr"></param>
         public static void slk_attrset(uint attrs, short color_pair)
         {
-            NativeNCurses.VerifyNCursesMethod(() => ncurses_slk_attrset(attrs, color_pair, IntPtr.Zero), "slk_attrset");
+            NativeNCurses.VerifyNCursesMethod(() => NCursesWrapper.slk_attrset(attrs, color_pair, IntPtr.Zero), "slk_attrset");
         }
         #endregion
 
@@ -1873,54 +1537,35 @@ namespace NCurses.Core.Interop
         /// returns the the attribute used for the soft keys
         /// </summary>
         /// <returns>an attribute</returns>
-        [DllImport(Constants.DLLNAME, EntryPoint = "slk_attr")]
-        public extern static uint slk_attr();
+        public static uint slk_attr()
+        {
+            return NCursesWrapper.slk_attr();
+        }
         #endregion
 
         #region slk_attr_set
-        /// <summary>
-        /// see <see cref="slk_attr_set(uint, short)"/>
-        /// </summary>
-        /// <returns>Constants.ERR on error or Constants.OK on success</returns>
-        [DllImport(Constants.DLLNAME, EntryPoint = "slk_attr_set")]
-        internal extern static int ncurses_slk_attr_set(uint attrs,  short color_pair, IntPtr opts);
-
         /// <summary>
         /// see <see cref="NativeStdScr.attr_set(uint, short)"/> (for soft function keys)
         /// <para />native method wrapped with verification.
         /// </summary>
         public static void slk_attr_set(uint attrs, short color_pair)
         {
-            NativeNCurses.VerifyNCursesMethod(() => ncurses_slk_attr_set(attrs, color_pair, IntPtr.Zero), "slk_attr_set");
+            NativeNCurses.VerifyNCursesMethod(() => NCursesWrapper.slk_attr_set(attrs, color_pair, IntPtr.Zero), "slk_attr_set");
         }
         #endregion
 
         #region slk_clear
-        /// <summary>
-        /// see <see cref="slk_clear"/>
-        /// </summary>
-        /// <returns>Constants.ERR on error or Constants.OK on success</returns>
-        [DllImport(Constants.DLLNAME, EntryPoint = "slk_clear")]
-        internal extern static int ncurses_slk_clear();
-
         /// <summary>
         /// The slk_clear routine clears  the soft  labels from  the screen.
         /// <para />native method wrapped with verification.
         /// </summary>
         public static void slk_clear()
         {
-            NativeNCurses.VerifyNCursesMethod(() => ncurses_slk_clear(), "slk_clear");
+            NativeNCurses.VerifyNCursesMethod(() => NCursesWrapper.slk_clear(), "slk_clear");
         }
         #endregion
 
         #region slk_color
-        /// <summary>
-        /// see <see cref="slk_color(short)"/>
-        /// </summary>
-        /// <returns>Constants.ERR on error or Constants.OK on success</returns>
-        [DllImport(Constants.DLLNAME, EntryPoint = "slk_color")]
-        internal extern static int ncurses_slk_color(short color_pair);
-
         /// <summary>
         /// The slk_color routine corresponds to color_set.It has an
         /// effect only  if  soft labels are simulated on the bottom
@@ -1929,18 +1574,11 @@ namespace NCurses.Core.Interop
         /// </summary>
         public static void slk_color(short color_pair)
         {
-            NativeNCurses.VerifyNCursesMethod(() => ncurses_slk_color(color_pair), "slk_color");
+            NativeNCurses.VerifyNCursesMethod(() => NCursesWrapper.slk_color(color_pair), "slk_color");
         }
         #endregion
 
         #region slk_init
-        /// <summary>
-        /// see <see cref="slk_init(int)"/>
-        /// </summary>
-        /// <returns>Constants.ERR on error or Constants.OK on success</returns>
-        [DllImport(Constants.DLLNAME, EntryPoint = "slk_init")]
-        internal extern static int ncurses_slk_init(int fmt);
-
         /// <summary>
         /// The slk_init  routine must  be called before initscr or
         /// newterm is called.If initscr eventually uses a line from
@@ -1957,7 +1595,7 @@ namespace NCurses.Core.Interop
         /// <param name="fmt">the format to init the soft labels with</param>
         public static void slk_init(int fmt)
         {
-            NativeNCurses.VerifyNCursesMethod(() => ncurses_slk_init(fmt), "slk_init");
+            NativeNCurses.VerifyNCursesMethod(() => NCursesWrapper.slk_init(fmt), "slk_init");
         }
         #endregion
 
@@ -1968,18 +1606,13 @@ namespace NCurses.Core.Interop
         /// </summary>
         /// <param name="labnum">number of the label for which you want to return the label</param>
         /// <returns>label</returns>
-        [DllImport(Constants.DLLNAME, EntryPoint = "slk_label")]
-        public extern static string slk_label(int labnum);
+        public static string slk_label(int labnum)
+        {
+            return NCursesWrapper.slk_label(labnum);
+        }
         #endregion
 
         #region slk_noutrefresh
-        /// <summary>
-        /// see <see cref="slk_noutrefresh"/>
-        /// </summary>
-        /// <returns>Constants.ERR on error or Constants.OK on success</returns>
-        [DllImport(Constants.DLLNAME, EntryPoint = "slk_noutrefresh")]
-        internal extern static int ncurses_slk_noutrefresh();
-
         /// <summary>
         /// The slk_refresh and slk_noutrefresh routines correspond to
         /// the <see cref="NativeWindow.wrefresh(IntPtr)"/>  and <see cref="NativeWindow.wnoutrefresh"/>  routines.
@@ -1987,36 +1620,22 @@ namespace NCurses.Core.Interop
         /// </summary>
         public static void slk_noutrefresh()
         {
-            NativeNCurses.VerifyNCursesMethod(() => ncurses_slk_noutrefresh(), "slk_noutrefresh");
+            NativeNCurses.VerifyNCursesMethod(() => NCursesWrapper.slk_noutrefresh(), "slk_noutrefresh");
         }
         #endregion
 
         #region slk_refresh
-        /// <summary>
-        /// see <see cref="slk_refresh"/>
-        /// </summary>
-        /// <returns>Constants.ERR on error or Constants.OK on success</returns>
-        [DllImport(Constants.DLLNAME, EntryPoint = "slk_refresh")]
-        internal extern static int ncurses_slk_refresh();
-
         /// <summary>
         /// see <see cref="slk_noutrefresh"/>
         /// <para />native method wrapped with verification.
         /// </summary>
         public static void slk_refresh()
         {
-            NativeNCurses.VerifyNCursesMethod(() => ncurses_slk_refresh(), "slk_refresh");
+            NativeNCurses.VerifyNCursesMethod(() => NCursesWrapper.slk_refresh(), "slk_refresh");
         }
         #endregion
 
         #region slk_restore
-        /// <summary>
-        /// see <see cref="slk_restore"/>
-        /// </summary>
-        /// <returns>Constants.ERR on error or Constants.OK on success</returns>
-        [DllImport(Constants.DLLNAME, EntryPoint = "slk_restore")]
-        internal extern static int ncurses_slk_restore();
-
         /// <summary>
         /// The slk_restore  routine restores the soft labels to the
         /// screen after a slk_clear has been performed.
@@ -2024,18 +1643,11 @@ namespace NCurses.Core.Interop
         /// </summary>
         public static void slk_restore()
         {
-            NativeNCurses.VerifyNCursesMethod(() => ncurses_slk_restore(), "slk_restore");
+            NativeNCurses.VerifyNCursesMethod(() => NCursesWrapper.slk_restore(), "slk_restore");
         }
         #endregion
 
         #region slk_set
-        /// <summary>
-        /// see <see cref="slk_set"/>
-        /// </summary>
-        /// <returns>Constants.ERR on error or Constants.OK on success</returns>
-        [DllImport(Constants.DLLNAME, EntryPoint = "slk_set")]
-        internal extern static int ncurses_slk_set(int labnum, string label, int fmt);
-
         /// <summary>
         /// label the soft keys
         /// <para />native method wrapped with verification.
@@ -2050,18 +1662,11 @@ namespace NCurses.Core.Interop
         /// right-justified,  respectively, within the label.</param>
         public static void slk_set(int labnum, string label, int fmt)
         {
-            NativeNCurses.VerifyNCursesMethod(() => ncurses_slk_set(labnum, label, fmt), "slk_set");
+            NativeNCurses.VerifyNCursesMethod(() => NCursesWrapper.slk_set(labnum, label, fmt), "slk_set");
         }
         #endregion
 
         #region slk_touch
-        /// <summary>
-        /// see <see cref="slk_touch"/>
-        /// </summary>
-        /// <returns>Constants.ERR on error or Constants.OK on success</returns>
-        [DllImport(Constants.DLLNAME, EntryPoint = "slk_touch")]
-        internal extern static int ncurses_slk_touch();
-
         /// <summary>
         /// The slk_touch routine forces all the  soft labels  to be
         /// output the next time a slk_noutrefresh is performed.
@@ -2069,18 +1674,11 @@ namespace NCurses.Core.Interop
         /// </summary>
         public static void slk_touch()
         {
-            NativeNCurses.VerifyNCursesMethod(() => ncurses_slk_touch(), "slk_touch");
+            NativeNCurses.VerifyNCursesMethod(() => NCursesWrapper.slk_touch(), "slk_touch");
         }
         #endregion
 
         #region start_color
-        /// <summary>
-        /// see <see cref="start_color"/>
-        /// </summary>
-        /// <returns>Constants.ERR on error or Constants.OK on success</returns>
-        [DllImport(Constants.DLLNAME, EntryPoint = "start_color")]
-        internal extern static int ncurses_start_color();
-
         /// <summary>
         /// The start_color routine requires no arguments.It must be
         /// called if the programmer wants to use colors, and before
@@ -2090,17 +1688,11 @@ namespace NCurses.Core.Interop
         /// </summary>
         public static void start_color()
         {
-            NativeNCurses.VerifyNCursesMethod(() => ncurses_start_color(), "start_color");
+            NativeNCurses.VerifyNCursesMethod(() => NCursesWrapper.start_color(), "start_color");
         }
         #endregion
 
         #region subpad
-        /// <summary>
-        /// see <see cref="subpad"/>
-        /// </summary>
-        [DllImport(Constants.DLLNAME, EntryPoint = "subpad")]
-        internal extern static IntPtr ncurses_subpad(IntPtr orig, int nlines, int ncols, int begin_y, int begin_x);
-
         /// <summary>
         /// The subpad routine creates and returns a pointer to a subwindow within a pad  with the  given number  of lines,
         /// <paramref name="nlines"/>, and  <paramref name="ncols"/>,  ncols.Unlike subwin, which uses
@@ -2119,17 +1711,11 @@ namespace NCurses.Core.Interop
         /// <returns>a pointer to the new pad (window)</returns>
         public static IntPtr subpad(IntPtr orig, int nlines, int ncols, int begin_y, int begin_x)
         {
-            return NativeNCurses.VerifyNCursesMethod(() => ncurses_subpad(orig, nlines, ncols, begin_y, begin_x), "subpad");
+            return NativeNCurses.VerifyNCursesMethod(() => NCursesWrapper.subpad(orig, nlines, ncols, begin_y, begin_x), "subpad");
         }
         #endregion
 
         #region subwin
-        /// <summary>
-        /// see <see cref="subwin"/>
-        /// </summary>
-        [DllImport(Constants.DLLNAME, EntryPoint = "subpad")]
-        internal extern static IntPtr ncurses_subwin(IntPtr orig, int nlines, int ncols, int begin_y, int begin_x);
-
         /// <summary>
         /// Calling subwin creates and returns a pointer to a new window with the given number of lines, <paramref name="nlines"/>,  and columns,
         /// <paramref name="ncols"/>.   The window  is at position(<paramref name="begin_y"/>, <paramref name="begin_x"/>) on
@@ -2148,7 +1734,7 @@ namespace NCurses.Core.Interop
         /// <returns>a pointer to the new window</returns>
         public static IntPtr subwin(IntPtr orig, int nlines, int ncols, int begin_y, int begin_x)
         {
-            return NativeNCurses.VerifyNCursesMethod(() => ncurses_subpad(orig, nlines, ncols, begin_y, begin_x), "subpad");
+            return NativeNCurses.VerifyNCursesMethod(() => NCursesWrapper.subpad(orig, nlines, ncols, begin_y, begin_x), "subpad");
         }
         #endregion
 
@@ -2164,8 +1750,10 @@ namespace NCurses.Core.Interop
         /// appearance of the screen.
         /// </summary>
         /// <returns>the supported attributes OR'd together</returns>
-        [DllImport(Constants.DLLNAME, EntryPoint = "termattrs")]
-        public extern static uint termattrs();
+        public static uint termattrs()
+        {
+            return NCursesWrapper.termattrs();
+        }
         #endregion
 
         #region termname
@@ -2173,17 +1761,13 @@ namespace NCurses.Core.Interop
         /// The termname routine returns the terminal  name used  by setupterm.
         /// </summary>
         /// <returns>the terminal name</returns>
-        [DllImport(Constants.DLLNAME, EntryPoint = "termname")]
-        public extern static string termname();
+        public static string termname()
+        {
+            return NCursesWrapper.termname();
+        }
         #endregion
 
         #region typeahead
-        /// <summary>
-        /// see <see cref="typeahead"/>
-        /// </summary>
-        [DllImport(Constants.DLLNAME, EntryPoint = "typeahead")]
-        internal extern static int ncurses_typeahead(int fd);
-
         /// <summary>
         /// The curses  library does "line-breakout optimization" by
         /// looking for  typeahead periodically  while  updating the
@@ -2201,18 +1785,11 @@ namespace NCurses.Core.Interop
         /// <param name="fd">file descriptor to use for typeahead</param>
         public static void typeahead(int fd)
         {
-            NativeNCurses.VerifyNCursesMethod(() => ncurses_typeahead(fd), "typeahead");
+            NativeNCurses.VerifyNCursesMethod(() => NCursesWrapper.typeahead(fd), "typeahead");
         }
         #endregion
 
         #region ungetch
-        /// <summary>
-        /// see <see cref="ungetch"/>
-        /// </summary>
-        /// <returns>Constants.ERR on error or Constants.OK on success</returns>
-        [DllImport(Constants.DLLNAME, EntryPoint = "ungetch")]
-        internal extern static int ncurses_ungetch(int ch);
-
         /// <summary>
         /// The ungetch routine places ch back onto the input queue to
         /// be returned by the next call to wgetch.There is just one
@@ -2222,7 +1799,7 @@ namespace NCurses.Core.Interop
         /// <param name="ch">character to place into the input queue</param>
         public static void ungetch(int ch)
         {
-            NativeNCurses.VerifyNCursesMethod(() => ncurses_ungetch(ch), "ungetch");
+            NativeNCurses.VerifyNCursesMethod(() => NCursesWrapper.ungetch(ch), "ungetch");
         }
         #endregion
 
@@ -2234,8 +1811,10 @@ namespace NCurses.Core.Interop
         /// ment variables when determining the screen size.
         /// </summary>
         /// <param name="f">enable/disable</param>
-        [DllImport(Constants.DLLNAME, EntryPoint = "use_env")]
-        public extern static void use_env(bool f);
+        public static void use_env(bool f)
+        {
+            NCursesWrapper.use_env(f);
+        }
         #endregion
 
         #region use_tioctl
@@ -2251,18 +1830,13 @@ namespace NCurses.Core.Interop
         /// which set the screen size.</para>
         /// </summary>
         /// <param name="f">enable/disable</param>
-        [DllImport(Constants.DLLNAME, EntryPoint = "use_tioctl")]
-        public extern static void use_tioctl(bool f);
+        public static void use_tioctl(bool f)
+        {
+            NCursesWrapper.use_tioctl(f);
+        }
         #endregion
 
         #region vidattr
-        /// <summary>
-        /// see <see cref="vidattr"/>
-        /// </summary>
-        /// <returns>Constants.ERR on error or Constants.OK on success</returns>
-        [DllImport(Constants.DLLNAME, EntryPoint = "vidattr")]
-        internal extern static int ncurses_vidattr(uint attrs);
-
         /// <summary>
         /// The  vidattr  routine  is like the vidputs routine, except that it outputs through putchar.
         /// <para />native method wrapped with verification.
@@ -2270,18 +1844,11 @@ namespace NCurses.Core.Interop
         /// <param name="attrs">attributes to show</param>
         public static void vidattr(uint attrs)
         {
-            NativeNCurses.VerifyNCursesMethod(() => ncurses_vidattr(attrs), "vidattr");
+            NativeNCurses.VerifyNCursesMethod(() => NCursesWrapper.vidattr(attrs), "vidattr");
         }
         #endregion
 
         #region vidputs
-        /// <summary>
-        /// see <see cref="vidputs"/>
-        /// </summary>
-        /// <returns>Constants.ERR on error or Constants.OK on success</returns>
-        [DllImport(Constants.DLLNAME, EntryPoint = "vidputs")]
-        internal extern static int ncurses_vidputs(uint attrs, IntPtr NCURSES_OUTC);
-
         /// <summary>
         /// The vidputs routine displays the string on the terminal in
         /// the video  attribute mode attrs, which is any combination
@@ -2292,7 +1859,7 @@ namespace NCurses.Core.Interop
         /// <param name="attrs">attributes to show</param>
         public static void vidputs(uint attrs, Func<int, int> NCURSES_OUTC)
         {
-            NativeNCurses.VerifyNCursesMethod(() => ncurses_vidputs(attrs, Marshal.GetFunctionPointerForDelegate(NCURSES_OUTC)), "vidputs");
+            NativeNCurses.VerifyNCursesMethod(() => NCursesWrapper.vidputs(attrs, Marshal.GetFunctionPointerForDelegate(NCURSES_OUTC)), "vidputs");
         }
         #endregion
 
@@ -2309,8 +1876,10 @@ namespace NCurses.Core.Interop
         /// <para>-1     if capname is not a boolean capability</para>
         /// <para>0      if it is canceled or absent from the terminal  description.</para>
         /// </returns>
-        [DllImport(Constants.DLLNAME, EntryPoint = "tigetflag")]
-        public extern static int tigetflag(string capname);
+        public static int tigetflag(string capName)
+        {
+            return NCursesWrapper.tigetflag(capName);
+        }
         #endregion
 
         #region tigetnum
@@ -2322,8 +1891,10 @@ namespace NCurses.Core.Interop
         /// <para>-2     if capname is not a numeric capability</para>
         /// <para>-1     if  it  is canceled or absent from the terminal description.</para>
         /// </returns>
-        [DllImport(Constants.DLLNAME, EntryPoint = "tigetnum")]
-        public extern static int tigetnum(string capname);
+        public static int tigetnum(string capname)
+        {
+            return NCursesWrapper.tigetnum(capname);
+        }
         #endregion
 
         #region tigetstr
@@ -2335,18 +1906,13 @@ namespace NCurses.Core.Interop
         /// <para>(char*)-1              if capname is not a string capability</para>
         /// <para>0      if it is canceled or absent from the terminal  description.</para>
         /// </returns>
-        [DllImport(Constants.DLLNAME, EntryPoint = "tigetstr")]
-        public extern static string tigetstr(string capname);
+        public static string tigetstr(string capname)
+        {
+            return NCursesWrapper.tigetstr(capname);
+        }
         #endregion
 
         #region putp
-        /// <summary>
-        /// see <see cref="putp"/>
-        /// </summary>
-        /// <returns>Constants.ERR on error or Constants.OK on success</returns>
-        [DllImport(Constants.DLLNAME, EntryPoint = "putp")]
-        internal extern static int ncurses_putp(string str);
-
         /// <summary>
         /// The putp routine calls tputs(str, 1, putchar).  Note that
         /// the output  of putp  always goes  to stdout, not to the
@@ -2356,7 +1922,7 @@ namespace NCurses.Core.Interop
         /// <param name="attrs">attributes to show</param>
         public static void putp(string str)
         {
-            NativeNCurses.VerifyNCursesMethod(() => ncurses_putp(str), "putp");
+            NativeNCurses.VerifyNCursesMethod(() => NCursesWrapper.putp(str), "putp");
         }
         #endregion
 
@@ -2370,8 +1936,10 @@ namespace NCurses.Core.Interop
         /// <param name="lines">new number of lines</param>
         /// <param name="columns">new number of columns</param>
         /// <returns>if term has been resized</returns>
-        [DllImport(Constants.DLLNAME, EntryPoint = "is_term_resized")]
-        internal extern static bool is_term_resized(int lines, int columns);
+        public static bool is_term_resized(int lines, int columns)
+        {
+            return NCursesWrapper.is_term_resized(lines, columns);
+        }
         #endregion
 
         #region keybound
@@ -2383,8 +1951,10 @@ namespace NCurses.Core.Interop
         /// <param name="keycode">keycode to check</param>
         /// <param name="count">iterate for</param>
         /// <returns>the name of the keycode</returns>
-        [DllImport(Constants.DLLNAME, EntryPoint = "keybound")]
-        public extern static string keybound(int keycode, int count);
+        public static string keybound(int keycode, int count)
+        {
+            return NCursesWrapper.keybound(keycode, count);
+        }
         #endregion
 
         #region curses_version
@@ -2392,18 +1962,13 @@ namespace NCurses.Core.Interop
         /// Use  curses_version  to  get the version number, including  patch level of the library, e.g., 5.0.19991023
         /// </summary>
         /// <returns>version string</returns>
-        [DllImport(Constants.DLLNAME, EntryPoint = "curses_version")]
-        internal extern static string curses_version();
+        public static string curses_version()
+        {
+            return NCursesWrapper.curses_version();
+        }
         #endregion
 
         #region assume_default_colors
-        /// <summary>
-        /// see <see cref="assume_default_colors"/>
-        /// </summary>
-        /// <returns>Constants.ERR on error or Constants.OK on success</returns>
-        [DllImport(Constants.DLLNAME, EntryPoint = "assume_default_colors")]
-        internal extern static int ncurses_assume_default_colors(int fg, int bg);
-
         /// <summary>
         /// The other, assume_default_colors  is  a refinement which
         /// tells which colors to paint for color pair 0.  This function recognizes  a special color number -1, which denotes
@@ -2414,18 +1979,11 @@ namespace NCurses.Core.Interop
         /// <param name="bg">the default background color</param>
         public static void assume_default_colors(int fg, int bg)
         {
-            NativeNCurses.VerifyNCursesMethod(() => ncurses_assume_default_colors(fg, bg), "assume_default_colors");
+            NativeNCurses.VerifyNCursesMethod(() => NCursesWrapper.assume_default_colors(fg, bg), "assume_default_colors");
         }
         #endregion
 
         #region define_key
-        /// <summary>
-        /// see <see cref="define_key"/>
-        /// </summary>
-        /// <returns>Constants.ERR on error or Constants.OK on success</returns>
-        [DllImport(Constants.DLLNAME, EntryPoint = "define_key")]
-        internal extern static int ncurses_define_key(string definition, int keycode);
-
         /// <summary>
         /// This is an extension to the curses library.It permits an
         /// application to define keycodes  with their  corresponding
@@ -2435,7 +1993,7 @@ namespace NCurses.Core.Interop
         /// </summary>
         public static void define_key(string definition, int keycode)
         {
-            NativeNCurses.VerifyNCursesMethod(() => ncurses_define_key(definition, keycode), "define_key");
+            NativeNCurses.VerifyNCursesMethod(() => NCursesWrapper.define_key(definition, keycode), "define_key");
         }
         #endregion
 
@@ -2443,8 +2001,10 @@ namespace NCurses.Core.Interop
         /// <summary>
         /// The get_escdelay function returns the value for ESCDELAY.
         /// </summary>
-        [DllImport(Constants.DLLNAME, EntryPoint = "get_escdelay")]
-        public extern static int get_escdelay();
+        public static int get_escdelay()
+        {
+            return NCursesWrapper.get_escdelay();
+        }
         #endregion
 
         #region key_defined
@@ -2457,18 +2017,13 @@ namespace NCurses.Core.Interop
         /// If  the  string  is bound to a keycode, its value (greater than zero) is returned.If no keycode is bound, zero is returned.
         /// If  the  string  conflicts with longer strings which are bound to keys, -1 is returned
         /// </returns>
-        [DllImport(Constants.DLLNAME, EntryPoint = "key_defined")]
-        public extern static int key_defined(string definition);
+        public static int key_defined(string definition)
+        {
+            return NCursesWrapper.key_defined(definition);
+        }
         #endregion
 
         #region keyok
-        /// <summary>
-        /// see <see cref="keyok"/>
-        /// </summary>
-        /// <returns>Constants.ERR on error</returns>
-        [DllImport(Constants.DLLNAME, EntryPoint = "keyok")]
-        internal extern static int ncurses_keyok(int keycode, bool enable);
-
         /// <summary>
         /// This is an extension to the curses library.It permits an
         /// application to disable specific keycodes, rather than  use
@@ -2479,18 +2034,11 @@ namespace NCurses.Core.Interop
         /// <param name="enable">enable/disable</param>
         public static void keyok(int keycode, bool enable)
         {
-            NativeNCurses.VerifyNCursesMethod(() => ncurses_keyok(keycode, enable), "keyok");
+            NativeNCurses.VerifyNCursesMethod(() => NCursesWrapper.keyok(keycode, enable), "keyok");
         }
         #endregion
 
         #region resize_term
-        /// <summary>
-        /// see <see cref="resize_term"/>
-        /// </summary>
-        /// <returns>Constants.ERR on error or Constants.OK on success</returns>
-        [DllImport(Constants.DLLNAME, EntryPoint = "resize_term")]
-        internal extern static int ncurses_resize_term(int lines, int columns);
-
         /// <summary>
         /// Most of   the work  is  done by  the inner  function
         /// resize_term.The outer function resizeterm adds bookkeeping  for the SIGWINCH handler.When resizing the windows,
@@ -2502,20 +2050,13 @@ namespace NCurses.Core.Interop
         /// </summary>
         public static void resize_term(int lines, int columns)
         {
-            NativeNCurses.VerifyNCursesMethod(() => ncurses_resize_term(lines, columns), "resize_term");
+            NativeNCurses.VerifyNCursesMethod(() => NCursesWrapper.resize_term(lines, columns), "resize_term");
             if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
                 NativeWindows.NativeWindowsConsoleResize(lines, columns);
         }
         #endregion
 
         #region resizeterm
-        /// <summary>
-        /// see <see cref="resizeterm"/>
-        /// </summary>
-        /// <returns>Constants.ERR on error or Constants.OK on success</returns>
-        [DllImport(Constants.DLLNAME, EntryPoint = "resizeterm")]
-        internal extern static int ncurses_resizeterm(int lines, int columns);
-
         /// <summary>
         /// The function  resizeterm resizes the standard and current
         /// windows to the specified  dimensions,  and adjusts  other
@@ -2525,20 +2066,13 @@ namespace NCurses.Core.Interop
         /// </summary>
         public static void resizeterm(int lines, int columns)
         {
-            NativeNCurses.VerifyNCursesMethod(() => ncurses_resizeterm(lines, columns), "resizeterm");
+            NativeNCurses.VerifyNCursesMethod(() => NCursesWrapper.resizeterm(lines, columns), "resizeterm");
             if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
                 NativeWindows.NativeWindowsConsoleResize(lines, columns);
         }
         #endregion
 
         #region set_escdelay
-        /// <summary>
-        /// see <see cref="set_escdelay"/>
-        /// </summary>
-        /// <returns>Constants.ERR on error or Constants.OK on success</returns>
-        [DllImport(Constants.DLLNAME, EntryPoint = "set_escdelay")]
-        internal extern static int ncurses_set_escdelay(int size);
-
         /// <summary>
         /// The ESCDELAY and TABSIZE global variables are modified by
         /// some applications.To modify them in  any configuration,
@@ -2548,18 +2082,11 @@ namespace NCurses.Core.Interop
         /// </summary>
         public static void set_escdelay(int size)
         {
-            NativeNCurses.VerifyNCursesMethod(() => ncurses_set_escdelay(size), "set_escdelay");
+            NativeNCurses.VerifyNCursesMethod(() => NCursesWrapper.set_escdelay(size), "set_escdelay");
         }
         #endregion
 
         #region set_tabsize
-        /// <summary>
-        /// see <see cref="set_tabsize"/>
-        /// </summary>
-        /// <returns>Constants.ERR on error or Constants.OK on success</returns>
-        [DllImport(Constants.DLLNAME, EntryPoint = "set_tabsize")]
-        internal extern static int ncurses_set_tabsize(int size);
-
         /// <summary>
         /// The ESCDELAY and TABSIZE global variables are modified by
         /// some applications.To modify them in  any configuration,
@@ -2569,18 +2096,11 @@ namespace NCurses.Core.Interop
         /// </summary>
         public static void set_tabsize(int size)
         {
-            NativeNCurses.VerifyNCursesMethod(() => ncurses_set_tabsize(size), "set_tabsize");
+            NativeNCurses.VerifyNCursesMethod(() => NCursesWrapper.set_tabsize(size), "set_tabsize");
         }
         #endregion
 
         #region use_default_colors
-        /// <summary>
-        /// see <see cref="use_default_colors"/>
-        /// </summary>
-        /// <returns>Constants.ERR on error or Constants.OK on success</returns>
-        [DllImport(Constants.DLLNAME, EntryPoint = "use_default_colors")]
-        internal extern static int ncurses_use_default_colors();
-
         /// <summary>
         /// The first function, use_default_colors tells  the curses
         /// library to  assign terminal default foreground/background
@@ -2592,18 +2112,11 @@ namespace NCurses.Core.Interop
         /// </summary>
         public static void use_default_colors()
         {
-            NativeNCurses.VerifyNCursesMethod(() => ncurses_use_default_colors(), "use_default_colors");
+            NativeNCurses.VerifyNCursesMethod(() => NCursesWrapper.use_default_colors(), "use_default_colors");
         }
         #endregion
 
         #region use_extended_names
-        /// <summary>
-        /// see <see cref="use_extended_names"/>
-        /// </summary>
-        /// <returns>Constants.ERR on error or Constants.OK on success</returns>
-        [DllImport(Constants.DLLNAME, EntryPoint = "use_extended_names")]
-        internal extern static int ncurses_use_extended_names(bool enable);
-
         /// <summary>
         /// The use_extended_names function controls whether the calling application is able to use user-defined or nonstandard
         /// names which may be compiled into the terminfo description,
@@ -2616,7 +2129,7 @@ namespace NCurses.Core.Interop
         /// </summary>
         public static int use_extended_names(bool enable)
         {
-            return ncurses_use_extended_names(enable);
+            return NCursesWrapper.use_extended_names(enable);
         }
         #endregion
 
@@ -2638,8 +2151,10 @@ namespace NCurses.Core.Interop
         /// If  the  screen  has  not  been  initialized, or the level
         /// parameter is out of range, the function returns ERR.Otherwise, it returns the previous level: 0, 1 or 2.
         /// </returns>
-        [DllImport(Constants.DLLNAME, EntryPoint = "use_legacy_coding")]
-        public extern static int use_legacy_coding(int level);
+        public static int use_legacy_coding(int level)
+        {
+            return NCursesWrapper.use_legacy_coding(level);
+        }
         #endregion
 
         #region nofilter
@@ -2650,8 +2165,10 @@ namespace NCurses.Core.Interop
         /// $TERM.The limitation arises because the filter  routine
         /// modifies the in-memory copy of the terminal information.
         /// </summary>
-        [DllImport(Constants.DLLNAME, EntryPoint = "nofilter")]
-        public extern static void nofilter();
+        public static void nofilter()
+        {
+            NCursesWrapper.nofilter();
+        }
         #endregion
 
         #region exported properties
@@ -2792,13 +2309,7 @@ namespace NCurses.Core.Interop
         #endregion
 
         #region erasewchar
-        /// <summary>
-        /// see <see cref="erasewchar"/>
-        /// </summary>
-        /// <returns>Constants.ERR on error or Constants.OK on success</returns>
-        [DllImport(Constants.DLLNAME, EntryPoint = "erasewchar")]
-        internal extern static int ncurses_erasewcharr(IntPtr wch);
-
+        
         /// <summary>
         /// The erasewchar routine stores the current erase character
         /// in  the location referenced by ch.If no erase character
@@ -2812,22 +2323,12 @@ namespace NCurses.Core.Interop
             IntPtr wPtr;
             using (wch.ToPointer(out wPtr))
             {
-                NativeNCurses.VerifyNCursesMethod(() => ncurses_erasewcharr(wPtr), "erasewchar");
+                NativeNCurses.VerifyNCursesMethod(() => NCursesWrapper.erasewcharr(wPtr), "erasewchar");
             }
         }
         #endregion
 
         #region getcchar
-        /// <summary>
-        /// see <see cref="getcchar"/>
-        /// </summary>
-        /// <param name="opts">an application must provide a null pointer as opts</param>
-        /// <returns>Constants.ERR on error or Constants.OK on success</returns>
-        //[DllImport(Constants.DLLNAME, EntryPoint = "getcchar", CharSet = CharSet.Unicode)]
-        //internal extern static int ncurses_getcchar(NCURSES_CH_T wcval, StringBuilder wch, out uint attrs, out short color_pair, IntPtr opts);
-        [DllImport(Constants.DLLNAME, EntryPoint = "getcchar")]
-        internal extern static int ncurses_getcchar(IntPtr wcval, IntPtr wch, out uint attrs, out short color_pair, IntPtr opts);
-
         /// <summary>
         /// The getcchar  function gets  a wide-character string and
         /// rendition from a cchar_t argument.When wch is not a null
@@ -2852,7 +2353,7 @@ namespace NCurses.Core.Interop
                 {
                     strPtr = Marshal.AllocHGlobal((pointerSize = Constants.SIZEOF_WCHAR_T * wch.Capacity));
                     GC.AddMemoryPressure(pointerSize);
-                    NCursesException.Verify(ncurses_getcchar(wPtr, strPtr, out attrs, out color_pair, IntPtr.Zero), "getcchar");
+                    NCursesException.Verify(NCursesWrapper.getcchar(wPtr, strPtr, out attrs, out color_pair, IntPtr.Zero), "getcchar");
                     wch.Append(MarshalStringFromNativeWideString(strPtr, wch.Capacity));
                 }
                 finally
@@ -2873,25 +2374,15 @@ namespace NCurses.Core.Interop
         /// </summary>
         /// <param name="c">code of the key</param>
         /// <returns>a string representing the key code</returns>
-        [DllImport(Constants.DLLNAME, EntryPoint = "key_name")]
-        internal extern static IntPtr ncurses_key_name(char c);
-
         public static string key_name(char c)
         {
             //using own marshalling, because .net can't free the allocated memory
-            IntPtr keyNamePtr = ncurses_key_name(c);
+            IntPtr keyNamePtr = NCursesWrapper.key_name(c);
             return Marshal.PtrToStringAnsi(keyNamePtr);
         }
         #endregion
 
         #region killwchar
-        /// <summary>
-        /// see <see cref="killwchar"/>
-        /// </summary>
-        /// <returns>Constants.ERR on error or Constants.OK on success</returns>
-        [DllImport(Constants.DLLNAME, EntryPoint = "killwchar")]
-        internal extern static int ncurses_killwchar(ref char wch);
-
         /// <summary>
         /// The killwchar routine stores the current line-kill character in the location referenced by  ch.If no  line-kill
         /// character  has been  defined,  the routine fails and the
@@ -2901,21 +2392,11 @@ namespace NCurses.Core.Interop
         /// <param name="wch">a reference to store the kill char</param>
         public static void killwchar(ref char wch)
         {
-            NCursesException.Verify(ncurses_killwchar(ref wch), "killwchar");
+            NCursesException.Verify(NCursesWrapper.killwchar(ref wch), "killwchar");
         }
         #endregion
 
         #region setcchar
-        /// <summary>
-        /// see <see cref="setcchar"/>
-        /// </summary>
-        /// <param name="opts">an application must provide a null pointer as opts</param>
-        /// <returns>Constants.ERR on error or Constants.OK on success</returns>
-        //[DllImport(Constants.DLLNAME, EntryPoint = "setcchar", CharSet = CharSet.Unicode)]
-        //internal extern static int ncurses_setcchar(out NCURSES_CH_T wcval, string wch, uint attrs, short color_pair, IntPtr opts);
-        [DllImport(Constants.DLLNAME, EntryPoint = "setcchar")]
-        internal extern static int ncurses_setcchar(IntPtr wcval, IntPtr wch, uint attrs, short color_pair, IntPtr opts);
-
         /// <summary>
         /// The setcchar function initializes the location pointed to
         /// by wcval by using:
@@ -2942,7 +2423,7 @@ namespace NCurses.Core.Interop
             using (wcval.ToPointer(out wPtr))
             {
                 MarshalNativeWideStringAndExecuteAction((strPtr) =>
-                    NCursesException.Verify(ncurses_setcchar(wPtr, strPtr, attrs, color_pair, IntPtr.Zero), "setcchar"),
+                    NCursesException.Verify(NCursesWrapper.setcchar(wPtr, strPtr, attrs, color_pair, IntPtr.Zero), "setcchar"),
                     wch, true);
             }
         }
@@ -2950,19 +2431,12 @@ namespace NCurses.Core.Interop
 
         #region slk_wset
         /// <summary>
-        /// see <see cref="slk_wset"/>
-        /// </summary>
-        /// <returns>Constants.ERR on error or Constants.OK on success</returns>
-        [DllImport(Constants.DLLNAME, EntryPoint = "slk_set")]
-        internal extern static int ncurses_slk_wset(int labnum, string label, int fmt);
-
-        /// <summary>
         /// <see cref="slk_set"/>
         /// <para />native method wrapped with verification.
         /// </summary>
         public static void slk_wset(int labnum, string label, int fmt)
         {
-            NativeNCurses.VerifyNCursesMethod(() => ncurses_slk_wset(labnum, label, fmt), "slk_wset");
+            NativeNCurses.VerifyNCursesMethod(() => NCursesWrapper.slk_wset(labnum, label, fmt), "slk_wset");
         }
         #endregion
 
@@ -2970,18 +2444,13 @@ namespace NCurses.Core.Interop
         /// <summary>
         /// see <see cref="termattrs"/>
         /// </summary>
-        [DllImport(Constants.DLLNAME, EntryPoint = "term_attrs")]
-        public extern static uint term_attrs();
+        public static uint term_attrs()
+        {
+            return NCursesWrapper.term_attrs();
+        }
         #endregion
 
         #region unget_wch
-        /// <summary>
-        /// see <see cref="unget_wch"/>
-        /// </summary>
-        /// <returns>Constants.ERR on error or Constants.OK on success</returns>
-        [DllImport(Constants.DLLNAME, EntryPoint = "unget_wch")]
-        internal extern static int ncurses_unget_wch(char wch);
-
         /// <summary>
         /// The unget_wch function pushes the wide character wch back
         /// onto the head of the input queue, so the wide character is
@@ -2994,18 +2463,11 @@ namespace NCurses.Core.Interop
         /// <param name="wch">a reference to store the kill char</param>
         public static void unget_wch(char wch)
         {
-            NCursesException.Verify(ncurses_unget_wch(wch), "unget_wch");
+            NCursesException.Verify(NCursesWrapper.unget_wch(wch), "unget_wch");
         }
         #endregion
 
         #region vid_attr
-        /// <summary>
-        /// see <see cref="vid_attr"/>
-        /// </summary>
-        /// <returns>Constants.ERR on error or Constants.OK on success</returns>
-        [DllImport(Constants.DLLNAME, EntryPoint = "vid_attr")]
-        internal extern static int ncurses_vid_attr(uint attrs, short pair, IntPtr opts);
-
         /// <summary>
         /// The vid_attr and vid_puts routines correspond  to vidattr
         /// and vidputs, respectively.   They use a set of arguments
@@ -3022,25 +2484,18 @@ namespace NCurses.Core.Interop
         /// <param name="pair">color pair index</param>
         public static void vid_attr(uint attrs, short pair)
         {
-            NativeNCurses.VerifyNCursesMethod(() => ncurses_vid_attr(attrs, pair, IntPtr.Zero), "vid_attr");
+            NativeNCurses.VerifyNCursesMethod(() => NCursesWrapper.vid_attr(attrs, pair, IntPtr.Zero), "vid_attr");
         }
         #endregion
 
         #region vid_puts
-        /// <summary>
-        /// see <see cref="vid_puts"/>
-        /// </summary>
-        /// <returns>Constants.ERR on error or Constants.OK on success</returns>
-        [DllImport(Constants.DLLNAME, EntryPoint = "vid_puts")]
-        internal extern static int ncurses_vid_puts(uint attrs, short pair, IntPtr opts, IntPtr NCURSES_OUTC);
-
         /// <summary>
         /// see <see cref="vid_attr"/>
         /// <para />native method wrapped with verification.
         /// </summary>
         public static void vid_puts(uint attrs, short pair, Func<int, int> NCURSES_OUTC)
         {
-            NativeNCurses.VerifyNCursesMethod(() => ncurses_vid_puts(attrs, pair, IntPtr.Zero, Marshal.GetFunctionPointerForDelegate(NCURSES_OUTC)), "vid_puts");
+            NativeNCurses.VerifyNCursesMethod(() => NCursesWrapper.vid_puts(attrs, pair, IntPtr.Zero, Marshal.GetFunctionPointerForDelegate(NCURSES_OUTC)), "vid_puts");
         }
         #endregion
 
@@ -3053,8 +2508,10 @@ namespace NCurses.Core.Interop
         /// of a wide character.
         /// </summary>
         /// <returns>printable representation of the character</returns>
-        [DllImport(Constants.DLLNAME, EntryPoint = "unctrl")]
-        internal extern static string unctrl(uint ch);
+        public static string unctrl(uint ch)
+        {
+            return NCursesWrapper.unctrl(ch);
+        }
         #endregion
 
         #region wunctrl
@@ -3062,11 +2519,6 @@ namespace NCurses.Core.Interop
         /// see <see cref="unctrl"/>
         /// </summary>
         /// <returns>printable representation of the character</returns>
-        //[DllImport(Constants.DLLNAME, EntryPoint = "wunctrl")]
-        //internal extern static string wunctrl(NCURSES_CH_T ch);
-        [DllImport(Constants.DLLNAME, EntryPoint = "wunctrl")]
-        internal extern static IntPtr ncurses_wunctrl(IntPtr ch);
-
         public static string wunctrl(NCursesWCHAR wch)
         {
             IntPtr wPtr, strPtr = IntPtr.Zero;
@@ -3074,7 +2526,7 @@ namespace NCurses.Core.Interop
             {
                 try
                 {
-                    strPtr = NativeNCurses.VerifyNCursesMethod(() => ncurses_wunctrl(wPtr), "wunctrl");
+                    strPtr = NativeNCurses.VerifyNCursesMethod(() => NCursesWrapper.wunctrl(wPtr), "wunctrl");
                     return MarshalStringFromNativeWideString(strPtr, Constants.SIZEOF_WCHAR_T * Constants.CCHARW_MAX);
                 }
                 finally
@@ -3091,18 +2543,13 @@ namespace NCurses.Core.Interop
         /// The has_mouse  function returns TRUE if the mouse driver has been successfully initialized.
         /// </summary>
         /// <returns>true if terminal supports insert/delete characters</returns>
-        [DllImport(Constants.DLLNAME, EntryPoint = "has_mouse")]
-        public extern static bool has_mouse();
+        public static bool has_mouse()
+        {
+            return NCursesWrapper.has_mouse();
+        }
         #endregion
 
         #region getmouse
-        /// <summary>
-        /// see <see cref="getmouse"/>
-        /// </summary>
-        /// <returns>Constants.ERR on error or Constants.OK on success</returns>
-        [DllImport(Constants.DLLNAME, EntryPoint = "getmouse")]
-        internal extern static int ncurses_getmouse(out MEVENT ev);
-
         /// <summary>
         /// Once a class of mouse events has been made visible  in  a
         /// window, calling the wgetch function on that window may return KEY_MOUSE as an indicator that a mouse event has been
@@ -3131,18 +2578,11 @@ namespace NCurses.Core.Interop
             //    //ev = NativeWindows.MouseEvent;
             //}
             //else
-                NCursesException.Verify(ncurses_getmouse(out ev), "getmouse");
+                NCursesException.Verify(NCursesWrapper.getmouse(out ev), "getmouse");
         }
         #endregion
 
-        #region ungetmouse
-        /// <summary>
-        /// see <see cref="ungetmouse"/>
-        /// </summary>
-        /// <returns>Constants.ERR on error or Constants.OK on success</returns>
-        [DllImport(Constants.DLLNAME, EntryPoint = "ungetmouse")]
-        internal extern static int ncurses_ungetmouse(MEVENT ev);
-
+        #region ungetmouse        
         /// <summary>
         /// The ungetmouse function behaves  analogously to  ungetch.
         /// It pushes a KEY_MOUSE event onto the input queue, and associates with that event the given state data and
@@ -3151,7 +2591,7 @@ namespace NCurses.Core.Interop
         /// </summary>
         public static void ungetmouse(MEVENT ev)
         {
-            NCursesException.Verify(ncurses_ungetmouse(ev), "ungetmouse");
+            NCursesException.Verify(NCursesWrapper.ungetmouse(ev), "ungetmouse");
         }
         #endregion
 
@@ -3167,8 +2607,10 @@ namespace NCurses.Core.Interop
         /// mouse event mask.
         /// </summary>
         /// <returns>the supported mousemasks</returns>
-        [DllImport(Constants.DLLNAME, EntryPoint = "mousemask")]
-        public extern static uint mousemask(uint newmask, out uint oldmask);
+        public static uint mousemask(uint newmask, out uint oldmask)
+        {
+            return NCursesWrapper.mousemask(newmask, out oldmask);
+        }
         #endregion
 
         #region mouseinterval
@@ -3180,16 +2622,20 @@ namespace NCurses.Core.Interop
         /// default is one sixth of a second.
         /// </summary>
         /// <returns>the previous mouse interval</returns>
-        [DllImport(Constants.DLLNAME, EntryPoint = "mouseinterval")]
-        public extern static int mouseinterval(int erval);
+        public static int mouseinterval(int erval)
+        {
+            return NCursesWrapper.mouseinterval(erval);
+        }
         #endregion
 
         #region mouse_trafo
         /// <summary>
         /// see <see cref="NativeWindow.wmouse_trafo"/>
         /// </summary>
-        [DllImport(Constants.DLLNAME, EntryPoint = "wmouse_trafo")]
-        public extern static bool mouse_trafo(ref int pY, ref int pX, bool to_screen);
+        public static bool mouse_trafo(ref int pY, ref int pX, bool to_screen)
+        {
+            return NCursesWrapper.mouse_trafo(ref pY, ref pX, to_screen);
+        }
         #endregion
 
         #region has_key
@@ -3200,8 +2646,10 @@ namespace NCurses.Core.Interop
         /// </summary>
         /// <param name="ch">the key code you want to test</param>
         /// <returns>true or false</returns>
-        [DllImport(Constants.DLLNAME, EntryPoint = "has_key")]
-        public extern static int has_key(int ch);
+        public static int has_key(int ch)
+        {
+            return NCursesWrapper.has_key(ch);
+        }
         #endregion
 
         #region setfont
@@ -3247,18 +2695,19 @@ namespace NCurses.Core.Interop
         /// check if the current terminal is unicode-able
         /// </summary>
         /// <returns>true or false</returns>
-        [DllImport(Constants.DLLNAME)]
-        public extern static bool _nc_unicode_locale();
+        public static bool _nc_unicode_locale()
+        {
+            return NCursesWrapper._nc_unicode_locale();
+        }
 
         /// <summary>
         /// returns the screen of the window
         /// </summary>
         /// <param name="window">pointer to a window</param>
         /// <returns>reference to a screen</returns>
-        [DllImport(Constants.DLLNAME)]
-        public extern static IntPtr _nc_screen_of(IntPtr window);
-
-        [DllImport(Constants.DLLNAME)]
-        public extern static int _nc_mingw_console_read(IntPtr screen, IntPtr intput, out int key);
+        public static IntPtr _nc_screen_of(IntPtr window)
+        {
+            return NCursesWrapper._nc_screen_of(window);
+        }
     }
 }

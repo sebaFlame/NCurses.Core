@@ -8,22 +8,26 @@ namespace NCurses.Core.Interop
     {
         private static int NCURSES_ATTR_SHIFT = 8;
 
-        //windows
-        //TODO: retarget as internal
-        public const string DLLNAME = "libncursesw";
+        internal static string DLLNAME { get; private set; }
+        internal static int SIZEOF_WCHAR_T { get; private set; }
+        internal const int CCHARW_MAX = 5;
 
         public const int ERR = -1;
         public const int OK = 0;
-        internal static int SIZEOF_WCHAR_T { get; private set; }
-        internal const int CCHARW_MAX = 5;
 
         //TODO: get WCHAR_T size at runtime (through libc?)
         static Constants()
         {
             if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
+            {
                 SIZEOF_WCHAR_T = 2;
+                DLLNAME = "libncursesw";
+            }
             else
+            {
                 SIZEOF_WCHAR_T = 4;
+                DLLNAME = "libncursesw.so.6";
+            }
         }
 
         internal static uint NCURSES_BITS(uint mask, int shift)
