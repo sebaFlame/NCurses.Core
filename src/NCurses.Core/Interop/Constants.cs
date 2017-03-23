@@ -21,7 +21,7 @@ namespace NCurses.Core.Interop
             if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
             {
                 SIZEOF_WCHAR_T = 2;
-                DLLNAME = "libncursesw";
+                DLLNAME = "libncursesw6";
             }
             else
             {
