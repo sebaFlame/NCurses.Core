@@ -909,7 +909,7 @@ namespace NCurses.Core.Interop
         /// see <see cref="wgetnstr"/>
         /// </summary>
         /// <returns>Constants.ERR on error or Constants.OK on success</returns>
-        [DllImport(Constants.DLLNAME, EntryPoint = "wgetnstr", CharSet = CharSet.Ansi)]
+        [DllImport(Constants.DLLNAME, EntryPoint = "wgetnstr")]
         internal extern static int ncurses_wgetnstr(IntPtr window, StringBuilder builder, int count);
 
         /// <summary>
@@ -928,7 +928,7 @@ namespace NCurses.Core.Interop
         /// see <see cref="wgetstr"/>
         /// </summary>
         /// <returns>Constants.ERR on error or Constants.OK on success</returns>
-        [DllImport(Constants.DLLNAME, EntryPoint = "wgetstr", CharSet = CharSet.Ansi)]
+        [DllImport(Constants.DLLNAME, EntryPoint = "wgetstr")]
         internal extern static int ncurses_wgetstr(IntPtr window, StringBuilder str);
 
         /// <summary>
@@ -1145,7 +1145,7 @@ namespace NCurses.Core.Interop
         /// see <see cref="winnstr"/>
         /// </summary>
         /// <returns>Constants.ERR on error or Constants.OK on success</returns>
-        [DllImport(Constants.DLLNAME, EntryPoint = "winnstr", CharSet = CharSet.Ansi)]
+        [DllImport(Constants.DLLNAME, EntryPoint = "winnstr")]
         internal extern static int ncurses_winnstr(IntPtr window, StringBuilder str, int n);
 
         /// <summary>
@@ -1319,7 +1319,7 @@ namespace NCurses.Core.Interop
         /// see <see cref="winstr"/>
         /// </summary>
         /// <returns>Constants.ERR on error or Constants.OK on success</returns>
-        [DllImport(Constants.DLLNAME, EntryPoint = "winstr", CharSet = CharSet.Ansi)]
+        [DllImport(Constants.DLLNAME, EntryPoint = "winstr")]
         internal extern static int ncurses_winstr(IntPtr window, StringBuilder str);
 
         /// <summary>
@@ -1713,7 +1713,7 @@ namespace NCurses.Core.Interop
         /// see <see cref="mvwgetnstr(IntPtr, int, int, StringBuilder, int)"/>
         /// </summary>
         /// <returns>Constants.ERR on error or Constants.OK on success</returns>
-        [DllImport(Constants.DLLNAME, EntryPoint = "mvwgetnstr", CharSet = CharSet.Ansi)]
+        [DllImport(Constants.DLLNAME, EntryPoint = "mvwgetnstr")]
         internal extern static int ncurses_mvwgetnstr(IntPtr window, int y, int x, StringBuilder str, int count);
 
         /// <summary>
@@ -1744,7 +1744,7 @@ namespace NCurses.Core.Interop
         /// see <see cref="mvwgetstr(IntPtr, int, int, StringBuilder)"/>
         /// </summary>
         /// <returns>Constants.ERR on error or Constants.OK on success</returns>
-        [DllImport(Constants.DLLNAME, EntryPoint = "mvwgetstr", CharSet = CharSet.Ansi)]
+        [DllImport(Constants.DLLNAME, EntryPoint = "mvwgetstr")]
         internal extern static int ncurses_mvwgetstr(IntPtr window, int y, int x, StringBuilder str);
 
         /// <summary>
@@ -1924,7 +1924,7 @@ namespace NCurses.Core.Interop
         /// see <see cref="mvwinnstr"/>
         /// </summary>
         /// <returns>Constants.ERR on error or Constants.OK on success</returns>
-        [DllImport(Constants.DLLNAME, EntryPoint = "mvwinnstr", CharSet = CharSet.Ansi)]
+        [DllImport(Constants.DLLNAME, EntryPoint = "mvwinnstr")]
         internal extern static int ncurses_mvwinnstr(IntPtr window, int y, int x, StringBuilder str, int n);
 
         /// <summary>
@@ -2048,7 +2048,7 @@ namespace NCurses.Core.Interop
         /// see <see cref="mvwinstr(IntPtr, int, int, StringBuilder)"/>
         /// </summary>
         /// <returns>Constants.ERR on error or Constants.OK on success</returns>
-        [DllImport(Constants.DLLNAME, EntryPoint = "mvwinstr", CharSet = CharSet.Ansi)]
+        [DllImport(Constants.DLLNAME, EntryPoint = "mvwinstr")]
         internal extern static int ncurses_mvwinstr(IntPtr window, int y, int x, StringBuilder str);
 
         /// <summary>
@@ -2106,7 +2106,7 @@ namespace NCurses.Core.Interop
         /// see <see cref="mvwscanw"/>
         /// </summary>
         /// <returns>Constants.ERR on error or Constants.OK on success</returns>
-        [DllImport(Constants.DLLNAME, EntryPoint = "mvwscanw", CharSet = CharSet.Ansi)]
+        [DllImport(Constants.DLLNAME, EntryPoint = "mvwscanw")]
         internal extern static int ncurses_mvwscanw(IntPtr window, int y, int x, StringBuilder format, object[] var);
 
         /// <summary>
@@ -2312,7 +2312,7 @@ namespace NCurses.Core.Interop
         /// see <see cref="wscanw"/>
         /// </summary>
         /// <returns>Constants.ERR on error or Constants.OK on success</returns>
-        [DllImport(Constants.DLLNAME, EntryPoint = "wprintw", CharSet = CharSet.Ansi)]
+        [DllImport(Constants.DLLNAME, EntryPoint = "wprintw")]
         internal extern static int ncurses_wscanw(IntPtr window, StringBuilder format, object[] var);
 
         /// <summary>
