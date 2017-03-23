@@ -3,7 +3,7 @@ using System.Runtime.InteropServices;
 
 namespace NCurses.Core.Interop
 {
-    public class NCursesException : Exception
+    internal class NCursesException : Exception
     {
         internal NCursesException(string message)
             : base(message)

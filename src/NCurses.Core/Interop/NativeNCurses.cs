@@ -1389,7 +1389,7 @@ namespace NCurses.Core.Interop
         /// </summary>
         public static void savetty()
         {
-            NativeNCurses.VerifyNCursesMethod(() => NCursesWrapper.resetty(), "savetty");
+            NativeNCurses.VerifyNCursesMethod(() => NCursesWrapper.savetty(), "savetty");
         }
         #endregion
 
@@ -1734,7 +1734,7 @@ namespace NCurses.Core.Interop
         /// <returns>a pointer to the new window</returns>
         public static IntPtr subwin(IntPtr orig, int nlines, int ncols, int begin_y, int begin_x)
         {
-            return NativeNCurses.VerifyNCursesMethod(() => NCursesWrapper.subpad(orig, nlines, ncols, begin_y, begin_x), "subpad");
+            return NativeNCurses.VerifyNCursesMethod(() => NCursesWrapper.subwin(orig, nlines, ncols, begin_y, begin_x), "subpad");
         }
         #endregion
 
