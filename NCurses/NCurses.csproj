@@ -1,0 +1,23 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <Description>An application programming interface (API) that allows the programmer to write text-based user interfaces in a terminal-independent manner.</Description>
+    <VersionPrefix>6.0.20170225</VersionPrefix>
+    <TargetFramework>netstandard1.0</TargetFramework>
+    <AssemblyName>NCurses</AssemblyName>
+    <PackageId>NCurses</PackageId>
+    <PackageTags>ncurses;console</PackageTags>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <None Update="x86\*">
+      <PackagePath>runtimes/win-x86/native/</PackagePath>
+      <Pack>true</Pack>
+    </None>
+    <None Update="x64\*">
+      <PackagePath>runtimes/win-x64/native/</PackagePath>
+      <Pack>true</Pack>
+    </None>
+  </ItemGroup>
+
+</Project>
