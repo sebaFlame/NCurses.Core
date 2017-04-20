@@ -2051,8 +2051,9 @@ namespace NCurses.Core.Interop
         public static void resize_term(int lines, int columns)
         {
             NativeNCurses.VerifyNCursesMethod(() => NCursesWrapper.resize_term(lines, columns), "resize_term");
-            if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
-                NativeWindows.NativeWindowsConsoleResize(lines, columns);
+            //TODO: check for < win 10
+            //if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
+            //    NativeWindows.NativeWindowsConsoleResize(lines, columns);
         }
         #endregion
 
@@ -2067,8 +2068,9 @@ namespace NCurses.Core.Interop
         public static void resizeterm(int lines, int columns)
         {
             NativeNCurses.VerifyNCursesMethod(() => NCursesWrapper.resizeterm(lines, columns), "resizeterm");
-            if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
-                NativeWindows.NativeWindowsConsoleResize(lines, columns);
+            //TODO:check for < win 10
+            //if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
+            //    NativeWindows.NativeWindowsConsoleResize(lines, columns);
         }
         #endregion
 
@@ -2660,6 +2662,9 @@ namespace NCurses.Core.Interop
         /// <param name="font">The font you want to change to</param>
         public static void SetConsoleFont(WindowsConsoleFont font)
         {
+            return;
+
+            //TODO: check for < win 10
             if (!RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
                 throw new ArgumentException("Changing the font not available on this platform");
 
