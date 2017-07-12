@@ -8,7 +8,7 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="NCurses" Version="6.0.20170225" />
+    <PackageReference Include="runtime.win.NCurses" Version="6.0.2017.0225" />
   </ItemGroup>
 
   <ItemGroup Condition=" '$(TargetFramework)' == 'netstandard1.6' ">

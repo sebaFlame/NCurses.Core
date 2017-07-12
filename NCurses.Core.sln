@@ -9,9 +9,9 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution 
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "test", "test", "{B1015D17-B6D0-4F0F-9A23-A0D0F26CB476}"
 EndProject
-Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "NCurses", "NCurses", "{530A3737-8D43-44D6-8513-169D81B9C4A9}"
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "runtime.win.NCurses", "runtime.win.NCurses", "{530A3737-8D43-44D6-8513-169D81B9C4A9}"
 	ProjectSection(SolutionItems) = preProject
-		NCurses\NCurses.csproj = NCurses\NCurses.csproj
+		runtime.win.NCurses\runtime.win.NCurses.csproj = runtime.win.NCurses\runtime.win.NCurses.csproj
 	EndProjectSection
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "NCurses.Core", "src\NCurses.Core\NCurses.Core.csproj", "{92ABBA2A-D80C-474D-818C-4058860CE43E}"

@@ -2,11 +2,12 @@
 
   <PropertyGroup>
     <Description>An application programming interface (API) that allows the programmer to write text-based user interfaces in a terminal-independent manner.</Description>
-    <VersionPrefix>6.0.20170225</VersionPrefix>
+    <VersionPrefix>6.0.2017.0225</VersionPrefix>
     <TargetFramework>netstandard1.0</TargetFramework>
-    <AssemblyName>NCurses</AssemblyName>
-    <PackageId>NCurses</PackageId>
+    <PackageId>runtime.win.NCurses</PackageId>
     <PackageTags>ncurses;console</PackageTags>
+	<IncludeBuildOutput>false</IncludeBuildOutput>
+    <RuntimeIdentifiers>win7-x86;win7-x64;win8-x86;win8-x64;win81-x86;win81-x64;win10-x86;win10-x64</RuntimeIdentifiers>
   </PropertyGroup>
 
   <ItemGroup>
