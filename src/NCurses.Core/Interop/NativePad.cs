@@ -1,6 +1,12 @@
 ﻿using System;
 using System.Runtime.InteropServices;
 
+#if NCURSES_VERSION_6
+using chtype = System.UInt32;
+#elif NCURSES_VERSION_5
+using chtype = System.UInt64;
+#endif
+
 namespace NCurses.Core.Interop
 {
     internal static class NativePad
@@ -19,16 +25,16 @@ namespace NCurses.Core.Interop
         /// </summary>
         /// <param name="pad">a pointer to the pad</param>
         /// <param name="ch">the character you want to echo</param>
-        public static void pechochar(IntPtr pad, uint ch)
+        public static void pechochar(IntPtr pad, chtype ch)
         {
             NativeNCurses.VerifyNCursesMethod(() => NativeNCurses.NCursesWrapper.pechochar(pad, ch), "pechochar");
         }
 
         /// <summary>
-        /// see <see cref="pechochar(IntPtr, uint)"/>
+        /// see <see cref="pechochar(IntPtr, chtype)"/>
         /// <para />native method wrapped with verification and thread safety.
         /// </summary>
-        public static void pechochar_t(IntPtr pad, uint ch)
+        public static void pechochar_t(IntPtr pad, chtype ch)
         {
             Func<IntPtr, IntPtr, int> callback = (IntPtr w, IntPtr a) => NativeNCurses.NCursesWrapper.pechochar(pad, ch);
             NativeNCurses.use_window_v(pad, Marshal.GetFunctionPointerForDelegate(new NCURSES_WINDOW_CB(callback)), "pechochar");

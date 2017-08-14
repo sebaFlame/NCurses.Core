@@ -5,6 +5,12 @@ using System.Reflection;
 using System.Reflection.Emit;
 using System.Runtime.InteropServices;
 
+#if NCURSES_VERSION_6
+using chtype = System.UInt32;
+#elif NCURSES_VERSION_5
+using chtype = System.UInt64;
+#endif
+
 namespace NCurses.Core.Interop
 {
     internal static class DynamicTypeBuilder
@@ -19,6 +25,7 @@ namespace NCurses.Core.Interop
         }
 
         #region NCURSES_CH_T
+        //TODO: new IL for ncurses5
         internal static Type CreateWCHARType()
         {
             FieldBuilder attrField, extField, charField;
@@ -34,7 +41,7 @@ namespace NCurses.Core.Interop
 
             /* fields */
             TypeBuilder typeBuilder = moduleBuilder.DefineType("NCURSES_CH_T", TypeAttributes.Public, typeof(ValueType));
-            attrField = typeBuilder.DefineField("attr", typeof(uint), FieldAttributes.Public);
+            attrField = typeBuilder.DefineField("attr", typeof(chtype), FieldAttributes.Public);
 
             /* chars field with attribute */
             charField = typeBuilder.DefineField("chars", typeof(byte[]), FieldAttributes.Public);
@@ -124,7 +131,7 @@ namespace NCurses.Core.Interop
             ctorIl.Emit(OpCodes.Ret);
 
             /* NCURSES_CH_T(char ch, uint attr) */
-            ctorBuilder = typeBuilder.DefineConstructor(MethodAttributes.Public, CallingConventions.Standard, new Type[] { typeof(char), typeof(uint) });
+            ctorBuilder = typeBuilder.DefineConstructor(MethodAttributes.Public, CallingConventions.Standard, new Type[] { typeof(char), typeof(chtype) });
             ctorIl = ctorBuilder.GetILGenerator();
 
             ctorIl.Emit(OpCodes.Ldarg_0);
@@ -138,7 +145,7 @@ namespace NCurses.Core.Interop
             ctorIl.Emit(OpCodes.Ret);
 
             /* NCURSES_CH_T(uint c) */
-            charCtorBuilder = typeBuilder.DefineConstructor(MethodAttributes.Public, CallingConventions.Standard, new Type[] { typeof(uint) });
+            charCtorBuilder = typeBuilder.DefineConstructor(MethodAttributes.Public, CallingConventions.Standard, new Type[] { typeof(chtype) });
             ctorIl = charCtorBuilder.GetILGenerator();
 
             ctorIl.Emit(OpCodes.Ldarg_0);
@@ -160,7 +167,7 @@ namespace NCurses.Core.Interop
             ctorIl.Emit(OpCodes.Ret);
 
             /* NCURSES_CH_T(uint c, uint attr) */
-            ctorBuilder = typeBuilder.DefineConstructor(MethodAttributes.Public, CallingConventions.Standard, new Type[] { typeof(uint), typeof(uint) });
+            ctorBuilder = typeBuilder.DefineConstructor(MethodAttributes.Public, CallingConventions.Standard, new Type[] { typeof(chtype), typeof(chtype) });
             ctorIl = ctorBuilder.GetILGenerator();
 
             ctorIl.Emit(OpCodes.Ldarg_0);

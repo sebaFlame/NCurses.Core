@@ -4,6 +4,12 @@ using System.Linq;
 using System.Text;
 using NCurses.Core.Interop;
 
+#if NCURSES_VERSION_6
+using chtype = System.UInt32;
+#elif NCURSES_VERSION_5
+using chtype = System.UInt64;
+#endif
+
 namespace NCurses.Core
 {
     public abstract class WindowBase : IDisposable
@@ -82,7 +88,7 @@ namespace NCurses.Core
         {
             get
             {
-                uint attrs;
+                chtype attrs;
                 short color_pair;
                 NativeWindow.wattr_get(this.WindowPtr, out attrs, out color_pair);
                 return color_pair;
@@ -97,28 +103,50 @@ namespace NCurses.Core
         /// set/get the current attribute/color attribute.
         /// get the enabled attributes by using AND on the corresponding <see cref="Attrs"/> field.
         /// </summary>
-        public uint Attribute
+        public ulong Attribute
         {
             get
             {
-                uint attr;
+                chtype attr;
                 short color_pair;
                 NativeWindow.wattr_get(this.WindowPtr, out attr, out color_pair);
+#if NCURSES_VERSION_5
                 return attr;
+#elif NCURSES_VERSION_6
+                return (ulong)attr;
+#endif
             }
             set
             {
+#if NCURSES_VERSION_5
                 NativeWindow.wattr_set(this.WindowPtr, value, 0);
+#elif NCURSES_VERSION_6
+                NativeWindow.wattr_set(this.WindowPtr, (chtype)value, 0);
+#endif
             }
         }
 
         /// <summary>
         /// set/gets the current window background with a character with attributes applied
         /// </summary>
-        public uint BackGround
+        public ulong BackGround
         {
-            get { return NativeWindow.getbkgd(this.WindowPtr); }
-            set { NativeWindow.wbkgd(this.WindowPtr, value); }
+            get
+            {
+#if NCURSES_VERSION_5
+                return NativeWindow.getbkgd(this.WindowPtr);
+#elif NCURSES_VERSION_6
+                return (ulong)NativeWindow.getbkgd(this.WindowPtr);
+#endif
+            }
+            set
+            {
+#if NCURSES_VERSION_5
+                NativeWindow.wbkgd(this.WindowPtr, value);
+#elif NCURSES_VERSION_6
+                NativeWindow.wbkgd(this.WindowPtr, (chtype)value);
+#endif
+            }
         }
 
         //public Color BackgroundColor
@@ -218,25 +246,33 @@ namespace NCurses.Core
             set { NativeWindow.notimeout(this.WindowPtr, value); }
             get { return NativeWindow.is_notimeout(this.WindowPtr); }
         }
-        #endregion
+#endregion
 
-        #region attributes
+#region attributes
         /// <summary>
         /// enable attribute(s) for the current window. Attributes can be OR'd together.
         /// </summary>
         /// <param name="attr">attribute(s) to enable</param>
-        public void AttrOn(uint attr)
+        public void AttrOn(ulong attr)
         {
+#if NCURSES_VERSION_5
             NativeWindow.wattr_on(this.WindowPtr, attr);
+#elif NCURSES_VERSION_6
+            NativeWindow.wattr_on(this.WindowPtr, (chtype)attr);
+#endif
         }
 
         /// <summary>
         /// disable attribute(s) for the current window. Attaributes can be OR'd together.
         /// </summary>
         /// <param name="attr">attribute(s) to disable</param>
-        public void AttrOff(uint attr)
+        public void AttrOff(ulong attr)
         {
+#if NCURSES_VERSION_5
             NativeWindow.wattr_off(this.WindowPtr, attr);
+#elif NCURSES_VERSION_6
+            NativeWindow.wattr_off(this.WindowPtr, (chtype)attr);
+#endif
         }
         #endregion
 
@@ -250,9 +286,9 @@ namespace NCurses.Core
         {
             NativeWindow.wmove(this.WindowPtr, lineNumber, columnNumber);
         }
-        #endregion
+#endregion
 
-        #region Write
+#region Write
         /// <summary>
         /// write string <paramref name="str"/> to the window.
         /// <paramref name="str"/> can be unicode if your terminal supports it.
@@ -299,7 +335,7 @@ namespace NCurses.Core
         /// the cursor advances.
         /// </summary>
         /// <param name="ch">character/attributes you want to add</param>
-        public void Write(uint ch)
+        public void Write(ulong ch)
         {
             //if (NCurses.UnicodeSupported)
             //{
@@ -314,7 +350,11 @@ namespace NCurses.Core
             //    NativeWindow.wadd_wch(this.WindowPtr, wch);
             //}
             //else
-                NativeWindow.waddch(this.WindowPtr, ch);
+#if NCURSES_VERSION_5
+            NativeWindow.waddch(this.WindowPtr, ch);
+#elif NCURSES_VERSION_6
+            NativeWindow.waddch(this.WindowPtr, (chtype)ch);
+#endif
         }
 
         /// <summary>
@@ -325,11 +365,15 @@ namespace NCurses.Core
         /// <param name="ch">the character to add</param>
         /// <param name="attrs">the attributes you want to add (eg <see cref="Attrs.BOLD"/>)</param>
         /// <param name="pair">the color pair you want to use on this character</param>
-        public void Write(uint ch, uint attrs, short pair)
+        public void Write(ulong ch, ulong attrs, short pair)
         {
             ch |= attrs;
-            ch |= (uint)NativeNCurses.COLOR_PAIR(pair);
+            ch |= (chtype)NativeNCurses.COLOR_PAIR(pair);
+#if NCURSES_VERSION_5
             NativeWindow.waddch(this.WindowPtr, ch);
+#elif NCURSES_VERSION_6
+            NativeWindow.waddch(this.WindowPtr, (chtype)ch);
+#endif
         }
 
         /// <summary>
@@ -354,33 +398,41 @@ namespace NCurses.Core
         /// <param name="ch">the character to add</param>
         /// <param name="attrs">the attributes you want to add (eg <see cref="Attrs.BOLD"/>)</param>
         /// <param name="pair">the color pair you want to use on this character</param>
-        public void Write(char ch, uint attrs, short pair)
+        public void Write(char ch, ulong attrs, short pair)
         {
             if (NCurses.UnicodeSupported)
             {
                 NCursesWCHAR wch = new NCursesWCHAR(ch);
+#if NCURSES_VERSION_5
                 wch.attr = attrs;
+#elif NCURSES_VERSION_6
+                wch.attr = (chtype)attrs;
+#endif
                 wch.ext_color = pair;
                 NativeWindow.wadd_wch(this.WindowPtr, wch);
             }
             else
             {
-                uint c = ch;
+                chtype c = ch;
+#if NCURSES_VERSION_5
                 c |= attrs;
+#elif NCURSES_VERSION_6
+                c |= (chtype)attrs;
+#endif
                 //TODO: replace with managed variant
-                c |= (uint)NativeNCurses.COLOR_PAIR(pair);
+                c |= (chtype)NativeNCurses.COLOR_PAIR(pair);
                 NativeWindow.waddch(this.WindowPtr, c);
             }
         }
 
         /// <summary>
         /// write the character/attributes <paramref name="ch"/> to line <paramref name="nline"/> and column <paramref name="ncol"/>.
-        /// see <see cref="Write(uint)"/>
+        /// see <see cref="Write(ulong)"/>
         /// </summary>
         /// <param name="nline">the line number to add the char to</param>
         /// <param name="ncol">the column number to add the char to</param>
         /// <param name="ch">the character/attributes to add</param>
-        public void Write(int nline, int ncol, uint ch)
+        public void Write(int nline, int ncol, ulong ch)
         {
             //if (NCurses.UnicodeSupported)
             //{
@@ -391,7 +443,11 @@ namespace NCurses.Core
             //    NativeWindow.mvwadd_wch(this.WindowPtr, nline, ncol, wch);
             //}
             //else
+#if NCURSES_VERSION_5
                 NativeWindow.mvwaddch(this.WindowPtr, nline, ncol, ch);
+#elif NCURSES_VERSION_6
+                NativeWindow.mvwaddch(this.WindowPtr, nline, ncol, (chtype)ch);
+#endif
         }
 
         /// <summary>
@@ -416,9 +472,16 @@ namespace NCurses.Core
         /// the cursor doesn't advance, only writes until the end of the line.
         /// </summary>
         /// <param name="chars">the characters you wnat to add</param>
-        public void Write(uint[] chars)
+        public void Write(ulong[] chars)
         {
+#if NCURSES_VERSION_5
             NativeWindow.waddchstr(this.WindowPtr, chars);
+#elif NCURSES_VERSION_6
+            chtype[] chars_1 = new chtype[chars.Length];
+            for (int i = 0; i < chars.Length; i++)
+                chars_1[i] = (chtype) chars[i];
+            NativeWindow.waddchstr(this.WindowPtr, chars_1);
+#endif
         }
 
         /// <summary>
@@ -429,15 +492,22 @@ namespace NCurses.Core
         /// <param name="chars">the characters you wnat to add</param>
         /// <param name="attrs">the attributes you want to add (eg <see cref="Attrs.BOLD"/>)</param>
         /// <param name="pair">the color pair you want to use on this character</param>
-        public void Write(uint[] chars, uint attrs, short pair)
+        public void Write(ulong[] chars, ulong attrs, short pair)
         {
             for (int i = 0; i < chars.Length; i++)
             {
                 chars[i] |= attrs;
                 //TODO: replace with managed variant
-                chars[i] |= (uint)NativeNCurses.COLOR_PAIR(pair);
+                chars[i] |= (ulong)((uint)NativeNCurses.COLOR_PAIR(pair));
             }
+#if NCURSES_VERSION_5
             NativeWindow.waddchstr(this.WindowPtr, chars);
+#elif NCURSES_VERSION_6
+            chtype[] chars_1 = new chtype[chars.Length];
+            for (int i = 0; i < chars.Length; i++)
+                chars_1[i] = (chtype)chars[i];
+            NativeWindow.waddchstr(this.WindowPtr, chars_1);
+#endif
         }
 
         /// <summary>
@@ -457,7 +527,7 @@ namespace NCurses.Core
             else
             {
                 //TODO: correct unicode char conversion to ASCII
-                uint[] chArray = new uint[chars.Length];
+                chtype[] chArray = new chtype[chars.Length];
                 for (int i = 0; i < chars.Length; i++)
                     chArray[i] = chars[i];
                 NativeWindow.waddchstr(this.WindowPtr, chArray);
@@ -471,20 +541,24 @@ namespace NCurses.Core
         /// <param name="chars">the characters you wnat to add</param>
         /// <param name="attrs">the attributes you want to add (eg <see cref="Attrs.BOLD"/>)</param>
         /// <param name="pair">the color pair you want to use on this character</param>
-        public void Write(char[] chars, uint attrs, short pair)
+        public void Write(char[] chars, ulong attrs, short pair)
         {
             NCursesWCHAR[] chArray = new NCursesWCHAR[chars.Length];
             for (int i = 0; i < chars.Length; i++)
             {
                 chArray[i] = new NCursesWCHAR(chars[i]);
+#if NCURSES_VERSION_5
                 chArray[i].attr = attrs;
+#elif NCURSES_VERSION_6
+                chArray[i].attr = (chtype)attrs;
+#endif
                 chArray[i].ext_color = pair;
             }
             NativeWindow.wadd_wchstr(this.WindowPtr, chArray);
         }
-        #endregion
+#endregion
 
-        #region WriteLine
+#region WriteLine
         /// <summary>
         /// write a new line to the window. see <see cref="Write(int, int, string)"/>
         /// </summary>
@@ -503,9 +577,9 @@ namespace NCurses.Core
         {
             this.WriteLine(string.Format(format, arg));
         }
-        #endregion
+#endregion
 
-        #region read input
+#region read input
         /// <summary>
         /// read a character from console input.
         /// Also refreshes the window if it hasn't been refreshed yet.
@@ -553,10 +627,10 @@ namespace NCurses.Core
                 NativeWindow.wgetnstr(this.WindowPtr, builder, length);
             return builder.ToString();
         }
-        #endregion
+#endregion
 
 
-        #region insert
+#region insert
         /// <summary>
         /// insert a character on the current cursor position. all characaters on the right move 1 column. character might fall off at the end of the line.
         /// supports unicode.
@@ -582,20 +656,28 @@ namespace NCurses.Core
         /// <param name="ch">the character to insert</param>
         /// <param name="attrs">the attributes you want to add (eg <see cref="Attrs.BOLD"/>)</param>
         /// <param name="pair">the color pair you want to use on this character</param>
-        public void Insert(char ch, uint attrs, short pair)
+        public void Insert(char ch, ulong attrs, short pair)
         {
             if (NCurses.UnicodeSupported)
             {
                 NCursesWCHAR wch = new NCursesWCHAR(ch);
+#if NCURSES_VERSION_5
                 wch.attr = attrs;
+#elif NCURSES_VERSION_6
+                wch.attr = (chtype)attrs;
+#endif
                 wch.ext_color = pair;
                 NativeWindow.wins_wch(this.WindowPtr, wch);
             }
             else
             {
-                uint c = ch;
+                chtype c = ch;
+#if NCURSES_VERSION_5
                 c |= attrs;
-                c |= (uint)NativeNCurses.COLOR_PAIR(pair);
+#elif NCURSES_VERSION_6
+                c |= (chtype)attrs;
+#endif
+                c |= (chtype)NativeNCurses.COLOR_PAIR(pair);
                 NativeWindow.winsch(this.WindowPtr, c);
             }
         }
@@ -630,9 +712,9 @@ namespace NCurses.Core
             else
                 NativeWindow.winsnstr(this.WindowPtr, str, count);
         }
-        #endregion
+#endregion
 
-        #region read output
+#region read output
         /// <summary>
         /// read a character from the console output at the current position
         /// supports unicode.
@@ -650,7 +732,7 @@ namespace NCurses.Core
             }
             else
             {
-                uint c = NativeWindow.winch(this.WindowPtr);
+                chtype c = NativeWindow.winch(this.WindowPtr);
                 ch = (char)(c & Attrs.CHARTEXT);
             }
 
@@ -665,7 +747,7 @@ namespace NCurses.Core
         /// <param name="attrs">attributes applied to the character</param>
         /// <param name="pair">pair number applied to the character</param>
         /// <returns>the read character</returns>
-        public char GetChar(out uint attrs, out short pair)
+        public char GetChar(out ulong attrs, out short pair)
         {
             char ch;
             if (NCurses.UnicodeSupported)
@@ -678,7 +760,7 @@ namespace NCurses.Core
             }
             else
             {
-                uint c = NativeWindow.winch(this.WindowPtr);
+                chtype c = NativeWindow.winch(this.WindowPtr);
                 ch = (char)(c & Attrs.CHARTEXT);
                 attrs = c & Attrs.ATTRIBUTES;
                 pair = (short)Constants.PAIR_NUMBER(c & Attrs.COLOR);
@@ -726,7 +808,7 @@ namespace NCurses.Core
         /// </summary>
         /// <param name="lstAttributes">a list to save the attributes in</param>
         /// <returns>the read string</returns>
-        public string GetString(IList<Tuple<uint, short>> lstAttributes)
+        public string GetString(IList<Tuple<ulong, short>> lstAttributes)
         {
             if (lstAttributes == null)
                 throw new ArgumentNullException("No list passed to save the attributes");
@@ -744,12 +826,16 @@ namespace NCurses.Core
             }
             else
             {
-                uint[] chArr = new uint[1024];
+                chtype[] chArr = new chtype[1024];
                 NativeWindow.winchstr(this.WindowPtr, ref chArr);
                 for (int i = 0; i < chArr.Length; i++)
                 {
                     builder.Append((char)(chArr[i] & Attrs.CHARTEXT));
+#if NCURSES_VERSION_5
                     lstAttributes.Add(Tuple.Create(chArr[i] & Attrs.ATTRIBUTES, (short)Constants.PAIR_NUMBER(chArr[i] & Attrs.COLOR)));
+#elif NCURSES_VERSION_6
+                    lstAttributes.Add(Tuple.Create((ulong)(chArr[i] & Attrs.ATTRIBUTES), (short)Constants.PAIR_NUMBER(chArr[i] & Attrs.COLOR)));
+#endif
                 }
             }
             return builder.ToString();
@@ -763,7 +849,7 @@ namespace NCurses.Core
         /// <param name="count">the number of characters to read</param>
         /// <param name="lstAttributes">a list to save the attributes in</param>
         /// <returns>the read string</returns>
-        public string GetString(int count, IList<Tuple<uint, short>> lstAttributes)
+        public string GetString(int count, IList<Tuple<ulong, short>> lstAttributes)
         {
             if (lstAttributes == null)
                 throw new ArgumentNullException("No list passed to save the attributes");
@@ -781,19 +867,23 @@ namespace NCurses.Core
             }
             else
             {
-                uint[] chArr = new uint[count];
+                chtype[] chArr = new chtype[count];
                 NativeWindow.winchnstr(this.WindowPtr, ref chArr, count);
                 for (int i = 0; i < chArr.Length; i++)
                 {
                     builder.Append((char)(chArr[i] & Attrs.CHARTEXT));
+#if NCURSES_VERSION_5
                     lstAttributes.Add(Tuple.Create(chArr[i] & Attrs.ATTRIBUTES, (short)Constants.PAIR_NUMBER(chArr[i] & Attrs.COLOR)));
+#elif NCURSES_VERSION_6
+                    lstAttributes.Add(Tuple.Create((ulong)(chArr[i] & Attrs.ATTRIBUTES), (short)Constants.PAIR_NUMBER(chArr[i] & Attrs.COLOR)));
+#endif
                 }
             }
             return builder.ToString();
         }
-        #endregion
+#endregion
 
-        #region border
+#region border
         /// <summary>
         /// draw the default borders for the current window.
         /// non-unicode supported
@@ -802,7 +892,7 @@ namespace NCurses.Core
         {
             NativeWindow.box(this.WindowPtr, 0, 0);
         }
-        #endregion
+#endregion
 
         /// <summary>
         /// Clear the window
@@ -849,7 +939,7 @@ namespace NCurses.Core
         public abstract void NoOutRefresh();
         public abstract WindowBase SubWindow();
 
-        #region IDisposable
+#region IDisposable
         protected virtual void Dispose(bool disposing)
         {
             if (this.WindowPtr != IntPtr.Zero)
@@ -860,6 +950,6 @@ namespace NCurses.Core
         {
             this.Dispose(true);
         }
-        #endregion
+#endregion
     }
 }

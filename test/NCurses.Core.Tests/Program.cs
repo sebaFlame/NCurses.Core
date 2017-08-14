@@ -22,11 +22,11 @@ namespace NCurses.Core.Tests
             //testRipoffLine(ref stdScr);
             //testPad(ref stdScr);
             //testColor(ref stdScr);
-            testWrite(ref stdScr);
+            //testWrite(ref stdScr);
             //testReadFromOutput(ref stdScr);
             //testInsert(ref stdScr);
             //testASC(ref stdScr);
-            //testRead(ref stdScr);
+            testRead(ref stdScr);
             //testWindowMemLeak(ref stdScr);
 
             Console.ReadKey();
@@ -114,7 +114,7 @@ namespace NCurses.Core.Tests
             NCurses.Echo = false;
 
             ////test add ASCII char with attributes
-            uint c = 'a';
+            ulong c = 'a';
             c |= Attrs.BOLD;
             stdScr.Write(c);
             stdScr.Refresh();
@@ -131,7 +131,7 @@ namespace NCurses.Core.Tests
 
             ////test get correct "string" from cchar_t
             short colorPair;
-            uint attrs;
+            ulong attrs;
             NCursesWCHAR wch = new NCursesWCHAR('\u263A');
             wch.attr = Attrs.BOLD;
             wch.ext_color = 4;
@@ -157,7 +157,7 @@ namespace NCurses.Core.Tests
             stdScr.Refresh();
 
             //test add ascii character array
-            uint[] chars1 = new uint[] { 'a', 'b', 'c', 'd', 'e', 'f', 'g', 'h', 'i', 'j', 'k', 'l', 'm', 'n', 'o', 'p' };
+            ulong[] chars1 = new ulong[] { 'a', 'b', 'c', 'd', 'e', 'f', 'g', 'h', 'i', 'j', 'k', 'l', 'm', 'n', 'o', 'p' };
             stdScr.Write(chars1, Attrs.BOLD, 4);
             stdScr.Refresh();
 
@@ -177,12 +177,12 @@ namespace NCurses.Core.Tests
             NCurses.Resize(50, 120);
 
             //test add ascii character array
-            uint[] chars1 = new uint[] { 'a', 'b', 'c', 'd', 'e', 'f', 'g', 'h', 'i', 'j', 'k', 'l', 'm', 'n', 'o', 'p' };
+            ulong[] chars1 = new ulong[] { 'a', 'b', 'c', 'd', 'e', 'f', 'g', 'h', 'i', 'j', 'k', 'l', 'm', 'n', 'o', 'p' };
             stdScr.Write(chars1, Attrs.BOLD, 4);
 
             //ASCII char test
             char ch = stdScr.GetChar();
-            uint attrs;
+            ulong attrs;
             short pair;
             ch = stdScr.GetChar(out attrs, out pair);
             string str = stdScr.GetString();
@@ -281,8 +281,8 @@ namespace NCurses.Core.Tests
             int ch;
             Key key;
             MEVENT mouseEvent = default(MEVENT);
-            uint oldMask;
-            uint newMask = NCurses.EnableMouseMask(MouseState.BUTTON1_CLICKED |
+            ulong oldMask;
+            ulong newMask = NCurses.EnableMouseMask(MouseState.BUTTON1_CLICKED |
                 MouseState.BUTTON1_DOUBLE_CLICKED | MouseState.BUTTON1_TRIPLE_CLICKED, out oldMask);
 
             while ((ch = stdScr.ReadKey()) != 'q')

@@ -5,6 +5,12 @@ using System.Text;
 using System.Runtime.InteropServices;
 using System.Linq;
 
+#if NCURSES_VERSION_6
+using chtype = System.UInt32;
+#elif NCURSES_VERSION_5
+using chtype = System.UInt64;
+#endif
+
 namespace NCurses.Core.Interop
 {
     public class NCursesWCHAR
@@ -38,15 +44,15 @@ namespace NCurses.Core.Interop
             }
         }
 
-        public uint attr
+        public ulong attr
         {
             get
             {
-                return (uint)WCHARType.GetTypeInfo().GetField("attr").GetValue(this.WCHAR);
+                return (chtype)WCHARType.GetTypeInfo().GetField("attr").GetValue(this.WCHAR);
             }
             set
             {
-                WCHARType.GetTypeInfo().GetField("attr").SetValue(this.WCHAR, value);
+                WCHARType.GetTypeInfo().GetField("attr").SetValue(this.WCHAR, (chtype)value);
             }
         }
 
@@ -86,25 +92,25 @@ namespace NCurses.Core.Interop
             this.WCHAR = wcharConstructor.Invoke(new object[] { ch });
         }
 
-        public NCursesWCHAR(char ch, uint attrs)
+        public NCursesWCHAR(char ch, ulong attrs)
         {
             if (wcharAttrConstructor == null)
-                wcharAttrConstructor = WCHARType.GetTypeInfo().GetConstructor(new Type[] { typeof(char), typeof(uint) });
-            this.WCHAR = wcharAttrConstructor.Invoke(new object[] { ch, attrs });
+                wcharAttrConstructor = WCHARType.GetTypeInfo().GetConstructor(new Type[] { typeof(char), typeof(chtype) });
+            this.WCHAR = wcharAttrConstructor.Invoke(new object[] { ch, (chtype)attrs });
         }
 
-        public NCursesWCHAR(uint ch)
+        public NCursesWCHAR(ulong ch)
         {
             if (charConstructor == null)
-                charConstructor = WCHARType.GetTypeInfo().GetConstructor(new Type[] { typeof(uint) });
-            this.WCHAR = charConstructor.Invoke(new object[] { ch });
+                charConstructor = WCHARType.GetTypeInfo().GetConstructor(new Type[] { typeof(chtype) });
+            this.WCHAR = charConstructor.Invoke(new object[] { (chtype)ch });
         }
 
-        public NCursesWCHAR(uint ch, uint attrs)
+        public NCursesWCHAR(ulong ch, ulong attrs)
         {
             if (charAttrConstructor == null)
-                charAttrConstructor = WCHARType.GetTypeInfo().GetConstructor(new Type[] { typeof(uint), typeof(uint) });
-            this.WCHAR = charAttrConstructor.Invoke(new object[] { ch, attrs });
+                charAttrConstructor = WCHARType.GetTypeInfo().GetConstructor(new Type[] { typeof(chtype), typeof(chtype) });
+            this.WCHAR = charAttrConstructor.Invoke(new object[] { (chtype)ch, (chtype)attrs });
         }
 
         internal IDisposable ToPointer(out IntPtr ptr)

@@ -4,6 +4,12 @@ using System.Threading;
 using System.Threading.Tasks;
 using System.Runtime.InteropServices;
 
+#if NCURSES_VERSION_6
+using chtype = System.UInt32;
+#elif NCURSES_VERSION_5
+using chtype = System.UInt64;
+#endif
+
 namespace NCurses.Core.Interop
 {
     internal enum Handles
@@ -379,12 +385,12 @@ namespace NCurses.Core.Interop
         }
 
         private static int numButtons;
-        private static uint decode_mouse(int mask)
+        private static chtype decode_mouse(int mask)
         {
             if (numButtons == 0)
                 NativeWindows.GetNumberOfConsoleMouseButtons(out numButtons);
 
-            uint result = 0;
+            chtype result = 0;
 
             if ((mask & (int)MouseButtonState.FROM_LEFT_1ST_BUTTON_PRESSED) != 0)
                 result |= MouseState.BUTTON1_PRESSED;

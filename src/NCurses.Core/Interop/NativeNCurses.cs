@@ -2,6 +2,12 @@
 using System.Text;
 using System.Runtime.InteropServices;
 
+#if NCURSES_VERSION_6
+using chtype = System.UInt32;
+#elif NCURSES_VERSION_5
+using chtype = System.UInt64;
+#endif
+
 namespace NCurses.Core.Interop
 {
     /// <summary>
@@ -10,7 +16,7 @@ namespace NCurses.Core.Interop
     /// </summary>
     internal static class NativeNCurses
     {
-        internal static uint[] Acs_Map = new uint[128];
+        internal static chtype[] Acs_Map = new chtype[128];
         internal static char[] Wacs_Map = new char[128];
 
         private static INCursesWrapper wrapper;
@@ -883,7 +889,7 @@ namespace NCurses.Core.Interop
                 Action<IntPtr> loadAcs = (IntPtr acsPtr) =>
                 {
                     for (int i = 0; i < Acs_Map.Length; i++)
-                        Acs_Map[i] = Marshal.PtrToStructure<uint>(acsPtr + (i * Marshal.SizeOf<uint>()));
+                        Acs_Map[i] = Marshal.PtrToStructure<chtype>(acsPtr + (i * Marshal.SizeOf<chtype>()));
                 };
                 NativeNCurses.LoadProperty("acs_map", loadAcs);
             }
@@ -896,7 +902,7 @@ namespace NCurses.Core.Interop
                 {
                     IntPtr real_wacs = Marshal.ReadIntPtr(wacsPtr);
                     for (int i = 0; i < Wacs_Map.Length; i++)
-                        Wacs_Map[i] = (char)Marshal.ReadInt16(real_wacs + (i * dummy.Size) + Marshal.SizeOf<uint>());
+                        Wacs_Map[i] = (char)Marshal.ReadInt16(real_wacs + (i * dummy.Size) + Marshal.SizeOf<chtype>());
                 };
                 NativeNCurses.LoadProperty("_nc_wacs", loadWacs);
             }
@@ -1480,7 +1486,7 @@ namespace NCurses.Core.Interop
         /// <para />native method wrapped with verification.
         /// </summary>
         /// <param name="attr"></param>
-        public static void slk_attroff(uint attrs)
+        public static void slk_attroff(chtype attrs)
         {
             NativeNCurses.VerifyNCursesMethod(() => NCursesWrapper.slk_attroff(attrs), "slk_attroff");
         }
@@ -1488,10 +1494,10 @@ namespace NCurses.Core.Interop
 
         #region slk_attr_off
         /// <summary>
-        /// see <see cref="NativeStdScr.attr_off(uint)"/>  (for soft function keys)
+        /// see <see cref="NativeStdScr.attr_off(chtype)"/>  (for soft function keys)
         /// <para />native method wrapped with verification.
         /// </summary>
-        public static void slk_attr_off(uint attrs)
+        public static void slk_attr_off(chtype attrs)
         {
             NativeNCurses.VerifyNCursesMethod(() => NCursesWrapper.slk_attr_off(attrs, IntPtr.Zero), "slk_attr_off");
         }
@@ -1499,11 +1505,11 @@ namespace NCurses.Core.Interop
 
         #region slk_attron
         /// <summary>
-        /// see <see cref="slk_attroff(uint)"/>
+        /// see <see cref="slk_attroff(chtype)"/>
         /// <para />native method wrapped with verification.
         /// </summary>
         /// <param name="attr"></param>
-        public static void slk_attron(uint attrs)
+        public static void slk_attron(chtype attrs)
         {
             NativeNCurses.VerifyNCursesMethod(() => NCursesWrapper.slk_attron(attrs), "slk_attron");
         }
@@ -1511,10 +1517,10 @@ namespace NCurses.Core.Interop
 
         #region slk_attr_on
         /// <summary>
-        /// see <see cref="NativeStdScr.attr_on(uint)"/> (for soft function keys)
+        /// see <see cref="NativeStdScr.attr_on(chtype)"/> (for soft function keys)
         /// <para />native method wrapped with verification.
         /// </summary>
-        public static void slk_attr_on(uint attrs)
+        public static void slk_attr_on(chtype attrs)
         {
             NativeNCurses.VerifyNCursesMethod(() => NCursesWrapper.slk_attr_on(attrs, IntPtr.Zero), "slk_attr_on");
         }
@@ -1522,11 +1528,11 @@ namespace NCurses.Core.Interop
 
         #region slk_attrset
         /// <summary>
-        /// see <see cref="slk_attroff(uint)"/>
+        /// see <see cref="slk_attroff(chtype)"/>
         /// <para />native method wrapped with verification.
         /// </summary>
         /// <param name="attr"></param>
-        public static void slk_attrset(uint attrs, short color_pair)
+        public static void slk_attrset(chtype attrs, short color_pair)
         {
             NativeNCurses.VerifyNCursesMethod(() => NCursesWrapper.slk_attrset(attrs, color_pair, IntPtr.Zero), "slk_attrset");
         }
@@ -1537,7 +1543,7 @@ namespace NCurses.Core.Interop
         /// returns the the attribute used for the soft keys
         /// </summary>
         /// <returns>an attribute</returns>
-        public static uint slk_attr()
+        public static chtype slk_attr()
         {
             return NCursesWrapper.slk_attr();
         }
@@ -1545,10 +1551,10 @@ namespace NCurses.Core.Interop
 
         #region slk_attr_set
         /// <summary>
-        /// see <see cref="NativeStdScr.attr_set(uint, short)"/> (for soft function keys)
+        /// see <see cref="NativeStdScr.attr_set(chtype, short)"/> (for soft function keys)
         /// <para />native method wrapped with verification.
         /// </summary>
-        public static void slk_attr_set(uint attrs, short color_pair)
+        public static void slk_attr_set(chtype attrs, short color_pair)
         {
             NativeNCurses.VerifyNCursesMethod(() => NCursesWrapper.slk_attr_set(attrs, color_pair, IntPtr.Zero), "slk_attr_set");
         }
@@ -1750,7 +1756,7 @@ namespace NCurses.Core.Interop
         /// appearance of the screen.
         /// </summary>
         /// <returns>the supported attributes OR'd together</returns>
-        public static uint termattrs()
+        public static chtype termattrs()
         {
             return NCursesWrapper.termattrs();
         }
@@ -1842,7 +1848,7 @@ namespace NCurses.Core.Interop
         /// <para />native method wrapped with verification.
         /// </summary>
         /// <param name="attrs">attributes to show</param>
-        public static void vidattr(uint attrs)
+        public static void vidattr(chtype attrs)
         {
             NativeNCurses.VerifyNCursesMethod(() => NCursesWrapper.vidattr(attrs), "vidattr");
         }
@@ -1857,7 +1863,7 @@ namespace NCurses.Core.Interop
         /// <para />native method wrapped with verification.
         /// </summary>
         /// <param name="attrs">attributes to show</param>
-        public static void vidputs(uint attrs, Func<int, int> NCURSES_OUTC)
+        public static void vidputs(chtype attrs, Func<int, int> NCURSES_OUTC)
         {
             NativeNCurses.VerifyNCursesMethod(() => NCursesWrapper.vidputs(attrs, Marshal.GetFunctionPointerForDelegate(NCURSES_OUTC)), "vidputs");
         }
@@ -2345,7 +2351,7 @@ namespace NCurses.Core.Interop
         /// <param name="wch">a reference to store the string (initialized as StringBuilder(5))</param>
         /// <param name="attrs">a reference to store the attributes in</param>
         /// <param name="color_pair">a reference to store the color pair in</param>
-        public static void getcchar(NCursesWCHAR wcval, StringBuilder wch, out uint attrs, out short color_pair)
+        public static void getcchar(NCursesWCHAR wcval, StringBuilder wch, out chtype attrs, out short color_pair)
         {
             IntPtr wPtr, strPtr = IntPtr.Zero;
             int pointerSize = 0;
@@ -2418,7 +2424,7 @@ namespace NCurses.Core.Interop
         /// <param name="wch">a reference to store the string</param>
         /// <param name="attrs">a reference to store the attributes in</param>
         /// <param name="color_pair">a reference to store the color pair in</param>
-        public static void setcchar(out NCursesWCHAR wcval, string wch, uint attrs, short color_pair)
+        public static void setcchar(out NCursesWCHAR wcval, string wch, chtype attrs, short color_pair)
         {
             wcval = new NCursesWCHAR();
             IntPtr wPtr;
@@ -2446,7 +2452,7 @@ namespace NCurses.Core.Interop
         /// <summary>
         /// see <see cref="termattrs"/>
         /// </summary>
-        public static uint term_attrs()
+        public static chtype term_attrs()
         {
             return NCursesWrapper.term_attrs();
         }
@@ -2484,7 +2490,7 @@ namespace NCurses.Core.Interop
         /// </summary>
         /// <param name="attrs">attributes to show</param>
         /// <param name="pair">color pair index</param>
-        public static void vid_attr(uint attrs, short pair)
+        public static void vid_attr(chtype attrs, short pair)
         {
             NativeNCurses.VerifyNCursesMethod(() => NCursesWrapper.vid_attr(attrs, pair, IntPtr.Zero), "vid_attr");
         }
@@ -2495,7 +2501,7 @@ namespace NCurses.Core.Interop
         /// see <see cref="vid_attr"/>
         /// <para />native method wrapped with verification.
         /// </summary>
-        public static void vid_puts(uint attrs, short pair, Func<int, int> NCURSES_OUTC)
+        public static void vid_puts(chtype attrs, short pair, Func<int, int> NCURSES_OUTC)
         {
             NativeNCurses.VerifyNCursesMethod(() => NCursesWrapper.vid_puts(attrs, pair, IntPtr.Zero, Marshal.GetFunctionPointerForDelegate(NCURSES_OUTC)), "vid_puts");
         }
@@ -2510,7 +2516,7 @@ namespace NCurses.Core.Interop
         /// of a wide character.
         /// </summary>
         /// <returns>printable representation of the character</returns>
-        public static string unctrl(uint ch)
+        public static string unctrl(chtype ch)
         {
             return NCursesWrapper.unctrl(ch);
         }
@@ -2609,7 +2615,7 @@ namespace NCurses.Core.Interop
         /// mouse event mask.
         /// </summary>
         /// <returns>the supported mousemasks</returns>
-        public static uint mousemask(uint newmask, out uint oldmask)
+        public static chtype mousemask(chtype newmask, out chtype oldmask)
         {
             return NCursesWrapper.mousemask(newmask, out oldmask);
         }

@@ -3,6 +3,12 @@ using System.Runtime.InteropServices;
 using System.Text;
 using NCurses.Core.Interop;
 
+#if NCURSES_VERSION_6
+using chtype = System.UInt32;
+#elif NCURSES_VERSION_5
+using chtype = System.UInt64;
+#endif
+
 namespace NCurses.Core
 {
     public static class NCurses
@@ -282,9 +288,9 @@ namespace NCurses.Core
         /// </summary>
         /// <param name="pairIndex">the pair index for which you want the attribute</param>
         /// <returns>attribute of the color</returns>
-        public static uint ColorPair(short pairIndex)
+        public static ulong ColorPair(short pairIndex)
         {
-            return (uint)NativeNCurses.COLOR_PAIR(pairIndex);
+            return (chtype)NativeNCurses.COLOR_PAIR(pairIndex);
         }
 
         public static int Colors
@@ -301,10 +307,16 @@ namespace NCurses.Core
         /// <param name="attrs">will contain the attributes of the wide char</param>
         /// <param name="pairIndex">will contain the color pair index of the wide char</param>
         /// <returns>string containing the wide char</returns>
-        public static string GetStringFromWideChar(NCursesWCHAR wch, out uint attrs, out short pairIndex)
+        public static string GetStringFromWideChar(NCursesWCHAR wch, out ulong attrs, out short pairIndex)
         {
             StringBuilder builder = new StringBuilder(Constants.CCHARW_MAX);
+#if NCURSES_VERSION_5
             NativeNCurses.getcchar(wch, builder, out attrs, out pairIndex);
+#elif NCURSES_VERSION_6
+            chtype attrs_1;
+            NativeNCurses.getcchar(wch, builder, out attrs_1, out pairIndex);
+            attrs = (ulong)attrs_1;
+#endif
             return builder.ToString();
         }
 
@@ -315,24 +327,35 @@ namespace NCurses.Core
         /// <param name="attrs">the attributes you want to apply to the string</param>
         /// <param name="pairIndex">the color pair index you want to apply to the string</param>
         /// <returns>the wide char represenation of the string</returns>
-        public static NCursesWCHAR GetWideCharFromString(string wStr, uint attrs, short pairIndex)
+        public static NCursesWCHAR GetWideCharFromString(string wStr, ulong attrs, short pairIndex)
         {
             NCursesWCHAR wch;
-            NativeNCurses.setcchar(out wch, wStr, Attrs.BOLD, 4);
+#if NCURSES_VERSION_5
+            NativeNCurses.setcchar(out wch, wStr, attrs, 4);
+#elif NCURSES_VERSION_6
+            NativeNCurses.setcchar(out wch, wStr, (chtype)attrs, 4);
+#endif
             return wch;
         }
-        #endregion
+#endregion
 
-        #region mouse
+#region mouse
         /// <summary>
         /// enable the reporting of mouse events
         /// </summary>
         /// <param name="mouseMask">mouse events you want to enable</param>
         /// <param name="oldMouseMask">mouse event which were already enabled</param>
         /// <returns>the enabled mouse mask</returns>
-        public static uint EnableMouseMask(uint mouseMask, out uint oldMouseMask)
+        public static ulong EnableMouseMask(ulong mouseMask, out ulong oldMouseMask)
         {
+#if NCURSES_VERSION_5
             return NativeNCurses.mousemask(mouseMask, out oldMouseMask);
+#elif NCURSES_VERSION_6
+            chtype oldMouseMask_1;
+            chtype ret = NativeNCurses.mousemask((chtype)mouseMask, out oldMouseMask_1);
+            oldMouseMask = (ulong)oldMouseMask_1;
+            return ret;
+#endif
         }
 
         /// <summary>
@@ -345,9 +368,9 @@ namespace NCurses.Core
             NativeNCurses.getmouse(out mouseEvent);
             return mouseEvent;
         }
-        #endregion
+#endregion
 
-        #region keymap
+#region keymap
         /// <summary>
         /// checks if a function key has been pressed
         /// </summary>
@@ -372,7 +395,7 @@ namespace NCurses.Core
                 return true;
             return false;
         }
-        #endregion
+#endregion
 
         /// <summary>
         /// Restores the terminal to the previous state

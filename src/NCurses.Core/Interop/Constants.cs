@@ -1,6 +1,12 @@
 ﻿using System;
 using System.Runtime.InteropServices;
 
+#if NCURSES_VERSION_6
+using chtype = System.UInt32;
+#elif NCURSES_VERSION_5
+using chtype = System.UInt64;
+#endif
+
 //several constants taken from ncurses.h
 namespace NCurses.Core.Interop
 {
@@ -30,22 +36,22 @@ namespace NCurses.Core.Interop
             }
         }
 
-        internal static uint NCURSES_BITS(uint mask, int shift)
+        internal static chtype NCURSES_BITS(chtype mask, int shift)
         {
             return mask << (shift + NCURSES_ATTR_SHIFT);
         }
 
-        internal static uint NCURSES_MOUSE_MASK(int button, uint mask)
+        internal static chtype NCURSES_MOUSE_MASK(int button, chtype mask)
         {
             return mask << (((button) - 1) * 5);
         }
 
-        public static uint COLOR_PAIR(uint number)
+        public static chtype COLOR_PAIR(chtype number)
         {
             return (NCURSES_BITS(number, 0) & Attrs.COLOR);
         }
 
-        public static int PAIR_NUMBER(uint attr)
+        public static int PAIR_NUMBER(chtype attr)
         {
             return (int)((attr & Attrs.COLOR) >> NCURSES_ATTR_SHIFT);
         }
@@ -56,26 +62,49 @@ namespace NCurses.Core.Interop
     /// </summary>
     public static class Attrs
     {
-        public static uint NORMAL = (1U - 1U);
-        public static uint ATTRIBUTES = Constants.NCURSES_BITS(~(1U - 1U), 0);
-        public static uint CHARTEXT = Constants.NCURSES_BITS(1U, 0) - 1U;
-        public static uint COLOR = Constants.NCURSES_BITS(((1U) << 8) - 1U, 0);
-        public static uint STANDOUT = Constants.NCURSES_BITS(1U, 8);
-        public static uint UNDERLINE = Constants.NCURSES_BITS(1U, 9);
-        public static uint REVERSE = Constants.NCURSES_BITS(1U, 10);
-        public static uint BLINK = Constants.NCURSES_BITS(1U, 11);
-        public static uint DIM = Constants.NCURSES_BITS(1U, 12);
-        public static uint BOLD = Constants.NCURSES_BITS(1U, 13);
-        public static uint ALTCHARSET = Constants.NCURSES_BITS(1U, 14);
-        public static uint INVIS = Constants.NCURSES_BITS(1U, 15);
-        public static uint PROTECT = Constants.NCURSES_BITS(1U, 16);
-        public static uint HORIZONTAL = Constants.NCURSES_BITS(1U, 17);
-        public static uint LEFT = Constants.NCURSES_BITS(1U, 18);
-        public static uint LOW = Constants.NCURSES_BITS(1U, 19);
-        public static uint RIGHT = Constants.NCURSES_BITS(1U, 20);
-        public static uint TOP = Constants.NCURSES_BITS(1U, 21);
-        public static uint VERTICAL = Constants.NCURSES_BITS(1U, 22);
-        public static uint ITALIC = Constants.NCURSES_BITS(1U, 23);
+#if NCURSES_VERSION_6
+        public static chtype NORMAL = (1U - 1U);
+        public static chtype ATTRIBUTES = Constants.NCURSES_BITS(~(1U - 1U), 0);
+        public static chtype CHARTEXT = Constants.NCURSES_BITS(1U, 0) - 1U;
+        public static chtype COLOR = Constants.NCURSES_BITS(((1U) << 8) - 1U, 0);
+        public static chtype STANDOUT = Constants.NCURSES_BITS(1U, 8);
+        public static chtype UNDERLINE = Constants.NCURSES_BITS(1U, 9);
+        public static chtype REVERSE = Constants.NCURSES_BITS(1U, 10);
+        public static chtype BLINK = Constants.NCURSES_BITS(1U, 11);
+        public static chtype DIM = Constants.NCURSES_BITS(1U, 12);
+        public static chtype BOLD = Constants.NCURSES_BITS(1U, 13);
+        public static chtype ALTCHARSET = Constants.NCURSES_BITS(1U, 14);
+        public static chtype INVIS = Constants.NCURSES_BITS(1U, 15);
+        public static chtype PROTECT = Constants.NCURSES_BITS(1U, 16);
+        public static chtype HORIZONTAL = Constants.NCURSES_BITS(1U, 17);
+        public static chtype LEFT = Constants.NCURSES_BITS(1U, 18);
+        public static chtype LOW = Constants.NCURSES_BITS(1U, 19);
+        public static chtype RIGHT = Constants.NCURSES_BITS(1U, 20);
+        public static chtype TOP = Constants.NCURSES_BITS(1U, 21);
+        public static chtype VERTICAL = Constants.NCURSES_BITS(1U, 22);
+        public static chtype ITALIC = Constants.NCURSES_BITS(1U, 23);
+#elif NCURSES_VERSION_5
+        public static chtype NORMAL = (1UL - 1UL);
+        public static chtype ATTRIBUTES = Constants.NCURSES_BITS(~(1UL - 1UL), 0);
+        public static chtype CHARTEXT = Constants.NCURSES_BITS(1UL, 0) - 1UL;
+        public static chtype COLOR = Constants.NCURSES_BITS(((1UL) << 8) - 1UL, 0);
+        public static chtype STANDOUT = Constants.NCURSES_BITS(1UL, 8);
+        public static chtype UNDERLINE = Constants.NCURSES_BITS(1UL, 9);
+        public static chtype REVERSE = Constants.NCURSES_BITS(1UL, 10);
+        public static chtype BLINK = Constants.NCURSES_BITS(1UL, 11);
+        public static chtype DIM = Constants.NCURSES_BITS(1UL, 12);
+        public static chtype BOLD = Constants.NCURSES_BITS(1UL, 13);
+        public static chtype ALTCHARSET = Constants.NCURSES_BITS(1UL, 14);
+        public static chtype INVIS = Constants.NCURSES_BITS(1UL, 15);
+        public static chtype PROTECT = Constants.NCURSES_BITS(1UL, 16);
+        public static chtype HORIZONTAL = Constants.NCURSES_BITS(1UL, 17);
+        public static chtype LEFT = Constants.NCURSES_BITS(1UL, 18);
+        public static chtype LOW = Constants.NCURSES_BITS(1UL, 19);
+        public static chtype RIGHT = Constants.NCURSES_BITS(1UL, 20);
+        public static chtype TOP = Constants.NCURSES_BITS(1UL, 21);
+        public static chtype VERTICAL = Constants.NCURSES_BITS(1UL, 22);
+        public static chtype ITALIC = Constants.NCURSES_BITS(1UL, 23);
+#endif
     }
 
     /// <summary>
@@ -581,51 +610,67 @@ namespace NCurses.Core.Interop
     //TODO: verify
     public static class MouseState
     {
-        public static uint BUTTON_RELEASED = 1U;
-        public static uint BUTTON_PRESSED = 2U;
-        public static uint BUTTON_CLICKED = 4U;
-        public static uint DOUBLE_CLICKED = 10U;
-        public static uint TRIPLE_CLICKED = 20U;
-        public static uint RESERVED_EVENT = 40U;
+#if NCURSES_VERSION_6
+        public static chtype BUTTON_RELEASED = 1U;
+        public static chtype BUTTON_PRESSED = 2U;
+        public static chtype BUTTON_CLICKED = 4U;
+        public static chtype DOUBLE_CLICKED = 10U;
+        public static chtype TRIPLE_CLICKED = 20U;
+        public static chtype RESERVED_EVENT = 40U;
+#elif NCURSES_VERSION_5
+        public static chtype BUTTON_RELEASED = 1L;
+        public static chtype BUTTON_PRESSED = 2L;
+        public static chtype BUTTON_CLICKED = 4L;
+        public static chtype DOUBLE_CLICKED = 10L;
+        public static chtype TRIPLE_CLICKED = 20L;
+        public static chtype RESERVED_EVENT = 40L;
+#endif
 
         /* event masks */
-        public static uint BUTTON1_RELEASED = Constants.NCURSES_MOUSE_MASK(1, BUTTON_RELEASED);
-        public static uint BUTTON1_PRESSED = Constants.NCURSES_MOUSE_MASK(1, BUTTON_PRESSED);
-        public static uint BUTTON1_CLICKED = Constants.NCURSES_MOUSE_MASK(1, BUTTON_CLICKED);
-        public static uint BUTTON1_DOUBLE_CLICKED = Constants.NCURSES_MOUSE_MASK(1, DOUBLE_CLICKED);
-        public static uint BUTTON1_TRIPLE_CLICKED = Constants.NCURSES_MOUSE_MASK(1, TRIPLE_CLICKED);
+        public static chtype BUTTON1_RELEASED = Constants.NCURSES_MOUSE_MASK(1, BUTTON_RELEASED);
+        public static chtype BUTTON1_PRESSED = Constants.NCURSES_MOUSE_MASK(1, BUTTON_PRESSED);
+        public static chtype BUTTON1_CLICKED = Constants.NCURSES_MOUSE_MASK(1, BUTTON_CLICKED);
+        public static chtype BUTTON1_DOUBLE_CLICKED = Constants.NCURSES_MOUSE_MASK(1, DOUBLE_CLICKED);
+        public static chtype BUTTON1_TRIPLE_CLICKED = Constants.NCURSES_MOUSE_MASK(1, TRIPLE_CLICKED);
 
-        public static uint BUTTON2_RELEASED = Constants.NCURSES_MOUSE_MASK(2, BUTTON_RELEASED);
-        public static uint BUTTON2_PRESSED = Constants.NCURSES_MOUSE_MASK(2, BUTTON_PRESSED);
-        public static uint BUTTON2_CLICKED = Constants.NCURSES_MOUSE_MASK(2, BUTTON_CLICKED);
-        public static uint BUTTON2_DOUBLE_CLICKED = Constants.NCURSES_MOUSE_MASK(2, DOUBLE_CLICKED);
-        public static uint BUTTON2_TRIPLE_CLICKED = Constants.NCURSES_MOUSE_MASK(2, TRIPLE_CLICKED);
+        public static chtype BUTTON2_RELEASED = Constants.NCURSES_MOUSE_MASK(2, BUTTON_RELEASED);
+        public static chtype BUTTON2_PRESSED = Constants.NCURSES_MOUSE_MASK(2, BUTTON_PRESSED);
+        public static chtype BUTTON2_CLICKED = Constants.NCURSES_MOUSE_MASK(2, BUTTON_CLICKED);
+        public static chtype BUTTON2_DOUBLE_CLICKED = Constants.NCURSES_MOUSE_MASK(2, DOUBLE_CLICKED);
+        public static chtype BUTTON2_TRIPLE_CLICKED = Constants.NCURSES_MOUSE_MASK(2, TRIPLE_CLICKED);
 
-        public static uint BUTTON3_RELEASED = Constants.NCURSES_MOUSE_MASK(3, BUTTON_RELEASED);
-        public static uint BUTTON3_PRESSED = Constants.NCURSES_MOUSE_MASK(3, BUTTON_PRESSED);
-        public static uint BUTTON3_CLICKED = Constants.NCURSES_MOUSE_MASK(3, BUTTON_CLICKED);
-        public static uint BUTTON3_DOUBLE_CLICKED = Constants.NCURSES_MOUSE_MASK(3, DOUBLE_CLICKED);
-        public static uint BUTTON3_TRIPLE_CLICKED = Constants.NCURSES_MOUSE_MASK(3, TRIPLE_CLICKED);
+        public static chtype BUTTON3_RELEASED = Constants.NCURSES_MOUSE_MASK(3, BUTTON_RELEASED);
+        public static chtype BUTTON3_PRESSED = Constants.NCURSES_MOUSE_MASK(3, BUTTON_PRESSED);
+        public static chtype BUTTON3_CLICKED = Constants.NCURSES_MOUSE_MASK(3, BUTTON_CLICKED);
+        public static chtype BUTTON3_DOUBLE_CLICKED = Constants.NCURSES_MOUSE_MASK(3, DOUBLE_CLICKED);
+        public static chtype BUTTON3_TRIPLE_CLICKED = Constants.NCURSES_MOUSE_MASK(3, TRIPLE_CLICKED);
 
-        public static uint BUTTON4_RELEASED = Constants.NCURSES_MOUSE_MASK(4, BUTTON_RELEASED);
-        public static uint BUTTON4_PRESSED = Constants.NCURSES_MOUSE_MASK(4, BUTTON_PRESSED);
-        public static uint BUTTON4_CLICKED = Constants.NCURSES_MOUSE_MASK(4, BUTTON_CLICKED);
-        public static uint BUTTON4_DOUBLE_CLICKED = Constants.NCURSES_MOUSE_MASK(4, DOUBLE_CLICKED);
-        public static uint BUTTON4_TRIPLE_CLICKED = Constants.NCURSES_MOUSE_MASK(4, TRIPLE_CLICKED);
+        public static chtype BUTTON4_RELEASED = Constants.NCURSES_MOUSE_MASK(4, BUTTON_RELEASED);
+        public static chtype BUTTON4_PRESSED = Constants.NCURSES_MOUSE_MASK(4, BUTTON_PRESSED);
+        public static chtype BUTTON4_CLICKED = Constants.NCURSES_MOUSE_MASK(4, BUTTON_CLICKED);
+        public static chtype BUTTON4_DOUBLE_CLICKED = Constants.NCURSES_MOUSE_MASK(4, DOUBLE_CLICKED);
+        public static chtype BUTTON4_TRIPLE_CLICKED = Constants.NCURSES_MOUSE_MASK(4, TRIPLE_CLICKED);
 
         //TODO: everything below could be different on x86
-        public static uint BUTTON5_RELEASED = Constants.NCURSES_MOUSE_MASK(5, BUTTON_RELEASED);
-        public static uint BUTTON5_PRESSED = Constants.NCURSES_MOUSE_MASK(5, BUTTON_PRESSED);
-        public static uint BUTTON5_CLICKED = Constants.NCURSES_MOUSE_MASK(5, BUTTON_CLICKED);
-        public static uint BUTTON5_DOUBLE_CLICKED = Constants.NCURSES_MOUSE_MASK(5, DOUBLE_CLICKED);
-        public static uint BUTTON5_TRIPLE_CLICKED = Constants.NCURSES_MOUSE_MASK(5, TRIPLE_CLICKED);
+        public static chtype BUTTON5_RELEASED = Constants.NCURSES_MOUSE_MASK(5, BUTTON_RELEASED);
+        public static chtype BUTTON5_PRESSED = Constants.NCURSES_MOUSE_MASK(5, BUTTON_PRESSED);
+        public static chtype BUTTON5_CLICKED = Constants.NCURSES_MOUSE_MASK(5, BUTTON_CLICKED);
+        public static chtype BUTTON5_DOUBLE_CLICKED = Constants.NCURSES_MOUSE_MASK(5, DOUBLE_CLICKED);
+        public static chtype BUTTON5_TRIPLE_CLICKED = Constants.NCURSES_MOUSE_MASK(5, TRIPLE_CLICKED);
 
-        public static uint BUTTON_CTRL = Constants.NCURSES_MOUSE_MASK(6, 1U);
-        public static uint BUTTON_SHIFT = Constants.NCURSES_MOUSE_MASK(6, 2U);
-        public static uint BUTTON_ALT = Constants.NCURSES_MOUSE_MASK(6, 4U);
-        public static uint REPORT_MOUSE_POSITION = Constants.NCURSES_MOUSE_MASK(6, 10U);
+#if NCURSES_VERSION_6
+        public static chtype BUTTON_CTRL = Constants.NCURSES_MOUSE_MASK(6, 1U);
+        public static chtype BUTTON_SHIFT = Constants.NCURSES_MOUSE_MASK(6, 2U);
+        public static chtype BUTTON_ALT = Constants.NCURSES_MOUSE_MASK(6, 4U);
+        public static chtype REPORT_MOUSE_POSITION = Constants.NCURSES_MOUSE_MASK(6, 10U);
+#elif NCURSES_VERSION_5
+        public static chtype BUTTON_CTRL = Constants.NCURSES_MOUSE_MASK(6, 1L);
+        public static chtype BUTTON_SHIFT = Constants.NCURSES_MOUSE_MASK(6, 2L);
+        public static chtype BUTTON_ALT = Constants.NCURSES_MOUSE_MASK(6, 4L);
+        public static chtype REPORT_MOUSE_POSITION = Constants.NCURSES_MOUSE_MASK(6, 10L);
+#endif
 
-        public static uint ALL_MOUSE_EVENTS = REPORT_MOUSE_POSITION - 1;
+        public static chtype ALL_MOUSE_EVENTS = REPORT_MOUSE_POSITION - 1;
     }
 
     /// <summary>
@@ -636,142 +681,142 @@ namespace NCurses.Core.Interop
         /// <summary>
         /// upper left corner
         /// </summary>
-        public static uint ULCORNER = NativeNCurses.Acs_Map['l'];     /* NCURSES_ACS('l') */
+        public static chtype ULCORNER = NativeNCurses.Acs_Map['l'];     /* NCURSES_ACS('l') */
         /// <summary>
         /// lower left corner
         /// </summary>
-        public static uint LLCORNER = NativeNCurses.Acs_Map['m'];     /* NCURSES_ACS('m') */
+        public static chtype LLCORNER = NativeNCurses.Acs_Map['m'];     /* NCURSES_ACS('m') */
         /// <summary>
         /// upper right corner
         /// </summary>
-        public static uint URCORNER = NativeNCurses.Acs_Map['k'];     /* NCURSES_ACS('k') */
+        public static chtype URCORNER = NativeNCurses.Acs_Map['k'];     /* NCURSES_ACS('k') */
         /// <summary>
         /// lower right corner
         /// </summary>
-        public static uint LRCORNER = NativeNCurses.Acs_Map['j'];     /* NCURSES_ACS('j') */
+        public static chtype LRCORNER = NativeNCurses.Acs_Map['j'];     /* NCURSES_ACS('j') */
         /// <summary>
         /// tee pointing right
         /// </summary>
-        public static uint LTEE = NativeNCurses.Acs_Map['t'];     /* NCURSES_ACS('t') */
+        public static chtype LTEE = NativeNCurses.Acs_Map['t'];     /* NCURSES_ACS('t') */
         /// <summary>
         /// tee pointing left
         /// </summary>
-        public static uint RTEE = NativeNCurses.Acs_Map['u'];     /* NCURSES_ACS('u') */
+        public static chtype RTEE = NativeNCurses.Acs_Map['u'];     /* NCURSES_ACS('u') */
         /// <summary>
         /// tee pointing up
         /// </summary>
-        public static uint BTEE = NativeNCurses.Acs_Map['v'];     /* NCURSES_ACS('v') */
+        public static chtype BTEE = NativeNCurses.Acs_Map['v'];     /* NCURSES_ACS('v') */
         /// <summary>
         /// tee pointing down
         /// </summary>
-        public static uint TTEE = NativeNCurses.Acs_Map['w'];     /* NCURSES_ACS('w') */
+        public static chtype TTEE = NativeNCurses.Acs_Map['w'];     /* NCURSES_ACS('w') */
         /// <summary>
         /// horizontal line
         /// </summary>
-        public static uint HLINE = NativeNCurses.Acs_Map['q'];    /* NCURSES_ACS('q') */
+        public static chtype HLINE = NativeNCurses.Acs_Map['q'];    /* NCURSES_ACS('q') */
         /// <summary>
         /// vertical line
         /// </summary>
-        public static uint VLINE = NativeNCurses.Acs_Map['x'];    /* NCURSES_ACS('x') */
+        public static chtype VLINE = NativeNCurses.Acs_Map['x'];    /* NCURSES_ACS('x') */
         /// <summary>
         /// large plus or crossover
         /// </summary>
-        public static uint PLUS = NativeNCurses.Acs_Map['n'];     /* NCURSES_ACS('n') */
+        public static chtype PLUS = NativeNCurses.Acs_Map['n'];     /* NCURSES_ACS('n') */
         /// <summary>
         /// scan line 1
         /// </summary>
-        public static uint S1 = NativeNCurses.Acs_Map['o'];       /* NCURSES_ACS('o') */
+        public static chtype S1 = NativeNCurses.Acs_Map['o'];       /* NCURSES_ACS('o') */
         /// <summary>
         /// scan line 9
         /// </summary>
-        public static uint S9 = NativeNCurses.Acs_Map['s'];       /* NCURSES_ACS('s') */
+        public static chtype S9 = NativeNCurses.Acs_Map['s'];       /* NCURSES_ACS('s') */
         /// <summary>
         /// diamond
         /// </summary>
-        public static uint DIAMOND = NativeNCurses.Acs_Map['`'];  /* NCURSES_ACS('`') */
+        public static chtype DIAMOND = NativeNCurses.Acs_Map['`'];  /* NCURSES_ACS('`') */
         /// <summary>
         /// checker board (stipple)
         /// </summary>
-        public static uint CKBOARD = NativeNCurses.Acs_Map['a'];  /* NCURSES_ACS('a') */
+        public static chtype CKBOARD = NativeNCurses.Acs_Map['a'];  /* NCURSES_ACS('a') */
         /// <summary>
         /// degree symbol
         /// </summary>
-        public static uint DEGREE = NativeNCurses.Acs_Map['f'];   /* NCURSES_ACS('f') */
+        public static chtype DEGREE = NativeNCurses.Acs_Map['f'];   /* NCURSES_ACS('f') */
         /// <summary>
         /// plus/minus
         /// </summary>
-        public static uint PLMINUS = NativeNCurses.Acs_Map['g'];  /* NCURSES_ACS('g') */
+        public static chtype PLMINUS = NativeNCurses.Acs_Map['g'];  /* NCURSES_ACS('g') */
         /// <summary>
         /// bullet
         /// </summary>
-        public static uint BULLET = NativeNCurses.Acs_Map['~'];   /* NCURSES_ACS('~') */
+        public static chtype BULLET = NativeNCurses.Acs_Map['~'];   /* NCURSES_ACS('~') */
 
-        #region Teletype 5410v1
+#region Teletype 5410v1
         /// <summary>
         /// arrow pointing left
         /// </summary>
-        public static uint LARROW = NativeNCurses.Acs_Map[','];   /* NCURSES_ACS(',') */
+        public static chtype LARROW = NativeNCurses.Acs_Map[','];   /* NCURSES_ACS(',') */
         /// <summary>
         /// arrow pointing right
         /// </summary>
-        public static uint RARROW = NativeNCurses.Acs_Map['+'];   /* NCURSES_ACS('+') */
+        public static chtype RARROW = NativeNCurses.Acs_Map['+'];   /* NCURSES_ACS('+') */
         /// <summary>
         /// arrow pointing down
         /// </summary>
-        public static uint DARROW = NativeNCurses.Acs_Map['.'];  /* NCURSES_ACS('.')  */
+        public static chtype DARROW = NativeNCurses.Acs_Map['.'];  /* NCURSES_ACS('.')  */
         /// <summary>
         /// arrow pointing up
         /// </summary>
-        public static uint UARROW = NativeNCurses.Acs_Map['-'];   /* NCURSES_ACS('-') */
+        public static chtype UARROW = NativeNCurses.Acs_Map['-'];   /* NCURSES_ACS('-') */
         /// <summary>
         /// board of squares
         /// </summary>
-        public static uint BOARD = NativeNCurses.Acs_Map['h'];    /* NCURSES_ACS('h') */
+        public static chtype BOARD = NativeNCurses.Acs_Map['h'];    /* NCURSES_ACS('h') */
         /// <summary>
         /// lantern symbol
         /// </summary>
-        public static uint LANTERN = NativeNCurses.Acs_Map['i'];  /* NCURSES_ACS('i') */
+        public static chtype LANTERN = NativeNCurses.Acs_Map['i'];  /* NCURSES_ACS('i') */
         /// <summary>
         /// solid square block
         /// </summary>
-        public static uint BLOCK = NativeNCurses.Acs_Map['0'];    /* NCURSES_ACS('0') */
-        #endregion
+        public static chtype BLOCK = NativeNCurses.Acs_Map['0'];    /* NCURSES_ACS('0') */
+#endregion
 
         /*
          * These aren't documented, but a lot of System Vs have them anyway
          * (you can spot pprryyzz{{||}} in a lot of AT&T terminfo strings).
          * The ACS_names may not match AT&T's, our source didn't know them.
          */
-        #region AT&T
+#region AT&T
         /// <summary>
         /// scan line 3
         /// </summary>
-        public static uint S3 = NativeNCurses.Acs_Map['p'];       /* NCURSES_ACS('p') */
+        public static chtype S3 = NativeNCurses.Acs_Map['p'];       /* NCURSES_ACS('p') */
         /// <summary>
         /// scan line 7
         /// </summary>
-        public static uint S7 = NativeNCurses.Acs_Map['r'];       /* NCURSES_ACS('r') */
+        public static chtype S7 = NativeNCurses.Acs_Map['r'];       /* NCURSES_ACS('r') */
         /// <summary>
         /// less/equal
         /// </summary>
-        public static uint LEQUAL = NativeNCurses.Acs_Map['y'];   /* NCURSES_ACS('y') */
+        public static chtype LEQUAL = NativeNCurses.Acs_Map['y'];   /* NCURSES_ACS('y') */
         /// <summary>
         /// greater/equal
         /// </summary>
-        public static uint GEQUAL = NativeNCurses.Acs_Map['z'];   /* NCURSES_ACS('z') */
+        public static chtype GEQUAL = NativeNCurses.Acs_Map['z'];   /* NCURSES_ACS('z') */
         /// <summary>
         /// Pi
         /// </summary>
-        public static uint PI = NativeNCurses.Acs_Map['{'];       /* NCURSES_ACS('{') */
+        public static chtype PI = NativeNCurses.Acs_Map['{'];       /* NCURSES_ACS('{') */
         /// <summary>
         /// not equal
         /// </summary>
-        public static uint NEQUAL = NativeNCurses.Acs_Map['|'];   /* NCURSES_ACS('|') */
+        public static chtype NEQUAL = NativeNCurses.Acs_Map['|'];   /* NCURSES_ACS('|') */
         /// <summary>
         /// UK pound sign
         /// </summary>
-        public static uint STERLING = NativeNCurses.Acs_Map['}'];     /* NCURSES_ACS('}') */
-        #endregion
+        public static chtype STERLING = NativeNCurses.Acs_Map['}'];     /* NCURSES_ACS('}') */
+#endregion
     }
 
     /// <summary>
@@ -852,7 +897,7 @@ namespace NCurses.Core.Interop
         /// </summary>
         public static char BULLET = NativeNCurses.Wacs_Map['~'];   /* NCURSES_WACS('~') */
 
-        #region Teletype 5410v1 symbols
+#region Teletype 5410v1 symbols
         /// <summary>
         /// arrow left
         /// </summary>
@@ -881,9 +926,9 @@ namespace NCurses.Core.Interop
         /// solid square block
         /// </summary>
         public static char BLOCK = NativeNCurses.Wacs_Map['0'];    /* NCURSES_WACS('0') */
-        #endregion
+#endregion
 
-        #region ncurses extensions
+#region ncurses extensions
         /// <summary>
         /// scan line 3
         /// </summary>
@@ -912,9 +957,9 @@ namespace NCurses.Core.Interop
         /// UK pound sign
         /// </summary>
         public static char STERLING = NativeNCurses.Wacs_Map['}'];     /* NCURSES_WACS('}') */
-        #endregion
+#endregion
 
-        #region double lines
+#region double lines
         public static char D_ULCORNER = NativeNCurses.Wacs_Map['C'];  /* NCURSES_WACS('C') */
         public static char D_LLCORNER = NativeNCurses.Wacs_Map['D'];  /* NCURSES_WACS('D') */
         public static char D_URCORNER = NativeNCurses.Wacs_Map['B'];  /* NCURSES_WACS('B') */
@@ -926,9 +971,9 @@ namespace NCurses.Core.Interop
         public static char D_HLINE = NativeNCurses.Wacs_Map['R']; /* NCURSES_WACS('R') */
         public static char D_VLINE = NativeNCurses.Wacs_Map['Y']; /* NCURSES_WACS('Y') */
         public static char D_PLUS = NativeNCurses.Wacs_Map['E'];  /* NCURSES_WACS('E') */
-        #endregion
+#endregion
 
-        #region thick lines
+#region thick lines
         public static char T_ULCORNER = NativeNCurses.Wacs_Map['L'];  /* NCURSES_WACS('L') */
         public static char T_LLCORNER = NativeNCurses.Wacs_Map['M'];  /* NCURSES_WACS('M') */
         public static char T_URCORNER = NativeNCurses.Wacs_Map['K'];  /* NCURSES_WACS('K') */
@@ -940,6 +985,6 @@ namespace NCurses.Core.Interop
         public static char T_HLINE = NativeNCurses.Wacs_Map['Q']; /* NCURSES_WACS('Q') */
         public static char T_VLINE = NativeNCurses.Wacs_Map['X']; /* NCURSES_WACS('X') */
         public static char T_PLUS = NativeNCurses.Wacs_Map['N'];	/* NCURSES_WACS('N') */
-        #endregion
+#endregion
     }
 }

@@ -6,6 +6,16 @@
     <AssemblyName>NCurses.Core</AssemblyName>
     <PackageId>NCurses.Core</PackageId>
   </PropertyGroup>
+  
+  <!--Version 5 uses ulong instead of uint for chtype-->
+  <PropertyGroup Condition="'$(Ncurses_Version)' == '5'">
+    <DefineConstants>$(DefineConstants);NCURSES_VERSION_5</DefineConstants>
+  </PropertyGroup>
+  
+  <!--Debian Stretch uses 5.9 as library suffix for a ncurses v 6-->
+  <PropertyGroup Condition="'$(Ncurses_Version)' == '' OR '$(Ncurses_Version)' == '6'">
+    <DefineConstants>$(DefineConstants);NCURSES_VERSION_6</DefineConstants>
+  </PropertyGroup>
 
   <ItemGroup Condition="'$(RuntimeIdentifier)' == '' OR $([System.String]::Copy('$(RuntimeIdentifier)').ToLower().Contains('win'))">
     <PackageReference Include="runtime.win.NCurses" Version="6.0.2017.0225" />

@@ -2,6 +2,12 @@
 using System.Text;
 using System.Runtime.InteropServices;
 
+#if NCURSES_VERSION_6
+using chtype = System.UInt32;
+#elif NCURSES_VERSION_5
+using chtype = System.UInt64;
+#endif
+
 namespace NCurses.Core.Interop
 {
     /// <summary>
@@ -953,20 +959,20 @@ namespace NCurses.Core.Interop
 
         #region slk_attroff_sp
         /// <summary>
-        /// see <see cref="NativeNCurses.slk_attroff(uint)"/>
+        /// see <see cref="NativeNCurses.slk_attroff(chtype)"/>
         /// <para />native method wrapped with verification.
         /// </summary>
         /// /// <param name="screen">A pointer to a screen</param>
-        public static void slk_attroff(IntPtr screen, uint attrs)
+        public static void slk_attroff(IntPtr screen, chtype attrs)
         {
             NativeNCurses.VerifyNCursesMethod(() => NativeNCurses.NCursesWrapper.slk_attroff_sp(screen, attrs), "slk_attroff_sp");
         }
 
         /// <summary>
-        /// see <see cref="slk_attroff(IntPtr, uint)"/>
+        /// see <see cref="slk_attroff(IntPtr, chtype)"/>
         /// <para />native method wrapped with verification and thread safety.
         /// </summary>
-        public static void slk_attroff_t(IntPtr screen, uint attrs)
+        public static void slk_attroff_t(IntPtr screen, chtype attrs)
         {
             Func<IntPtr, IntPtr, int> callback = (IntPtr w, IntPtr a) => NativeNCurses.NCursesWrapper.slk_attroff_sp(screen, attrs);
             NativeNCurses.use_screen_v(screen, Marshal.GetFunctionPointerForDelegate(new NCURSES_SCREEN_CB(callback)), "slk_attroff_sp");
@@ -975,20 +981,20 @@ namespace NCurses.Core.Interop
 
         #region slk_attron_sp
         /// <summary>
-        /// see <see cref="NativeNCurses.slk_attroff(uint)"/>
+        /// see <see cref="NativeNCurses.slk_attroff(chtype)"/>
         /// <para />native method wrapped with verification.
         /// </summary>
         /// /// <param name="screen">A pointer to a screen</param>
-        public static void slk_attron(IntPtr screen, uint attrs)
+        public static void slk_attron(IntPtr screen, chtype attrs)
         {
             NativeNCurses.VerifyNCursesMethod(() => NativeNCurses.NCursesWrapper.slk_attron_sp(screen, attrs), "slk_attron_sp");
         }
 
         /// <summary>
-        /// see <see cref="slk_attron(IntPtr, uint)"/>
+        /// see <see cref="slk_attron(IntPtr, chtype)"/>
         /// <para />native method wrapped with verification and thread safety.
         /// </summary>
-        public static void slk_attron_t(IntPtr screen, uint attrs)
+        public static void slk_attron_t(IntPtr screen, chtype attrs)
         {
             Func<IntPtr, IntPtr, int> callback = (IntPtr w, IntPtr a) => NativeNCurses.NCursesWrapper.slk_attron_sp(screen, attrs);
             NativeNCurses.use_screen_v(screen, Marshal.GetFunctionPointerForDelegate(new NCURSES_SCREEN_CB(callback)), "slk_attron_sp");
@@ -997,20 +1003,20 @@ namespace NCurses.Core.Interop
 
         #region slk_attrset_sp
         /// <summary>
-        /// see <see cref="slk_attroff(IntPtr, uint)"/>
+        /// see <see cref="slk_attroff(IntPtr, chtype)"/>
         /// <para />native method wrapped with verification.
         /// </summary>
         /// /// <param name="screen">A pointer to a screen</param>
-        public static void slk_attrset(IntPtr screen, uint attrs, short color_pair)
+        public static void slk_attrset(IntPtr screen, chtype attrs, short color_pair)
         {
             NativeNCurses.VerifyNCursesMethod(() => NativeNCurses.NCursesWrapper.slk_attrset_sp(screen, attrs, color_pair, IntPtr.Zero), "slk_attrset_sp");
         }
 
         /// <summary>
-        /// see <see cref="slk_attrset(IntPtr, uint, short)"/>
+        /// see <see cref="slk_attrset(IntPtr, chtype, short)"/>
         /// <para />native method wrapped with verification and thread safety.
         /// </summary>
-        public static void slk_attrset_t(IntPtr screen, uint attrs, short color_pair)
+        public static void slk_attrset_t(IntPtr screen, chtype attrs, short color_pair)
         {
             Func<IntPtr, IntPtr, int> callback = (IntPtr w, IntPtr a) => NativeNCurses.NCursesWrapper.slk_attrset_sp(screen, attrs, color_pair, IntPtr.Zero);
             NativeNCurses.use_screen_v(screen, Marshal.GetFunctionPointerForDelegate(new NCURSES_SCREEN_CB(callback)), "slk_attrset_sp");
@@ -1022,7 +1028,7 @@ namespace NCurses.Core.Interop
         /// see <see cref="NativeNCurses.slk_attr"/>
         /// </summary>
         /// <returns>an attribute</returns>
-        public static uint slk_attr(IntPtr screen)
+        public static chtype slk_attr(IntPtr screen)
         {
             return NativeNCurses.NCursesWrapper.slk_attr_sp(screen);
         }
@@ -1030,20 +1036,20 @@ namespace NCurses.Core.Interop
 
         #region slk_attr_set_sp
         /// <summary>
-        /// see <see cref="NativeNCurses.slk_attr_set(uint, short)"/> (for soft function keys)
+        /// see <see cref="NativeNCurses.slk_attr_set(chtype, short)"/> (for soft function keys)
         /// <para />native method wrapped with verification.
         /// </summary>
         /// <param name="screen">A pointer to a screen</param>
-        public static void slk_attr_set(IntPtr screen, uint attrs, short color_pair)
+        public static void slk_attr_set(IntPtr screen, chtype attrs, short color_pair)
         {
             NativeNCurses.VerifyNCursesMethod(() => NativeNCurses.NCursesWrapper.slk_attr_set_sp(screen, attrs, color_pair, IntPtr.Zero), "slk_attr_set_sp");
         }
 
         /// <summary>
-        /// see <see cref="slk_attr_set(IntPtr, uint, short)"/>
+        /// see <see cref="slk_attr_set(IntPtr, chtype, short)"/>
         /// <para />native method wrapped with verification and thread safety.
         /// </summary>
-        public static void slk_attr_set_t(IntPtr screen, uint attrs, short color_pair)
+        public static void slk_attr_set_t(IntPtr screen, chtype attrs, short color_pair)
         {
             Func<IntPtr, IntPtr, int> callback = (IntPtr w, IntPtr a) => NativeNCurses.NCursesWrapper.slk_attr_set_sp(screen, attrs, color_pair, IntPtr.Zero);
             NativeNCurses.use_screen_v(screen, Marshal.GetFunctionPointerForDelegate(new NCURSES_SCREEN_CB(callback)), "slk_attr_set_sp");
@@ -1264,7 +1270,7 @@ namespace NCurses.Core.Interop
         /// <summary>
         /// see <see cref="NativeNCurses.termattrs"/>
         /// </summary>
-        public static uint termattrs(IntPtr screen)
+        public static chtype termattrs(IntPtr screen)
         {
             return NativeNCurses.NCursesWrapper.termattrs_sp(screen);
         }
@@ -1351,7 +1357,7 @@ namespace NCurses.Core.Interop
         /// <para />native method wrapped with verification.
         /// </summary>
         /// <param name="screen">A pointer to a screen</param>
-        public static void vidattr(IntPtr screen, uint attrs)
+        public static void vidattr(IntPtr screen, chtype attrs)
         {
             NativeNCurses.VerifyNCursesMethod(() => NativeNCurses.NCursesWrapper.vidattr_sp(screen, attrs), "vidattr_sp");
         }
@@ -1360,7 +1366,7 @@ namespace NCurses.Core.Interop
         /// see <see cref="vidattr"/>
         /// <para />native method wrapped with verification and thread safety.
         /// </summary>
-        public static void vidattr_t(IntPtr screen, uint attrs)
+        public static void vidattr_t(IntPtr screen, chtype attrs)
         {
             Func<IntPtr, IntPtr, int> callback = (IntPtr w, IntPtr a) => NativeNCurses.NCursesWrapper.vidattr_sp(screen, attrs);
             NativeNCurses.use_screen_v(screen, Marshal.GetFunctionPointerForDelegate(new NCURSES_SCREEN_CB(callback)), "vidattr_sp");
@@ -1373,7 +1379,7 @@ namespace NCurses.Core.Interop
         /// <para />native method wrapped with verification.
         /// </summary>
         /// <param name="screen">A pointer to a screen</param>
-        public static void vidputs(IntPtr screen, uint attrs, Func<int, int> NCURSES_OUTC)
+        public static void vidputs(IntPtr screen, chtype attrs, Func<int, int> NCURSES_OUTC)
         {
             NativeNCurses.VerifyNCursesMethod(() => NativeNCurses.NCursesWrapper.vidputs_sp(screen, attrs, Marshal.GetFunctionPointerForDelegate(NCURSES_OUTC)), "vidputs_sp");
         }
@@ -1382,7 +1388,7 @@ namespace NCurses.Core.Interop
         /// see <see cref="vidputs"/>
         /// <para />native method wrapped with verification and thread safety.
         /// </summary>
-        public static void vidputs_t(IntPtr screen, uint attrs, Func<int, int> NCURSES_OUTC)
+        public static void vidputs_t(IntPtr screen, chtype attrs, Func<int, int> NCURSES_OUTC)
         {
             Func<IntPtr, IntPtr, int> callback = (IntPtr w, IntPtr a) => NativeNCurses.NCursesWrapper.vidputs_sp(screen, attrs, Marshal.GetFunctionPointerForDelegate(NCURSES_OUTC));
             NativeNCurses.use_screen_v(screen, Marshal.GetFunctionPointerForDelegate(new NCURSES_SCREEN_CB(callback)), "vidputs_sp");
@@ -1687,7 +1693,7 @@ namespace NCurses.Core.Interop
         /// see <see cref="NativeNCurses.term_attrs"/>
         /// </summary>
         /// <param name="screen">A pointer to a screen</param>
-        public static uint term_attrs(IntPtr screen)
+        public static chtype term_attrs(IntPtr screen)
         {
             return NativeNCurses.NCursesWrapper.term_attrs_sp(screen);
         }
@@ -1745,7 +1751,7 @@ namespace NCurses.Core.Interop
         /// <para />native method wrapped with verification.
         /// </summary>
         /// <param name="screen">A pointer to a screen</param>
-        public static void vid_attr(IntPtr screen, uint attrs, short pair)
+        public static void vid_attr(IntPtr screen, chtype attrs, short pair)
         {
             NativeNCurses.VerifyNCursesMethod(() => NativeNCurses.NCursesWrapper.vid_attr_sp(screen, attrs, pair, IntPtr.Zero), "vid_attr_sp");
         }
@@ -1754,7 +1760,7 @@ namespace NCurses.Core.Interop
         /// see <see cref="vid_attr"/>
         /// <para />native method wrapped with verification and thread safety.
         /// </summary>
-        public static void vid_attr_t(IntPtr screen, uint attrs, short pair)
+        public static void vid_attr_t(IntPtr screen, chtype attrs, short pair)
         {
             Func<IntPtr, IntPtr, int> callback = (IntPtr w, IntPtr a) => NativeNCurses.NCursesWrapper.vid_attr_sp(screen, attrs, pair, IntPtr.Zero);
             NativeNCurses.use_screen_v(screen, Marshal.GetFunctionPointerForDelegate(new NCURSES_SCREEN_CB(callback)), "vid_attr_sp");
@@ -1767,7 +1773,7 @@ namespace NCurses.Core.Interop
         /// <para />native method wrapped with verification.
         /// </summary>
         /// <param name="screen">A pointer to a screen</param>
-        public static void vid_puts(IntPtr screen, uint attrs, short pair, Func<int, int> NCURSES_OUTC)
+        public static void vid_puts(IntPtr screen, chtype attrs, short pair, Func<int, int> NCURSES_OUTC)
         {
             NativeNCurses.VerifyNCursesMethod(() => NativeNCurses.NCursesWrapper.vid_puts_sp(screen, attrs, pair, IntPtr.Zero,
                 Marshal.GetFunctionPointerForDelegate(NCURSES_OUTC)), "vid_puts_sp");
@@ -1777,7 +1783,7 @@ namespace NCurses.Core.Interop
         /// see <see cref="vid_puts"/>
         /// <para />native method wrapped with verification and thread safety.
         /// </summary>
-        public static void vid_puts_t(IntPtr screen, uint attrs, short pair, Func<int, int> NCURSES_OUTC)
+        public static void vid_puts_t(IntPtr screen, chtype attrs, short pair, Func<int, int> NCURSES_OUTC)
         {
             Func<IntPtr, IntPtr, int> callback = (IntPtr w, IntPtr a) => NativeNCurses.NCursesWrapper.vid_puts_sp(screen, attrs, pair, IntPtr.Zero,
                 Marshal.GetFunctionPointerForDelegate(NCURSES_OUTC));
@@ -1858,7 +1864,7 @@ namespace NCurses.Core.Interop
         /// mouse event mask.
         /// </summary>
         /// <param name="screen">A pointer to a screen</param>
-        public static uint mousemask(IntPtr screen, uint newmask, ref uint? oldmask)
+        public static chtype mousemask(IntPtr screen, chtype newmask, ref chtype? oldmask)
         {
             return NativeNCurses.NCursesWrapper.mousemask_sp(screen, newmask, ref oldmask);
         }

@@ -2,6 +2,12 @@
 using System.Text;
 using System.Runtime.InteropServices;
 
+#if NCURSES_VERSION_6
+using chtype = System.UInt32;
+#elif NCURSES_VERSION_5
+using chtype = System.UInt64;
+#endif
+
 namespace NCurses.Core.Interop
 {
     /// <summary>
@@ -19,7 +25,7 @@ namespace NCurses.Core.Interop
         /// <para />native method wrapped with verification.
         /// </summary>
         /// <param name="ch">The character you want to add</param>
-        public static void addch(uint ch)
+        public static void addch(chtype ch)
         {
             NativeNCurses.VerifyNCursesMethod(() => NativeNCurses.NCursesWrapper.addch(ch), "addch");
         }
@@ -35,7 +41,7 @@ namespace NCurses.Core.Interop
         /// </summary>
         /// <param name="txt">the string you want to add</param>
         /// <param name="number">number of elements to copy</param>
-        public static void addchnstr(uint[] txt, int number)
+        public static void addchnstr(chtype[] txt, int number)
         {
             int totalSize = 0;
             IntPtr arrayPtr = NativeNCurses.MarshallArray(txt, true, out totalSize);
@@ -59,7 +65,7 @@ namespace NCurses.Core.Interop
         /// <para />native method wrapped with verification.
         /// </summary>
         /// <param name="txt">the string you want to add</param>
-        public static void addchstr(uint[] txt)
+        public static void addchstr(chtype[] txt)
         {
             int totalSize = 0;
             IntPtr arrayPtr = NativeNCurses.MarshallArray(txt, true, out totalSize);
@@ -155,7 +161,7 @@ namespace NCurses.Core.Interop
         /// <para />native method wrapped with verification.
         /// </summary>
         /// <param name="attrs">attribute(s) to enable</param>
-        public static void attr_on(uint attrs)
+        public static void attr_on(chtype attrs)
         {
             NativeNCurses.VerifyNCursesMethod(() => NativeNCurses.NCursesWrapper.attr_on(attrs, IntPtr.Zero), "attr_on");
         }
@@ -167,7 +173,7 @@ namespace NCurses.Core.Interop
         /// <para />native method wrapped with verification.
         /// </summary>
         /// <param name="attrs">attribute(s) to disable</param>
-        public static void attr_off(uint attrs)
+        public static void attr_off(chtype attrs)
         {
             NativeNCurses.VerifyNCursesMethod(() => NativeNCurses.NCursesWrapper.attr_off(attrs, IntPtr.Zero), "attr_off");
         }
@@ -182,7 +188,7 @@ namespace NCurses.Core.Interop
         /// </summary>
         /// <param name="attrs">attribute(s) to enable</param>
         /// <param name="pair">color pair to enable</param>
-        public static void attr_set(uint attrs, short pair)
+        public static void attr_set(chtype attrs, short pair)
         {
             NativeNCurses.VerifyNCursesMethod(() => NativeNCurses.NCursesWrapper.attr_set(attrs, pair, IntPtr.Zero), "attr_set");
         }
@@ -193,9 +199,9 @@ namespace NCurses.Core.Interop
         /// see <see cref="attr_set"/>
         /// <para />native method wrapped with verification.
         /// </summary>
-        /// <param name="attrs">Pointer to an uint to retrieve current attributes</param>
+        /// <param name="attrs">Pointer to an chtype to retrieve current attributes</param>
         /// <param name="pair">Pointer to a short to retrieve current color pair</param>
-        public static void attr_get(ref uint attrs, ref short pair)
+        public static void attr_get(ref chtype attrs, ref short pair)
         {
             IntPtr aPtr = Marshal.AllocHGlobal(Marshal.SizeOf(attrs));
             Marshal.StructureToPtr(attrs, aPtr, true);
@@ -230,7 +236,7 @@ namespace NCurses.Core.Interop
         /// <para />native method wrapped with verification.
         /// </summary>
         /// <param name="bkgd">a character to change the background to</param>
-        public static void bkgd(uint bkgd)
+        public static void bkgd(chtype bkgd)
         {
             NativeNCurses.VerifyNCursesMethod(() => NativeNCurses.NCursesWrapper.bkgd(bkgd), "bkgd");
         }
@@ -250,7 +256,7 @@ namespace NCurses.Core.Interop
         /// line/character operations.
         /// </summary>
         /// <param name="bkgd">a character to change the background to</param>
-        public static void bkgdset(uint bkgd)
+        public static void bkgdset(chtype bkgd)
         {
             NativeNCurses.NCursesWrapper.bkgdset(bkgd);
         }
@@ -270,7 +276,7 @@ namespace NCurses.Core.Interop
         /// <param name="tr">top right-hand corner</param>
         /// <param name="bl">bottom left-hand corner</param>
         /// <param name="br">bottom right-hand corner</param>
-        public static void border(uint ls, uint rs, uint ts, uint bs, uint tl, uint tr, uint bl, uint br)
+        public static void border(chtype ls, chtype rs, chtype ts, chtype bs, chtype tl, chtype tr, chtype bl, chtype br)
         {
             NativeNCurses.VerifyNCursesMethod(() => NativeNCurses.NCursesWrapper.border(ls, rs, ts, bs, tl, tr, bl, br), "border");
         }
@@ -289,7 +295,7 @@ namespace NCurses.Core.Interop
         /// <param name="number">number of characters to apply the new attrs to</param>
         /// <param name="attrs">attribute(s) to enable</param>
         /// <param name="pair">color pair to enable</param>
-        public static void chgat(int number, uint attrs, short pair)
+        public static void chgat(int number, chtype attrs, short pair)
         {
             NativeNCurses.VerifyNCursesMethod(() => NativeNCurses.NCursesWrapper.chgat(number, attrs, pair, IntPtr.Zero), "chgat");
         }
@@ -391,7 +397,7 @@ namespace NCurses.Core.Interop
         /// <para />native method wrapped with verification.
         /// </summary>
         /// <param name="ch">the character you want to add</param>
-        public static void echochar(uint ch)
+        public static void echochar(chtype ch)
         {
             NativeNCurses.VerifyNCursesMethod(() => NativeNCurses.NCursesWrapper.echochar(ch), "echochar");
         }
@@ -468,7 +474,7 @@ namespace NCurses.Core.Interop
         /// </summary>
         /// <param name="ch">the character to use as a horizontal line</param>
         /// <param name="count">maximum length of the line</param>
-        public static void hline(uint ch, int count)
+        public static void hline(chtype ch, int count)
         {
             NativeNCurses.VerifyNCursesMethod(() => NativeNCurses.NCursesWrapper.hline(ch, count), "hline");
         }
@@ -484,7 +490,7 @@ namespace NCurses.Core.Interop
         /// to extract the character or attributes alone.
         /// </summary>
         /// <returns>characther with attributes at current position</returns>
-        public static uint inch()
+        public static chtype inch()
         {
             return NativeNCurses.NCursesWrapper.inch();
         }
@@ -505,7 +511,7 @@ namespace NCurses.Core.Interop
         /// </summary>
         /// <param name="txt">the array to copy the chars into</param>
         /// <param name="count">number of chars/attributes to copy</param>
-        public static void inchnstr(ref uint[] txt, int count)
+        public static void inchnstr(ref chtype[] txt, int count)
         {
             int totalSize = 0;
             IntPtr arrayPtr = NativeNCurses.MarshallArray(txt, true, out totalSize);
@@ -515,7 +521,11 @@ namespace NCurses.Core.Interop
             {
                 NativeNCurses.VerifyNCursesMethod(() => NativeNCurses.NCursesWrapper.inchnstr(arrayPtr, count), "inchnstr");
                 for (int i = 0; i < txt.Length; i++)
-                    txt[i] = (uint)Marshal.ReadInt32(arrayPtr + (i * sizeof(uint)));
+#if NCURSES_VERSION_6
+                    txt[i] = (chtype)Marshal.ReadInt32(arrayPtr + (i * sizeof(chtype)));
+#elif NCURSES_VERSION_5
+                    txt[i] = (chtype)Marshal.ReadInt64(arrayPtr + (i * sizeof(chtype)));
+#endif
             }
             finally
             {
@@ -531,7 +541,7 @@ namespace NCurses.Core.Interop
         /// <para />native method wrapped with verification.
         /// </summary>
         /// <param name="txt">the array to copy the chars into</param>
-        public static void inchstr(ref uint[] txt)
+        public static void inchstr(ref chtype[] txt)
         {
             int totalSize = 0;
             IntPtr arrayPtr = NativeNCurses.MarshallArray(txt, true, out totalSize);
@@ -541,7 +551,11 @@ namespace NCurses.Core.Interop
             {
                 NativeNCurses.VerifyNCursesMethod(() => NativeNCurses.NCursesWrapper.inchstr(arrayPtr), "inchstr");
                 for (int i = 0; i < txt.Length; i++)
-                    txt[i] = (uint)Marshal.ReadInt32(arrayPtr + (i * sizeof(uint)));
+#if NCURSES_VERSION_6
+                    txt[i] = (chtype)Marshal.ReadInt32(arrayPtr + (i * sizeof(chtype)));
+#elif NCURSES_VERSION_5
+                    txt[i] = (chtype)Marshal.ReadInt64(arrayPtr + (i * sizeof(chtype)));
+#endif
             }
             finally
             {
@@ -579,7 +593,7 @@ namespace NCurses.Core.Interop
         /// <para />native method wrapped with verification.
         /// </summary>
         /// <param name="ch">The character to insert</param>
-        public static void insch(uint ch)
+        public static void insch(chtype ch)
         {
             NativeNCurses.VerifyNCursesMethod(() => NativeNCurses.NCursesWrapper.insch(ch), "insch");
         }
@@ -674,13 +688,13 @@ namespace NCurses.Core.Interop
 
         #region mvaddch
         /// <summary>
-        /// move cursor position to line <paramref name="y"/> and column <paramref name="x"/> and see <see cref="addch(uint)"/>
+        /// move cursor position to line <paramref name="y"/> and column <paramref name="x"/> and see <see cref="addch(chtype)"/>
         /// <para />native method wrapped with verification.
         /// </summary>
         /// <param name="y">the line number to move to</param>
         /// <param name="x">the column number to move to</param>
         /// <param name="ch">the character to add</param>
-        public static void mvaddch(int y, int x, uint ch)
+        public static void mvaddch(int y, int x, chtype ch)
         {
             NativeNCurses.VerifyNCursesMethod(() => NativeNCurses.NCursesWrapper.mvaddch(y, x, ch), "mvaddch");
         }
@@ -693,9 +707,9 @@ namespace NCurses.Core.Interop
         /// </summary>
         /// <param name="y">the line number to move to</param>
         /// <param name="x">the column number to move to</param>
-        /// <param name="chstr">pointer to a null terminated array of uint</param>
+        /// <param name="chstr">pointer to a null terminated array of chtype</param>
         /// <param name="n">number of elements to copy</param>
-        public static void mvaddchnstr(int y, int x, uint[] chstr, int n)
+        public static void mvaddchnstr(int y, int x, chtype[] chstr, int n)
         {
             int totalSize = 0;
             IntPtr arrayPtr = NativeNCurses.MarshallArray(chstr, true, out totalSize);
@@ -720,8 +734,8 @@ namespace NCurses.Core.Interop
         /// </summary>
         /// <param name="y">the line number to move to</param>
         /// <param name="x">the column number to move to</param>
-        /// <param name="chstr">pointer to a null terminated array of uint</param>
-        public static void mvaddchstr(int y, int x, uint[] chstr)
+        /// <param name="chstr">pointer to a null terminated array of chtype</param>
+        public static void mvaddchstr(int y, int x, chtype[] chstr)
         {
             int totalSize = 0;
             IntPtr arrayPtr = NativeNCurses.MarshallArray(chstr, true, out totalSize);
@@ -767,12 +781,12 @@ namespace NCurses.Core.Interop
 
         #region mvchgat
         /// <summary>
-        /// move cursor position to line <paramref name="y"/> and column <paramref name="x"/> and see <see cref="chgat(int, uint, short)"/>
+        /// move cursor position to line <paramref name="y"/> and column <paramref name="x"/> and see <see cref="chgat(int, chtype, short)"/>
         /// <para />native method wrapped with verification.
         /// </summary>
         /// <param name="y">the line number to move to</param>
         /// <param name="x">the column number to move to</param>
-        public static void mvchgat(int y, int x, int number, uint attrs, short pair)
+        public static void mvchgat(int y, int x, int number, chtype attrs, short pair)
         {
             NativeNCurses.VerifyNCursesMethod(() => NativeNCurses.NCursesWrapper.mvchgat(y, x, number, attrs, pair), "mvchgat");
         }
@@ -832,12 +846,12 @@ namespace NCurses.Core.Interop
 
         #region mvhline
         /// <summary>
-        /// move cursor position to line <paramref name="y"/> and column <paramref name="x"/> and see <see cref="hline(uint, int)"/>
+        /// move cursor position to line <paramref name="y"/> and column <paramref name="x"/> and see <see cref="hline(chtype, int)"/>
         /// <para />native method wrapped with verification.
         /// </summary>
         /// <param name="y">the line number to move to</param>
         /// <param name="x">the column number to move to</param>
-        public static void mvhline(int y, int x, uint ch, int count)
+        public static void mvhline(int y, int x, chtype ch, int count)
         {
             NativeNCurses.VerifyNCursesMethod(() => NativeNCurses.NCursesWrapper.mvhline(y, x, ch, count), "mvhline");
         }
@@ -850,7 +864,7 @@ namespace NCurses.Core.Interop
         /// <param name="y">the line number to move to</param>
         /// <param name="x">the column number to move to</param>
         /// <returns>Constants.ERR on error or Constants.OK on success</returns>
-        public static uint mvinch(int y, int x)
+        public static chtype mvinch(int y, int x)
         {
             return NativeNCurses.NCursesWrapper.mvinch(y, x);
         }
@@ -897,12 +911,12 @@ namespace NCurses.Core.Interop
 
         #region mvinsch
         /// <summary>
-        /// move cursor position to line <paramref name="y"/> and column <paramref name="x"/> and see <see cref="insch(uint)"/>
+        /// move cursor position to line <paramref name="y"/> and column <paramref name="x"/> and see <see cref="insch(chtype)"/>
         /// <para />native method wrapped with verification.
         /// </summary>
         /// <param name="y">the line number to move to</param>
         /// <param name="x">the column number to move to</param>
-        public static void mvinsch(int y, int x, uint ch)
+        public static void mvinsch(int y, int x, chtype ch)
         {
             NativeNCurses.VerifyNCursesMethod(() => NativeNCurses.NCursesWrapper.mvinsch(y, x, ch), "mvinsch");
         }
@@ -975,12 +989,12 @@ namespace NCurses.Core.Interop
 
         #region mvvline
         /// <summary>
-        /// move cursor position to line <paramref name="y"/> and column <paramref name="x"/> and see <see cref="vline(uint, int)"/>
+        /// move cursor position to line <paramref name="y"/> and column <paramref name="x"/> and see <see cref="vline(chtype, int)"/>
         /// <para />native method wrapped with verification.
         /// </summary>
         /// <param name="y">the line number to move to</param>
         /// <param name="x">the column number to move to</param>
-        public static void mvvline(int y, int x, uint ch, int n)
+        public static void mvvline(int y, int x, chtype ch, int n)
         {
             NativeNCurses.VerifyNCursesMethod(() => NativeNCurses.NCursesWrapper.mvvline(y, x, ch, n), "mvvline");
         }
@@ -1140,7 +1154,7 @@ namespace NCurses.Core.Interop
         /// </summary>
         /// <param name="ch">the character to use as a horizontal line</param>
         /// <param name="count">maximum length of the line</param>
-        public static void vline(uint ch, int n)
+        public static void vline(chtype ch, int n)
         {
             NativeNCurses.VerifyNCursesMethod(() => NativeNCurses.NCursesWrapper.vline(ch, n), "vline");
         }
@@ -1398,15 +1412,15 @@ namespace NCurses.Core.Interop
         public static void get_wch(out char wch)
         {
             //TODO: returns KEY_CODE_YES if a function key gets pressed
-            IntPtr chPtr = Marshal.AllocHGlobal(Marshal.SizeOf<uint>());
-            GC.AddMemoryPressure(Marshal.SizeOf<uint>());
+            IntPtr chPtr = Marshal.AllocHGlobal(Marshal.SizeOf<chtype>());
+            GC.AddMemoryPressure(Marshal.SizeOf<chtype>());
 
             try
             {
                 NativeNCurses.VerifyNCursesMethod(() => NativeNCurses.NCursesWrapper.get_wch(chPtr), "get_wch");
 
-                byte[] arr = new byte[Marshal.SizeOf<uint>()];
-                Marshal.Copy(chPtr, arr, 0, Marshal.SizeOf<uint>());
+                byte[] arr = new byte[Marshal.SizeOf<chtype>()];
+                Marshal.Copy(chPtr, arr, 0, Marshal.SizeOf<chtype>());
 
                 if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
                     wch = Encoding.Unicode.GetChars(arr)[0];
@@ -1416,7 +1430,7 @@ namespace NCurses.Core.Interop
             finally
             {
                 Marshal.FreeHGlobal(chPtr);
-                GC.RemoveMemoryPressure(Marshal.SizeOf<uint>());
+                GC.RemoveMemoryPressure(Marshal.SizeOf<chtype>());
             }
         }
         #endregion
@@ -1437,7 +1451,7 @@ namespace NCurses.Core.Interop
         /// <param name="wstr">a reference to store the returned wide string in</param>
         public static void get_wstr(StringBuilder wstr)
         {
-            int size = Marshal.SizeOf<uint>() * wstr.Capacity;
+            int size = Marshal.SizeOf<chtype>() * wstr.Capacity;
             IntPtr strPtr = Marshal.AllocHGlobal(size);
             GC.AddMemoryPressure(size);
 
@@ -1449,7 +1463,7 @@ namespace NCurses.Core.Interop
             finally
             {
                 Marshal.FreeHGlobal(strPtr);
-                GC.RemoveMemoryPressure(Marshal.SizeOf<uint>());
+                GC.RemoveMemoryPressure(Marshal.SizeOf<chtype>());
             }
         }
         #endregion
@@ -1480,7 +1494,7 @@ namespace NCurses.Core.Interop
         /// <param name="n">the number of wide characters to get</param>
         public static void getn_wstr(StringBuilder wstr, int n)
         {
-            int size = Marshal.SizeOf<uint>() * n;
+            int size = Marshal.SizeOf<chtype>() * n;
             IntPtr strPtr = Marshal.AllocHGlobal(size);
             GC.AddMemoryPressure(size);
 
@@ -1810,15 +1824,15 @@ namespace NCurses.Core.Interop
         /// <param name="x">the column number to move to</param>
         public static void mvget_wch(int y, int x, out char wch)
         {
-            IntPtr chPtr = Marshal.AllocHGlobal(Marshal.SizeOf<uint>());
-            GC.AddMemoryPressure(Marshal.SizeOf<uint>());
+            IntPtr chPtr = Marshal.AllocHGlobal(Marshal.SizeOf<chtype>());
+            GC.AddMemoryPressure(Marshal.SizeOf<chtype>());
 
             try
             {
                 NCursesException.Verify(NativeNCurses.NCursesWrapper.mvget_wch(y, x, chPtr), "mvget_wch");
 
-                byte[] arr = new byte[Marshal.SizeOf<uint>()];
-                Marshal.Copy(chPtr, arr, 0, Marshal.SizeOf<uint>());
+                byte[] arr = new byte[Marshal.SizeOf<chtype>()];
+                Marshal.Copy(chPtr, arr, 0, Marshal.SizeOf<chtype>());
 
                 if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
                     wch = Encoding.Unicode.GetChars(arr)[0];
@@ -1828,7 +1842,7 @@ namespace NCurses.Core.Interop
             finally
             {
                 Marshal.FreeHGlobal(chPtr);
-                GC.RemoveMemoryPressure(Marshal.SizeOf<uint>());
+                GC.RemoveMemoryPressure(Marshal.SizeOf<chtype>());
             }
         }
         #endregion
@@ -1842,7 +1856,7 @@ namespace NCurses.Core.Interop
         /// <param name="x">the column number to move to</param>
         public static void mvget_wstr(int y, int x, StringBuilder wstr)
         {
-            int size = Marshal.SizeOf<uint>() * wstr.Capacity;
+            int size = Marshal.SizeOf<chtype>() * wstr.Capacity;
             IntPtr strPtr = Marshal.AllocHGlobal(size);
             GC.AddMemoryPressure(size);
 
@@ -1854,7 +1868,7 @@ namespace NCurses.Core.Interop
             finally
             {
                 Marshal.FreeHGlobal(strPtr);
-                GC.RemoveMemoryPressure(Marshal.SizeOf<uint>());
+                GC.RemoveMemoryPressure(Marshal.SizeOf<chtype>());
             }
         }
         #endregion
@@ -1868,7 +1882,7 @@ namespace NCurses.Core.Interop
         /// <param name="x">the column number to move to</param>
         public static void mvgetn_wstr(int y, int x, StringBuilder wstr, int n)
         {
-            int size = Marshal.SizeOf<uint>() * n;
+            int size = Marshal.SizeOf<chtype>() * n;
             IntPtr strPtr = Marshal.AllocHGlobal(size);
             GC.AddMemoryPressure(size);
 
