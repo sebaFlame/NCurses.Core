@@ -22,11 +22,11 @@ namespace NCurses.Core.Tests
             //testRipoffLine(ref stdScr);
             //testPad(ref stdScr);
             //testColor(ref stdScr);
-            //testWrite(ref stdScr);
+            testWrite(ref stdScr);
             //testReadFromOutput(ref stdScr);
             //testInsert(ref stdScr);
             //testASC(ref stdScr);
-            testRead(ref stdScr);
+            //testRead(ref stdScr);
             //testWindowMemLeak(ref stdScr);
 
             Console.ReadKey();

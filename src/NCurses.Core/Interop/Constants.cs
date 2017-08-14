@@ -32,7 +32,12 @@ namespace NCurses.Core.Interop
             else
             {
                 SIZEOF_WCHAR_T = 4;
+                //Debian stretch uses libncursesw.so.5.9 for version 6 !!!
+#if NCURSES_VERSION_6
                 DLLNAME = "libncursesw.so.6";
+#elif NCURSES_VERSION_5
+                DLLNAME = "libncursesw.so.5.9";
+#endif
             }
         }
 

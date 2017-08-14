@@ -405,8 +405,10 @@ namespace NCurses.Core
                 NCursesWCHAR wch = new NCursesWCHAR(ch);
 #if NCURSES_VERSION_5
                 wch.attr = attrs;
+                wch.attr |= (chtype)((uint)NativeNCurses.COLOR_PAIR(pair));
 #elif NCURSES_VERSION_6
                 wch.attr = (chtype)attrs;
+                wch.attr |= (chtype)NativeNCurses.COLOR_PAIR(pair);
 #endif
                 wch.ext_color = pair;
                 NativeWindow.wadd_wch(this.WindowPtr, wch);
@@ -549,8 +551,10 @@ namespace NCurses.Core
                 chArray[i] = new NCursesWCHAR(chars[i]);
 #if NCURSES_VERSION_5
                 chArray[i].attr = attrs;
+                chArray[i].attr |= (chtype)((uint)NativeNCurses.COLOR_PAIR(pair));
 #elif NCURSES_VERSION_6
                 chArray[i].attr = (chtype)attrs;
+                chArray[i].attr |= (chtype)NativeNCurses.COLOR_PAIR(pair);
 #endif
                 chArray[i].ext_color = pair;
             }
@@ -663,8 +667,10 @@ namespace NCurses.Core
                 NCursesWCHAR wch = new NCursesWCHAR(ch);
 #if NCURSES_VERSION_5
                 wch.attr = attrs;
+                wch.attr |= (chtype)((uint)NativeNCurses.COLOR_PAIR(pair));
 #elif NCURSES_VERSION_6
                 wch.attr = (chtype)attrs;
+                wch.attr |= (chtype)NativeNCurses.COLOR_PAIR(pair);
 #endif
                 wch.ext_color = pair;
                 NativeWindow.wins_wch(this.WindowPtr, wch);
@@ -757,6 +763,12 @@ namespace NCurses.Core
                 ch = wch.GetChar();
                 attrs = wch.attr;
                 pair = (short)wch.ext_color;
+                if(pair == 0)
+#if NCURSES_VERSION_5
+                    pair = (short)Constants.PAIR_NUMBER(attrs & Attrs.COLOR);
+#elif NCURSES_VERSION_6
+                    pair = (short)Constants.PAIR_NUMBER((chtype)attrs & Attrs.COLOR);
+#endif
             }
             else
             {
