@@ -734,13 +734,13 @@ namespace NCurses.Core.Interop
 
     internal static class NativeLinux
     {
-        [DllImport("libdl.so")]
+        [DllImport("libdl.so.2")]
         internal static extern IntPtr dlopen(string dllToLoad, int flags);
 
-        [DllImport("libdl.so")]
+        [DllImport("libdl.so.2")]
         internal static extern IntPtr dlsym(IntPtr libHandle, string symbol);
 
-        [DllImport("libdl.so")]
+        [DllImport("libdl.so.2")]
         internal static extern int dlclose(IntPtr libHandle);
 
         [DllImport("libc.so.6")]
