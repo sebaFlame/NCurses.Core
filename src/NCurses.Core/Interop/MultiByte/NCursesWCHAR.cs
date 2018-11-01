@@ -150,17 +150,14 @@ namespace NCurses.Core.Interop.MultiByte
             return hashCode;
         }
 
-        /* TODO
-         * use cchar_t (generated overrides)
-         */
         public bool Equals(INCursesWCHAR obj)
         {
             if (obj is NCursesWCHAR<TWide> other)
             {
-                //return this.wchar.Equals(obj.wchar);
-                ReadOnlySpan<byte> left = MemoryMarshal.AsBytes<TWide>(this.WCHAR.Span);
-                ReadOnlySpan<byte> right = MemoryMarshal.AsBytes<TWide>(other.WCHAR.Span);
-                return left.SequenceEqual(right);
+                return this.wchar.Equals(other.wchar);
+                //ReadOnlySpan<byte> left = MemoryMarshal.AsBytes<TWide>(this.WCHAR.Span);
+                //ReadOnlySpan<byte> right = MemoryMarshal.AsBytes<TWide>(other.WCHAR.Span);
+                //return left.SequenceEqual(right);
             }
             return false;
         }

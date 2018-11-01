@@ -106,18 +106,17 @@ namespace NCurses.Core.Interop.Dynamic.cchar_t
             return ret;
         }
 
+        /* TODO
+        * ReadOnlySpan.SequenceEqual returns false on linux (using netcoreapp2.0 or netcoreapp2.1)
+        */
         public static bool operator ==(in cchar_t wchLeft, in cchar_t wchRight)
         {
             unsafe
             {
-                fixed(byte* leftPtr = wchLeft.chars, rightPtr = wchRight.chars)
-                {
-                    ReadOnlySpan<byte> left = new ReadOnlySpan<byte>(leftPtr, charGlobalLength);
-                    ReadOnlySpan<byte> right = new ReadOnlySpan<byte>(rightPtr, charGlobalLength);
-                    return left.SequenceEqual(right)
+                fixed (byte* leftPtr = wchLeft.chars, rightPtr = wchRight.chars)
+                    return NativeNCurses.EqualBytesLongUnrolled(leftPtr, rightPtr, charGlobalLength)
                         && wchLeft.attr == wchRight.attr
                         && wchLeft.ext_color == wchRight.ext_color;
-                }
             }
         }
 
@@ -126,13 +125,9 @@ namespace NCurses.Core.Interop.Dynamic.cchar_t
             unsafe
             {
                 fixed (byte* leftPtr = wchLeft.chars, rightPtr = wchRight.chars)
-                {
-                    ReadOnlySpan<byte> left = new ReadOnlySpan<byte>(leftPtr, charGlobalLength);
-                    ReadOnlySpan<byte> right = new ReadOnlySpan<byte>(rightPtr, charGlobalLength);
-                    return !(left.SequenceEqual(right)
+                    return !(NativeNCurses.EqualBytesLongUnrolled(leftPtr, rightPtr, charGlobalLength)
                         && wchLeft.attr == wchRight.attr
                         && wchLeft.ext_color == wchRight.ext_color);
-                }
             }
         }
 

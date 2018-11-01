@@ -230,6 +230,38 @@ namespace NCurses.Core.Interop
         }
         #endregion
 
+        #region unsafe helper methods
+        //source: https://stackoverflow.com/questions/43289/comparing-two-byte-arrays-in-net
+        internal static unsafe bool EqualBytesLongUnrolled(byte* bytes1, byte* bytes2, int length)
+        {
+            int rem = length % (sizeof(long) * 16);
+            long* b1 = (long*)bytes1;
+            long* b2 = (long*)bytes2;
+            long* e1 = (long*)(bytes1 + length - rem);
+
+            while (b1 < e1)
+            {
+                if (*(b1) != *(b2) || *(b1 + 1) != *(b2 + 1) ||
+                    *(b1 + 2) != *(b2 + 2) || *(b1 + 3) != *(b2 + 3) ||
+                    *(b1 + 4) != *(b2 + 4) || *(b1 + 5) != *(b2 + 5) ||
+                    *(b1 + 6) != *(b2 + 6) || *(b1 + 7) != *(b2 + 7) ||
+                    *(b1 + 8) != *(b2 + 8) || *(b1 + 9) != *(b2 + 9) ||
+                    *(b1 + 10) != *(b2 + 10) || *(b1 + 11) != *(b2 + 11) ||
+                    *(b1 + 12) != *(b2 + 12) || *(b1 + 13) != *(b2 + 13) ||
+                    *(b1 + 14) != *(b2 + 14) || *(b1 + 15) != *(b2 + 15))
+                    return false;
+                b1 += 16;
+                b2 += 16;
+            }
+
+            for (int i = 0; i < rem; i++)
+                if (bytes1[length - 1 - i] != bytes2[length - 1 - i])
+                    return false;
+
+            return true;
+        }
+        #endregion
+
         #region baudrate
         /// <summary>
         /// returns the output speed of the terminal.

@@ -10,7 +10,7 @@
             "request": "launch",
             "preLaunchTask": "build",
             // If you have changed target frameworks, make sure to update the program path.
-            "program": "${workspaceFolder}/test/NCurses.Core.Tests/bin/Debug/netcoreapp2.0/NCurses.Core.Tests.dll",
+            "program": "${workspaceFolder}/test/NCurses.Core.Tests/bin/Debug/netcoreapp2.1/NCurses.Core.Tests.dll",
             "args": [],
             "cwd": "${workspaceFolder}/test/NCurses.Core.Tests",
             // For more information about the 'console' field, see https://github.com/OmniSharp/omnisharp-vscode/blob/master/debugger-launchjson.md#console-terminal-window
@@ -33,7 +33,7 @@
             "request": "launch",
             "preLaunchTask": "build_wsl",
             //add a WSLworkspaceFolderMountPath to Workspace Settings to the mount point for your current workspaceFolder
-            "program": "${config:WSLworkspaceFolderMountPath}/test/NCurses.Core.Tests/bin/Debug/netcoreapp2.0/ubuntu.16.04-x64/publish/NCurses.Core.Tests.dll",
+            "program": "${config:WSLworkspaceFolderMountPath}/test/NCurses.Core.Tests/bin/Debug/netcoreapp2.1/ubuntu.16.04-x64/publish/NCurses.Core.Tests.dll",
             "args": [],
             "cwd": "${config:WSLworkspaceFolderMountPath}/test/NCurses.Core.Tests",
             "stopAtEntry": false,
@@ -55,9 +55,9 @@
             "name": ".NET Core WSL Attach",
             "type": "coreclr",
             "request": "attach",
-            "processId": "6745",
+            "processId": "${command:pickProcess}",
             "sourceFileMap": {
-                //add a WSLworkspaceRootMountPath to Workspace Settings for the WSL path where your source directory resides
+                //add a WSLAttachSourceMap to Workspace Settings for the WSL path where your source directory resides
                 "${config:WSLAttachSourceMap}": "${workspaceFolder}"
             },
             "pipeTransport": {

@@ -461,7 +461,6 @@ namespace NCurses.Core.Interop.Dynamic.cchar_t
             methodIl.Emit(OpCodes.Ret);
             #endregion
 
-            //TODO: fix for linux
             #region public static bool operator ==(in cchar_t wchLeft, in cchar_t wchRight)
             opEquality = typeBuilder.DefineMethod("op_Equality",
                 MethodAttributes.Public | MethodAttributes.HideBySig | MethodAttributes.SpecialName | MethodAttributes.Static,
@@ -473,9 +472,7 @@ namespace NCurses.Core.Interop.Dynamic.cchar_t
             lcl1 = methodIl.DeclareLocal(typeof(byte*));
             lcl2 = methodIl.DeclareLocal(typeof(byte*), true);
             lcl3 = methodIl.DeclareLocal(typeof(byte*), true);
-            lcl4 = methodIl.DeclareLocal(typeof(ReadOnlySpan<>).MakeGenericType(typeof(byte))); //left
-            lcl5 = methodIl.DeclareLocal(typeof(ReadOnlySpan<>).MakeGenericType(typeof(byte))); //right
-            lcl6 = methodIl.DeclareLocal(typeof(bool));
+            lcl4 = methodIl.DeclareLocal(typeof(bool));
 
             lbl1 = methodIl.DefineLabel();
             lbl2 = methodIl.DefineLabel();
@@ -510,24 +507,11 @@ namespace NCurses.Core.Interop.Dynamic.cchar_t
             methodIl.Emit(OpCodes.Conv_U);
             methodIl.Emit(OpCodes.Stloc_1);
             methodIl.Emit(OpCodes.Nop);
-            //ReadOnlySpan<byte> left = new ReadOnlySpan<byte>(leftPtr, charGlobalLength);
-            methodIl.Emit(OpCodes.Ldloca_S, lcl4);
+            //NativeNCurses.EqualBytesLongUnrolled(leftPtr, rightPtr, charGlobalLength)
             methodIl.Emit(OpCodes.Ldloc_0);
-            methodIl.Emit(OpCodes.Ldc_I4_S, (byte)wcharLength);
-            methodIl.Emit(OpCodes.Call, typeof(ReadOnlySpan<>).MakeGenericType(typeof(byte)).GetConstructor(new Type[] { typeof(void*), typeof(int) }));
-            //ReadOnlySpan<byte> right = new ReadOnlySpan<byte>(rightPtr, charGlobalLength);
-            methodIl.Emit(OpCodes.Ldloca_S, lcl5);
             methodIl.Emit(OpCodes.Ldloc_1);
             methodIl.Emit(OpCodes.Ldc_I4_S, (byte)wcharLength);
-            methodIl.Emit(OpCodes.Call, typeof(ReadOnlySpan<>).MakeGenericType(typeof(byte)).GetConstructor(new Type[] { typeof(void*), typeof(int) }));
-            //left.SequenceEqual(right)
-            methodIl.Emit(OpCodes.Ldloca_S, lcl4);
-            methodIl.Emit(OpCodes.Ldloca_S, lcl5);
-            //TODO: this method returns false on linux, runs fine when not generated (cfr <cref="NCursesWCHAR.Equals"/>)
-            methodIl.Emit(OpCodes.Call, typeof(MemoryExtensions).GetMethods()
-                .FirstOrDefault(m => m.Name.Equals("SequenceEqual")
-                    && m.GetParameters().Select(p => p.ParameterType).SequenceEqual(new Type[] { typeof(ReadOnlySpan<>), typeof(ReadOnlySpan<>) }, new SimpleTypeComparer()))
-                .MakeGenericMethod(typeof(byte)));
+            methodIl.Emit(OpCodes.Call, typeof(NativeNCurses).GetMethod("EqualBytesLongUnrolled", BindingFlags.NonPublic | BindingFlags.Static));
             methodIl.Emit(OpCodes.Brfalse_S, lbl1);
             //wchLeft.attr == wchRight.attr
             methodIl.Emit(OpCodes.Ldarg_0);
@@ -546,10 +530,10 @@ namespace NCurses.Core.Interop.Dynamic.cchar_t
             methodIl.MarkLabel(lbl1);
             methodIl.Emit(OpCodes.Ldc_I4_0);
             methodIl.MarkLabel(lbl2);
-            methodIl.Emit(OpCodes.Stloc_S, lcl6);
+            methodIl.Emit(OpCodes.Stloc_S, lcl4);
             methodIl.Emit(OpCodes.Br_S, lbl3);
             methodIl.MarkLabel(lbl3);
-            methodIl.Emit(OpCodes.Ldloc_S, lcl6);
+            methodIl.Emit(OpCodes.Ldloc_S, lcl4);
             methodIl.Emit(OpCodes.Ret);
             #endregion
 

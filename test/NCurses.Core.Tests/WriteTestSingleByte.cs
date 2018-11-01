@@ -64,19 +64,19 @@ namespace NCurses.Core.Tests
            Assert.Equal(testString, resultString);
         }
 
-        //TODO: crashes visual studio debugger in Windows (on NCursesSCHAR.ToString())
-        // [Fact]
-        // public void TestWriteStringColorSingleByte()
-        // {
-        //    string testString = "test";
-        //    this.SingleByteStdScr.Write(testString, Attrs.BOLD | Attrs.ITALIC, 4);
-        //    this.SingleByteStdScr.ExtractString(0, 0, out INCursesCharStr resultNCursesString, testString.Length);
+        //TODO: crashes visual studio debugger in Windows (on NCursesSCHAR.ToString()) using netcoreapp2.0
+        [Fact]
+        public void TestWriteStringColorSingleByte()
+        {
+            string testString = "test";
+            this.SingleByteStdScr.Write(testString, Attrs.BOLD | Attrs.ITALIC, 4);
+            this.SingleByteStdScr.ExtractString(0, 0, out INCursesCharStr resultNCursesString, testString.Length);
 
-        //    Assert.Equal(testString.Length, resultNCursesString.Length);
-        //    string resultString = resultNCursesString.ToString();
-        //    Assert.Equal(testString, resultString);
-        //    Assert.Equal(Attrs.BOLD | Attrs.ITALIC, resultNCursesString[0].Attributes);
-        //    Assert.Equal(4, resultNCursesString[0].Color);
-        // }
+            Assert.Equal(testString.Length, resultNCursesString.Length);
+            string resultString = resultNCursesString.ToString();
+            Assert.Equal(testString, resultString);
+            Assert.Equal(Attrs.BOLD | Attrs.ITALIC, resultNCursesString[0].Attributes);
+            Assert.Equal(4, resultNCursesString[0].Color);
+        }
     }
 }

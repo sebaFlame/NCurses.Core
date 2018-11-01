@@ -214,7 +214,7 @@ namespace NCurses.Core.Interop.MultiByteString
             unsafe
             {
                 TWideStr* strPtr = stackalloc TWideStr[n];
-                read = NCursesException.Verify((int)this.Wrapper.mvinnwstr(y, x, ref MarshalString(strPtr, n, out Span<TWideStr> span), n), "mvinnwstr");
+                read = NCursesException.Verify(this.Wrapper.mvinnwstr(y, x, ref MarshalString(strPtr, n, out Span<TWideStr> span), n), "mvinnwstr");
                 wstr = ReadString(ref span);
             }
         }

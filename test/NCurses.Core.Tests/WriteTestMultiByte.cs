@@ -5,6 +5,7 @@ using Xunit;
 using Xunit.Abstractions;
 using NCurses.Core.Interop;
 using NCurses.Core.Interop.MultiByte;
+using NCurses.Core.Interop.MultiByteString;
 
 namespace NCurses.Core.Tests
 {
@@ -53,6 +54,10 @@ namespace NCurses.Core.Tests
             Assert.Equal(4, resultChar.Color);
         }
 
+        //TODO: crashes on windows using netcoreapp2.0
+        /// <summary>
+        /// <see cref="INCursesWrapperWideStr{TWideStr, TSmallStr}.mvinnwstr(int, int, ref TWideStr, int)"/>
+        /// </summary>
         [Fact]
         public void TestWriteStringMultiByte()
         {
@@ -68,6 +73,10 @@ namespace NCurses.Core.Tests
             Assert.Equal(testString.Length, read);
         }
 
+        //TODO: crashes on windows using netcoreapp2.0
+        /// <summary>
+        /// <see cref="INCursesWrapperWideStr{TWideStr, TSmallStr}.mvinnwstr(int, int, ref TWideStr, int)"/>
+        /// </summary>
         [Fact]
         public void TestMoveWriteStringMultiByte()
         {
