@@ -2,328 +2,409 @@
 using System.Text;
 using System.Collections.Generic;
 using NCurses.Core.Interop;
+using System.Reflection;
+using Xunit;
+using Xunit.Abstractions;
+using System.Diagnostics;
+using System.Threading;
+using System.Runtime.InteropServices;
 
 namespace NCurses.Core.Tests
 {
     public class Program
     {
-        private static uint UnicodeCharToUTF8Uint(char c)
-        {
-            byte[] arrow = Encoding.Unicode.GetBytes(c.ToString());
-            byte[] arrowUint = new byte[4];
-            Array.Copy(arrow, arrowUint, arrow.Length);
-            return BitConverter.ToUInt32(arrowUint, 0);
-        }
+        //private static uint UnicodeCharToUTF8Uint(char c)
+        //{
+        //    byte[] arrow = Encoding.Unicode.GetBytes(c.ToString());
+        //    byte[] arrowUint = new byte[4];
+        //    Array.Copy(arrow, arrowUint, arrow.Length);
+        //    return BitConverter.ToUInt32(arrowUint, 0);
+        //}
 
+        /* TODO
+         * fix xunit tests on Linux (max 1-3 can run in 1 run)
+        */
         public static void Main(string[] args)
         {
-            Window stdScr = null;
+#if DEBUG
+            if (RuntimeInformation.IsOSPlatform(OSPlatform.Linux))
+            {
+                Console.WriteLine($"Please attach a debugger to process {Process.GetCurrentProcess().Id}...");
+                while (!Debugger.IsAttached) { Thread.Sleep(100); }
+            }
+#endif
+
+            Assembly currentAssembly = Assembly.GetExecutingAssembly();
+
+            IRunnerLogger logger = new ConsoleRunnerLogger(true);
+            IMessageSink messageSink = new DefaultRunnerReporterWithTypesMessageHandler(logger);
+
+            XunitFrontController frontController = new XunitFrontController
+            (
+                AppDomainSupport.Denied, 
+                currentAssembly.GetLocalCodeBase(),
+                sourceInformationProvider: new NullSourceInformationProvider(),
+                diagnosticMessageSink: messageSink
+            );
+
+            ITestFrameworkDiscoveryOptions discoveryOptions = TestFrameworkOptions.ForDiscovery();
+            discoveryOptions.SetMethodDisplay(TestMethodDisplay.ClassAndMethod);
+
+            ITestFrameworkExecutionOptions executionOptions = TestFrameworkOptions.ForExecution();
+            executionOptions.SetDisableParallelization(true);
+            executionOptions.SetMaxParallelThreads(1);
+            executionOptions.SetDiagnosticMessages(true);
+
+            frontController.RunAll(messageSink, discoveryOptions, executionOptions);
+
+            Console.Write("Press any key to exit...");
+            Console.ReadKey();
+
+            //IWindow stdScr = null;
 
             //testRipoffLine(ref stdScr);
             //testPad(ref stdScr);
             //testColor(ref stdScr);
-            testWrite(ref stdScr);
+            //testWrite(ref stdScr);
             //testReadFromOutput(ref stdScr);
             //testInsert(ref stdScr);
             //testASC(ref stdScr);
             //testRead(ref stdScr);
             //testWindowMemLeak(ref stdScr);
 
-            Console.ReadKey();
+            //stdScr = NCurses.Start();
 
-            NCurses.End();
+            //NCurses.CBreak = true;
+            //NCurses.Echo = false;
+
+            //stdScr.KeyPad = true;
+            //stdScr.Meta = true;
+
+            //INCursesChar acs = Acs.ULCORNER;
+            //stdScr.Write(acs);
+
+            //stdScr.Write('\n');
+            //char testChar1 = '\u263A';
+            //stdScr.Write(testChar1);
+            //char resultChar1 = stdScr.ExtractChar();
+            //stdScr.ExtractChar(1, 0, out INCursesChar resultNcursesChar1);
+            //char resultChar2 = resultNcursesChar1.Char;
+            //stdScr.MoveCursor(1, 1);
+
+            //stdScr.Write('\n');
+            //string testString1 = "TestTestTest";
+            //stdScr.Write(testString1);
+            //string resultString1 = stdScr.ExtractString(1, 0, testString1.Length);
+            //stdScr.ExtractString(2, 0, out INCursesCharStr resultNcursesString1, testString1.Length);
+            //string resultString2 = resultNcursesString1.ToString();
+            //stdScr.MoveCursor(2, testString1.Length);
+
+            //stdScr.Write('\n');
+            //string testString2 = new string(new char[] { '\u0490', '\u0491', '\u0492', '\u0493', '\u0494', '\u0495', '\u0496', '\u0497', '\u0498', '\u0499'
+            //    , '\u049A', '\u049B', '\u049C', '\u049D', '\u049E', '\u049F' });
+            //stdScr.Write(testString2);
+            //string resultString3 = stdScr.ExtractString(2, 0, testString2.Length);
+            //stdScr.ExtractString(3, 0, out INCursesCharStr resultNcursesString2, testString2.Length);
+            //string resultString4 = resultNcursesString2.ToString();
+            //stdScr.MoveCursor(3, testString2.Length);
+
+            //stdScr.Refresh();
+
+            //stdScr.ReadKey(out char ch, out Key key);
+
+            //NCurses.End();
         }
 
-        //TODO: doesn't run on windows
-        private static void testRipoffLine(ref Window stdScr)
-        {
-            Window input = null;
-            Action<Window, int> assignInput = (Window win, int cols) => input = win;
-            NCurses.RipOffLine(-1, assignInput);
+        ////TODO: doesn't run on windows
+        //private static void testRipoffLine(ref Window stdScr)
+        //{
+        //    Window input = null;
+        //    Action<Window, int> assignInput = (Window win, int cols) => input = win;
+        //    NCurses.RipOffLine(-1, assignInput);
 
-            stdScr = NCurses.Start();
-        }
+        //    stdScr = NCurses.Start();
+        //}
 
-        private static void testPad(ref Window stdScr)
-        {
-            Pad newPad = new Pad(200, 200);
-            newPad.Scroll = true;
-            newPad.KeyPad = true;
+        //private static void testPad(ref Window stdScr)
+        //{
+        //    Pad newPad = new Pad(200, 200);
+        //    newPad.Scroll = true;
+        //    newPad.KeyPad = true;
 
-            for (int i = 0; i < 200; i++)
-                newPad.WriteLine("{0}Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.", i.ToString().PadLeft(3, ' '));
+        //    for (int i = 0; i < 200; i++)
+        //        newPad.WriteLine("{0}Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.", i.ToString().PadLeft(3, ' '));
 
-            NCurses.Resize(50, 120);
-            int currentLine = 50;
-            newPad.NoOutRefresh(currentLine, 0, 0, 0, 49, 119);
-            NCurses.Update();
+        //    NCurses.Resize(50, 120);
+        //    int currentLine = 50;
+        //    newPad.NoOutRefresh(currentLine, 0, 0, 0, 49, 119);
+        //    NCurses.Update();
 
-            int c;
-            while ((c = newPad.ReadKey()) != Constants.ERR)
-            {
-                if (c == (int)Key.PPAGE) // page up
-                {
-                    if ((currentLine -= 50) < 0)
-                        currentLine = 0;
-                }
-                else if (c == (int)Key.NPAGE)
-                {
-                    if ((currentLine += 50) > (newPad.MaxLine - 50))
-                        currentLine = newPad.MaxLine - 50;
-                }
-                else if (c == 'q')
-                    break;
+        //    int c;
+        //    while ((c = newPad.ReadKey()) != Constants.ERR)
+        //    {
+        //        if (c == (int)Key.PPAGE) // page up
+        //        {
+        //            if ((currentLine -= 50) < 0)
+        //                currentLine = 0;
+        //        }
+        //        else if (c == (int)Key.NPAGE)
+        //        {
+        //            if ((currentLine += 50) > (newPad.MaxLine - 50))
+        //                currentLine = newPad.MaxLine - 50;
+        //        }
+        //        else if (c == 'q')
+        //            break;
 
-                newPad.NoOutRefresh(currentLine, 0, 0, 0, 49, 119);
-                NCurses.Update();
-            }
+        //        newPad.NoOutRefresh(currentLine, 0, 0, 0, 49, 119);
+        //        NCurses.Update();
+        //    }
 
-            NCurses.Resize(50, 100);
-            newPad.WriteLine(NCurses.stdscr.MaxColumn.ToString());
-            newPad.NoOutRefresh(currentLine = 150, 0, 0, 0, 49, 99);
-            NCurses.Update();
-        }
+        //    NCurses.Resize(50, 100);
+        //    newPad.WriteLine(NCurses.stdscr.MaxColumn.ToString());
+        //    newPad.NoOutRefresh(currentLine = 150, 0, 0, 0, 49, 99);
+        //    NCurses.Update();
+        //}
 
-        private static void testColor(ref Window stdScr)
-        {
-            stdScr = NCurses.Start();
+        //private static void testColor(ref Window stdScr)
+        //{
+        //    stdScr = NCurses.Start();
 
-            if (NCurses.HasColor)
-            {
-                NCurses.StartColor();
-                NCurses.InitDefaultPairs();
-            }
+        //    if (NCurses.HasColor)
+        //    {
+        //        NCurses.StartColor();
+        //        NCurses.InitDefaultPairs();
+        //    }
 
-            for (int i = 0; i < NCurses.ColorPairs; i++)
-            {
-                stdScr.Color = (short)i;
-                stdScr.Write(i.ToString().PadLeft(3));
-            }
+        //    for (int i = 0; i < NCurses.ColorPairs; i++)
+        //    {
+        //        stdScr.Color = (short)i;
+        //        stdScr.Write(i.ToString().PadLeft(3));
+        //    }
 
-            stdScr.Refresh();
-        }
+        //    stdScr.Refresh();
+        //}
 
-        private static void testWrite(ref Window stdScr)
-        {
-            stdScr = NCurses.Start();
+        //private static void testWrite(ref Window stdScr)
+        //{
+        //    //stdScr = NCurses.Start();
 
-            //supports more unicode characters
-            NCurses.SetFont(WindowsConsoleFont.CONSOLAS);
-            NCurses.Resize(50, 120);
+        //    ////supports more unicode characters
+        //    //NCurses.SetFont(WindowsConsoleFont.CONSOLAS);
+        //    //NCurses.Resize(50, 120);
 
-            NCurses.Echo = false;
+        //    //NCurses.Echo = false;
 
-            ////test add ASCII char with attributes
-            ulong c = 'a';
-            c |= Attrs.BOLD;
-            stdScr.Write(c);
-            stdScr.Refresh();
+        //    //////test add ASCII char with attributes
+        //    //ulong c = 'a';
+        //    //c |= Attrs.BOLD;
+        //    //stdScr.Write(c);
+        //    //stdScr.Refresh();
 
-            //test add unicode char
-            stdScr.Write('\u263A');
-            stdScr.Refresh();
+        //    ////test add unicode char
+        //    //stdScr.Write('\u263A');
+        //    //stdScr.Refresh();
 
-            if (NCurses.HasColor)
-            {
-                NCurses.StartColor();
-                NCurses.InitDefaultPairs();
-            }
+        //    //if (NCurses.HasColor)
+        //    //{
+        //    //    NCurses.StartColor();
+        //    //    NCurses.InitDefaultPairs();
+        //    //}
 
-            ////test get correct "string" from cchar_t
-            short colorPair;
-            ulong attrs;
-            NCursesWCHAR wch = new NCursesWCHAR('\u263A');
-            wch.attr = Attrs.BOLD;
-            wch.ext_color = 4;
-            string wStr = NCurses.GetStringFromWideChar(wch, out attrs, out colorPair);
+        //    //////test get correct "string" from cchar_t
+        //    //short colorPair;
+        //    //ulong attrs;
+        //    //NCursesWCHAR wch = new NCursesWCHAR('\u263A');
+        //    //wch.attr = Attrs.BOLD;
+        //    //wch.ext_color = 4;
+        //    //string wStr = NCurses.GetStringFromWideChar(wch, out attrs, out colorPair);
 
-            //test get correct cchar_t from string
-            string str = '\u263A'.ToString();
-            NCursesWCHAR wch1 = NCurses.GetWideCharFromString(str, Attrs.BOLD, 4);
+        //    ////test get correct cchar_t from string
+        //    //string str = '\u263A'.ToString();
+        //    //NCursesWCHAR wch1 = NCurses.GetWideCharFromString(str, Attrs.BOLD, 4);
 
-            //test add ASCII char with attributes and color
-            c = 'b';
-            c |= Attrs.BOLD;
-            c |= NCurses.ColorPair(3);
-            stdScr.Write(c);
-            stdScr.Refresh();
+        //    ////test add ASCII char with attributes and color
+        //    //c = 'b';
+        //    //c |= Attrs.BOLD;
+        //    //c |= NCurses.ColorPair(3);
+        //    //stdScr.Write(c);
+        //    //stdScr.Refresh();
 
-            //test add unicode char with attributes and color
-            stdScr.Write('\u263A', Attrs.BOLD, 4);
-            stdScr.Refresh();
+        //    ////test add unicode char with attributes and color
+        //    //stdScr.Write('\u263A', Attrs.BOLD, 4);
+        //    //stdScr.Refresh();
 
-            //test add unicode string
-            stdScr.Write("bleh\u263A");
-            stdScr.Refresh();
+        //    ////test add unicode string
+        //    //stdScr.Write("bleh\u263A");
+        //    //stdScr.Refresh();
 
-            //test add ascii character array
-            ulong[] chars1 = new ulong[] { 'a', 'b', 'c', 'd', 'e', 'f', 'g', 'h', 'i', 'j', 'k', 'l', 'm', 'n', 'o', 'p' };
-            stdScr.Write(chars1, Attrs.BOLD, 4);
-            stdScr.Refresh();
+        //    ////test add ascii character array
+        //    //ulong[] chars1 = new ulong[] { 'a', 'b', 'c', 'd', 'e', 'f', 'g', 'h', 'i', 'j', 'k', 'l', 'm', 'n', 'o', 'p' };
+        //    //stdScr.Write(chars1, Attrs.BOLD, 4);
+        //    //stdScr.Refresh();
 
-            //test add unicode character array
-            char[] chars = new char[] { '\u0490', '\u0491', '\u0492', '\u0493', '\u0494', '\u0495', '\u0496', '\u0497', '\u0498', '\u0499'
-                , '\u049A', '\u049B', '\u049C', '\u049D', '\u049E', '\u049F' };
-            stdScr.Write(chars, Attrs.BOLD, 4);
-            stdScr.Refresh();
-        }
+        //    ////test add unicode character array
+        //    //char[] chars = new char[] { '\u0490', '\u0491', '\u0492', '\u0493', '\u0494', '\u0495', '\u0496', '\u0497', '\u0498', '\u0499'
+        //    //    , '\u049A', '\u049B', '\u049C', '\u049D', '\u049E', '\u049F' };
+        //    //stdScr.Write(chars, Attrs.BOLD, 4);
+        //    //stdScr.Refresh();
+        //}
 
-        private static void testReadFromOutput(ref Window stdScr)
-        {
-            stdScr = NCurses.Start();
+        //private static void testReadFromOutput(ref Window stdScr)
+        //{
+        //    stdScr = NCurses.Start();
 
-            //supports more unicode characters
-            NCurses.SetFont(WindowsConsoleFont.CONSOLAS);
-            NCurses.Resize(50, 120);
+        //    //supports more unicode characters
+        //    NCurses.SetFont(WindowsConsoleFont.CONSOLAS);
+        //    NCurses.Resize(50, 120);
 
-            //test add ascii character array
-            ulong[] chars1 = new ulong[] { 'a', 'b', 'c', 'd', 'e', 'f', 'g', 'h', 'i', 'j', 'k', 'l', 'm', 'n', 'o', 'p' };
-            stdScr.Write(chars1, Attrs.BOLD, 4);
+        //    //test add ascii character array
+        //    ulong[] chars1 = new ulong[] { 'a', 'b', 'c', 'd', 'e', 'f', 'g', 'h', 'i', 'j', 'k', 'l', 'm', 'n', 'o', 'p' };
+        //    stdScr.Write(chars1, Attrs.BOLD, 4);
 
-            //ASCII char test
-            char ch = stdScr.GetChar();
-            ulong attrs;
-            short pair;
-            ch = stdScr.GetChar(out attrs, out pair);
-            string str = stdScr.GetString();
+        //    //ASCII char test
+        //    char ch = stdScr.GetChar();
+        //    ulong attrs;
+        //    short pair;
+        //    ch = stdScr.GetChar(out attrs, out pair);
+        //    string str = stdScr.GetString();
 
-            //test add unicode character array
-            char[] chars = new char[] { '\u0490', '\u0491', '\u0492', '\u0493', '\u0494', '\u0495', '\u0496', '\u0497', '\u0498', '\u0499'
-                , '\u049A', '\u049B', '\u049C', '\u049D', '\u049E', '\u049F' };
-            stdScr.Write(chars, Attrs.BOLD, 4);
+        //    //test add unicode character array
+        //    char[] chars = new char[] { '\u0490', '\u0491', '\u0492', '\u0493', '\u0494', '\u0495', '\u0496', '\u0497', '\u0498', '\u0499'
+        //        , '\u049A', '\u049B', '\u049C', '\u049D', '\u049E', '\u049F' };
+        //    stdScr.Write(chars, Attrs.BOLD, 4);
 
-            //unicode char test
-            ch = stdScr.GetChar();
-            str = stdScr.GetString();
-        }
+        //    //unicode char test
+        //    ch = stdScr.GetChar();
+        //    str = stdScr.GetString();
+        //}
 
-        private static void testInsert(ref Window stdScr)
-        {
-            stdScr = NCurses.Start();
+        //private static void testInsert(ref Window stdScr)
+        //{
+        //    stdScr = NCurses.Start();
 
-            //supports more unicode characters
-            NCurses.SetFont(WindowsConsoleFont.CONSOLAS);
-            NCurses.Resize(50, 120);
+        //    //supports more unicode characters
+        //    NCurses.SetFont(WindowsConsoleFont.CONSOLAS);
+        //    NCurses.Resize(50, 120);
 
-            stdScr.Write("Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.");
-            stdScr.Refresh();
+        //    stdScr.Write("Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.");
+        //    stdScr.Refresh();
 
-            stdScr.MoveCursor(0, 0);
-            //test unicode char insert
-            stdScr.Insert('\u263A');
-            //test ASCII char insert
-            stdScr.Insert('b');
-            stdScr.Refresh();
+        //    stdScr.MoveCursor(0, 0);
+        //    //test unicode char insert
+        //    stdScr.Insert('\u263A');
+        //    //test ASCII char insert
+        //    stdScr.Insert('b');
+        //    stdScr.Refresh();
 
-            if (NCurses.HasColor)
-            {
-                NCurses.StartColor();
-                NCurses.InitDefaultPairs();
-            }
+        //    if (NCurses.HasColor)
+        //    {
+        //        NCurses.StartColor();
+        //        NCurses.InitDefaultPairs();
+        //    }
 
-            stdScr.MoveCursor(0, 0);
-            //test unicode char insert
-            stdScr.Insert('\u263A', Attrs.BOLD, 4);
-            //test ASCII char insert
-            stdScr.Insert('b', Attrs.BOLD, 4);
-            stdScr.Refresh();
+        //    stdScr.MoveCursor(0, 0);
+        //    //test unicode char insert
+        //    stdScr.Insert('\u263A', Attrs.BOLD, 4);
+        //    //test ASCII char insert
+        //    stdScr.Insert('b', Attrs.BOLD, 4);
+        //    stdScr.Refresh();
 
-            char[] chars = new char[] { '\u0490', '\u0491', '\u0492', '\u0493', '\u0494', '\u0495', '\u0496', '\u0497', '\u0498', '\u0499'
-                , '\u049A', '\u049B', '\u049C', '\u049D', '\u049E', '\u049F' };
-            char[] chars1 = new char[] { 'a', 'b', 'c', 'd', 'e', 'f', 'g', 'h', 'i', 'j', 'k', 'l', 'm', 'n', 'o', 'p' };
+        //    char[] chars = new char[] { '\u0490', '\u0491', '\u0492', '\u0493', '\u0494', '\u0495', '\u0496', '\u0497', '\u0498', '\u0499'
+        //        , '\u049A', '\u049B', '\u049C', '\u049D', '\u049E', '\u049F' };
+        //    char[] chars1 = new char[] { 'a', 'b', 'c', 'd', 'e', 'f', 'g', 'h', 'i', 'j', 'k', 'l', 'm', 'n', 'o', 'p' };
 
-            //test unicode string insert
-            stdScr.Insert(new string(chars));
-            //test ASCII string insert
-            stdScr.Insert(new string(chars1));
-            stdScr.Refresh();
+        //    //test unicode string insert
+        //    stdScr.Insert(new string(chars));
+        //    //test ASCII string insert
+        //    stdScr.Insert(new string(chars1));
+        //    stdScr.Refresh();
 
-            stdScr.Color = 4;
-            stdScr.AttrOn(Attrs.BOLD);
-            stdScr.Insert("IS THIS COLORED?"); //yes
-            stdScr.Refresh();
-        }
+        //    stdScr.Color = 4;
+        //    stdScr.AttrOn(Attrs.BOLD);
+        //    stdScr.Insert("IS THIS COLORED?"); //yes
+        //    stdScr.Refresh();
+        //}
 
-        private static void testASC(ref Window stdScr)
-        {
-            stdScr = NCurses.Start();
+        //private static void testASC(ref Window stdScr)
+        //{
+        //    stdScr = NCurses.Start();
 
-            //supports more unicode characters
-            NCurses.SetFont(WindowsConsoleFont.LUCIDA);
-            NCurses.Resize(50, 120);
+        //    //supports more unicode characters
+        //    NCurses.SetFont(WindowsConsoleFont.LUCIDA);
+        //    NCurses.Resize(50, 120);
 
-            //regular supported ACS chars
-            stdScr.Write("Regular ACS: ");
-            stdScr.Write(Acs.ULCORNER);
+        //    //regular supported ACS chars
+        //    stdScr.Write("Regular ACS: ");
+        //    stdScr.Write(Acs.ULCORNER);
 
-            //wide ACS chars
-            stdScr.Write("\nWide ACS: ");
-            stdScr.Write(Wacs.D_ULCORNER);
-            stdScr.Write(Wacs.ULCORNER);
+        //    //wide ACS chars
+        //    stdScr.Write("\nWide ACS: ");
+        //    stdScr.Write(Wacs.D_ULCORNER);
+        //    stdScr.Write(Wacs.ULCORNER);
 
-            stdScr.Refresh();
-        }
+        //    stdScr.Refresh();
+        //}
 
-        //keypad and keyname as ansi string == actual key names (except backspace/enter)
-        private static void testRead(ref Window stdScr)
-        {
-            stdScr = NCurses.Start();
-            NCurses.Echo = true;
-            //Managed.NCurses.CBreak = true;
-            stdScr.KeyPad = true;
-            //Managed.NCurses.Meta = true;
-            //stdScr.UseHwInsDelLine = true;
-            //Managed.NCurses.FlushOnInterrupt = false;
-            //stdScr.Blocking = true;
-            //stdScr.NoTimeout = true;
-            //Managed.NCurses.Raw = true;
+        ////keypad and keyname as ansi string == actual key names (except backspace/enter)
+        //private static void testRead(ref Window stdScr)
+        //{
+        //    //stdScr = NCurses.Start();
+        //    //NCurses.Echo = true;
+        //    ////Managed.NCurses.CBreak = true;
+        //    //stdScr.KeyPad = true;
+        //    ////Managed.NCurses.Meta = true;
+        //    ////stdScr.UseHwInsDelLine = true;
+        //    ////Managed.NCurses.FlushOnInterrupt = false;
+        //    ////stdScr.Blocking = true;
+        //    ////stdScr.NoTimeout = true;
+        //    ////Managed.NCurses.Raw = true;
 
-            int ch;
-            Key key;
-            MEVENT mouseEvent = default(MEVENT);
-            ulong oldMask;
-            ulong newMask = NCurses.EnableMouseMask(MouseState.BUTTON1_CLICKED |
-                MouseState.BUTTON1_DOUBLE_CLICKED | MouseState.BUTTON1_TRIPLE_CLICKED, out oldMask);
+        //    //int ch;
+        //    //Key key;
+        //    //MEVENT mouseEvent = default(MEVENT);
+        //    //ulong oldMask;
+        //    //ulong newMask = NCurses.EnableMouseMask(MouseState.BUTTON1_CLICKED |
+        //    //    MouseState.BUTTON1_DOUBLE_CLICKED | MouseState.BUTTON1_TRIPLE_CLICKED, out oldMask);
 
-            while ((ch = stdScr.ReadKey()) != 'q')
-            {
-                if (NCurses.GetKey(ch, out key) && key == Key.MOUSE)
-                    mouseEvent = NCurses.GetMouseEvent();
-            }
-        }
+        //    //while ((ch = stdScr.ReadKey()) != 'q')
+        //    //{
+        //    //    if (NCurses.GetKey(ch, out key) && key == Key.MOUSE)
+        //    //        mouseEvent = NCurses.GetMouseEvent();
+        //    //}
+        //}
 
-        //upto 420MB, back down to 24MB -> FINE
-        private static void testWindowMemLeak(ref Window stdScr)
-        {
-            List<Window> lstWindow = new List<Window>();
-            Window win;
+        ////upto 420MB, back down to 24MB -> FINE
+        //private static void testWindowMemLeak(ref Window stdScr)
+        //{
+        //    List<Window> lstWindow = new List<Window>();
+        //    Window win;
 
-            if (NCurses.HasColor)
-            {
-                NCurses.StartColor();
-                NCurses.InitDefaultPairs();
-            }
+        //    if (NCurses.HasColor)
+        //    {
+        //        NCurses.StartColor();
+        //        NCurses.InitDefaultPairs();
+        //    }
 
-            for (int i = 0; i < 100; i++)
-            {
-                lstWindow.Add(win = new Window());
-                win.BackGround = 'g' | Attrs.BOLD | NCurses.ColorPair(3);
-                win.NoOutRefresh();
-            }
+        //    for (int i = 0; i < 100; i++)
+        //    {
+        //        lstWindow.Add(win = new Window());
+        //        win.BackGround = 'g' | Attrs.BOLD | NCurses.ColorPair(3);
+        //        win.NoOutRefresh();
+        //    }
 
-            NCurses.Update();
-            stdScr = NCurses.stdscr;
+        //    NCurses.Update();
+        //    stdScr = NCurses.stdscr;
 
-            stdScr.ReadKey();
+        //    stdScr.ReadKey();
 
-            foreach(Window w in lstWindow)
-                w.Dispose();
+        //    foreach(Window w in lstWindow)
+        //        w.Dispose();
 
-            lstWindow.Clear();
-            NCurses.Update();
+        //    lstWindow.Clear();
+        //    NCurses.Update();
 
-            stdScr.ReadKey();
-        }
+        //    stdScr.ReadKey();
+        //}
 
         //    public static void TestMain(string[] args)
         //    {

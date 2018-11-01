@@ -1,11 +1,6 @@
 ﻿using System;
+using System.Linq;
 using System.Runtime.InteropServices;
-
-#if NCURSES_VERSION_6
-using chtype = System.UInt32;
-#elif NCURSES_VERSION_5
-using chtype = System.UInt64;
-#endif
 
 //several constants taken from ncurses.h
 namespace NCurses.Core.Interop
@@ -14,9 +9,22 @@ namespace NCurses.Core.Interop
     {
         private static int NCURSES_ATTR_SHIFT = 8;
 
+        //TODO: expose these?
         internal static string DLLNAME { get; private set; }
         internal static int SIZEOF_WCHAR_T { get; private set; }
+        internal static Type CHTYPE_TYPE { get; private set; }
+
+        //TODO: implement these
+        internal static int SIZEOF_WINT_T { get; private set; }
+        internal static int SIZEOF_ATTR_T { get; private set; }
+        internal static int SIZEOF_MMASK_T { get; private set; }
+
         internal const int CCHARW_MAX = 5;
+        //TODO: all references to this value can overflow
+        internal const int MAX_STRING_LENGTH = 1024;
+
+        internal const string TypeGenerationExceptionMessage = "Custom types haven't been generated yet, please run NCurses.Start, NativeNCurses.initscr or create a window with Window.CreateWindow";
+        internal const string NoUnicodeExceptionMessage = "Unicode not supported";
 
         public const int ERR = -1;
         public const int OK = 0;
@@ -24,41 +32,65 @@ namespace NCurses.Core.Interop
         //TODO: get WCHAR_T size at runtime (through libc?)
         static Constants()
         {
-            if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
+            switch (Microsoft.DotNet.PlatformAbstractions.RuntimeEnvironment.GetRuntimeIdentifier())
             {
-                SIZEOF_WCHAR_T = 2;
-                DLLNAME = "libncursesw6";
-            }
-            else
-            {
-                SIZEOF_WCHAR_T = 4;
-                //Debian stretch uses libncursesw.so.5.9 for version 6 !!!
-#if NCURSES_VERSION_6
-                DLLNAME = "libncursesw.so.6";
-#elif NCURSES_VERSION_5
-                DLLNAME = "libncursesw.so.5.9";
-#endif
+                case "win7-x64":
+                case "win8-x64":
+                case "win81-x64":
+                case "win10-x64":
+                case "win7-x86":
+                case "win8-x86":
+                case "win81-x86":
+                case "win10-x86":
+                    DLLNAME = "libncursesw6";
+                    SIZEOF_WCHAR_T = 2;
+                    CHTYPE_TYPE = typeof(UInt32);
+                    break;
+                case "ubuntu.16.04-x64":
+                case "debian.8-x64":
+                case "debian.9-x64":
+                    DLLNAME = "libncursesw.so.5.9";
+                    SIZEOF_WCHAR_T = 4;
+                    CHTYPE_TYPE = typeof(UInt64);
+                    break;
+                default:
+                    DLLNAME = "libncursesw.so.6";
+                    SIZEOF_WCHAR_T = 4;
+                    CHTYPE_TYPE = typeof(UInt32);
+                    break;
             }
         }
 
-        internal static chtype NCURSES_BITS(chtype mask, int shift)
+        internal static ulong NCURSES_BITS(ulong mask, int shift)
         {
             return mask << (shift + NCURSES_ATTR_SHIFT);
         }
 
-        internal static chtype NCURSES_MOUSE_MASK(int button, chtype mask)
+        internal static ulong NCURSES_MOUSE_MASK(int button, ulong mask)
         {
             return mask << (((button) - 1) * 5);
         }
 
-        public static chtype COLOR_PAIR(chtype number)
+        public static ulong COLOR_PAIR(ulong number)
         {
             return (NCURSES_BITS(number, 0) & Attrs.COLOR);
         }
 
-        public static int PAIR_NUMBER(chtype attr)
+        public static int PAIR_NUMBER(ulong attr)
         {
             return (int)((attr & Attrs.COLOR) >> NCURSES_ATTR_SHIFT);
+        }
+
+        //https://github.com/rofl0r/motor/blob/master/kkconsui/include/conscommon.h
+        public static int CTRL(int key)
+        {
+            return (key & 0x1F);
+        }
+
+        //https://github.com/rofl0r/motor/blob/master/kkconsui/include/conscommon.h
+        public static int ALT(int key)
+        {
+            return (int)(0x200 | (uint)key);
         }
     }
 
@@ -67,49 +99,26 @@ namespace NCurses.Core.Interop
     /// </summary>
     public static class Attrs
     {
-#if NCURSES_VERSION_6
-        public static chtype NORMAL = (1U - 1U);
-        public static chtype ATTRIBUTES = Constants.NCURSES_BITS(~(1U - 1U), 0);
-        public static chtype CHARTEXT = Constants.NCURSES_BITS(1U, 0) - 1U;
-        public static chtype COLOR = Constants.NCURSES_BITS(((1U) << 8) - 1U, 0);
-        public static chtype STANDOUT = Constants.NCURSES_BITS(1U, 8);
-        public static chtype UNDERLINE = Constants.NCURSES_BITS(1U, 9);
-        public static chtype REVERSE = Constants.NCURSES_BITS(1U, 10);
-        public static chtype BLINK = Constants.NCURSES_BITS(1U, 11);
-        public static chtype DIM = Constants.NCURSES_BITS(1U, 12);
-        public static chtype BOLD = Constants.NCURSES_BITS(1U, 13);
-        public static chtype ALTCHARSET = Constants.NCURSES_BITS(1U, 14);
-        public static chtype INVIS = Constants.NCURSES_BITS(1U, 15);
-        public static chtype PROTECT = Constants.NCURSES_BITS(1U, 16);
-        public static chtype HORIZONTAL = Constants.NCURSES_BITS(1U, 17);
-        public static chtype LEFT = Constants.NCURSES_BITS(1U, 18);
-        public static chtype LOW = Constants.NCURSES_BITS(1U, 19);
-        public static chtype RIGHT = Constants.NCURSES_BITS(1U, 20);
-        public static chtype TOP = Constants.NCURSES_BITS(1U, 21);
-        public static chtype VERTICAL = Constants.NCURSES_BITS(1U, 22);
-        public static chtype ITALIC = Constants.NCURSES_BITS(1U, 23);
-#elif NCURSES_VERSION_5
-        public static chtype NORMAL = (1UL - 1UL);
-        public static chtype ATTRIBUTES = Constants.NCURSES_BITS(~(1UL - 1UL), 0);
-        public static chtype CHARTEXT = Constants.NCURSES_BITS(1UL, 0) - 1UL;
-        public static chtype COLOR = Constants.NCURSES_BITS(((1UL) << 8) - 1UL, 0);
-        public static chtype STANDOUT = Constants.NCURSES_BITS(1UL, 8);
-        public static chtype UNDERLINE = Constants.NCURSES_BITS(1UL, 9);
-        public static chtype REVERSE = Constants.NCURSES_BITS(1UL, 10);
-        public static chtype BLINK = Constants.NCURSES_BITS(1UL, 11);
-        public static chtype DIM = Constants.NCURSES_BITS(1UL, 12);
-        public static chtype BOLD = Constants.NCURSES_BITS(1UL, 13);
-        public static chtype ALTCHARSET = Constants.NCURSES_BITS(1UL, 14);
-        public static chtype INVIS = Constants.NCURSES_BITS(1UL, 15);
-        public static chtype PROTECT = Constants.NCURSES_BITS(1UL, 16);
-        public static chtype HORIZONTAL = Constants.NCURSES_BITS(1UL, 17);
-        public static chtype LEFT = Constants.NCURSES_BITS(1UL, 18);
-        public static chtype LOW = Constants.NCURSES_BITS(1UL, 19);
-        public static chtype RIGHT = Constants.NCURSES_BITS(1UL, 20);
-        public static chtype TOP = Constants.NCURSES_BITS(1UL, 21);
-        public static chtype VERTICAL = Constants.NCURSES_BITS(1UL, 22);
-        public static chtype ITALIC = Constants.NCURSES_BITS(1UL, 23);
-#endif
+        public static ulong NORMAL = (1U - 1U);
+        public static ulong ATTRIBUTES = Constants.NCURSES_BITS(~(1U - 1U), 0);
+        public static ulong CHARTEXT = Constants.NCURSES_BITS(1U, 0) - 1U;
+        public static ulong COLOR = Constants.NCURSES_BITS(((1U) << 8) - 1U, 0);
+        public static ulong STANDOUT = Constants.NCURSES_BITS(1U, 8);
+        public static ulong UNDERLINE = Constants.NCURSES_BITS(1U, 9);
+        public static ulong REVERSE = Constants.NCURSES_BITS(1U, 10);
+        public static ulong BLINK = Constants.NCURSES_BITS(1U, 11);
+        public static ulong DIM = Constants.NCURSES_BITS(1U, 12);
+        public static ulong BOLD = Constants.NCURSES_BITS(1U, 13);
+        public static ulong ALTCHARSET = Constants.NCURSES_BITS(1U, 14);
+        public static ulong INVIS = Constants.NCURSES_BITS(1U, 15);
+        public static ulong PROTECT = Constants.NCURSES_BITS(1U, 16);
+        public static ulong HORIZONTAL = Constants.NCURSES_BITS(1U, 17);
+        public static ulong LEFT = Constants.NCURSES_BITS(1U, 18);
+        public static ulong LOW = Constants.NCURSES_BITS(1U, 19);
+        public static ulong RIGHT = Constants.NCURSES_BITS(1U, 20);
+        public static ulong TOP = Constants.NCURSES_BITS(1U, 21);
+        public static ulong VERTICAL = Constants.NCURSES_BITS(1U, 22);
+        public static ulong ITALIC = Constants.NCURSES_BITS(1U, 23);
     }
 
     /// <summary>
@@ -615,176 +624,160 @@ namespace NCurses.Core.Interop
     //TODO: verify
     public static class MouseState
     {
-#if NCURSES_VERSION_6
-        public static chtype BUTTON_RELEASED = 1U;
-        public static chtype BUTTON_PRESSED = 2U;
-        public static chtype BUTTON_CLICKED = 4U;
-        public static chtype DOUBLE_CLICKED = 10U;
-        public static chtype TRIPLE_CLICKED = 20U;
-        public static chtype RESERVED_EVENT = 40U;
-#elif NCURSES_VERSION_5
-        public static chtype BUTTON_RELEASED = 1L;
-        public static chtype BUTTON_PRESSED = 2L;
-        public static chtype BUTTON_CLICKED = 4L;
-        public static chtype DOUBLE_CLICKED = 10L;
-        public static chtype TRIPLE_CLICKED = 20L;
-        public static chtype RESERVED_EVENT = 40L;
-#endif
+        public static ulong BUTTON_RELEASED = 1U;
+        public static ulong BUTTON_PRESSED = 2U;
+        public static ulong BUTTON_CLICKED = 4U;
+        public static ulong DOUBLE_CLICKED = 10U;
+        public static ulong TRIPLE_CLICKED = 20U;
+        public static ulong RESERVED_EVENT = 40U;
 
         /* event masks */
-        public static chtype BUTTON1_RELEASED = Constants.NCURSES_MOUSE_MASK(1, BUTTON_RELEASED);
-        public static chtype BUTTON1_PRESSED = Constants.NCURSES_MOUSE_MASK(1, BUTTON_PRESSED);
-        public static chtype BUTTON1_CLICKED = Constants.NCURSES_MOUSE_MASK(1, BUTTON_CLICKED);
-        public static chtype BUTTON1_DOUBLE_CLICKED = Constants.NCURSES_MOUSE_MASK(1, DOUBLE_CLICKED);
-        public static chtype BUTTON1_TRIPLE_CLICKED = Constants.NCURSES_MOUSE_MASK(1, TRIPLE_CLICKED);
+        public static ulong BUTTON1_RELEASED = Constants.NCURSES_MOUSE_MASK(1, BUTTON_RELEASED);
+        public static ulong BUTTON1_PRESSED = Constants.NCURSES_MOUSE_MASK(1, BUTTON_PRESSED);
+        public static ulong BUTTON1_CLICKED = Constants.NCURSES_MOUSE_MASK(1, BUTTON_CLICKED);
+        public static ulong BUTTON1_DOUBLE_CLICKED = Constants.NCURSES_MOUSE_MASK(1, DOUBLE_CLICKED);
+        public static ulong BUTTON1_TRIPLE_CLICKED = Constants.NCURSES_MOUSE_MASK(1, TRIPLE_CLICKED);
 
-        public static chtype BUTTON2_RELEASED = Constants.NCURSES_MOUSE_MASK(2, BUTTON_RELEASED);
-        public static chtype BUTTON2_PRESSED = Constants.NCURSES_MOUSE_MASK(2, BUTTON_PRESSED);
-        public static chtype BUTTON2_CLICKED = Constants.NCURSES_MOUSE_MASK(2, BUTTON_CLICKED);
-        public static chtype BUTTON2_DOUBLE_CLICKED = Constants.NCURSES_MOUSE_MASK(2, DOUBLE_CLICKED);
-        public static chtype BUTTON2_TRIPLE_CLICKED = Constants.NCURSES_MOUSE_MASK(2, TRIPLE_CLICKED);
+        public static ulong BUTTON2_RELEASED = Constants.NCURSES_MOUSE_MASK(2, BUTTON_RELEASED);
+        public static ulong BUTTON2_PRESSED = Constants.NCURSES_MOUSE_MASK(2, BUTTON_PRESSED);
+        public static ulong BUTTON2_CLICKED = Constants.NCURSES_MOUSE_MASK(2, BUTTON_CLICKED);
+        public static ulong BUTTON2_DOUBLE_CLICKED = Constants.NCURSES_MOUSE_MASK(2, DOUBLE_CLICKED);
+        public static ulong BUTTON2_TRIPLE_CLICKED = Constants.NCURSES_MOUSE_MASK(2, TRIPLE_CLICKED);
 
-        public static chtype BUTTON3_RELEASED = Constants.NCURSES_MOUSE_MASK(3, BUTTON_RELEASED);
-        public static chtype BUTTON3_PRESSED = Constants.NCURSES_MOUSE_MASK(3, BUTTON_PRESSED);
-        public static chtype BUTTON3_CLICKED = Constants.NCURSES_MOUSE_MASK(3, BUTTON_CLICKED);
-        public static chtype BUTTON3_DOUBLE_CLICKED = Constants.NCURSES_MOUSE_MASK(3, DOUBLE_CLICKED);
-        public static chtype BUTTON3_TRIPLE_CLICKED = Constants.NCURSES_MOUSE_MASK(3, TRIPLE_CLICKED);
+        public static ulong BUTTON3_RELEASED = Constants.NCURSES_MOUSE_MASK(3, BUTTON_RELEASED);
+        public static ulong BUTTON3_PRESSED = Constants.NCURSES_MOUSE_MASK(3, BUTTON_PRESSED);
+        public static ulong BUTTON3_CLICKED = Constants.NCURSES_MOUSE_MASK(3, BUTTON_CLICKED);
+        public static ulong BUTTON3_DOUBLE_CLICKED = Constants.NCURSES_MOUSE_MASK(3, DOUBLE_CLICKED);
+        public static ulong BUTTON3_TRIPLE_CLICKED = Constants.NCURSES_MOUSE_MASK(3, TRIPLE_CLICKED);
 
-        public static chtype BUTTON4_RELEASED = Constants.NCURSES_MOUSE_MASK(4, BUTTON_RELEASED);
-        public static chtype BUTTON4_PRESSED = Constants.NCURSES_MOUSE_MASK(4, BUTTON_PRESSED);
-        public static chtype BUTTON4_CLICKED = Constants.NCURSES_MOUSE_MASK(4, BUTTON_CLICKED);
-        public static chtype BUTTON4_DOUBLE_CLICKED = Constants.NCURSES_MOUSE_MASK(4, DOUBLE_CLICKED);
-        public static chtype BUTTON4_TRIPLE_CLICKED = Constants.NCURSES_MOUSE_MASK(4, TRIPLE_CLICKED);
+        public static ulong BUTTON4_RELEASED = Constants.NCURSES_MOUSE_MASK(4, BUTTON_RELEASED);
+        public static ulong BUTTON4_PRESSED = Constants.NCURSES_MOUSE_MASK(4, BUTTON_PRESSED);
+        public static ulong BUTTON4_CLICKED = Constants.NCURSES_MOUSE_MASK(4, BUTTON_CLICKED);
+        public static ulong BUTTON4_DOUBLE_CLICKED = Constants.NCURSES_MOUSE_MASK(4, DOUBLE_CLICKED);
+        public static ulong BUTTON4_TRIPLE_CLICKED = Constants.NCURSES_MOUSE_MASK(4, TRIPLE_CLICKED);
 
         //TODO: everything below could be different on x86
-        public static chtype BUTTON5_RELEASED = Constants.NCURSES_MOUSE_MASK(5, BUTTON_RELEASED);
-        public static chtype BUTTON5_PRESSED = Constants.NCURSES_MOUSE_MASK(5, BUTTON_PRESSED);
-        public static chtype BUTTON5_CLICKED = Constants.NCURSES_MOUSE_MASK(5, BUTTON_CLICKED);
-        public static chtype BUTTON5_DOUBLE_CLICKED = Constants.NCURSES_MOUSE_MASK(5, DOUBLE_CLICKED);
-        public static chtype BUTTON5_TRIPLE_CLICKED = Constants.NCURSES_MOUSE_MASK(5, TRIPLE_CLICKED);
+        public static ulong BUTTON5_RELEASED = Constants.NCURSES_MOUSE_MASK(5, BUTTON_RELEASED);
+        public static ulong BUTTON5_PRESSED = Constants.NCURSES_MOUSE_MASK(5, BUTTON_PRESSED);
+        public static ulong BUTTON5_CLICKED = Constants.NCURSES_MOUSE_MASK(5, BUTTON_CLICKED);
+        public static ulong BUTTON5_DOUBLE_CLICKED = Constants.NCURSES_MOUSE_MASK(5, DOUBLE_CLICKED);
+        public static ulong BUTTON5_TRIPLE_CLICKED = Constants.NCURSES_MOUSE_MASK(5, TRIPLE_CLICKED);
 
-#if NCURSES_VERSION_6
-        public static chtype BUTTON_CTRL = Constants.NCURSES_MOUSE_MASK(6, 1U);
-        public static chtype BUTTON_SHIFT = Constants.NCURSES_MOUSE_MASK(6, 2U);
-        public static chtype BUTTON_ALT = Constants.NCURSES_MOUSE_MASK(6, 4U);
-        public static chtype REPORT_MOUSE_POSITION = Constants.NCURSES_MOUSE_MASK(6, 10U);
-#elif NCURSES_VERSION_5
-        public static chtype BUTTON_CTRL = Constants.NCURSES_MOUSE_MASK(6, 1L);
-        public static chtype BUTTON_SHIFT = Constants.NCURSES_MOUSE_MASK(6, 2L);
-        public static chtype BUTTON_ALT = Constants.NCURSES_MOUSE_MASK(6, 4L);
-        public static chtype REPORT_MOUSE_POSITION = Constants.NCURSES_MOUSE_MASK(6, 10L);
-#endif
+        public static ulong BUTTON_CTRL = Constants.NCURSES_MOUSE_MASK(6, 1U);
+        public static ulong BUTTON_SHIFT = Constants.NCURSES_MOUSE_MASK(6, 2U);
+        public static ulong BUTTON_ALT = Constants.NCURSES_MOUSE_MASK(6, 4U);
+        public static ulong REPORT_MOUSE_POSITION = Constants.NCURSES_MOUSE_MASK(6, 10U);
 
-        public static chtype ALL_MOUSE_EVENTS = REPORT_MOUSE_POSITION - 1;
+        public static ulong ALL_MOUSE_EVENTS = REPORT_MOUSE_POSITION - 1;
     }
 
     /// <summary>
-    /// Line drawing characters
+    /// Line drawing characters, these can only be drawn (presented) within NCurses
     /// </summary>
     public static class Acs
     {
         /// <summary>
         /// upper left corner
         /// </summary>
-        public static chtype ULCORNER = NativeNCurses.Acs_Map['l'];     /* NCURSES_ACS('l') */
+        public static INCursesChar ULCORNER => NativeNCurses.Acs_Map['l'];     /* NCURSES_ACS('l') */
         /// <summary>
         /// lower left corner
         /// </summary>
-        public static chtype LLCORNER = NativeNCurses.Acs_Map['m'];     /* NCURSES_ACS('m') */
+        public static INCursesChar LLCORNER => NativeNCurses.Acs_Map['m'];     /* NCURSES_ACS('m') */
         /// <summary>
         /// upper right corner
         /// </summary>
-        public static chtype URCORNER = NativeNCurses.Acs_Map['k'];     /* NCURSES_ACS('k') */
+        public static INCursesChar URCORNER => NativeNCurses.Acs_Map['k'];     /* NCURSES_ACS('k') */
         /// <summary>
         /// lower right corner
         /// </summary>
-        public static chtype LRCORNER = NativeNCurses.Acs_Map['j'];     /* NCURSES_ACS('j') */
+        public static INCursesChar LRCORNER => NativeNCurses.Acs_Map['j'];     /* NCURSES_ACS('j') */
         /// <summary>
         /// tee pointing right
         /// </summary>
-        public static chtype LTEE = NativeNCurses.Acs_Map['t'];     /* NCURSES_ACS('t') */
+        public static INCursesChar LTEE => NativeNCurses.Acs_Map['t'];     /* NCURSES_ACS('t') */
         /// <summary>
         /// tee pointing left
         /// </summary>
-        public static chtype RTEE = NativeNCurses.Acs_Map['u'];     /* NCURSES_ACS('u') */
+        public static INCursesChar RTEE => NativeNCurses.Acs_Map['u'];     /* NCURSES_ACS('u') */
         /// <summary>
         /// tee pointing up
         /// </summary>
-        public static chtype BTEE = NativeNCurses.Acs_Map['v'];     /* NCURSES_ACS('v') */
+        public static INCursesChar BTEE => NativeNCurses.Acs_Map['v'];     /* NCURSES_ACS('v') */
         /// <summary>
         /// tee pointing down
         /// </summary>
-        public static chtype TTEE = NativeNCurses.Acs_Map['w'];     /* NCURSES_ACS('w') */
+        public static INCursesChar TTEE => NativeNCurses.Acs_Map['w'];     /* NCURSES_ACS('w') */
         /// <summary>
         /// horizontal line
         /// </summary>
-        public static chtype HLINE = NativeNCurses.Acs_Map['q'];    /* NCURSES_ACS('q') */
+        public static INCursesChar HLINE => NativeNCurses.Acs_Map['q'];    /* NCURSES_ACS('q') */
         /// <summary>
         /// vertical line
         /// </summary>
-        public static chtype VLINE = NativeNCurses.Acs_Map['x'];    /* NCURSES_ACS('x') */
+        public static INCursesChar VLINE => NativeNCurses.Acs_Map['x'];    /* NCURSES_ACS('x') */
         /// <summary>
         /// large plus or crossover
         /// </summary>
-        public static chtype PLUS = NativeNCurses.Acs_Map['n'];     /* NCURSES_ACS('n') */
+        public static INCursesChar PLUS => NativeNCurses.Acs_Map['n'];     /* NCURSES_ACS('n') */
         /// <summary>
         /// scan line 1
         /// </summary>
-        public static chtype S1 = NativeNCurses.Acs_Map['o'];       /* NCURSES_ACS('o') */
+        public static INCursesChar S1 => NativeNCurses.Acs_Map['o'];       /* NCURSES_ACS('o') */
         /// <summary>
         /// scan line 9
         /// </summary>
-        public static chtype S9 = NativeNCurses.Acs_Map['s'];       /* NCURSES_ACS('s') */
+        public static INCursesChar S9 => NativeNCurses.Acs_Map['s'];       /* NCURSES_ACS('s') */
         /// <summary>
         /// diamond
         /// </summary>
-        public static chtype DIAMOND = NativeNCurses.Acs_Map['`'];  /* NCURSES_ACS('`') */
+        public static INCursesChar DIAMOND => NativeNCurses.Acs_Map['`'];  /* NCURSES_ACS('`') */
         /// <summary>
         /// checker board (stipple)
         /// </summary>
-        public static chtype CKBOARD = NativeNCurses.Acs_Map['a'];  /* NCURSES_ACS('a') */
+        public static INCursesChar CKBOARD => NativeNCurses.Acs_Map['a'];  /* NCURSES_ACS('a') */
         /// <summary>
         /// degree symbol
         /// </summary>
-        public static chtype DEGREE = NativeNCurses.Acs_Map['f'];   /* NCURSES_ACS('f') */
+        public static INCursesChar DEGREE => NativeNCurses.Acs_Map['f'];   /* NCURSES_ACS('f') */
         /// <summary>
         /// plus/minus
         /// </summary>
-        public static chtype PLMINUS = NativeNCurses.Acs_Map['g'];  /* NCURSES_ACS('g') */
+        public static INCursesChar PLMINUS => NativeNCurses.Acs_Map['g'];  /* NCURSES_ACS('g') */
         /// <summary>
         /// bullet
         /// </summary>
-        public static chtype BULLET = NativeNCurses.Acs_Map['~'];   /* NCURSES_ACS('~') */
+        public static INCursesChar BULLET => NativeNCurses.Acs_Map['~'];   /* NCURSES_ACS('~') */
 
 #region Teletype 5410v1
         /// <summary>
         /// arrow pointing left
         /// </summary>
-        public static chtype LARROW = NativeNCurses.Acs_Map[','];   /* NCURSES_ACS(',') */
+        public static INCursesChar LARROW => NativeNCurses.Acs_Map[','];   /* NCURSES_ACS(',') */
         /// <summary>
         /// arrow pointing right
         /// </summary>
-        public static chtype RARROW = NativeNCurses.Acs_Map['+'];   /* NCURSES_ACS('+') */
+        public static INCursesChar RARROW => NativeNCurses.Acs_Map['+'];   /* NCURSES_ACS('+') */
         /// <summary>
         /// arrow pointing down
         /// </summary>
-        public static chtype DARROW = NativeNCurses.Acs_Map['.'];  /* NCURSES_ACS('.')  */
+        public static INCursesChar DARROW => NativeNCurses.Acs_Map['.'];  /* NCURSES_ACS('.')  */
         /// <summary>
         /// arrow pointing up
         /// </summary>
-        public static chtype UARROW = NativeNCurses.Acs_Map['-'];   /* NCURSES_ACS('-') */
+        public static INCursesChar UARROW => NativeNCurses.Acs_Map['-'];   /* NCURSES_ACS('-') */
         /// <summary>
         /// board of squares
         /// </summary>
-        public static chtype BOARD = NativeNCurses.Acs_Map['h'];    /* NCURSES_ACS('h') */
+        public static INCursesChar BOARD => NativeNCurses.Acs_Map['h'];    /* NCURSES_ACS('h') */
         /// <summary>
         /// lantern symbol
         /// </summary>
-        public static chtype LANTERN = NativeNCurses.Acs_Map['i'];  /* NCURSES_ACS('i') */
+        public static INCursesChar LANTERN => NativeNCurses.Acs_Map['i'];  /* NCURSES_ACS('i') */
         /// <summary>
         /// solid square block
         /// </summary>
-        public static chtype BLOCK = NativeNCurses.Acs_Map['0'];    /* NCURSES_ACS('0') */
+        public static INCursesChar BLOCK => NativeNCurses.Acs_Map['0'];    /* NCURSES_ACS('0') */
 #endregion
 
         /*
@@ -796,31 +789,31 @@ namespace NCurses.Core.Interop
         /// <summary>
         /// scan line 3
         /// </summary>
-        public static chtype S3 = NativeNCurses.Acs_Map['p'];       /* NCURSES_ACS('p') */
+        public static INCursesChar S3 => NativeNCurses.Acs_Map['p'];       /* NCURSES_ACS('p') */
         /// <summary>
         /// scan line 7
         /// </summary>
-        public static chtype S7 = NativeNCurses.Acs_Map['r'];       /* NCURSES_ACS('r') */
+        public static INCursesChar S7 => NativeNCurses.Acs_Map['r'];       /* NCURSES_ACS('r') */
         /// <summary>
         /// less/equal
         /// </summary>
-        public static chtype LEQUAL = NativeNCurses.Acs_Map['y'];   /* NCURSES_ACS('y') */
+        public static INCursesChar LEQUAL => NativeNCurses.Acs_Map['y'];   /* NCURSES_ACS('y') */
         /// <summary>
         /// greater/equal
         /// </summary>
-        public static chtype GEQUAL = NativeNCurses.Acs_Map['z'];   /* NCURSES_ACS('z') */
+        public static INCursesChar GEQUAL => NativeNCurses.Acs_Map['z'];   /* NCURSES_ACS('z') */
         /// <summary>
         /// Pi
         /// </summary>
-        public static chtype PI = NativeNCurses.Acs_Map['{'];       /* NCURSES_ACS('{') */
+        public static INCursesChar PI => NativeNCurses.Acs_Map['{'];       /* NCURSES_ACS('{') */
         /// <summary>
         /// not equal
         /// </summary>
-        public static chtype NEQUAL = NativeNCurses.Acs_Map['|'];   /* NCURSES_ACS('|') */
+        public static INCursesChar NEQUAL => NativeNCurses.Acs_Map['|'];   /* NCURSES_ACS('|') */
         /// <summary>
         /// UK pound sign
         /// </summary>
-        public static chtype STERLING = NativeNCurses.Acs_Map['}'];     /* NCURSES_ACS('}') */
+        public static INCursesChar STERLING => NativeNCurses.Acs_Map['}'];     /* NCURSES_ACS('}') */
 #endregion
     }
 
@@ -832,164 +825,164 @@ namespace NCurses.Core.Interop
         /// <summary>
         /// upper left corner
         /// </summary>
-        public static char ULCORNER = NativeNCurses.Wacs_Map['l'];     /* NCURSES_WACS('l') */
+        public static INCursesChar ULCORNER => NativeNCurses.Wacs_Map['l'];     /* NCURSES_WACS('l') */
         /// <summary>
         /// lower left corner
         /// </summary>
-        public static char LLCORNER = NativeNCurses.Wacs_Map['m'];     /* NCURSES_WACS('m') */
+        public static INCursesChar LLCORNER => NativeNCurses.Wacs_Map['m'];     /* NCURSES_WACS('m') */
         /// <summary>
         /// upper right corner
         /// </summary>
-        public static char URCORNER = NativeNCurses.Wacs_Map['k'];     /* NCURSES_WACS('k') */
+        public static INCursesChar URCORNER => NativeNCurses.Wacs_Map['k'];     /* NCURSES_WACS('k') */
         /// <summary>
         /// lower right corner
         /// </summary>
-        public static char LRCORNER = NativeNCurses.Wacs_Map['j'];     /* NCURSES_WACS('j') */
+        public static INCursesChar LRCORNER => NativeNCurses.Wacs_Map['j'];     /* NCURSES_WACS('j') */
         /// <summary>
         /// tee pointing right
         /// </summary>
-        public static char LTEE = NativeNCurses.Wacs_Map['t'];     /* NCURSES_WACS('t') */
+        public static INCursesChar LTEE => NativeNCurses.Wacs_Map['t'];     /* NCURSES_WACS('t') */
         /// <summary>
         /// tee pointing left
         /// </summary>
-        public static char RTEE = NativeNCurses.Wacs_Map['u'];     /* NCURSES_WACS('u') */
+        public static INCursesChar RTEE => NativeNCurses.Wacs_Map['u'];     /* NCURSES_WACS('u') */
         /// <summary>
         /// tee pointing up
         /// </summary>
-        public static char BTEE = NativeNCurses.Wacs_Map['v'];     /* NCURSES_WACS('v') */
+        public static INCursesChar BTEE => NativeNCurses.Wacs_Map['v'];     /* NCURSES_WACS('v') */
         /// <summary>
         /// tee pointing down
         /// </summary>
-        public static char TTEE = NativeNCurses.Wacs_Map['w'];     /* NCURSES_WACS('w') */
+        public static INCursesChar TTEE => NativeNCurses.Wacs_Map['w'];     /* NCURSES_WACS('w') */
         /// <summary>
         /// horizontal line
         /// </summary>
-        public static char HLINE = NativeNCurses.Wacs_Map['q'];    /* NCURSES_WACS('q') */
+        public static INCursesChar HLINE => NativeNCurses.Wacs_Map['q'];    /* NCURSES_WACS('q') */
         /// <summary>
         /// vertical line
         /// </summary>
-        public static char VLINE = NativeNCurses.Wacs_Map['x'];    /* NCURSES_WACS('x') */
+        public static INCursesChar VLINE => NativeNCurses.Wacs_Map['x'];    /* NCURSES_WACS('x') */
         /// <summary>
         /// large plus or crossover
         /// </summary>
-        public static char PLUS = NativeNCurses.Wacs_Map['n'];     /* NCURSES_WACS('n') */
+        public static INCursesChar PLUS => NativeNCurses.Wacs_Map['n'];     /* NCURSES_WACS('n') */
         /// <summary>
         /// scan line 1
         /// </summary>
-        public static char S1 = NativeNCurses.Wacs_Map['o'];       /* NCURSES_WACS('o') */
+        public static INCursesChar S1 => NativeNCurses.Wacs_Map['o'];       /* NCURSES_WACS('o') */
         /// <summary>
         /// scan line 9
         /// </summary>
-        public static char S9 = NativeNCurses.Wacs_Map['s'];   /* NCURSES_WACS('s') */
+        public static INCursesChar S9 => NativeNCurses.Wacs_Map['s'];   /* NCURSES_WACS('s') */
         /// <summary>
         /// diamond
         /// </summary>
-        public static char DIAMOND = NativeNCurses.Wacs_Map['`'];  /* NCURSES_WACS('`') */
+        public static INCursesChar DIAMOND => NativeNCurses.Wacs_Map['`'];  /* NCURSES_WACS('`') */
         /// <summary>
         /// checker board
         /// </summary>
-        public static char CKBOARD = NativeNCurses.Wacs_Map['a'];  /* NCURSES_WACS('a') */
+        public static INCursesChar CKBOARD => NativeNCurses.Wacs_Map['a'];  /* NCURSES_WACS('a') */
         /// <summary>
         /// degree symbol
         /// </summary>
-        public static char DEGREE = NativeNCurses.Wacs_Map['f'];   /* NCURSES_WACS('f') */
+        public static INCursesChar DEGREE => NativeNCurses.Wacs_Map['f'];   /* NCURSES_WACS('f') */
         /// <summary>
         /// plus/minus
         /// </summary>
-        public static char PLMINUS = NativeNCurses.Wacs_Map['g'];  /* NCURSES_WACS('g') */
+        public static INCursesChar PLMINUS => NativeNCurses.Wacs_Map['g'];  /* NCURSES_WACS('g') */
         /// <summary>
         /// bullet
         /// </summary>
-        public static char BULLET = NativeNCurses.Wacs_Map['~'];   /* NCURSES_WACS('~') */
+        public static INCursesChar BULLET => NativeNCurses.Wacs_Map['~'];   /* NCURSES_WACS('~') */
 
 #region Teletype 5410v1 symbols
         /// <summary>
         /// arrow left
         /// </summary>
-        public static char LARROW = NativeNCurses.Wacs_Map[','];   /* NCURSES_WACS(',') */
+        public static INCursesChar LARROW => NativeNCurses.Wacs_Map[','];   /* NCURSES_WACS(',') */
         /// <summary>
         /// arrow right
         /// </summary>
-        public static char RARROW = NativeNCurses.Wacs_Map['+'];   /* NCURSES_WACS('+') */
+        public static INCursesChar RARROW => NativeNCurses.Wacs_Map['+'];   /* NCURSES_WACS('+') */
         /// <summary>
         /// arrow down
         /// </summary>
-        public static char DARROW = NativeNCurses.Wacs_Map['.'];   /* NCURSES_WACS('.') */
+        public static INCursesChar DARROW => NativeNCurses.Wacs_Map['.'];   /* NCURSES_WACS('.') */
         /// <summary>
         /// arrow up
         /// </summary>
-        public static char UARROW = NativeNCurses.Wacs_Map['-'];   /* NCURSES_WACS('-') */
+        public static INCursesChar UARROW => NativeNCurses.Wacs_Map['-'];   /* NCURSES_WACS('-') */
         /// <summary>
         /// board of squares
         /// </summary>
-        public static char BOARD = NativeNCurses.Wacs_Map['h'];    /* NCURSES_WACS('h') */
+        public static INCursesChar BOARD => NativeNCurses.Wacs_Map['h'];    /* NCURSES_WACS('h') */
         /// <summary>
         /// lantern symbol
         /// </summary>
-        public static char LANTERN = NativeNCurses.Wacs_Map['i'];  /* NCURSES_WACS('i') */
+        public static INCursesChar LANTERN => NativeNCurses.Wacs_Map['i'];  /* NCURSES_WACS('i') */
         /// <summary>
         /// solid square block
         /// </summary>
-        public static char BLOCK = NativeNCurses.Wacs_Map['0'];    /* NCURSES_WACS('0') */
+        public static INCursesChar BLOCK => NativeNCurses.Wacs_Map['0'];    /* NCURSES_WACS('0') */
 #endregion
 
 #region ncurses extensions
         /// <summary>
         /// scan line 3
         /// </summary>
-        public static char S3 = NativeNCurses.Wacs_Map['p'];       /* NCURSES_WACS('p') */
+        public static INCursesChar S3 => NativeNCurses.Wacs_Map['p'];       /* NCURSES_WACS('p') */
         /// <summary>
         /// scan line 7
         /// </summary>
-        public static char S7 = NativeNCurses.Wacs_Map['r'];       /* NCURSES_WACS('r') */
+        public static INCursesChar S7 => NativeNCurses.Wacs_Map['r'];       /* NCURSES_WACS('r') */
         /// <summary>
         /// less/equal
         /// </summary>
-        public static char LEQUAL = NativeNCurses.Wacs_Map['y'];   /* NCURSES_WACS('y') */
+        public static INCursesChar LEQUAL => NativeNCurses.Wacs_Map['y'];   /* NCURSES_WACS('y') */
         /// <summary>
         /// greater/equal
         /// </summary>
-        public static char GEQUAL = NativeNCurses.Wacs_Map['z'];   /* NCURSES_WACS('z') */
+        public static INCursesChar GEQUAL => NativeNCurses.Wacs_Map['z'];   /* NCURSES_WACS('z') */
         /// <summary>
         /// Pi
         /// </summary>
-        public static char PI = NativeNCurses.Wacs_Map['{'];       /* NCURSES_WACS('{') */
+        public static INCursesChar PI => NativeNCurses.Wacs_Map['{'];       /* NCURSES_WACS('{') */
         /// <summary>
         /// not equal
         /// </summary>
-        public static char NEQUAL = NativeNCurses.Wacs_Map['|'];   /* NCURSES_WACS('|') */
+        public static INCursesChar NEQUAL => NativeNCurses.Wacs_Map['|'];   /* NCURSES_WACS('|') */
         /// <summary>
         /// UK pound sign
         /// </summary>
-        public static char STERLING = NativeNCurses.Wacs_Map['}'];     /* NCURSES_WACS('}') */
+        public static INCursesChar STERLING => NativeNCurses.Wacs_Map['}'];     /* NCURSES_WACS('}') */
 #endregion
 
 #region double lines
-        public static char D_ULCORNER = NativeNCurses.Wacs_Map['C'];  /* NCURSES_WACS('C') */
-        public static char D_LLCORNER = NativeNCurses.Wacs_Map['D'];  /* NCURSES_WACS('D') */
-        public static char D_URCORNER = NativeNCurses.Wacs_Map['B'];  /* NCURSES_WACS('B') */
-        public static char D_LRCORNER = NativeNCurses.Wacs_Map['A'];  /* NCURSES_WACS('A') */
-        public static char D_RTEE = NativeNCurses.Wacs_Map['G'];  /* NCURSES_WACS('G') */
-        public static char D_LTEE = NativeNCurses.Wacs_Map['F'];  /* NCURSES_WACS('F') */
-        public static char D_BTEE = NativeNCurses.Wacs_Map['H'];  /* NCURSES_WACS('H') */
-        public static char D_TTEE = NativeNCurses.Wacs_Map['I'];  /* NCURSES_WACS('I') */
-        public static char D_HLINE = NativeNCurses.Wacs_Map['R']; /* NCURSES_WACS('R') */
-        public static char D_VLINE = NativeNCurses.Wacs_Map['Y']; /* NCURSES_WACS('Y') */
-        public static char D_PLUS = NativeNCurses.Wacs_Map['E'];  /* NCURSES_WACS('E') */
+        public static INCursesChar D_ULCORNER => NativeNCurses.Wacs_Map['C'];  /* NCURSES_WACS('C') */
+        public static INCursesChar D_LLCORNER => NativeNCurses.Wacs_Map['D'];  /* NCURSES_WACS('D') */
+        public static INCursesChar D_URCORNER => NativeNCurses.Wacs_Map['B'];  /* NCURSES_WACS('B') */
+        public static INCursesChar D_LRCORNER => NativeNCurses.Wacs_Map['A'];  /* NCURSES_WACS('A') */
+        public static INCursesChar D_RTEE => NativeNCurses.Wacs_Map['G'];  /* NCURSES_WACS('G') */
+        public static INCursesChar D_LTEE => NativeNCurses.Wacs_Map['F'];  /* NCURSES_WACS('F') */
+        public static INCursesChar D_BTEE => NativeNCurses.Wacs_Map['H'];  /* NCURSES_WACS('H') */
+        public static INCursesChar D_TTEE => NativeNCurses.Wacs_Map['I'];  /* NCURSES_WACS('I') */
+        public static INCursesChar D_HLINE => NativeNCurses.Wacs_Map['R']; /* NCURSES_WACS('R') */
+        public static INCursesChar D_VLINE => NativeNCurses.Wacs_Map['Y']; /* NCURSES_WACS('Y') */
+        public static INCursesChar D_PLUS => NativeNCurses.Wacs_Map['E'];  /* NCURSES_WACS('E') */
 #endregion
 
 #region thick lines
-        public static char T_ULCORNER = NativeNCurses.Wacs_Map['L'];  /* NCURSES_WACS('L') */
-        public static char T_LLCORNER = NativeNCurses.Wacs_Map['M'];  /* NCURSES_WACS('M') */
-        public static char T_URCORNER = NativeNCurses.Wacs_Map['K'];  /* NCURSES_WACS('K') */
-        public static char T_LRCORNER = NativeNCurses.Wacs_Map['J'];  /* NCURSES_WACS('J') */
-        public static char T_RTEE = NativeNCurses.Wacs_Map['U'];  /* NCURSES_WACS('U') */
-        public static char T_LTEE = NativeNCurses.Wacs_Map['T'];  /* NCURSES_WACS('T') */
-        public static char T_BTEE = NativeNCurses.Wacs_Map['V'];  /* NCURSES_WACS('V') */
-        public static char T_TTEE = NativeNCurses.Wacs_Map['W'];  /* NCURSES_WACS('W') */
-        public static char T_HLINE = NativeNCurses.Wacs_Map['Q']; /* NCURSES_WACS('Q') */
-        public static char T_VLINE = NativeNCurses.Wacs_Map['X']; /* NCURSES_WACS('X') */
-        public static char T_PLUS = NativeNCurses.Wacs_Map['N'];	/* NCURSES_WACS('N') */
+        public static INCursesChar T_ULCORNER => NativeNCurses.Wacs_Map['L'];  /* NCURSES_WACS('L') */
+        public static INCursesChar T_LLCORNER => NativeNCurses.Wacs_Map['M'];  /* NCURSES_WACS('M') */
+        public static INCursesChar T_URCORNER => NativeNCurses.Wacs_Map['K'];  /* NCURSES_WACS('K') */
+        public static INCursesChar T_LRCORNER => NativeNCurses.Wacs_Map['J'];  /* NCURSES_WACS('J') */
+        public static INCursesChar T_RTEE => NativeNCurses.Wacs_Map['U'];  /* NCURSES_WACS('U') */
+        public static INCursesChar T_LTEE => NativeNCurses.Wacs_Map['T'];  /* NCURSES_WACS('T') */
+        public static INCursesChar T_BTEE => NativeNCurses.Wacs_Map['V'];  /* NCURSES_WACS('V') */
+        public static INCursesChar T_TTEE => NativeNCurses.Wacs_Map['W'];  /* NCURSES_WACS('W') */
+        public static INCursesChar T_HLINE => NativeNCurses.Wacs_Map['Q']; /* NCURSES_WACS('Q') */
+        public static INCursesChar T_VLINE => NativeNCurses.Wacs_Map['X']; /* NCURSES_WACS('X') */
+        public static INCursesChar T_PLUS => NativeNCurses.Wacs_Map['N'];	/* NCURSES_WACS('N') */
 #endregion
     }
 }

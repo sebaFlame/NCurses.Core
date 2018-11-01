@@ -4,37 +4,36 @@ using System.Linq;
 using System.Text;
 using NCurses.Core.Interop;
 
-#if NCURSES_VERSION_6
-using chtype = System.UInt32;
-#elif NCURSES_VERSION_5
-using chtype = System.UInt64;
-#endif
-
 namespace NCurses.Core
 {
-    public abstract class WindowBase : IDisposable
+    /* TODO
+     * methods using INCursesChar should allow other types than their own implementation
+    */
+    public abstract class WindowBase : IWindow, IDisposable
     {
-        protected static Dictionary<IntPtr, WindowBase> DictPtrWindows = new Dictionary<IntPtr, WindowBase>();
-        public static IEnumerable<WindowBase> LstWindows
-        {
-            get { return DictPtrWindows.Values.Where(x => x.OwnsHandle) ; }
-        }
+        internal static Dictionary<WindowBase, IntPtr> DictPtrWindows { get; private set; }
 
-        //TODO: change back to protected
-        protected IntPtr WindowPtr { get; set; }
+        protected IntPtr WindowPtr;
         protected bool OwnsHandle;
 
+        static WindowBase()
+        {
+            DictPtrWindows = new Dictionary<WindowBase, IntPtr>();
+        }
+
+        //use before all other initialization: NCurses should first be initialized
+        //DO NOT try to pass the window pointer in the constructor
         internal WindowBase()
         {
-            this.initialize();
+            this.Initialize();
             this.OwnsHandle = true;
         }
 
-        internal WindowBase(IntPtr ptr, bool ownsHandle)
+        //ONLY use for StdScr initialization
+        internal WindowBase(IntPtr ptr)
         {
-            this.WindowPtr = ptr;
-            this.OwnsHandle = ownsHandle;
-            DictPtrWindows.Add(ptr, this);
+            this.OwnsHandle = false;
+            DictPtrWindows.Add(this, this.WindowPtr = ptr);
         }
 
         ~WindowBase()
@@ -42,9 +41,9 @@ namespace NCurses.Core
             this.Dispose(true);
         }
 
-        private void initialize()
+        private void Initialize()
         {
-            if (NCurses.stdscr == null)
+            if (NCurses.StdScr is null)
                 NCurses.Start();
         }
 
@@ -82,131 +81,14 @@ namespace NCurses.Core
         }
 
         /// <summary>
-        /// set/get the current active color pair index
-        /// </summary>
-        public short Color
-        {
-            get
-            {
-                chtype attrs;
-                short color_pair;
-                NativeWindow.wattr_get(this.WindowPtr, out attrs, out color_pair);
-                return color_pair;
-            }
-            set
-            {
-                NativeWindow.wcolor_set(this.WindowPtr, value);
-            }
-        }
-
-        /// <summary>
-        /// set/get the current attribute/color attribute.
-        /// get the enabled attributes by using AND on the corresponding <see cref="Attrs"/> field.
-        /// </summary>
-        public ulong Attribute
-        {
-            get
-            {
-                chtype attr;
-                short color_pair;
-                NativeWindow.wattr_get(this.WindowPtr, out attr, out color_pair);
-#if NCURSES_VERSION_5
-                return attr;
-#elif NCURSES_VERSION_6
-                return (ulong)attr;
-#endif
-            }
-            set
-            {
-#if NCURSES_VERSION_5
-                NativeWindow.wattr_set(this.WindowPtr, value, 0);
-#elif NCURSES_VERSION_6
-                NativeWindow.wattr_set(this.WindowPtr, (chtype)value, 0);
-#endif
-            }
-        }
-
-        /// <summary>
         /// set/gets the current window background with a character with attributes applied
         /// </summary>
-        public ulong BackGround
-        {
-            get
-            {
-#if NCURSES_VERSION_5
-                return NativeWindow.getbkgd(this.WindowPtr);
-#elif NCURSES_VERSION_6
-                return (ulong)NativeWindow.getbkgd(this.WindowPtr);
-#endif
-            }
-            set
-            {
-#if NCURSES_VERSION_5
-                NativeWindow.wbkgd(this.WindowPtr, value);
-#elif NCURSES_VERSION_6
-                NativeWindow.wbkgd(this.WindowPtr, (chtype)value);
-#endif
-            }
-        }
+        public abstract INCursesChar BackGround { get; set; }
 
-        //public Color BackgroundColor
-        //{
-        //    get
-        //    {
-        //        uint bgAttr = 0;
-        //        if (NCurses.UnicodeSupported)
-        //        {
-        //            NCURSES_CH_T bkgd;
-        //            NativeWindow.wgetbkgrnd(this.WindowPtr, out bkgd);
-        //            bgAttr = bkgd.attr & Attrs.COLOR;
-        //        }
-        //        else
-        //        {
-        //            uint bkgd = NativeWindow.getbkgd(this.WindowPtr);
-        //            bgAttr = bkgd & Attrs.COLOR;
-        //        }
-
-        //        short fg, bg;
-        //        if (bgAttr > 0)
-        //        {
-        //            int color_pair = NativeNCurses.PAIR_NUMBER(bgAttr);
-        //            NativeNCurses.pair_content((short)color_pair, out fg, out bg);
-        //            return (Color)bg;
-        //        }
-
-        //        NativeNCurses.pair_content(0, out fg, out bg);
-        //        return (Color)bg;
-        //    }
-        //    set
-        //    {
-        //        if (NCurses.UnicodeSupported)
-        //        {
-        //            NCURSES_CH_T bkgd = new NCURSES_CH_T(' ');
-        //            bkgd.attr = (uint)NativeNCurses.COLOR_PAIR((int)value);
-        //            NativeWindow.wbkgrnd(this.WindowPtr, bkgd);
-        //        }
-        //        else
-        //        {
-        //            uint bkgd = ' ';
-        //            bkgd |= (uint)NativeNCurses.COLOR_PAIR((int)value);
-        //            NativeWindow.wbkgd(this.WindowPtr, bkgd);
-        //        }
-        //    }
-        //}
-
-        //public Color ForegroundColor
-        //{
-        //    get
-        //    {
-        //        short fg, bg;
-        //        NativeNCurses.pair_content(0, out fg, out bg);
-        //        return (Color)fg;
-        //    }
-        //    set
-        //    {
-        //        NativeNCurses.assume_default_colors((int)value, -1);
-        //    }
-        //}
+        /// <summary>
+        /// set/gets the background for all insterted characters (with waddch)
+        /// </summary>
+        public abstract INCursesChar InsertBackGround { get; set; }
 
         /// <summary>
         /// enable/disable returning function keys on <see cref="ReadKey"/>  (Key.* defined in constants).
@@ -219,6 +101,15 @@ namespace NCurses.Core
         }
 
         /// <summary>
+        /// return 8 bits instead of 7 from console input (could enable alt key usage)
+        /// disabled by default
+        /// </summary>
+        public bool Meta
+        {
+            set { NativeNCurses.meta(this.WindowPtr, value); }
+        }
+
+        /// <summary>
         /// enable/disable scrolling on the current window
         /// disabled by default
         /// </summary>
@@ -228,6 +119,9 @@ namespace NCurses.Core
             set { NativeWindow.scrollok(this.WindowPtr, value); }
         }
 
+        /// <summary>
+        /// use the hardware  insert/delete line  feature of  terminals so equipped.
+        /// </summary>
         public bool UseHwInsDelLine
         {
             get { return NativeWindow.is_idlok(this.WindowPtr); }
@@ -235,44 +129,24 @@ namespace NCurses.Core
         }
 
         //TODO: gives read error on windows when true
+        /// <summary>
+        /// The nodelay option causes getch to be a non-blocking call.
+        /// </summary>
         public bool Blocking
         {
             get { return NativeWindow.is_nodelay(this.WindowPtr); }
             set { NativeWindow.nodelay(this.WindowPtr, value); }
         }
 
+        /// <summary>
+        /// if set wgetch does not set a timer.  The purpose of  the  timeout
+        /// is  to differentiate between sequences received from a function key and
+        /// those typed by a user.
+        /// </summary>
         public bool NoTimeout
         {
             set { NativeWindow.notimeout(this.WindowPtr, value); }
             get { return NativeWindow.is_notimeout(this.WindowPtr); }
-        }
-#endregion
-
-#region attributes
-        /// <summary>
-        /// enable attribute(s) for the current window. Attributes can be OR'd together.
-        /// </summary>
-        /// <param name="attr">attribute(s) to enable</param>
-        public void AttrOn(ulong attr)
-        {
-#if NCURSES_VERSION_5
-            NativeWindow.wattr_on(this.WindowPtr, attr);
-#elif NCURSES_VERSION_6
-            NativeWindow.wattr_on(this.WindowPtr, (chtype)attr);
-#endif
-        }
-
-        /// <summary>
-        /// disable attribute(s) for the current window. Attaributes can be OR'd together.
-        /// </summary>
-        /// <param name="attr">attribute(s) to disable</param>
-        public void AttrOff(ulong attr)
-        {
-#if NCURSES_VERSION_5
-            NativeWindow.wattr_off(this.WindowPtr, attr);
-#elif NCURSES_VERSION_6
-            NativeWindow.wattr_off(this.WindowPtr, (chtype)attr);
-#endif
         }
         #endregion
 
@@ -282,150 +156,105 @@ namespace NCurses.Core
         /// </summary>
         /// <param name="lineNumber">the line number to move the cursor to</param>
         /// <param name="columnNumber">the column number to move the cursor to</param>
-        public void MoveCursor(int lineNumber, int columnNumber)
-        {
-            NativeWindow.wmove(this.WindowPtr, lineNumber, columnNumber);
-        }
-#endregion
+        public abstract void MoveCursor(int lineNumber, int columnNumber);
+        #endregion
 
-#region Write
+        #region Attributes and Color manipulation
+        /// <summary>
+        /// Turn  1 or multiple attributes OR'd together on
+        /// Colors are NOT supported
+        /// </summary>
+        /// <param name="Attributes">Attributes to enable</param>
+        public abstract void AttributesOn(ulong Attributes);
+
+        /// <summary>
+        /// Turn on 1 or multiple attributes
+        /// Colors are NOT supported
+        /// </summary>
+        /// <param name="Attributes">Attributes to disable</param>
+        public abstract void AttributesOff(ulong Attributes);
+
+        /// <summary>
+        /// Get current enables attributes and active color pair
+        /// </summary>
+        /// <param name="attrs">The current enabled attributes OR'd together</param>
+        /// <param name="colorPair">The current active color pair</param>
+        public abstract void CurrentAttributesAndColor(out ulong attrs, out short colorPair);
+
+        /// <summary>
+        /// Activate attributes OR's together and color
+        /// </summary>
+        /// <param name="attrs">Attributes to enable</param>
+        /// <param name="colorPair">Color pair to use</param>
+        public abstract void EnableAttributesAndColor(ulong attrs, short colorPair);
+
+        /// <summary>
+        /// Activate a color
+        /// </summary>
+        /// <param name="colorPair">The color pair to use</param>
+        public abstract void EnableColor(short colorPair);
+        #endregion
+
+        #region Write
+        /// <summary>
+        /// write a (generated) NCurses type to the window
+        /// can be useful for ACS symbols (single byte characters)
+        /// </summary>
+        /// <param name="ch">the character to write to the window</param>
+        public abstract void Write(in INCursesChar ch);
+
+        /// <summary>
+        /// write a (generated) string of an NCurses type to the window
+        /// </summary>
+        /// <param name="str">the string to write to the window</param>
+        public abstract void Write(in INCursesCharStr str);
+
         /// <summary>
         /// write string <paramref name="str"/> to the window.
-        /// <paramref name="str"/> can be unicode if your terminal supports it.
-        /// the cursor advances the length of the string.
         /// </summary>
         /// <param name="str">the string to write</param>
-        public void Write(string str)
-        {
-            if (NCurses.UnicodeSupported)
-                NativeWindow.waddwstr(this.WindowPtr, str);
-            else
-                NativeWindow.waddstr(this.WindowPtr, str);
-        }
+        public abstract void Write(string str);
+
+        /// <summary>
+        /// write string <paramref name="str"/> to the window. with defined attributes/color pair.
+        /// </summary>
+        /// <param name="str">the string to write</param>
+        /// <param name="attrs">the attributes you want to add (eg <see cref="Attrs.BOLD"/>)</param>
+        /// <param name="pair">the color pair you want to use on this character</param>
+        public abstract void Write(string str, ulong attrs, short pair);
 
         /// <summary>
         /// write string <paramref name="str"/> to the window on line <paramref name="nline"/> and column <paramref name="ncol"/>.
-        /// <paramref name="str"/> can be unicode if your terminal supports it.
-        /// the cursor advances the length of the string
         /// </summary>
         /// <param name="nline">the line number to start writing</param>
         /// <param name="ncol">the column number to start writing</param>
         /// <param name="str">the string to add</param>
-        public void Write(int nline, int ncol, string str)
-        {
-            if (NCurses.UnicodeSupported)
-                NativeWindow.mvwaddwstr(this.WindowPtr, nline, ncol, str);
-            else
-                NativeWindow.mvwaddstr(this.WindowPtr, nline, ncol, str);
-        }
+        public abstract void Write(int nline, int ncol, string str);
 
         /// <summary>
-        /// add a string with formatting. see <see cref="Write(string)"/>
+        /// write string <paramref name="str"/> to the window on line <paramref name="nline"/> and column <paramref name="ncol"/>.
+        /// with defined attributes/color pair.
         /// </summary>
-        /// <param name="format">the string to format</param>
-        /// <param name="arg">arguments to format with</param>
-        public void Write(string format, params object[] arg)
-        {
-            this.Write(string.Format(format, arg));
-        }
-
-        /// <summary>
-        /// add character OR'd together with attributes/color attributes.
-        /// no unicode supported.
-        /// the cursor advances.
-        /// </summary>
-        /// <param name="ch">character/attributes you want to add</param>
-        public void Write(ulong ch)
-        {
-            //if (NCurses.UnicodeSupported)
-            //{
-            //    uint c = ch & Attrs.CHARTEXT;
-            //    uint a = ch & Attrs.ATTRIBUTES;
-            //    uint col = ch & Attrs.COLOR;
-
-            //    int pair = Constants.PAIR_NUMBER(col);
-            //    NCURSES_CH_T wch = new NCURSES_CH_T(c);
-            //    wch.attr = a;
-            //    wch.ext_color = pair;
-            //    NativeWindow.wadd_wch(this.WindowPtr, wch);
-            //}
-            //else
-#if NCURSES_VERSION_5
-            NativeWindow.waddch(this.WindowPtr, ch);
-#elif NCURSES_VERSION_6
-            NativeWindow.waddch(this.WindowPtr, (chtype)ch);
-#endif
-        }
-
-        /// <summary>
-        /// write character <paramref name="ch"/> to the window with defined attributes/color pair.
-        /// no unicode support.
-        /// the cursor advances.
-        /// </summary>
-        /// <param name="ch">the character to add</param>
+        /// <param name="nline">the line number to start writing</param>
+        /// <param name="ncol">the column number to start writing</param>
+        /// <param name="str">the string to add</param>
         /// <param name="attrs">the attributes you want to add (eg <see cref="Attrs.BOLD"/>)</param>
         /// <param name="pair">the color pair you want to use on this character</param>
-        public void Write(ulong ch, ulong attrs, short pair)
-        {
-            ch |= attrs;
-            ch |= (chtype)NativeNCurses.COLOR_PAIR(pair);
-#if NCURSES_VERSION_5
-            NativeWindow.waddch(this.WindowPtr, ch);
-#elif NCURSES_VERSION_6
-            NativeWindow.waddch(this.WindowPtr, (chtype)ch);
-#endif
-        }
+        public abstract void Write(int nline, int ncol, string str, ulong attrs, short pair);
 
         /// <summary>
         /// write character <paramref name="ch"/> to the window.
-        /// <paramref name="ch"/> can be unicode if your terminal supports it.
-        /// the cursor advances.
         /// </summary>
         /// <param name="ch">the character to add</param>
-        public void Write(char ch)
-        {
-            if (NCurses.UnicodeSupported)
-                NativeWindow.wadd_wch(this.WindowPtr, new NCursesWCHAR(ch));
-            else
-                NativeWindow.waddch(this.WindowPtr, (byte)ch);
-        }
+        public abstract void Write(char ch);
 
         /// <summary>
         /// write character <paramref name="ch"/> to the window with defined attributes/color pair.
-        /// <paramref name="ch"/> can be unicode if your terminal supports it.
-        /// the cursor advances
         /// </summary>
         /// <param name="ch">the character to add</param>
         /// <param name="attrs">the attributes you want to add (eg <see cref="Attrs.BOLD"/>)</param>
         /// <param name="pair">the color pair you want to use on this character</param>
-        public void Write(char ch, ulong attrs, short pair)
-        {
-            if (NCurses.UnicodeSupported)
-            {
-                NCursesWCHAR wch = new NCursesWCHAR(ch);
-#if NCURSES_VERSION_5
-                wch.attr = attrs;
-                wch.attr |= (chtype)((uint)NativeNCurses.COLOR_PAIR(pair));
-#elif NCURSES_VERSION_6
-                wch.attr = (chtype)attrs;
-                wch.attr |= (chtype)NativeNCurses.COLOR_PAIR(pair);
-#endif
-                wch.ext_color = pair;
-                NativeWindow.wadd_wch(this.WindowPtr, wch);
-            }
-            else
-            {
-                chtype c = ch;
-#if NCURSES_VERSION_5
-                c |= attrs;
-#elif NCURSES_VERSION_6
-                c |= (chtype)attrs;
-#endif
-                //TODO: replace with managed variant
-                c |= (chtype)NativeNCurses.COLOR_PAIR(pair);
-                NativeWindow.waddch(this.WindowPtr, c);
-            }
-        }
+        public abstract void Write(char ch, ulong attrs, short pair);
 
         /// <summary>
         /// write the character/attributes <paramref name="ch"/> to line <paramref name="nline"/> and column <paramref name="ncol"/>.
@@ -434,187 +263,97 @@ namespace NCurses.Core
         /// <param name="nline">the line number to add the char to</param>
         /// <param name="ncol">the column number to add the char to</param>
         /// <param name="ch">the character/attributes to add</param>
-        public void Write(int nline, int ncol, ulong ch)
-        {
-            //if (NCurses.UnicodeSupported)
-            //{
-            //    uint c = ch & Attrs.CHARTEXT;
-            //    uint a = ch & Attrs.ATTRIBUTES;
-            //    NCURSES_CH_T wch = new NCURSES_CH_T(c);
-            //    wch.attr = a;
-            //    NativeWindow.mvwadd_wch(this.WindowPtr, nline, ncol, wch);
-            //}
-            //else
-#if NCURSES_VERSION_5
-                NativeWindow.mvwaddch(this.WindowPtr, nline, ncol, ch);
-#elif NCURSES_VERSION_6
-                NativeWindow.mvwaddch(this.WindowPtr, nline, ncol, (chtype)ch);
-#endif
-        }
+        public abstract void Write(int nline, int ncol, char ch);
 
         /// <summary>
-        /// write the character <paramref name="ch"/> to line <paramref name="nline"/> and column <paramref name="ncol"/>.
-        /// see <see cref="Write(char)"/>
+        /// write the character/attributes <paramref name="ch"/> to line <paramref name="nline"/> and column <paramref name="ncol"/>
+        /// with defined attributes/color pair.
         /// </summary>
         /// <param name="nline">the line number to add the char to</param>
         /// <param name="ncol">the column number to add the char to</param>
-        /// <param name="ch">the character to add</param>
-        public void Write(int nline, int ncol, char ch)
-        {
-            if (NCurses.UnicodeSupported)
-                NativeWindow.mvwadd_wch(this.WindowPtr, nline, ncol, new NCursesWCHAR(ch));
-            else
-                NativeWindow.mvwaddch(this.WindowPtr, nline, ncol, (byte)ch);
-
-        }
-
-        /// <summary>
-        /// write the array of characters.
-        /// unicode not supported.
-        /// the cursor doesn't advance, only writes until the end of the line.
-        /// </summary>
-        /// <param name="chars">the characters you wnat to add</param>
-        public void Write(ulong[] chars)
-        {
-#if NCURSES_VERSION_5
-            NativeWindow.waddchstr(this.WindowPtr, chars);
-#elif NCURSES_VERSION_6
-            chtype[] chars_1 = new chtype[chars.Length];
-            for (int i = 0; i < chars.Length; i++)
-                chars_1[i] = (chtype) chars[i];
-            NativeWindow.waddchstr(this.WindowPtr, chars_1);
-#endif
-        }
-
-        /// <summary>
-        /// write the array of characters OR'd with attributes/coror attribute.
-        /// unicode not supported.
-        /// the cursor doesn't advance, only writes until the end of the line.
-        /// </summary>
-        /// <param name="chars">the characters you wnat to add</param>
+        /// <param name="ch">the character/attributes to add</param>
         /// <param name="attrs">the attributes you want to add (eg <see cref="Attrs.BOLD"/>)</param>
         /// <param name="pair">the color pair you want to use on this character</param>
-        public void Write(ulong[] chars, ulong attrs, short pair)
-        {
-            for (int i = 0; i < chars.Length; i++)
-            {
-                chars[i] |= attrs;
-                //TODO: replace with managed variant
-                chars[i] |= (ulong)((uint)NativeNCurses.COLOR_PAIR(pair));
-            }
-#if NCURSES_VERSION_5
-            NativeWindow.waddchstr(this.WindowPtr, chars);
-#elif NCURSES_VERSION_6
-            chtype[] chars_1 = new chtype[chars.Length];
-            for (int i = 0; i < chars.Length; i++)
-                chars_1[i] = (chtype)chars[i];
-            NativeWindow.waddchstr(this.WindowPtr, chars_1);
-#endif
-        }
+        public abstract void Write(int nline, int ncol, char ch, ulong attrs, short pair);
 
         /// <summary>
-        /// write the array of (unicode) characters.
-        /// the cursor doesn't advance, only writes until the end of the line.
+        /// write byte array <paramref name="str"/>  encoded in <paramref name="encoding"/> to the window.
         /// </summary>
-        /// <param name="chars">the characters you wnat to add</param>
-        public void Write(char[] chars)
-        {
-            if (NCurses.UnicodeSupported)
-            {
-                NCursesWCHAR[] chArray = new NCursesWCHAR[chars.Length];
-                for (int i = 0; i < chars.Length; i++)
-                    chArray[i] = new NCursesWCHAR(chars[i]);
-                NativeWindow.wadd_wchstr(this.WindowPtr, chArray);
-            }
-            else
-            {
-                //TODO: correct unicode char conversion to ASCII
-                chtype[] chArray = new chtype[chars.Length];
-                for (int i = 0; i < chars.Length; i++)
-                    chArray[i] = chars[i];
-                NativeWindow.waddchstr(this.WindowPtr, chArray);
-            }
-        }
+        /// <param name="str">the string to write</param>
+        /// <param name="encoding">encoding of <paramref name="str"/></param>
+        public abstract void Write(byte[] str, Encoding encoding);
 
         /// <summary>
-        /// write the array of (unicode) characters with defined attributes/color pair
-        /// the cursor doesn't advance, only writes until the end of the line.
+        /// write byte array <paramref name="str"/> encoded in <paramref name="encoding"/> to the window. with defined attributes/color pair.
         /// </summary>
-        /// <param name="chars">the characters you wnat to add</param>
+        /// <param name="str">the string to write</param>
+        /// <param name="encoding">encoding of <paramref name="str"/></param>
         /// <param name="attrs">the attributes you want to add (eg <see cref="Attrs.BOLD"/>)</param>
         /// <param name="pair">the color pair you want to use on this character</param>
-        public void Write(char[] chars, ulong attrs, short pair)
-        {
-            NCursesWCHAR[] chArray = new NCursesWCHAR[chars.Length];
-            for (int i = 0; i < chars.Length; i++)
-            {
-                chArray[i] = new NCursesWCHAR(chars[i]);
-#if NCURSES_VERSION_5
-                chArray[i].attr = attrs;
-                chArray[i].attr |= (chtype)((uint)NativeNCurses.COLOR_PAIR(pair));
-#elif NCURSES_VERSION_6
-                chArray[i].attr = (chtype)attrs;
-                chArray[i].attr |= (chtype)NativeNCurses.COLOR_PAIR(pair);
-#endif
-                chArray[i].ext_color = pair;
-            }
-            NativeWindow.wadd_wchstr(this.WindowPtr, chArray);
-        }
-#endregion
-
-#region WriteLine
-        /// <summary>
-        /// write a new line to the window. see <see cref="Write(int, int, string)"/>
-        /// </summary>
-        /// <param name="str">the string to write to the window</param>
-        public void WriteLine(string str)
-        {
-            this.Write(string.Format("{0}\n", str));
-        }
+        public abstract void Write(byte[] str, Encoding encoding, ulong attrs, short pair);
 
         /// <summary>
-        /// write a formatted string to the window. see <see cref="WriteLine(string)"/>
+        /// write byte array <paramref name="str"/> encoded in <paramref name="encoding"/> to the window on line <paramref name="nline"/> and column <paramref name="ncol"/>.
         /// </summary>
-        /// <param name="format">the string to format</param>
-        /// <param name="arg">arguments to format with</param>
-        public void WriteLine(string format, params object[] arg)
-        {
-            this.WriteLine(string.Format(format, arg));
-        }
-#endregion
+        /// <param name="nline">the line number to start writing</param>
+        /// <param name="ncol">the column number to start writing</param>
+        /// <param name="str">the string to add</param>
+        /// <param name="encoding">encoding of <paramref name="str"/></param>
+        public abstract void Write(int nline, int ncol, byte[] str, Encoding encoding);
 
-#region read input
+        /// <summary>
+        /// write byte array <paramref name="str"/> encoded in <paramref name="encoding"/> to the window on line <paramref name="nline"/> and column <paramref name="ncol"/>.
+        /// with defined attributes/color pair.
+        /// </summary>
+        /// <param name="nline">the line number to start writing</param>
+        /// <param name="ncol">the column number to start writing</param>
+        /// <param name="str">the string to add</param>
+        /// <param name="encoding">encoding of <paramref name="str"/></param>
+        /// <param name="attrs">the attributes you want to add (eg <see cref="Attrs.BOLD"/>)</param>
+        /// <param name="pair">the color pair you want to use on this character</param>
+        public abstract void Write(int nline, int ncol, byte[] str, Encoding encoding, ulong attrs, short pair);
+        #endregion
+
+        #region read input
         /// <summary>
         /// read a character from console input.
-        /// Also refreshes the window if it hasn't been refreshed yet.
+        /// can also be an escaped character/function key <see cref="Constants.CTRL(int)"/> and <see cref="Constants.ALT(int)"/>
+        /// if this returns a multibyte character, it's already decoded (incorrectly), so escaping information is lost
+        /// use the appropriate static methods in that case
         /// </summary>
-        /// <returns>the read character</returns>
-        public int ReadKey()
-        {
-            if (NCurses.UnicodeSupported)
-            {
-                char ret;
-                NativeWindow.wget_wch(this.WindowPtr, out ret);
-                return ret;
-            }
-            else
-                return NativeWindow.wgetch(this.WindowPtr);
-        }
+        /// <param name="ch">the read character</param>
+        /// <param name="key">the read function key</param>
+        /// <returns>TRUE if the read key is a function key</returns>
+        public abstract bool ReadKey(out char ch, out Key key);
+
+        /// <summary>
+        /// read a character from console input after moving the cursor to <paramref name="nline"/> and <paramref name="ncol"/>
+        /// can also be an escaped character/function key <see cref="Constants.CTRL(int)"/> and <see cref="Constants.ALT(int)"/>
+        /// if this returns a multibyte character, it's already decoded (incorrectly), so escaping information is lost
+        /// use the appropriate static methods in that case
+        /// </summary>
+        /// <param name="nline">the line number to move to</param>
+        /// <param name="ncol">the column number to move to</param>
+        /// <param name="ch">the read character</param>
+        /// <param name="key">the read function key</param>
+        /// <returns>TRUE if the read key is a function key</returns>
+        public abstract bool ReadKey(int nline, int ncol, out char ch, out Key key);
 
         /// <summary>
         /// read a string of atmost 1023 characters from the console input or until return
         /// Also refreshes the window if it hasn't been refreshed yet.
         /// </summary>
         /// <returns>the read string</returns>
-        public string ReadLine()
-        {
-            StringBuilder builder = new StringBuilder(1024);
-            if (NCurses.UnicodeSupported)
-                NativeWindow.wget_wstr(this.WindowPtr, builder);
-            else
-                NativeWindow.wgetstr(this.WindowPtr, builder);
-            return builder.ToString();
-        }
+        public abstract string ReadLine();
+
+        /// <summary>
+        /// read a string of atmost 1023 characters from the console input or until return
+        /// Also refreshes the window if it hasn't been refreshed yet.
+        /// </summary>
+        /// <param name="nline">the line number to move to</param>
+        /// <param name="ncol">the column number to move to</param>
+        /// <returns>the read string</returns>
+        public abstract string ReadLine(int nline, int ncol);
 
         /// <summary>
         /// read a string of a particular length from the console input or until return
@@ -622,128 +361,97 @@ namespace NCurses.Core
         /// </summary>
         /// <param name="length">count of characters to read</param>
         /// <returns>the read string</returns>
-        public string ReadLine(int length)
-        {
-            StringBuilder builder = new StringBuilder(length + 1);
-            if (NCurses.UnicodeSupported)
-                NativeWindow.wgetn_wstr(this.WindowPtr, builder, length);
-            else
-                NativeWindow.wgetnstr(this.WindowPtr, builder, length);
-            return builder.ToString();
-        }
-#endregion
+        public abstract string ReadLine(int length);
 
+        /// <summary>
+        /// read a string of a particular length from the console input or until return
+        /// Also refreshes the window if it hasn't been refreshed yet.
+        /// </summary>
+        /// <param name="nline">the line number to move to</param>
+        /// <param name="ncol">the column number to move to</param>
+        /// <param name="length">count of characters to read</param>
+        /// <returns>the read string</returns>
+        public abstract string ReadLine(int nline, int ncol, int length);
+        #endregion
 
-#region insert
+        #region insert
         /// <summary>
         /// insert a character on the current cursor position. all characaters on the right move 1 column. character might fall off at the end of the line.
-        /// supports unicode.
-        /// cursor doesn't move.
         /// </summary>
         /// <param name="ch">the character to insert</param>
-        public void Insert(char ch)
-        {
-            if (NCurses.UnicodeSupported)
-            {
-                NCursesWCHAR wch = new NCursesWCHAR(ch);
-                NativeWindow.wins_wch(this.WindowPtr, wch);
-            }
-            else
-                NativeWindow.winsch(this.WindowPtr, ch);
-        }
+        public abstract void Insert(char ch);
+
+        /// <summary>
+        /// insert a character on line <paramref name="nline"/> and column <paramref name="ncol"/>. all characaters on the right move 1 column. character might fall off at the end of the line.
+        /// </summary>
+        /// <param name="nline">the line number to start writing</param>
+        /// <param name="ncol">the column number to start writing</param>
+        /// <param name="ch">the character to insert</param>
+        public abstract void Insert(int nline, int ncol, char ch);
 
         /// <summary>
         /// insert a character with attributes/color on the current cursor position. all characaters on the right move 1 column. character might fall off at the end of the line.
-        /// supports unicode.
-        /// cursor doesn't move.
         /// </summary>
         /// <param name="ch">the character to insert</param>
         /// <param name="attrs">the attributes you want to add (eg <see cref="Attrs.BOLD"/>)</param>
         /// <param name="pair">the color pair you want to use on this character</param>
-        public void Insert(char ch, ulong attrs, short pair)
-        {
-            if (NCurses.UnicodeSupported)
-            {
-                NCursesWCHAR wch = new NCursesWCHAR(ch);
-#if NCURSES_VERSION_5
-                wch.attr = attrs;
-                wch.attr |= (chtype)((uint)NativeNCurses.COLOR_PAIR(pair));
-#elif NCURSES_VERSION_6
-                wch.attr = (chtype)attrs;
-                wch.attr |= (chtype)NativeNCurses.COLOR_PAIR(pair);
-#endif
-                wch.ext_color = pair;
-                NativeWindow.wins_wch(this.WindowPtr, wch);
-            }
-            else
-            {
-                chtype c = ch;
-#if NCURSES_VERSION_5
-                c |= attrs;
-#elif NCURSES_VERSION_6
-                c |= (chtype)attrs;
-#endif
-                c |= (chtype)NativeNCurses.COLOR_PAIR(pair);
-                NativeWindow.winsch(this.WindowPtr, c);
-            }
-        }
+        public abstract void Insert(char ch, ulong attrs, short pair);
+
+        /// <summary>
+        /// insert a character with attributes/color on line <paramref name="nline"/> and column <paramref name="ncol"/>. 
+        /// all characaters on the right move 1 column. character might fall off at the end of the line.
+        /// </summary>
+        /// <param name="nline">the line number to start writing</param>
+        /// <param name="ncol">the column number to start writing</param>
+        /// <param name="ch">the character to insert</param>
+        /// <param name="attrs">the attributes you want to add (eg <see cref="Attrs.BOLD"/>)</param>
+        /// <param name="pair">the color pair you want to use on this character</param>
+        public abstract void Insert(int nline, int ncol, char ch, ulong attrs, short pair);
 
         /// <summary>
         /// insert a string on the current cursor position. all characaters on the right move the lenght of the string.
         /// character might fall off at the end of the line.
-        /// supports unicode
-        /// cursor doesn't move
         /// </summary>
         /// <param name="str">the string to insert</param>
-        public void Insert(string str)
-        {
-            if (NCurses.UnicodeSupported)
-                NativeWindow.wins_wstr(this.WindowPtr, str);
-            else
-                NativeWindow.winsstr(this.WindowPtr, str);
-        }
+        public abstract void Insert(string str);
 
         /// <summary>
-        /// insert a max of <paramref name="count"/> character of the string on the current cursor position.
-        /// all characaters shift the length of the string. character might fall off at the end of the line.
-        /// supports unicode
-        /// cursor doesn't move
+        /// insert a string on line <paramref name="nline"/> and column <paramref name="ncol"/>. all characaters on the right move 1 column. character might fall off at the end of the line.
         /// </summary>
+        /// <param name="nline">the line number to start writing</param>
+        /// <param name="ncol">the column number to start writing</param>
         /// <param name="str">the string to insert</param>
-        /// <param name="count">the amount of characters to insert</param>
-        public void Insert(string str, int count)
-        {
-            if (NCurses.UnicodeSupported)
-                NativeWindow.wins_nwstr(this.WindowPtr, str, count);
-            else
-                NativeWindow.winsnstr(this.WindowPtr, str, count);
-        }
-#endregion
+        public abstract void Insert(int nline, int ncol, string str);
+        #endregion
 
-#region read output
+        #region extract output
         /// <summary>
         /// read a character from the console output at the current position
-        /// supports unicode.
-        /// doesn't move the cursor
+        /// </summary>
+        /// <param name="charsWithAttributes">The returned charactes with attributes</param>
+        public abstract void ExtractChar(out INCursesChar ch);
+
+        /// <summary>
+        /// read a character from the console output at the current position
         /// </summary>
         /// <returns>the read character</returns>
-        public char GetChar()
-        {
-            char ch;
-            if (NCurses.UnicodeSupported)
-            {
-                NCursesWCHAR wch;
-                NativeWindow.win_wch(this.WindowPtr, out wch);
-                return wch.GetChar();
-            }
-            else
-            {
-                chtype c = NativeWindow.winch(this.WindowPtr);
-                ch = (char)(c & Attrs.CHARTEXT);
-            }
+        public abstract char ExtractChar();
 
-            return ch;
-        }
+        /// <summary>
+        /// read a character from the console output on line <paramref name="nline"/> and column <paramref name="ncol"/>. 
+        /// </summary>
+        /// <param name="nline">the line number to start writing</param>
+        /// <param name="ncol">the column number to start writing</param>
+        /// <returns>the read character</returns>
+        public abstract char ExtractChar(int nline, int ncol);
+
+        /// <summary>
+        /// read a character from the console output on line <paramref name="nline"/> and column <paramref name="ncol"/>. 
+        /// </summary>
+        /// <param name="nline">the line number to start writing</param>
+        /// <param name="ncol">the column number to start writing</param>
+        /// <param name="charsWithAttributes">The returned charactes with attributes</param>
+        public abstract void ExtractChar(int nline, int ncol, out INCursesChar ch);
 
         /// <summary>
         /// read a character with all its attributes from the console output at the current position
@@ -753,215 +461,238 @@ namespace NCurses.Core
         /// <param name="attrs">attributes applied to the character</param>
         /// <param name="pair">pair number applied to the character</param>
         /// <returns>the read character</returns>
-        public char GetChar(out ulong attrs, out short pair)
-        {
-            char ch;
-            if (NCurses.UnicodeSupported)
-            {
-                NCursesWCHAR wch;
-                NativeWindow.win_wch(this.WindowPtr, out wch);
-                ch = wch.GetChar();
-                attrs = wch.attr;
-                pair = (short)wch.ext_color;
-                if(pair == 0)
-#if NCURSES_VERSION_5
-                    pair = (short)Constants.PAIR_NUMBER(attrs & Attrs.COLOR);
-#elif NCURSES_VERSION_6
-                    pair = (short)Constants.PAIR_NUMBER((chtype)attrs & Attrs.COLOR);
-#endif
-            }
-            else
-            {
-                chtype c = NativeWindow.winch(this.WindowPtr);
-                ch = (char)(c & Attrs.CHARTEXT);
-                attrs = c & Attrs.ATTRIBUTES;
-                pair = (short)Constants.PAIR_NUMBER(c & Attrs.COLOR);
-            }
+        public abstract char ExtractChar(out ulong attrs, out short pair);
 
-            return ch;
-        }
+        /// <summary>
+        /// read a character with all its attributes from the console output on line <paramref name="nline"/> and column <paramref name="ncol"/>. 
+        /// supports unicode.
+        /// doesn't move the cursor
+        /// </summary>
+        /// <param name="nline">the line number to start writing</param>
+        /// <param name="ncol">the column number to start writing</param>
+        /// <param name="attrs">attributes applied to the character</param>
+        /// <param name="pair">pair number applied to the character</param>
+        /// <returns>the read character</returns>
+        public abstract char ExtractChar(int nline, int ncol, out ulong attrs, out short pair);
 
         /// <summary>
         /// read a string of atmost 1024 characters or until the right margin from the console output.
-        /// supports unicode.
-        /// doesn't move the cursor
         /// </summary>
         /// <returns>the read string</returns>
-        public string GetString()
-        {
-            StringBuilder builder = new StringBuilder(1024);
-            if (NCurses.UnicodeSupported)
-                NativeWindow.winwstr(this.WindowPtr, builder);
-            else
-                NativeWindow.winstr(this.WindowPtr, builder);
-            return builder.ToString();
-        }
+        public abstract string ExtractString();
 
         /// <summary>
-        /// read a string of atmost <paramref name="count"/> characters or until the right margin from the console output.
-        /// supports unicode.
-        /// doesn't move the cursor
+        /// read a string of atmost <paramref name="maxChars"/> characters.
         /// </summary>
-        /// <param name="count">the number of characters to read</param>
+        /// <param name="maxChars">The number of characters to extract</param>
+        /// <param name="read">The number of character extracted</param>
         /// <returns>the read string</returns>
-        public string GetString(int count)
-        {
-            StringBuilder builder = new StringBuilder(count);
-            if (NCurses.UnicodeSupported)
-                NativeWindow.winnwstr(this.WindowPtr, builder, count);
-            else
-                NativeWindow.winnstr(this.WindowPtr, builder, count);
-            return builder.ToString();
-        }
+        public abstract string ExtractString(int maxChars, out int read);
 
         /// <summary>
-        ///  read a string with all of its attributes of atmost 1024 characters or until the right margin from the console output.
-        ///  attribute indexes relate to the character index in the string.
+        /// read a string atmost 1024 charactersor until the right margin from the console output from the console output 
+        /// on line <paramref name="nline"/> and column <paramref name="ncol"/>. 
         /// </summary>
-        /// <param name="lstAttributes">a list to save the attributes in</param>
-        /// <returns>the read string</returns>
-        public string GetString(IList<Tuple<ulong, short>> lstAttributes)
-        {
-            if (lstAttributes == null)
-                throw new ArgumentNullException("No list passed to save the attributes");
+        /// <param name="nline">the line number to start writing</param>
+        /// <param name="ncol">the column number to start writing</param>
+        /// <returns>the read character</returns>
+        public abstract string ExtractString(int nline, int ncol);
 
-            StringBuilder builder = new StringBuilder(1024);
-            if (NCurses.UnicodeSupported)
-            {
-                NCursesWCHAR[] wchArr = new NCursesWCHAR[1024];
-                NativeWindow.win_wchstr(this.WindowPtr, ref wchArr);
-                for (int i = 0; i < wchArr.Length; i++)
-                {
-                    builder.Append(wchArr[i].GetChar());
-                    lstAttributes.Add(Tuple.Create(wchArr[i].attr, (short)wchArr[i].ext_color));
-                }
-            }
-            else
-            {
-                chtype[] chArr = new chtype[1024];
-                NativeWindow.winchstr(this.WindowPtr, ref chArr);
-                for (int i = 0; i < chArr.Length; i++)
-                {
-                    builder.Append((char)(chArr[i] & Attrs.CHARTEXT));
-#if NCURSES_VERSION_5
-                    lstAttributes.Add(Tuple.Create(chArr[i] & Attrs.ATTRIBUTES, (short)Constants.PAIR_NUMBER(chArr[i] & Attrs.COLOR)));
-#elif NCURSES_VERSION_6
-                    lstAttributes.Add(Tuple.Create((ulong)(chArr[i] & Attrs.ATTRIBUTES), (short)Constants.PAIR_NUMBER(chArr[i] & Attrs.COLOR)));
-#endif
-                }
-            }
-            return builder.ToString();
-        }
-
-        //TODO: return NCURSES_CH_T or uint[] ????
         /// <summary>
-        ///  read a string with all of its attributes of atmost <paramref name="count"/> characters or until the right margin from the console output.
-        ///  attribute indexes refer to the character index in the string.
+        /// read a string atmost 1024 charactersor until the right margin from the console output from the console output 
+        /// on line <paramref name="nline"/> and column <paramref name="ncol"/>. 
         /// </summary>
-        /// <param name="count">the number of characters to read</param>
-        /// <param name="lstAttributes">a list to save the attributes in</param>
-        /// <returns>the read string</returns>
-        public string GetString(int count, IList<Tuple<ulong, short>> lstAttributes)
-        {
-            if (lstAttributes == null)
-                throw new ArgumentNullException("No list passed to save the attributes");
+        /// <param name="nline">the line number to start writing</param>
+        /// <param name="ncol">the column number to start writing</param>
+        /// <param name="maxChars">The number of characters to extract</param>
+        /// <param name="read">The number of character extracted</param>
+        /// <returns>the read character</returns>
+        public abstract string ExtractString(int nline, int ncol, int maxChars, out int read);
 
-            StringBuilder builder = new StringBuilder(count);
-            if (NCurses.UnicodeSupported)
-            {
-                NCursesWCHAR[] wchArr = new NCursesWCHAR[count];
-                NativeWindow.win_wchnstr(this.WindowPtr, ref wchArr, count);
-                for (int i = 0; i < wchArr.Length; i++)
-                {
-                    builder.Append(wchArr[i].GetChar());
-                    lstAttributes.Add(Tuple.Create(wchArr[i].attr, (short)wchArr[i].ext_color));
-                }
-            }
-            else
-            {
-                chtype[] chArr = new chtype[count];
-                NativeWindow.winchnstr(this.WindowPtr, ref chArr, count);
-                for (int i = 0; i < chArr.Length; i++)
-                {
-                    builder.Append((char)(chArr[i] & Attrs.CHARTEXT));
-#if NCURSES_VERSION_5
-                    lstAttributes.Add(Tuple.Create(chArr[i] & Attrs.ATTRIBUTES, (short)Constants.PAIR_NUMBER(chArr[i] & Attrs.COLOR)));
-#elif NCURSES_VERSION_6
-                    lstAttributes.Add(Tuple.Create((ulong)(chArr[i] & Attrs.ATTRIBUTES), (short)Constants.PAIR_NUMBER(chArr[i] & Attrs.COLOR)));
-#endif
-                }
-            }
-            return builder.ToString();
-        }
-#endregion
-
-#region border
         /// <summary>
-        /// draw the default borders for the current window.
-        /// non-unicode supported
+        /// read a string with all its attributes of atmost 1024 characters or until the right margin from the console output.
         /// </summary>
-        public void Box()
-        {
-            NativeWindow.box(this.WindowPtr, 0, 0);
-        }
-#endregion
+        /// <param name="charsWithAttributes">The returned charactes with attributes</param>
+        public abstract void ExtractString(out INCursesCharStr charsWithAttributes);
+
+        /// <summary>
+        /// read a string with all its attributes of atmost paramref name="maxChars"/> characters or until the right margin from the console output.
+        /// </summary>
+        /// <param name="charsWithAttributes">The returned charactes with attributes</param>
+        /// <param name="maxChars">The number of characters to extract</param>
+        public abstract void ExtractString(out INCursesCharStr charsWithAttributes, int maxChars);
+
+        /// <summary>
+        /// read a string with all its attributes of atmost 1024 characters or until the right margin from the console output 
+        /// on line <paramref name="nline"/> and column <paramref name="ncol"/>. 
+        /// </summary>
+        /// <param name="nline">the line number to start writing</param>
+        /// <param name="ncol">the column number to start writing</param>
+        /// <param name="charsWithAttributes">The returned charactes with attributes</param>
+        public abstract void ExtractString(int nline, int ncol, out INCursesCharStr charsWithAttributes);
+
+        /// <summary>
+        /// read a string with all its attributes of atmost <paramref name="maxChars"/> characters or until the right margin from the console output 
+        /// on line <paramref name="nline"/> and column <paramref name="ncol"/>. 
+        /// </summary>
+        /// <param name="nline">the line number to start writing</param>
+        /// <param name="ncol">the column number to start writing</param>
+        /// <param name="charsWithAttributes">The returned charactes with attributes</param>
+        /// <param name="maxChars">The number of characters to extract</param>
+        public abstract void ExtractString(int nline, int ncol, out INCursesCharStr charsWithAttributes, int maxChars);
+        #endregion
+
+        //TODO: strings
+        #region character creation
+        /// <summary>
+        /// Get a native character representing <paramref name="ch"/>
+        /// </summary>
+        /// <param name="ch">The character to convert</param>
+        /// <returns>The converted cahracter</returns>
+        public abstract void CreateChar(char ch, out INCursesChar chRet);
+
+        /// <summary>
+        /// Get a native character representing <paramref name="ch"/>
+        /// </summary>
+        /// <param name="ch">The character to convert</param>
+        /// <param name="attrs">attributes applied to the character</param>
+        /// <returns>The converted cahracter</returns>
+        public abstract void CreateChar(char ch, ulong attrs, out INCursesChar chRet);
+
+        /// <summary>
+        /// Get a native character representing <paramref name="ch"/> with attributes/color applied
+        /// </summary>
+        /// <param name="ch">The character to convert</param>
+        /// <param name="attrs">attributes applied to the character</param>
+        /// <param name="pair">pair number applied to the character</param>
+        /// <returns>The converted cahracter</returns>
+        public abstract void CreateChar(char ch, ulong attrs, short pair, out INCursesChar chRet);
+
+        /// <summary>
+        /// Get a native string representing <paramref name="str"/>
+        /// </summary>
+        /// <param name="str">The string to convert</param>
+        /// <returns>The converted str</returns>
+        public abstract void CreateString(string str, out INCursesCharStr chStr);
+
+        /// <summary>
+        /// Get a native string representing <paramref name="str"/>
+        /// </summary>
+        /// <param name="str">The string to convert</param>
+        /// <param name="attrs">attributes applied to the character</param>
+        /// <returns>The converted str</returns>
+        public abstract void CreateString(string str, ulong attrs, out INCursesCharStr chStr);
+
+        /// <summary>
+        /// Get a native string representing <paramref name="str"/> with attributes/color applied
+        /// </summary>
+        /// <param name="str">The string to convert</param>
+        /// <param name="attrs">attributes applied to the character</param>
+        /// <param name="pair">pair number applied to the character</param>
+        /// <returns>The converted cahracter</returns>
+        public abstract void CreateString(string str, ulong attrs, short pair, out INCursesCharStr chStr);
+        #endregion
+
+        #region border
+        /// <summary>
+        /// Draw a box around the edges of the window
+        /// </summary>
+        /// <param name="ls">left side</param>
+        /// <param name="rs">right side</param>
+        /// <param name="ts">top side</param>
+        /// <param name="bs">bottom side</param>
+        /// <param name="tl">top left-hand corner</param>
+        /// <param name="tr">top right-hand corner</param>
+        /// <param name="bl">bottom left-hand corner</param>
+        /// <param name="br">bottom right-hand corner</param>
+        public abstract void Border(in INCursesChar l, in INCursesChar rs, in INCursesChar ts, in INCursesChar bs, in INCursesChar tl, in INCursesChar tr, in INCursesChar bl, in INCursesChar br);
+
+        /// <summary>
+        /// Draw a default border around the edges of the window
+        /// </summary>
+        public abstract void Border();
+
+        /// <summary>
+        /// Draw a horizontal line using
+        /// </summary>
+        /// <param name="lineChar">The character to use for the horizontal line</param>
+        /// <param name="length">Lenght of the line with character <paramref name="lineChar"/></param>
+        public abstract void HorizontalLine(in INCursesChar lineChar, int length);
+
+        /// <summary>
+        /// Draw a horizontal line on line <paramref name="nline"/> and column <paramref name="ncol"/>. 
+        /// </summary>
+        /// <param name="nline">the line number to start writing</param>
+        /// <param name="ncol">the column number to start writing</param>
+        /// <param name="lineChar">The character to use for the horizontal line</param>
+        /// <param name="length">Lenght of the line with character <paramref name="lineChar"/></param>
+        public abstract void HorizontalLine(int nline, int ncol, in INCursesChar lineChar, int length);
+
+        /// <summary>
+        /// Draw a vertical line
+        /// </summary>
+        /// <param name="lineChar">The character to use for the vertical line</param>
+        /// <param name="length">Lenght of the line with character <paramref name="lineChar"/></param>
+        public abstract void VerticalLine(in INCursesChar lineChar, int length);
+
+        /// <summary>
+        /// Draw a vertical line on line <paramref name="nline"/> and column <paramref name="ncol"/>. 
+        /// </summary>
+        /// <param name="nline">the line number to start writing</param>
+        /// <param name="ncol">the column number to start writing</param>
+        /// <param name="lineChar">The character to use for the vertical line</param>
+        /// <param name="length">Lenght of the line with character <paramref name="lineChar"/></param>
+        public abstract void VerticalLine(int nline, int ncol, in INCursesChar lineChar, int length);
+        #endregion
 
         /// <summary>
         /// Clear the window
         /// </summary>
-        public void Erase()
-        {
-            NativeWindow.werase(this.WindowPtr);
-        }
+        public abstract void Erase();
 
         /// <summary>
-        /// Clear the window without a call to refresh
+        /// Clear the window without committing to the screen
         /// </summary>
-        public void Clear()
-        {
-            NativeWindow.wclear(this.WindowPtr);
-        }
+        public abstract void Clear();
 
         /// <summary>
         /// Scroll the window <paramref name="lines"/> lines.
         /// </summary>
         /// <param name="lines">the number of lines to scroll, negative to scroll down.</param>
-        public void ScrollWindow(int lines)
-        {
-            NativeWindow.wscrl(this.WindowPtr, lines);
-        }
+        public abstract void ScrollWindow(int lines);
 
         /// <summary>
         /// Clear to the end of the line
         /// </summary>
-        public void ClearToEol()
-        {
-            NativeWindow.wclrtoeol(this.WindowPtr);
-        }
+        public abstract void ClearToEol();
 
         /// <summary>
         /// Clear window to bottom starting from current cursor position
         /// </summary>
-        public void ClearToBottom()
-        {
-            NativeWindow.wclrtobot(this.WindowPtr);
-        }
+        public abstract void ClearToBottom();
 
+        /// <summary>
+        /// Refresh the entire screen
+        /// </summary>
         public abstract void Refresh();
-        public abstract void NoOutRefresh();
-        public abstract WindowBase SubWindow();
 
-#region IDisposable
+        /// <summary>
+        /// Refresh the changed portions of the screen, allowing to refresh multiple windows at once
+        /// Remember to call <see cref="NCurses.DoUpdate"/> after all calls
+        /// </summary>
+        public abstract void NoOutRefresh();
+
+        #region IDisposable
         protected virtual void Dispose(bool disposing)
         {
             if (this.WindowPtr != IntPtr.Zero)
-                DictPtrWindows.Remove(this.WindowPtr);
+                DictPtrWindows.Remove(this);
         }
 
         public void Dispose()
         {
             this.Dispose(true);
         }
-#endregion
+        #endregion
     }
 }

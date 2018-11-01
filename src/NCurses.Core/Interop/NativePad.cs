@@ -1,16 +1,57 @@
 ﻿using System;
 using System.Runtime.InteropServices;
-
-#if NCURSES_VERSION_6
-using chtype = System.UInt32;
-#elif NCURSES_VERSION_5
-using chtype = System.UInt64;
-#endif
+using NCurses.Core.Interop.Wide;
+using NCurses.Core.Interop.WideStr;
+using NCurses.Core.Interop.Small;
+using NCurses.Core.Interop.SmallStr;
+using NCurses.Core.Interop.Dynamic;
 
 namespace NCurses.Core.Interop
 {
     internal static class NativePad
     {
+        #region Custom type wrapper fields
+        private static INativePadWide widePadWrapper;
+        private static INativePadWide WidePadWrapper => NativeNCurses.HasUnicodeSupport
+              ? widePadWrapper ?? throw new InvalidOperationException(Constants.TypeGenerationExceptionMessage)
+              : throw new InvalidOperationException(Constants.NoUnicodeExceptionMessage);
+
+        private static INativePadSmall smallPadWrapper;
+        private static INativePadSmall SmallPadWrapper => smallPadWrapper ?? throw new InvalidOperationException(Constants.TypeGenerationExceptionMessage);
+        #endregion
+
+        #region custom type initialization
+        internal static void CreateCharCustomWrappers()
+        {
+            //do nothing
+        }
+
+        internal static void CreateCustomTypeWrappers()
+        {
+            if ((DynamicTypeBuilder.chtype is null
+                || DynamicTypeBuilder.schar is null)
+                || (NativeNCurses.HasUnicodeSupport
+                    && (DynamicTypeBuilder.cchar_t is null || DynamicTypeBuilder.wchar_t is null)))
+                throw new InvalidOperationException("Custom types haven't been generated yet.");
+
+            Type customType;
+            if (NativeNCurses.HasUnicodeSupport)
+            {
+                if (widePadWrapper is null)
+                {
+                    customType = typeof(NativePadWide<,,,>).MakeGenericType(DynamicTypeBuilder.cchar_t, DynamicTypeBuilder.wchar_t, DynamicTypeBuilder.chtype, DynamicTypeBuilder.schar);
+                    widePadWrapper = (INativePadWide)Activator.CreateInstance(customType);
+                }
+            }
+
+            if (smallPadWrapper is null)
+            {
+                customType = typeof(NativePadSmall<,>).MakeGenericType(DynamicTypeBuilder.chtype, DynamicTypeBuilder.schar);
+                smallPadWrapper = (INativePadSmall)Activator.CreateInstance(customType);
+            }
+        }
+        #endregion
+
         #region pechochar
         /// <summary>
         /// The pechochar routine is functionally equivalent to a call
@@ -25,19 +66,9 @@ namespace NCurses.Core.Interop
         /// </summary>
         /// <param name="pad">a pointer to the pad</param>
         /// <param name="ch">the character you want to echo</param>
-        public static void pechochar(IntPtr pad, chtype ch)
+        public static void pechochar(IntPtr pad, in INCursesSCHAR ch)
         {
-            NativeNCurses.VerifyNCursesMethod(() => NativeNCurses.NCursesWrapper.pechochar(pad, ch), "pechochar");
-        }
-
-        /// <summary>
-        /// see <see cref="pechochar(IntPtr, chtype)"/>
-        /// <para />native method wrapped with verification and thread safety.
-        /// </summary>
-        public static void pechochar_t(IntPtr pad, chtype ch)
-        {
-            Func<IntPtr, IntPtr, int> callback = (IntPtr w, IntPtr a) => NativeNCurses.NCursesWrapper.pechochar(pad, ch);
-            NativeNCurses.use_window_v(pad, Marshal.GetFunctionPointerForDelegate(new NCURSES_WINDOW_CB(callback)), "pechochar");
+            SmallPadWrapper.pechochar(pad, ch);
         }
         #endregion
 
@@ -67,17 +98,7 @@ namespace NCurses.Core.Interop
         /// <param name="smaxcol">minimum column number of the screen where to display</param>
         public static void pnoutrefresh(IntPtr pad, int pminrow, int pmincol, int sminrow, int smincol, int smaxrow, int smaxcol)
         {
-            NativeNCurses.VerifyNCursesMethod(() => NativeNCurses.NCursesWrapper.pnoutrefresh(pad, pminrow, pmincol, sminrow, smincol, smaxrow, smaxcol), "pnoutrefresh");
-        }
-
-        /// <summary>
-        /// see <see cref="pnoutrefresh"/>
-        /// <para />native method wrapped with verification and thread safety.
-        /// </summary>
-        public static void pnoutrefresh_t(IntPtr pad, int pminrow, int pmincol, int sminrow, int smincol, int smaxrow, int smaxcol)
-        {
-            Func<IntPtr, IntPtr, int> callback = (IntPtr w, IntPtr a) => NativeNCurses.NCursesWrapper.pnoutrefresh(pad, pminrow, pmincol, sminrow, smincol, smaxrow, smaxcol);
-            NativeNCurses.use_window_v(pad, Marshal.GetFunctionPointerForDelegate(new NCURSES_WINDOW_CB(callback)), "pnoutrefresh");
+            NCursesException.Verify(NativeNCurses.NCursesWrapper.pnoutrefresh(pad, pminrow, pmincol, sminrow, smincol, smaxrow, smaxcol), "pnoutrefresh");
         }
         #endregion
 
@@ -88,17 +109,7 @@ namespace NCurses.Core.Interop
         /// </summary>
         public static void prefresh(IntPtr pad, int pminrow, int pmincol, int sminrow, int smincol, int smaxrow, int smaxcol)
         {
-            NativeNCurses.VerifyNCursesMethod(() => NativeNCurses.NCursesWrapper.prefresh(pad, pminrow, pmincol, sminrow, smincol, smaxrow, smaxcol), "prefresh");
-        }
-
-        /// <summary>
-        /// see <see cref="prefresh(IntPtr, int, int, int, int, int, int)"/>
-        /// <para />native method wrapped with verification and thread safety.
-        /// </summary>
-        public static void prefresh_t(IntPtr pad, int pminrow, int pmincol, int sminrow, int smincol, int smaxrow, int smaxcol)
-        {
-            Func<IntPtr, IntPtr, int> callback = (IntPtr w, IntPtr a) => NativeNCurses.NCursesWrapper.prefresh(pad, pminrow, pmincol, sminrow, smincol, smaxrow, smaxcol);
-            NativeNCurses.use_window_v(pad, Marshal.GetFunctionPointerForDelegate(new NCURSES_WINDOW_CB(callback)), "prefresh");
+            NCursesException.Verify(NativeNCurses.NCursesWrapper.prefresh(pad, pminrow, pmincol, sminrow, smincol, smaxrow, smaxcol), "prefresh");
         }
         #endregion
 
@@ -114,35 +125,9 @@ namespace NCurses.Core.Interop
         /// arguments to prefresh.
         /// <para />native method wrapped with verification and thread safety.
         /// </summary>
-        public static void pecho_wchar(IntPtr pad, NCursesWCHAR wch)
+        public static void pecho_wchar(IntPtr pad, INCursesWCHAR wch)
         {
-            IntPtr wPtr;
-            using (wch.ToPointer(out wPtr))
-            {
-                NativeNCurses.VerifyNCursesMethod(() => NativeNCurses.NCursesWrapper.pecho_wchar(pad, wPtr), "pecho_wchar");
-            }
-        }
-
-        /// <summary>
-        /// see <see cref="pecho_wchar"/>
-        /// <para />native method wrapped with verification and thread safety.
-        /// </summary>
-        public static void pecho_wchar_t(IntPtr pad, NCursesWCHAR wch)
-        {
-            IntPtr wPtr = wch.ToPointer();
-            GC.AddMemoryPressure(wch.Size);
-
-            Func<IntPtr, IntPtr, int> callback = (IntPtr w, IntPtr a) => NativeNCurses.NCursesWrapper.pecho_wchar(pad, wPtr);
-
-            try
-            {
-                NativeNCurses.use_window_v(pad, Marshal.GetFunctionPointerForDelegate(new NCURSES_WINDOW_CB(callback)), "pecho_wchar");
-            }
-            finally
-            {
-                Marshal.FreeHGlobal(wPtr);
-                GC.RemoveMemoryPressure(wch.Size);
-            }
+            WidePadWrapper.pecho_wchar(pad, wch);
         }
         #endregion
     }

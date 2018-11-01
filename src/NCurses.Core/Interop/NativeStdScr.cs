@@ -1,12 +1,14 @@
 ﻿using System;
 using System.Text;
 using System.Runtime.InteropServices;
-
-#if NCURSES_VERSION_6
-using chtype = System.UInt32;
-#elif NCURSES_VERSION_5
-using chtype = System.UInt64;
-#endif
+using System.Buffers;
+using NCurses.Core.Interop.Wide;
+using NCurses.Core.Interop.Small;
+using NCurses.Core.Interop.WideStr;
+using NCurses.Core.Interop.SmallStr;
+using NCurses.Core.Interop.Dynamic;
+using System.Collections.Generic;
+using System.Runtime.CompilerServices;
 
 namespace NCurses.Core.Interop
 {
@@ -16,6 +18,68 @@ namespace NCurses.Core.Interop
     /// </summary>
     internal static class NativeStdScr
     {
+        #region Custom type wrapper fields
+        private static INativeStdScrWide wideStdScrWrapper;
+        private static INativeStdScrWide WideStdScrWrapper => NativeNCurses.HasUnicodeSupport
+              ? wideStdScrWrapper ?? throw new InvalidOperationException(Constants.TypeGenerationExceptionMessage)
+              : throw new InvalidOperationException(Constants.NoUnicodeExceptionMessage);
+        private static INativeStdScrWideStr wideStrStdScrWrapper;
+        private static INativeStdScrWideStr WideStrStdScrWrapper => NativeNCurses.HasUnicodeSupport
+              ? wideStrStdScrWrapper ?? throw new InvalidOperationException(Constants.TypeGenerationExceptionMessage)
+              : throw new InvalidOperationException(Constants.NoUnicodeExceptionMessage);
+
+        private static INativeStdScrSmall smallStdScrWrapper;
+        private static INativeStdScrSmall SmallStdScrWrapper => smallStdScrWrapper ?? throw new InvalidOperationException(Constants.TypeGenerationExceptionMessage);
+        private static INativeStdScrSmallStr smallStrStdScrWrapper;
+        private static INativeStdScrSmallStr SmallStrStdScrWrapper => smallStrStdScrWrapper ?? throw new InvalidOperationException(Constants.TypeGenerationExceptionMessage);
+        #endregion
+
+        #region custom type initialization
+        internal static void CreateCharCustomWrappers()
+        {
+            if (DynamicTypeBuilder.schar is null)
+                throw new InvalidOperationException("Custom types haven't been generated yet.");
+
+            Type customType;
+            if (smallStrStdScrWrapper is null)
+            {
+                customType = typeof(NativeStdScrSmallStr<>).MakeGenericType(DynamicTypeBuilder.schar);
+                smallStrStdScrWrapper = (INativeStdScrSmallStr)Activator.CreateInstance(customType);
+            }
+        }
+
+        internal static void CreateCustomTypeWrappers()
+        {
+            if ((DynamicTypeBuilder.chtype is null
+                || DynamicTypeBuilder.schar is null)
+                || (NativeNCurses.HasUnicodeSupport
+                    && (DynamicTypeBuilder.cchar_t is null || DynamicTypeBuilder.wchar_t is null)))
+                throw new InvalidOperationException("Custom types haven't been generated yet.");
+
+            Type customType;
+            if (NativeNCurses.HasUnicodeSupport)
+            {
+                if (wideStdScrWrapper is null)
+                {
+                    customType = typeof(NativeStdScrWide<,,,>).MakeGenericType(DynamicTypeBuilder.cchar_t, DynamicTypeBuilder.wchar_t, DynamicTypeBuilder.chtype, DynamicTypeBuilder.schar);
+                    wideStdScrWrapper = (INativeStdScrWide)Activator.CreateInstance(customType);
+                }
+
+                if (wideStrStdScrWrapper is null)
+                {
+                    customType = typeof(NativeStdScrWideStr<,>).MakeGenericType(DynamicTypeBuilder.wchar_t, DynamicTypeBuilder.schar);
+                    wideStrStdScrWrapper = (INativeStdScrWideStr)Activator.CreateInstance(customType);
+                }
+            }
+
+            if (smallStdScrWrapper is null)
+            {
+                customType = typeof(NativeStdScrSmall<,>).MakeGenericType(DynamicTypeBuilder.chtype, DynamicTypeBuilder.schar);
+                smallStdScrWrapper = (INativeStdScrSmall)Activator.CreateInstance(customType);
+            }
+        }
+        #endregion
+
         #region addch
         /// <summary>
         /// The addch, waddch, mvaddch and mvwaddch routines put the
@@ -25,9 +89,9 @@ namespace NCurses.Core.Interop
         /// <para />native method wrapped with verification.
         /// </summary>
         /// <param name="ch">The character you want to add</param>
-        public static void addch(chtype ch)
+        public static void addch(INCursesSCHAR ch)
         {
-            NativeNCurses.VerifyNCursesMethod(() => NativeNCurses.NCursesWrapper.addch(ch), "addch");
+            SmallStdScrWrapper.addch(ch);
         }
         #endregion
 
@@ -41,21 +105,9 @@ namespace NCurses.Core.Interop
         /// </summary>
         /// <param name="txt">the string you want to add</param>
         /// <param name="number">number of elements to copy</param>
-        public static void addchnstr(chtype[] txt, int number)
+        public static void addchnstr(INCursesSCHARStr txt, int number)
         {
-            int totalSize = 0;
-            IntPtr arrayPtr = NativeNCurses.MarshallArray(txt, true, out totalSize);
-            GC.AddMemoryPressure(totalSize);
-
-            try
-            {
-                NativeNCurses.VerifyNCursesMethod(() => NativeNCurses.NCursesWrapper.addchnstr(arrayPtr, number), "addchnstr");
-            }
-            finally
-            {
-                Marshal.FreeHGlobal(arrayPtr);
-                GC.RemoveMemoryPressure(totalSize);
-            }
+            SmallStdScrWrapper.addchnstr(txt, number);
         }
         #endregion
 
@@ -65,21 +117,9 @@ namespace NCurses.Core.Interop
         /// <para />native method wrapped with verification.
         /// </summary>
         /// <param name="txt">the string you want to add</param>
-        public static void addchstr(chtype[] txt)
+        public static void addchstr(INCursesSCHARStr txt)
         {
-            int totalSize = 0;
-            IntPtr arrayPtr = NativeNCurses.MarshallArray(txt, true, out totalSize);
-            GC.AddMemoryPressure(totalSize);
-
-            try
-            {
-                NativeNCurses.VerifyNCursesMethod(() => NativeNCurses.NCursesWrapper.addchstr(arrayPtr), "addchstr");
-            }
-            finally
-            {
-                Marshal.FreeHGlobal(arrayPtr);
-                GC.RemoveMemoryPressure(totalSize);
-            }
+            SmallStdScrWrapper.addchstr(txt);
         }
         #endregion
 
@@ -87,14 +127,15 @@ namespace NCurses.Core.Interop
         /// <summary>
         /// These functions  write the(null-terminated)  character
         /// string str on the given window.It is similar to  calling
-        /// waddch once for each character in the string.
+        /// waddch once for each character in the string. It gets wrapped
+        /// into wide overloads if supported
         /// <para />native method wrapped with verification.
         /// </summary>
         /// <param name="txt">string to add</param>
         /// <param name="number">number of elements to copy</param>
         public static void addnstr(string txt, int number)
         {
-            NativeNCurses.VerifyNCursesMethod(() => NativeNCurses.NCursesWrapper.addnstr(txt, number), "addnstr");
+            SmallStrStdScrWrapper.addnstr(txt, number);
         }
         #endregion
 
@@ -106,7 +147,7 @@ namespace NCurses.Core.Interop
         /// <param name="txt">string to add</param>
         public static void addstr(string txt)
         {
-            NativeNCurses.VerifyNCursesMethod(() => NativeNCurses.NCursesWrapper.addstr(txt), "addstr");
+            SmallStrStdScrWrapper.addstr(txt);
         }
         #endregion
 
@@ -121,7 +162,7 @@ namespace NCurses.Core.Interop
         /// <param name="attrs">attribute(s) to disable</param>
         public static void attroff(int attrs)
         {
-            NativeNCurses.VerifyNCursesMethod(() => NativeNCurses.NCursesWrapper.attroff(attrs), "attroff");
+            NCursesException.Verify(NativeNCurses.NCursesWrapper.attroff(attrs), "attroff");
         }
         #endregion
 
@@ -134,7 +175,7 @@ namespace NCurses.Core.Interop
         /// <param name="attrs">attribute(s) to enable</param>
         public static void attron(int attrs)
         {
-            NativeNCurses.VerifyNCursesMethod(() => NativeNCurses.NCursesWrapper.attron(attrs), "attron");
+            NCursesException.Verify(NativeNCurses.NCursesWrapper.attron(attrs), "attron");
         }
         #endregion
 
@@ -148,7 +189,7 @@ namespace NCurses.Core.Interop
         /// <param name="attrs">attribute(s) to enable</param>
         public static void attrset(int attrs)
         {
-            NativeNCurses.VerifyNCursesMethod(() => NativeNCurses.NCursesWrapper.attrset(attrs), "attrset");
+            NCursesException.Verify(NativeNCurses.NCursesWrapper.attrset(attrs), "attrset");
         }
         #endregion
 
@@ -161,9 +202,9 @@ namespace NCurses.Core.Interop
         /// <para />native method wrapped with verification.
         /// </summary>
         /// <param name="attrs">attribute(s) to enable</param>
-        public static void attr_on(chtype attrs)
+        public static void attr_on(in ulong attrs)
         {
-            NativeNCurses.VerifyNCursesMethod(() => NativeNCurses.NCursesWrapper.attr_on(attrs, IntPtr.Zero), "attr_on");
+            SmallStdScrWrapper.attr_on(attrs);
         }
         #endregion
 
@@ -173,9 +214,9 @@ namespace NCurses.Core.Interop
         /// <para />native method wrapped with verification.
         /// </summary>
         /// <param name="attrs">attribute(s) to disable</param>
-        public static void attr_off(chtype attrs)
+        public static void attr_off(in ulong attrs)
         {
-            NativeNCurses.VerifyNCursesMethod(() => NativeNCurses.NCursesWrapper.attr_off(attrs, IntPtr.Zero), "attr_off");
+            SmallStdScrWrapper.attr_off(attrs);
         }
         #endregion
 
@@ -188,9 +229,9 @@ namespace NCurses.Core.Interop
         /// </summary>
         /// <param name="attrs">attribute(s) to enable</param>
         /// <param name="pair">color pair to enable</param>
-        public static void attr_set(chtype attrs, short pair)
+        public static void attr_set(ulong attrs, short pair)
         {
-            NativeNCurses.VerifyNCursesMethod(() => NativeNCurses.NCursesWrapper.attr_set(attrs, pair, IntPtr.Zero), "attr_set");
+            SmallStdScrWrapper.attr_set(attrs, pair);
         }
         #endregion
 
@@ -201,28 +242,9 @@ namespace NCurses.Core.Interop
         /// </summary>
         /// <param name="attrs">Pointer to an chtype to retrieve current attributes</param>
         /// <param name="pair">Pointer to a short to retrieve current color pair</param>
-        public static void attr_get(ref chtype attrs, ref short pair)
+        public static void attr_get(out ulong attrs, out short pair)
         {
-            IntPtr aPtr = Marshal.AllocHGlobal(Marshal.SizeOf(attrs));
-            Marshal.StructureToPtr(attrs, aPtr, true);
-            GC.AddMemoryPressure(Marshal.SizeOf(attrs));
-
-            IntPtr pPtr = Marshal.AllocHGlobal(Marshal.SizeOf(pair));
-            Marshal.StructureToPtr(pair, pPtr, true);
-            GC.AddMemoryPressure(Marshal.SizeOf(pair));
-
-            try
-            {
-                NativeNCurses.VerifyNCursesMethod(() => NativeNCurses.NCursesWrapper.attr_get(aPtr, pPtr, IntPtr.Zero), "attr_get");
-            }
-            finally
-            {
-                Marshal.FreeHGlobal(aPtr);
-                GC.RemoveMemoryPressure(Marshal.SizeOf(attrs));
-
-                Marshal.FreeHGlobal(pPtr);
-                GC.RemoveMemoryPressure(Marshal.SizeOf(pair));
-            }
+            SmallStdScrWrapper.attr_get(out attrs, out pair);
         }
         #endregion
 
@@ -236,9 +258,9 @@ namespace NCurses.Core.Interop
         /// <para />native method wrapped with verification.
         /// </summary>
         /// <param name="bkgd">a character to change the background to</param>
-        public static void bkgd(chtype bkgd)
+        public static void bkgd(in INCursesSCHAR bkgd)
         {
-            NativeNCurses.VerifyNCursesMethod(() => NativeNCurses.NCursesWrapper.bkgd(bkgd), "bkgd");
+            SmallStdScrWrapper.bkgd(bkgd);
         }
         #endregion
 
@@ -256,9 +278,9 @@ namespace NCurses.Core.Interop
         /// line/character operations.
         /// </summary>
         /// <param name="bkgd">a character to change the background to</param>
-        public static void bkgdset(chtype bkgd)
+        public static void bkgdset(in INCursesSCHAR bkgd)
         {
-            NativeNCurses.NCursesWrapper.bkgdset(bkgd);
+            SmallStdScrWrapper.bkgdset(bkgd);
         }
         #endregion
 
@@ -276,9 +298,9 @@ namespace NCurses.Core.Interop
         /// <param name="tr">top right-hand corner</param>
         /// <param name="bl">bottom left-hand corner</param>
         /// <param name="br">bottom right-hand corner</param>
-        public static void border(chtype ls, chtype rs, chtype ts, chtype bs, chtype tl, chtype tr, chtype bl, chtype br)
+        public static void border(in INCursesSCHAR ls, in INCursesSCHAR rs, in INCursesSCHAR ts, in INCursesSCHAR bs, in INCursesSCHAR tl, in INCursesSCHAR tr, in INCursesSCHAR bl, in INCursesSCHAR br)
         {
-            NativeNCurses.VerifyNCursesMethod(() => NativeNCurses.NCursesWrapper.border(ls, rs, ts, bs, tl, tr, bl, br), "border");
+            SmallStdScrWrapper.border(ls, rs, ts, bs, tl, tr, bl, br);
         }
         #endregion
 
@@ -295,9 +317,9 @@ namespace NCurses.Core.Interop
         /// <param name="number">number of characters to apply the new attrs to</param>
         /// <param name="attrs">attribute(s) to enable</param>
         /// <param name="pair">color pair to enable</param>
-        public static void chgat(int number, chtype attrs, short pair)
+        public static void chgat(int number, ulong attrs, short pair)
         {
-            NativeNCurses.VerifyNCursesMethod(() => NativeNCurses.NCursesWrapper.chgat(number, attrs, pair, IntPtr.Zero), "chgat");
+            SmallStdScrWrapper.chgat(number, attrs, pair);
         }
         #endregion
 
@@ -311,7 +333,7 @@ namespace NCurses.Core.Interop
         /// </summary>
         public static void clear()
         {
-            NativeNCurses.VerifyNCursesMethod(() => NativeNCurses.NCursesWrapper.clear(), "clear");
+            NCursesException.Verify(NativeNCurses.NCursesWrapper.clear(), "clear");
         }
         #endregion
 
@@ -325,7 +347,7 @@ namespace NCurses.Core.Interop
         /// </summary>
         public static void clrtobot()
         {
-            NativeNCurses.VerifyNCursesMethod(() => NativeNCurses.NCursesWrapper.clrtobot(), "clrtobot");
+            NCursesException.Verify(NativeNCurses.NCursesWrapper.clrtobot(), "clrtobot");
         }
         #endregion
 
@@ -337,7 +359,7 @@ namespace NCurses.Core.Interop
         /// </summary>
         public static void clrtoeol()
         {
-            NativeNCurses.VerifyNCursesMethod(() => NativeNCurses.NCursesWrapper.clrtoeol(), "clrtoeol");
+            NCursesException.Verify(NativeNCurses.NCursesWrapper.clrtoeol(), "clrtoeol");
         }
         #endregion
 
@@ -351,7 +373,7 @@ namespace NCurses.Core.Interop
         /// <param name="pair">A color pair index</param>
         public static void color_set(short pair)
         {
-            NativeNCurses.VerifyNCursesMethod(() => NativeNCurses.NCursesWrapper.color_set(pair, IntPtr.Zero), "color_set");
+            NCursesException.Verify(NativeNCurses.NCursesWrapper.color_set(pair, IntPtr.Zero), "color_set");
         }
         #endregion
 
@@ -367,7 +389,7 @@ namespace NCurses.Core.Interop
         /// </summary>
         public static void delch()
         {
-            NativeNCurses.VerifyNCursesMethod(() => NativeNCurses.NCursesWrapper.delch(), "delch");
+            NCursesException.Verify(NativeNCurses.NCursesWrapper.delch(), "delch");
         }
         #endregion
 
@@ -381,7 +403,7 @@ namespace NCurses.Core.Interop
         /// </summary>
         public static void deleteln()
         {
-            NativeNCurses.VerifyNCursesMethod(() => NativeNCurses.NCursesWrapper.deleteln(), "deleteln");
+            NCursesException.Verify(NativeNCurses.NCursesWrapper.deleteln(), "deleteln");
         }
         #endregion
 
@@ -397,9 +419,9 @@ namespace NCurses.Core.Interop
         /// <para />native method wrapped with verification.
         /// </summary>
         /// <param name="ch">the character you want to add</param>
-        public static void echochar(chtype ch)
+        public static void echochar(in INCursesSCHAR ch)
         {
-            NativeNCurses.VerifyNCursesMethod(() => NativeNCurses.NCursesWrapper.echochar(ch), "echochar");
+            SmallStdScrWrapper.echochar(ch);
         }
         #endregion
 
@@ -410,7 +432,7 @@ namespace NCurses.Core.Interop
         /// </summary>
         public static void erase()
         {
-            NativeNCurses.VerifyNCursesMethod(() => NativeNCurses.NCursesWrapper.erase(), "erase");
+            NCursesException.Verify(NativeNCurses.NCursesWrapper.erase(), "erase");
         }
         #endregion
 
@@ -428,7 +450,17 @@ namespace NCurses.Core.Interop
         /// </summary>
         public static int getch()
         {
-            return NativeNCurses.NCursesWrapper.getch();
+            int ret = 0;
+            NCursesException.Verify(ret = NativeNCurses.NCursesWrapper.getch(), "getch");
+            return ret;
+        }
+
+        /// <summary>
+        /// <see cref="NativeStdScr.getch"/>
+        /// </summary>
+        public static bool getch(out char ch, out Key key)
+        {
+            return NativeNCurses.VerifyInput("getch", NativeNCurses.NCursesWrapper.getch(), out ch, out key);
         }
         #endregion
 
@@ -443,9 +475,9 @@ namespace NCurses.Core.Interop
         /// </summary>
         /// <param name="builder">string reference to read the char(s) into</param>
         /// <param name="count">max number or characters to read</param>
-        public static void getnstr(StringBuilder builder, int count)
+        public static void getnstr(out string str, int count)
         {
-            NativeNCurses.NCursesWrapper.getnstr(builder, count);
+            SmallStrStdScrWrapper.getnstr(out str, count);
         }
         #endregion
 
@@ -459,9 +491,9 @@ namespace NCurses.Core.Interop
         /// <para />native method wrapped with verification.
         /// </summary>
         /// <param name="builder">string reference to read the char(s) into</param>
-        public static void getstr(StringBuilder builder)
+        public static void getstr(out string str)
         {
-            NativeNCurses.VerifyNCursesMethod(() => NativeNCurses.NCursesWrapper.getstr(builder), "getstr");
+            SmallStrStdScrWrapper.getstr(out str);
         }
         #endregion
 
@@ -474,9 +506,9 @@ namespace NCurses.Core.Interop
         /// </summary>
         /// <param name="ch">the character to use as a horizontal line</param>
         /// <param name="count">maximum length of the line</param>
-        public static void hline(chtype ch, int count)
+        public static void hline(INCursesSCHAR ch, int count)
         {
-            NativeNCurses.VerifyNCursesMethod(() => NativeNCurses.NCursesWrapper.hline(ch, count), "hline");
+            SmallStdScrWrapper.hline(ch, count);
         }
         #endregion
 
@@ -490,9 +522,9 @@ namespace NCurses.Core.Interop
         /// to extract the character or attributes alone.
         /// </summary>
         /// <returns>characther with attributes at current position</returns>
-        public static chtype inch()
+        public static void inch(out INCursesSCHAR ch)
         {
-            return NativeNCurses.NCursesWrapper.inch();
+            SmallStdScrWrapper.inch(out ch);
         }
         #endregion
 
@@ -511,27 +543,9 @@ namespace NCurses.Core.Interop
         /// </summary>
         /// <param name="txt">the array to copy the chars into</param>
         /// <param name="count">number of chars/attributes to copy</param>
-        public static void inchnstr(ref chtype[] txt, int count)
+        public static void inchnstr(out INCursesSCHARStr txt, int count, out int read)
         {
-            int totalSize = 0;
-            IntPtr arrayPtr = NativeNCurses.MarshallArray(txt, true, out totalSize);
-            GC.AddMemoryPressure(totalSize);
-
-            try
-            {
-                NativeNCurses.VerifyNCursesMethod(() => NativeNCurses.NCursesWrapper.inchnstr(arrayPtr, count), "inchnstr");
-                for (int i = 0; i < txt.Length; i++)
-#if NCURSES_VERSION_6
-                    txt[i] = (chtype)Marshal.ReadInt32(arrayPtr + (i * sizeof(chtype)));
-#elif NCURSES_VERSION_5
-                    txt[i] = (chtype)Marshal.ReadInt64(arrayPtr + (i * sizeof(chtype)));
-#endif
-            }
-            finally
-            {
-                Marshal.FreeHGlobal(arrayPtr);
-                GC.RemoveMemoryPressure(totalSize);
-            }
+            SmallStdScrWrapper.inchnstr(out txt, count, out read);
         }
         #endregion
 
@@ -541,27 +555,9 @@ namespace NCurses.Core.Interop
         /// <para />native method wrapped with verification.
         /// </summary>
         /// <param name="txt">the array to copy the chars into</param>
-        public static void inchstr(ref chtype[] txt)
+        public static void inchstr(out INCursesSCHARStr str, out int read)
         {
-            int totalSize = 0;
-            IntPtr arrayPtr = NativeNCurses.MarshallArray(txt, true, out totalSize);
-            GC.AddMemoryPressure(totalSize);
-
-            try
-            {
-                NativeNCurses.VerifyNCursesMethod(() => NativeNCurses.NCursesWrapper.inchstr(arrayPtr), "inchstr");
-                for (int i = 0; i < txt.Length; i++)
-#if NCURSES_VERSION_6
-                    txt[i] = (chtype)Marshal.ReadInt32(arrayPtr + (i * sizeof(chtype)));
-#elif NCURSES_VERSION_5
-                    txt[i] = (chtype)Marshal.ReadInt64(arrayPtr + (i * sizeof(chtype)));
-#endif
-            }
-            finally
-            {
-                Marshal.FreeHGlobal(arrayPtr);
-                GC.RemoveMemoryPressure(totalSize);
-            }
+            SmallStdScrWrapper.inchstr(out str, out read);
         }
         #endregion
 
@@ -576,9 +572,9 @@ namespace NCurses.Core.Interop
         /// </summary>
         /// <param name="str">A reference to the string you want to extract</param>
         /// <param name="n">max length of the leading substring</param>
-        public static void innstr(StringBuilder str, int n)
+        public static void innstr(out string str, int n, out int read)
         {
-            NativeNCurses.VerifyNCursesMethod(() => NativeNCurses.NCursesWrapper.innstr(str, n), "innstr");
+            SmallStrStdScrWrapper.innstr(out str, n, out read);
         }
         #endregion
 
@@ -593,9 +589,9 @@ namespace NCurses.Core.Interop
         /// <para />native method wrapped with verification.
         /// </summary>
         /// <param name="ch">The character to insert</param>
-        public static void insch(chtype ch)
+        public static void insch(in INCursesSCHAR ch)
         {
-            NativeNCurses.VerifyNCursesMethod(() => NativeNCurses.NCursesWrapper.insch(ch), "insch");
+            SmallStdScrWrapper.insch(ch);
         }
         #endregion
 
@@ -612,7 +608,7 @@ namespace NCurses.Core.Interop
         /// <param name="n">The number of lines to insert</param>
         public static void insdelln(int n)
         {
-            NativeNCurses.VerifyNCursesMethod(() => NativeNCurses.NCursesWrapper.insdelln(n), "insdelln");
+            NCursesException.Verify(NativeNCurses.NCursesWrapper.insdelln(n), "insdelln");
         }
         #endregion
 
@@ -623,7 +619,7 @@ namespace NCurses.Core.Interop
         /// </summary>
         public static void insertln()
         {
-            NativeNCurses.VerifyNCursesMethod(() => NativeNCurses.NCursesWrapper.insertln(), "insertln");
+            NCursesException.Verify(NativeNCurses.NCursesWrapper.insertln(), "insertln");
         }
         #endregion
 
@@ -639,9 +635,9 @@ namespace NCurses.Core.Interop
         /// </summary>
         /// <param name="str">The string to insert</param>
         /// <param name="n">The nubmer of characters to insert</param>
-        public static void insnstr(string str, int n)
+        public static void insnstr(in string str, int n)
         {
-            NativeNCurses.VerifyNCursesMethod(() => NativeNCurses.NCursesWrapper.insnstr(str, n), "insnstr");
+            SmallStrStdScrWrapper.insnstr(str, n);
         }
         #endregion
 
@@ -651,9 +647,9 @@ namespace NCurses.Core.Interop
         /// <para />native method wrapped with verification.
         /// </summary>
         /// <param name="str">The string to insert</param>
-        public static void insstr(string str)
+        public static void insstr(in string str)
         {
-            NativeNCurses.VerifyNCursesMethod(() => NativeNCurses.NCursesWrapper.insstr(str), "insstr");
+            SmallStrStdScrWrapper.insstr(str);
         }
         #endregion
 
@@ -663,9 +659,9 @@ namespace NCurses.Core.Interop
         /// <para />native method wrapped with verification.
         /// </summary>
         /// <param name="str">Reference to the string you want extracted</param>
-        public static void instr(StringBuilder str)
+        public static void instr(out string str, out int read)
         {
-            NativeNCurses.VerifyNCursesMethod(() => NativeNCurses.NCursesWrapper.instr(str), "instr");
+            SmallStrStdScrWrapper.instr(out str, out read);
         }
         #endregion
 
@@ -682,7 +678,7 @@ namespace NCurses.Core.Interop
         /// <param name="x">the column number to move to</param>
         public static void move(int y, int x)
         {
-            NativeNCurses.VerifyNCursesMethod(() => NativeNCurses.NCursesWrapper.move(y, x), "move");
+            NCursesException.Verify(NativeNCurses.NCursesWrapper.move(y, x), "move");
         }
         #endregion
 
@@ -694,9 +690,9 @@ namespace NCurses.Core.Interop
         /// <param name="y">the line number to move to</param>
         /// <param name="x">the column number to move to</param>
         /// <param name="ch">the character to add</param>
-        public static void mvaddch(int y, int x, chtype ch)
+        public static void mvaddch(int y, int x, in INCursesSCHAR ch)
         {
-            NativeNCurses.VerifyNCursesMethod(() => NativeNCurses.NCursesWrapper.mvaddch(y, x, ch), "mvaddch");
+            SmallStdScrWrapper.mvaddch(y, x, ch);
         }
         #endregion
 
@@ -709,21 +705,9 @@ namespace NCurses.Core.Interop
         /// <param name="x">the column number to move to</param>
         /// <param name="chstr">pointer to a null terminated array of chtype</param>
         /// <param name="n">number of elements to copy</param>
-        public static void mvaddchnstr(int y, int x, chtype[] chstr, int n)
+        public static void mvaddchnstr(int y, int x, in INCursesSCHARStr chstr, int n)
         {
-            int totalSize = 0;
-            IntPtr arrayPtr = NativeNCurses.MarshallArray(chstr, true, out totalSize);
-            GC.AddMemoryPressure(totalSize);
-
-            try
-            {
-                NativeNCurses.VerifyNCursesMethod(() => NativeNCurses.NCursesWrapper.mvaddchnstr(y, x, arrayPtr, n), "mvaddchnstr");
-            }
-            finally
-            {
-                Marshal.FreeHGlobal(arrayPtr);
-                GC.RemoveMemoryPressure(totalSize);
-            }
+            SmallStdScrWrapper.mvaddchnstr(y, x, chstr, n);
         }
         #endregion
 
@@ -735,21 +719,9 @@ namespace NCurses.Core.Interop
         /// <param name="y">the line number to move to</param>
         /// <param name="x">the column number to move to</param>
         /// <param name="chstr">pointer to a null terminated array of chtype</param>
-        public static void mvaddchstr(int y, int x, chtype[] chstr)
+        public static void mvaddchstr(int y, int x, in INCursesSCHARStr chstr)
         {
-            int totalSize = 0;
-            IntPtr arrayPtr = NativeNCurses.MarshallArray(chstr, true, out totalSize);
-            GC.AddMemoryPressure(totalSize);
-
-            try
-            {
-                NativeNCurses.VerifyNCursesMethod(() => NativeNCurses.NCursesWrapper.mvaddchstr(y, x, arrayPtr), "mvaddchstr");
-            }
-            finally
-            {
-                Marshal.FreeHGlobal(arrayPtr);
-                GC.RemoveMemoryPressure(totalSize);
-            }
+            SmallStdScrWrapper.mvaddchstr(y, x, chstr);
         }
         #endregion
 
@@ -760,9 +732,9 @@ namespace NCurses.Core.Interop
         /// <param name="y">the line number to move to</param>
         /// <param name="x">the column number to move to</param>
         /// </summary>
-        public static void mvaddnstr(int y, int x, string txt, int n)
+        public static void mvaddnstr(int y, int x, in string txt, int n)
         {
-            NativeNCurses.VerifyNCursesMethod(() => NativeNCurses.NCursesWrapper.mvaddnstr(y, x, txt, n), "mvaddnstr");
+            SmallStrStdScrWrapper.mvaddnstr(y, x, txt, n);
         }
         #endregion
 
@@ -773,9 +745,9 @@ namespace NCurses.Core.Interop
         /// <param name="y">the line number to move to</param>
         /// <param name="x">the column number to move to</param>
         /// </summary>
-        public static void mvaddstr(int y, int x, string txt)
+        public static void mvaddstr(int y, int x, in string txt)
         {
-            NativeNCurses.VerifyNCursesMethod(() => NativeNCurses.NCursesWrapper.mvaddstr(y, x, txt), "mvaddstr");
+            SmallStrStdScrWrapper.mvaddstr(y, x, txt);
         }
         #endregion
 
@@ -786,9 +758,9 @@ namespace NCurses.Core.Interop
         /// </summary>
         /// <param name="y">the line number to move to</param>
         /// <param name="x">the column number to move to</param>
-        public static void mvchgat(int y, int x, int number, chtype attrs, short pair)
+        public static void mvchgat(int y, int x, int number, ulong attrs, short pair)
         {
-            NativeNCurses.VerifyNCursesMethod(() => NativeNCurses.NCursesWrapper.mvchgat(y, x, number, attrs, pair), "mvchgat");
+            SmallStdScrWrapper.mvchgat(y, x, number, attrs, pair);
         }
         #endregion
 
@@ -801,7 +773,7 @@ namespace NCurses.Core.Interop
         /// <param name="x">the column number to move to</param>
         public static void mvdelch(int y, int x)
         {
-            NativeNCurses.VerifyNCursesMethod(() => NativeNCurses.NCursesWrapper.mvdelch(y, x), "mvdelch");
+            NCursesException.Verify(NativeNCurses.NCursesWrapper.mvdelch(y, x), "mvdelch");
         }
         #endregion
 
@@ -812,9 +784,19 @@ namespace NCurses.Core.Interop
         /// </summary>
         /// <param name="y">the line number to move to</param>
         /// <param name="x">the column number to move to</param>
-        public static void mvgetch(int y, int x)
+        public static int mvgetch(int y, int x)
         {
-            NativeNCurses.VerifyNCursesMethod(() => NativeNCurses.NCursesWrapper.mvgetch(y, x), "mvgetch");
+            int ret = 0;
+            NCursesException.Verify(NativeNCurses.NCursesWrapper.mvgetch(y, x), "mvgetch");
+            return ret;
+        }
+
+        /// <summary>
+        /// <see cref="NativeStdScr.mvgetch(int, int)"/>
+        /// </summary>
+        public static bool mvgetch(int y, int x, out char ch, out Key key)
+        {
+            return NativeNCurses.VerifyInput("mvgetch", NativeNCurses.NCursesWrapper.mvgetch(y, x), out ch, out key);
         }
         #endregion
 
@@ -825,9 +807,9 @@ namespace NCurses.Core.Interop
         /// </summary>
         /// <param name="y">the line number to move to</param>
         /// <param name="x">the column number to move to</param>
-        public static void mvgetnstr(int y, int x, StringBuilder str, int count)
+        public static void mvgetnstr(int y, int x, out string str, int count)
         {
-            NativeNCurses.VerifyNCursesMethod(() => NativeNCurses.NCursesWrapper.mvgetnstr(y, x, str, count), "mvgetnstr");
+            SmallStrStdScrWrapper.mvgetnstr(y, x, out str, count);
         }
         #endregion
 
@@ -838,9 +820,9 @@ namespace NCurses.Core.Interop
         /// </summary>
         /// <param name="y">the line number to move to</param>
         /// <param name="x">the column number to move to</param>
-        public static void mvgetstr(int y, int x, StringBuilder str)
+        public static void mvgetstr(int y, int x, out string str)
         {
-            NativeNCurses.VerifyNCursesMethod(() => NativeNCurses.NCursesWrapper.mvgetstr(y, x, str), "mvgetstr");
+            SmallStrStdScrWrapper.mvgetstr(y, x, out str);
         }
         #endregion
 
@@ -851,9 +833,9 @@ namespace NCurses.Core.Interop
         /// </summary>
         /// <param name="y">the line number to move to</param>
         /// <param name="x">the column number to move to</param>
-        public static void mvhline(int y, int x, chtype ch, int count)
+        public static void mvhline(int y, int x, in INCursesSCHAR ch, int count)
         {
-            NativeNCurses.VerifyNCursesMethod(() => NativeNCurses.NCursesWrapper.mvhline(y, x, ch, count), "mvhline");
+            SmallStdScrWrapper.mvhline(y, x, ch, count);
         }
         #endregion
 
@@ -864,9 +846,9 @@ namespace NCurses.Core.Interop
         /// <param name="y">the line number to move to</param>
         /// <param name="x">the column number to move to</param>
         /// <returns>Constants.ERR on error or Constants.OK on success</returns>
-        public static chtype mvinch(int y, int x)
+        public static void mvinch(int y, int x, out INCursesSCHAR ch)
         {
-            return NativeNCurses.NCursesWrapper.mvinch(y, x);
+            SmallStdScrWrapper.mvinch(y, x, out ch);
         }
         #endregion
 
@@ -877,9 +859,9 @@ namespace NCurses.Core.Interop
         /// </summary>
         /// <param name="y">the line number to move to</param>
         /// <param name="x">the column number to move to</param>
-        public static void mvinchnstr(int y, int x, IntPtr txt, int count)
+        public static void mvinchnstr(int y, int x, out INCursesSCHARStr txt, int count, out int read)
         {
-            NativeNCurses.VerifyNCursesMethod(() => NativeNCurses.NCursesWrapper.mvinchnstr(y, x, txt, count), "mvinchnstr");
+            SmallStdScrWrapper.mvinchnstr(y, x, out txt, count, out read);
         }
         #endregion
 
@@ -890,9 +872,9 @@ namespace NCurses.Core.Interop
         /// </summary>
         /// <param name="y">the line number to move to</param>
         /// <param name="x">the column number to move to</param>
-        public static void mvinchstr(int y, int x, IntPtr txt)
+        public static void mvinchstr(int y, int x, out INCursesSCHARStr chstr, out int read)
         {
-            NativeNCurses.VerifyNCursesMethod(() => NativeNCurses.NCursesWrapper.mvinchstr(y, x, txt), "mvinchstr");
+            SmallStdScrWrapper.mvinchstr(y, x, out chstr, out read);
         }
         #endregion
 
@@ -903,9 +885,9 @@ namespace NCurses.Core.Interop
         /// </summary>
         /// <param name="y">the line number to move to</param>
         /// <param name="x">the column number to move to</param>
-        public static void mvinnstr(int y, int x, StringBuilder str, int n)
+        public static void mvinnstr(int y, int x, out string str, int n, out int read)
         {
-            NativeNCurses.VerifyNCursesMethod(() => NativeNCurses.NCursesWrapper.mvinnstr(y, x, str, n), "mvinnstr");
+            SmallStrStdScrWrapper.mvinnstr(y, x, out str, n, out read);
         }
         #endregion
 
@@ -916,9 +898,9 @@ namespace NCurses.Core.Interop
         /// </summary>
         /// <param name="y">the line number to move to</param>
         /// <param name="x">the column number to move to</param>
-        public static void mvinsch(int y, int x, chtype ch)
+        public static void mvinsch(int y, int x, in INCursesSCHAR ch)
         {
-            NativeNCurses.VerifyNCursesMethod(() => NativeNCurses.NCursesWrapper.mvinsch(y, x, ch), "mvinsch");
+            SmallStdScrWrapper.mvinsch(y, x, ch);
         }
         #endregion
 
@@ -929,9 +911,9 @@ namespace NCurses.Core.Interop
         /// </summary>
         /// <param name="y">the line number to move to</param>
         /// <param name="x">the column number to move to</param>
-        public static void mvinsnstr(int y, int x, string str, int n)
+        public static void mvinsnstr(int y, int x, in string str, int n)
         {
-            NativeNCurses.VerifyNCursesMethod(() => NativeNCurses.NCursesWrapper.mvinsnstr(y, x, str, n), "mvinsnstr");
+            SmallStrStdScrWrapper.mvinsnstr(y, x, str, n);
         }
         #endregion
 
@@ -944,7 +926,7 @@ namespace NCurses.Core.Interop
         /// <param name="x">the column number to move to</param>
         public static void mvinsstr(int y, int x, string str)
         {
-            NativeNCurses.VerifyNCursesMethod(() => NativeNCurses.NCursesWrapper.mvinsstr(y, x, str), "mvinsstr");
+            SmallStrStdScrWrapper.mvinsstr(y, x, str);
         }
         #endregion
 
@@ -955,9 +937,9 @@ namespace NCurses.Core.Interop
         /// </summary>
         /// <param name="y">the line number to move to</param>
         /// <param name="x">the column number to move to</param>
-        public static void mvinstr(int y, int x, StringBuilder str)
+        public static void mvinstr(int y, int x, out string str, out int read)
         {
-            NativeNCurses.VerifyNCursesMethod(() => NativeNCurses.NCursesWrapper.mvinstr(y, x, str), "mvinstr");
+            SmallStrStdScrWrapper.mvinstr(y, x, out str, out read);
         }
         #endregion
 
@@ -968,9 +950,9 @@ namespace NCurses.Core.Interop
         /// </summary>
         /// <param name="y">the line number to move to</param>
         /// <param name="x">the column number to move to</param>
-        public static void mvprintw(int y, int x, string format, params object[] var)
+        public static void mvprintw(int y, int x, in string format, params string[] varArg)
         {
-            NativeNCurses.VerifyNCursesMethod(() => NativeNCurses.NCursesWrapper.mvprintw(y, x, format, var), "mvprintw");
+            SmallStrStdScrWrapper.mvprintw(y, x, format, varArg);
         }
         #endregion
 
@@ -981,9 +963,9 @@ namespace NCurses.Core.Interop
         /// </summary>
         /// <param name="y">the line number to move to</param>
         /// <param name="x">the column number to move to</param>
-        public static void mvscanw(int y, int x, StringBuilder format, params object[] var)
+        public static void mvscanw(int y, int x, out string format, params string[] argList)
         {
-            NativeNCurses.VerifyNCursesMethod(() => NativeNCurses.NCursesWrapper.mvscanw(y, x, format, var), "mvscanw");
+            SmallStrStdScrWrapper.mvscanw(y, x, out format, argList);
         }
         #endregion
 
@@ -994,9 +976,9 @@ namespace NCurses.Core.Interop
         /// </summary>
         /// <param name="y">the line number to move to</param>
         /// <param name="x">the column number to move to</param>
-        public static void mvvline(int y, int x, chtype ch, int n)
+        public static void mvvline(int y, int x, in INCursesSCHAR ch, int n)
         {
-            NativeNCurses.VerifyNCursesMethod(() => NativeNCurses.NCursesWrapper.mvvline(y, x, ch, n), "mvvline");
+            SmallStdScrWrapper.mvvline(y, x, ch, n);
         }
         #endregion
 
@@ -1010,24 +992,9 @@ namespace NCurses.Core.Interop
         /// </summary>
         /// <param name="format">the format string</param>
         /// <param name="var">the variables</param>
-        public static void printw(string format, params object[] var)
+        public static void printw(string format, params string[] argList)
         {
-            NativeNCurses.VerifyNCursesMethod(() => NativeNCurses.NCursesWrapper.printw(format, var), "printw");
-        }
-        #endregion
-
-        #region redrawwin
-        /// <summary>
-        /// The wredrawln routine indicates to curses that some screen
-        /// lines are corrupted and should be thrown away before  anything  is  written over  them.It touches the indicated
-        /// lines(marking them  changed).   The routine  redrawwin
-        /// touches the entire window.
-        /// <para />native method wrapped with verification.
-        /// </summary>
-        /// <param name="window">A pointer to a window</param>
-        public static void redrawwin()
-        {
-            NativeNCurses.VerifyNCursesMethod(() => NativeNCurses.NCursesWrapper.redrawwin(), "redrawwin");
+            SmallStrStdScrWrapper.printw(format, argList);
         }
         #endregion
 
@@ -1044,7 +1011,7 @@ namespace NCurses.Core.Interop
         /// </summary>
         public static void refresh()
         {
-            NativeNCurses.VerifyNCursesMethod(() => NativeNCurses.NCursesWrapper.refresh(), "refresh");
+            NCursesException.Verify(NativeNCurses.NCursesWrapper.refresh(), "refresh");
         }
         #endregion
 
@@ -1059,9 +1026,9 @@ namespace NCurses.Core.Interop
         /// </summary>
         /// <param name="format">the format string</param>
         /// <param name="var">the variables</param>
-        public static void scanw(StringBuilder format, params object[] var)
+        public static void scanw(out string format, params string[] argList)
         {
-            NativeNCurses.VerifyNCursesMethod(() => NativeNCurses.NCursesWrapper.scanw(format, var), "scanw");
+            SmallStrStdScrWrapper.scanw(out format, argList);
         }
         #endregion
 
@@ -1076,7 +1043,7 @@ namespace NCurses.Core.Interop
         /// <param name="n">the number of lines to scroll</param>
         public static void scrl(int n)
         {
-            NativeNCurses.VerifyNCursesMethod(() => NativeNCurses.NCursesWrapper.scrl(n), "scrl");
+            NCursesException.Verify(NativeNCurses.NCursesWrapper.scrl(n), "scrl");
         }
         #endregion
 
@@ -1100,7 +1067,7 @@ namespace NCurses.Core.Interop
         /// <param name="bot">bottom line of the scrolling region</param>
         public static void setscrreg(int top, int bot)
         {
-            NativeNCurses.VerifyNCursesMethod(() => NativeNCurses.NCursesWrapper.setscrreg(top, bot), "setscrreg");
+            NCursesException.Verify(NativeNCurses.NCursesWrapper.setscrreg(top, bot), "setscrreg");
         }
         #endregion
 
@@ -1113,7 +1080,7 @@ namespace NCurses.Core.Interop
         /// </summary>
         public static void standout()
         {
-            NativeNCurses.VerifyNCursesMethod(() => NativeNCurses.NCursesWrapper.standout(), "standout");
+            NCursesException.Verify(NativeNCurses.NCursesWrapper.standout(), "standout");
         }
         #endregion
 
@@ -1124,7 +1091,7 @@ namespace NCurses.Core.Interop
         /// </summary>
         public static void standend()
         {
-            NativeNCurses.VerifyNCursesMethod(() => NativeNCurses.NCursesWrapper.standend(), "standend");
+            NCursesException.Verify(NativeNCurses.NCursesWrapper.standend(), "standend");
         }
         #endregion
 
@@ -1154,9 +1121,9 @@ namespace NCurses.Core.Interop
         /// </summary>
         /// <param name="ch">the character to use as a horizontal line</param>
         /// <param name="count">maximum length of the line</param>
-        public static void vline(chtype ch, int n)
+        public static void vline(in INCursesSCHAR ch, int n)
         {
-            NativeNCurses.VerifyNCursesMethod(() => NativeNCurses.NCursesWrapper.vline(ch, n), "vline");
+            SmallStdScrWrapper.vline(ch, n);
         }
         #endregion
 
@@ -1168,13 +1135,9 @@ namespace NCurses.Core.Interop
         /// <para />native method wrapped with verification.
         /// </summary>
         /// <param name="wch">The wide character to add</param>
-        public static void add_wch(NCursesWCHAR wch)
+        public static void add_wch(INCursesWCHAR wch)
         {
-            IntPtr wPtr;
-            using(wch.ToPointer(out wPtr))
-            {
-                NativeNCurses.VerifyNCursesMethod(() => NativeNCurses.NCursesWrapper.add_wch(wPtr), "add_wch");
-            }
+            WideStdScrWrapper.add_wch(wch);
         }
         #endregion
 
@@ -1194,21 +1157,9 @@ namespace NCurses.Core.Interop
         /// </summary>
         /// <param name="wchStr">The string of complex characters you want to add</param>
         /// <param name="n">number of elements to copy</param>
-        public static void add_wchnstr(NCursesWCHAR[] wchStr, int n)
+        public static void add_wchnstr(INCursesWCHARStr wchStr, int n)
         {
-            int totalSize = 0;
-            IntPtr arrayPtr = NativeNCurses.MarshallArray(wchStr, true, out totalSize);
-            GC.AddMemoryPressure(totalSize);
-
-            try
-            {
-                NativeNCurses.VerifyNCursesMethod(() => NativeNCurses.NCursesWrapper.add_wchnstr(arrayPtr, n), "add_wchnstr");
-            }
-            finally
-            {
-                Marshal.FreeHGlobal(arrayPtr);
-                GC.RemoveMemoryPressure(totalSize);
-            }
+            WideStdScrWrapper.add_wchnstr(wchStr, n);
         }
         #endregion
 
@@ -1219,21 +1170,9 @@ namespace NCurses.Core.Interop
         /// </summary>
         /// <param name="wchStr">The string of complex characters you want to add</param>
         /// <param name="n">number of elements to copy</param>
-        public static void add_wchstr(NCursesWCHAR[] wchStr)
+        public static void add_wchstr(INCursesWCHARStr wchStr)
         {
-            int totalSize = 0;
-            IntPtr arrayPtr = NativeNCurses.MarshallArray(wchStr, true, out totalSize);
-            GC.AddMemoryPressure(totalSize);
-
-            try
-            {
-                NativeNCurses.VerifyNCursesMethod(() => NativeNCurses.NCursesWrapper.add_wchstr(arrayPtr), "add_wchstr");
-            }
-            finally
-            {
-                Marshal.FreeHGlobal(arrayPtr);
-                GC.RemoveMemoryPressure(totalSize);
-            }
+            WideStdScrWrapper.add_wchstr(wchStr);
         }
         #endregion
 
@@ -1248,9 +1187,7 @@ namespace NCurses.Core.Interop
         /// <param name="n">number of elements to copy</param>
         public static void addnwstr(string wstr, int n)
         {
-            NativeNCurses.MarshalNativeWideStringAndExecuteAction((ptr) =>
-                NativeNCurses.VerifyNCursesMethod(() => NativeNCurses.NCursesWrapper.addnwstr(ptr, n), "addnwstr"),
-                wstr);
+            WideStrStdScrWrapper.addnwstr(wstr, n);
         }
         #endregion
 
@@ -1262,9 +1199,7 @@ namespace NCurses.Core.Interop
         /// <param name="wstr">the string to add</param>
         public static void addwstr(string wstr)
         {
-            NativeNCurses.MarshalNativeWideStringAndExecuteAction((ptr) =>
-                NativeNCurses.VerifyNCursesMethod(() => NativeNCurses.NCursesWrapper.addwstr(wstr), "addwstr"),
-                wstr, true);
+            WideStrStdScrWrapper.addwstr(wstr);
         }
         #endregion
 
@@ -1278,13 +1213,9 @@ namespace NCurses.Core.Interop
         /// <para />native method wrapped with verification.
         /// </summary>
         /// <param name="wstr">the string to add</param>
-        public static void bkgrnd(NCursesWCHAR wch)
+        public static void bkgrnd(in INCursesWCHAR wch)
         {
-            IntPtr wPtr;
-            using(wch.ToPointer(out wPtr))
-            {
-                NativeNCurses.VerifyNCursesMethod(() => NativeNCurses.NCursesWrapper.bkgrnd(wPtr), "bkgrnd");
-            }
+            WideStdScrWrapper.bkgrnd(wch);
         }
         #endregion
 
@@ -1303,13 +1234,9 @@ namespace NCurses.Core.Interop
         /// line/character operations.
         /// </summary>
         /// <param name="wstr">the string to add</param>
-        public static void bkgrndset(NCursesWCHAR wch)
+        public static void bkgrndset(in INCursesWCHAR wch)
         {
-            IntPtr wPtr;
-            using (wch.ToPointer(out wPtr))
-            {
-                NativeNCurses.NCursesWrapper.bkgrndset(wPtr);
-            }
+            WideStdScrWrapper.bkgrndset(wch);
         }
         #endregion
 
@@ -1328,48 +1255,10 @@ namespace NCurses.Core.Interop
         /// <param name="tr">top right-hand corner</param>
         /// <param name="bl">bottom left-hand corner</param>
         /// <param name="br">bottom right-hand corner</param>
-        public static void border_set(NCursesWCHAR ls, NCursesWCHAR rs, NCursesWCHAR ts, NCursesWCHAR bs, NCursesWCHAR tl, NCursesWCHAR tr,
-            NCursesWCHAR bl, NCursesWCHAR br)
+        public static void border_set(in INCursesWCHAR ls, in INCursesWCHAR rs, in INCursesWCHAR ts, in INCursesWCHAR bs, in INCursesWCHAR tl, 
+            in INCursesWCHAR tr, in INCursesWCHAR bl, in INCursesWCHAR br)
         {
-            IntPtr lsPtr = ls.ToPointer();
-            IntPtr rsPtr = rs.ToPointer();
-            IntPtr tsPtr = ts.ToPointer();
-            IntPtr bsPtr = bs.ToPointer();
-            IntPtr tlPtr = tl.ToPointer();
-            IntPtr trPtr = tr.ToPointer();
-            IntPtr blPtr = bl.ToPointer();
-            IntPtr brPtr = br.ToPointer();
-
-            try
-            {
-                NativeNCurses.VerifyNCursesMethod(() => NativeNCurses.NCursesWrapper.border_set(lsPtr, rsPtr, tsPtr, bsPtr, tlPtr, trPtr, blPtr, brPtr), "add_wch");
-            }
-            finally
-            {
-                Marshal.FreeHGlobal(lsPtr);
-                GC.RemoveMemoryPressure(Marshal.SizeOf(ls));
-
-                Marshal.FreeHGlobal(rsPtr);
-                GC.RemoveMemoryPressure(Marshal.SizeOf(rs));
-
-                Marshal.FreeHGlobal(tsPtr);
-                GC.RemoveMemoryPressure(Marshal.SizeOf(ts));
-
-                Marshal.FreeHGlobal(bsPtr);
-                GC.RemoveMemoryPressure(Marshal.SizeOf(bs));
-
-                Marshal.FreeHGlobal(tlPtr);
-                GC.RemoveMemoryPressure(Marshal.SizeOf(tl));
-
-                Marshal.FreeHGlobal(trPtr);
-                GC.RemoveMemoryPressure(Marshal.SizeOf(tr));
-
-                Marshal.FreeHGlobal(blPtr);
-                GC.RemoveMemoryPressure(Marshal.SizeOf(bl));
-
-                Marshal.FreeHGlobal(lsPtr);
-                GC.RemoveMemoryPressure(Marshal.SizeOf(br));
-            }
+            WideStdScrWrapper.border_set(ls, rs, ts, bs, tl, tr, bl, br);
         }
         #endregion
 
@@ -1385,13 +1274,9 @@ namespace NCurses.Core.Interop
         /// <para />native method wrapped with verification.
         /// </summary>
         /// <param name="wch">the character to echo</param>
-        public static void echo_wchar(NCursesWCHAR wch)
+        public static void echo_wchar(in INCursesWCHAR wch)
         {
-            IntPtr wPtr;
-            using (wch.ToPointer(out wPtr))
-            {
-                NativeNCurses.VerifyNCursesMethod(() => NativeNCurses.NCursesWrapper.echo_wchar(wPtr), "echo_wchar");
-            }
+            WideStdScrWrapper.echo_wchar(wch);
         }
         #endregion
 
@@ -1409,29 +1294,9 @@ namespace NCurses.Core.Interop
         /// <para />native method wrapped with verification.
         /// </summary>
         /// <param name="wch">a reference to store the returned wide char in</param>
-        public static void get_wch(out char wch)
+        public static bool get_wch(out char wch, out Key key)
         {
-            //TODO: returns KEY_CODE_YES if a function key gets pressed
-            IntPtr chPtr = Marshal.AllocHGlobal(Marshal.SizeOf<chtype>());
-            GC.AddMemoryPressure(Marshal.SizeOf<chtype>());
-
-            try
-            {
-                NativeNCurses.VerifyNCursesMethod(() => NativeNCurses.NCursesWrapper.get_wch(chPtr), "get_wch");
-
-                byte[] arr = new byte[Marshal.SizeOf<chtype>()];
-                Marshal.Copy(chPtr, arr, 0, Marshal.SizeOf<chtype>());
-
-                if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
-                    wch = Encoding.Unicode.GetChars(arr)[0];
-                else
-                    wch = Encoding.UTF32.GetChars(arr)[0];
-            }
-            finally
-            {
-                Marshal.FreeHGlobal(chPtr);
-                GC.RemoveMemoryPressure(Marshal.SizeOf<chtype>());
-            }
+            return WideStrStdScrWrapper.get_wch(out wch, out key);
         }
         #endregion
 
@@ -1449,22 +1314,9 @@ namespace NCurses.Core.Interop
         /// <para />native method wrapped with verification.
         /// </summary>
         /// <param name="wstr">a reference to store the returned wide string in</param>
-        public static void get_wstr(StringBuilder wstr)
+        public static void get_wstr(out string wstr)
         {
-            int size = Marshal.SizeOf<chtype>() * wstr.Capacity;
-            IntPtr strPtr = Marshal.AllocHGlobal(size);
-            GC.AddMemoryPressure(size);
-
-            try
-            {
-                NativeNCurses.VerifyNCursesMethod(() => NativeNCurses.NCursesWrapper.get_wstr(strPtr), "get_wstr");
-                wstr.Append(NativeNCurses.MarshalStringFromNativeWideString(strPtr, wstr.Capacity));
-            }
-            finally
-            {
-                Marshal.FreeHGlobal(strPtr);
-                GC.RemoveMemoryPressure(Marshal.SizeOf<chtype>());
-            }
+            WideStrStdScrWrapper.get_wstr(out wstr);
         }
         #endregion
 
@@ -1475,14 +1327,9 @@ namespace NCurses.Core.Interop
         /// <para />native method wrapped with verification.
         /// </summary>
         /// <param name="wch">a reference to store the returned background char in</param>
-        public static void getbkgrnd(out NCursesWCHAR wch)
+        public static void getbkgrnd(out INCursesWCHAR wch)
         {
-            IntPtr wPtr;
-            wch = new NCursesWCHAR();
-            using(wch.ToPointer(out wPtr))
-            {
-                NCursesException.Verify(NativeNCurses.NCursesWrapper.getbkgrnd(wPtr), "getbkgrnd");
-            }
+            WideStdScrWrapper.getbkgrnd(out wch);
         }
         #endregion
 
@@ -1492,22 +1339,9 @@ namespace NCurses.Core.Interop
         /// <para />native method wrapped with verification.
         /// </summary>
         /// <param name="n">the number of wide characters to get</param>
-        public static void getn_wstr(StringBuilder wstr, int n)
+        public static void getn_wstr(out string wstr, int n)
         {
-            int size = Marshal.SizeOf<chtype>() * n;
-            IntPtr strPtr = Marshal.AllocHGlobal(size);
-            GC.AddMemoryPressure(size);
-
-            try
-            {
-                NativeNCurses.VerifyNCursesMethod(() => NativeNCurses.NCursesWrapper.getn_wstr(strPtr, n), "getn_wstr");
-                wstr.Append(NativeNCurses.MarshalStringFromNativeWideString(strPtr, n));
-            }
-            finally
-            {
-                Marshal.FreeHGlobal(strPtr);
-                GC.RemoveMemoryPressure(size);
-            }
+            WideStrStdScrWrapper.getn_wstr(out wstr, n);
         }
         #endregion
 
@@ -1521,13 +1355,9 @@ namespace NCurses.Core.Interop
         /// </summary>
         /// <param name="wch">the character to use as line</param>
         /// <param name="n">the lenght of the line</param>
-        public static void hline_set(NCursesWCHAR wch, int n)
+        public static void hline_set(INCursesWCHAR wch, int n)
         {
-            IntPtr wPtr;
-            using(wch.ToPointer(out wPtr))
-            {
-                NativeNCurses.VerifyNCursesMethod(() => NativeNCurses.NCursesWrapper.hline_set(wPtr, n), "hline_set");
-            }
+            WideStdScrWrapper.hline_set(wch, n);
         }
         #endregion
 
@@ -1538,14 +1368,9 @@ namespace NCurses.Core.Interop
         /// <para />native method wrapped with verification.
         /// </summary>
         /// <param name="wcval">a reference to store the complex character in</param>
-        public static void in_wch(out NCursesWCHAR wcval)
+        public static void in_wch(out INCursesWCHAR wcval)
         {
-            IntPtr wPtr;
-            wcval = new NCursesWCHAR();
-            using (wcval.ToPointer(out wPtr))
-            {
-                NCursesException.Verify(NativeNCurses.NCursesWrapper.in_wch(wPtr), "in_wch");
-            }
+            WideStdScrWrapper.in_wch(out wcval);
         }
         #endregion
 
@@ -1558,23 +1383,9 @@ namespace NCurses.Core.Interop
         /// <para />native method wrapped with verification.
         /// </summary>
         /// <param name="wcval">array reference to store the complex characters in</param>
-        public static void in_wchnstr(ref NCursesWCHAR[] wcval, int n)
+        public static void in_wchnstr(out INCursesWCHARStr wcval, int n)
         {
-            int totalSize = 0;
-            IntPtr arrayPtr = NativeNCurses.MarshallArray(wcval, false, out totalSize);
-            GC.AddMemoryPressure(totalSize);
-
-            try
-            {
-                NativeNCurses.VerifyNCursesMethod(() => NativeNCurses.NCursesWrapper.in_wchnstr(arrayPtr, n), "in_wchnstr");
-                for (int i = 0; i < wcval.Length; i++)
-                    wcval[i].ToStructure(arrayPtr + (i * wcval[i].Size));
-            }
-            finally
-            {
-                Marshal.FreeHGlobal(arrayPtr);
-                GC.RemoveMemoryPressure(totalSize);
-            }
+            WideStdScrWrapper.in_wchnstr(out wcval, n);
         }
         #endregion
 
@@ -1584,23 +1395,9 @@ namespace NCurses.Core.Interop
         /// <para />native method wrapped with verification.
         /// </summary>
         /// <param name="wcval">array reference to store the complex characters in</param>
-        public static void in_wchstr(ref NCursesWCHAR[] wcval)
+        public static void in_wchstr(out INCursesWCHARStr wcval)
         {
-            int totalSize = 0;
-            IntPtr arrayPtr = NativeNCurses.MarshallArray(wcval, false, out totalSize);
-            GC.AddMemoryPressure(totalSize);
-
-            try
-            {
-                NativeNCurses.VerifyNCursesMethod(() => NativeNCurses.NCursesWrapper.in_wchstrr(arrayPtr), "in_wchstr");
-                for (int i = 0; i < wcval.Length; i++)
-                    wcval[i].ToStructure(arrayPtr + (i * wcval[i].Size));
-            }
-            finally
-            {
-                Marshal.FreeHGlobal(arrayPtr);
-                GC.RemoveMemoryPressure(totalSize);
-            }
+            WideStdScrWrapper.in_wchstr(out wcval);
         }
         #endregion
 
@@ -1617,22 +1414,9 @@ namespace NCurses.Core.Interop
         /// </summary>
         /// <param name="str">a reference to store the string in</param>
         /// <param name="n">the number of characters to store</param>
-        public static void innwstr(StringBuilder str, int n)
+        public static void innwstr(out string str, int n, out int read)
         {
-            int size = Constants.SIZEOF_WCHAR_T * n;
-            IntPtr strPtr = Marshal.AllocHGlobal(size);
-            GC.AddMemoryPressure(size);
-
-            try
-            {
-                NativeNCurses.VerifyNCursesMethod(() => NativeNCurses.NCursesWrapper.innwstr(strPtr, n), "innwstr");
-                str.Append(NativeNCurses.MarshalStringFromNativeWideString(strPtr, n));
-            }
-            finally
-            {
-                Marshal.FreeHGlobal(strPtr);
-                GC.RemoveMemoryPressure(size);
-            }
+            WideStrStdScrWrapper.innwstr(out str, n, out read);
         }
         #endregion
 
@@ -1651,11 +1435,9 @@ namespace NCurses.Core.Interop
         /// </summary>
         /// <param name="str">the string to insert</param>
         /// <param name="n">the number of characters to insert</param>
-        public static void ins_nwstr(string str, int n)
+        public static void ins_nwstr(in string str, int n)
         {
-            NativeNCurses.MarshalNativeWideStringAndExecuteAction((strPtr) =>
-                NativeNCurses.VerifyNCursesMethod(() => NativeNCurses.NCursesWrapper.ins_nwstr(strPtr, n), "ins_nwstr"),
-                str);
+            WideStrStdScrWrapper.ins_nwstr(in str, n);
         }
         #endregion
 
@@ -1669,13 +1451,9 @@ namespace NCurses.Core.Interop
         /// <para />native method wrapped with verification.
         /// </summary>
         /// <param name="wch">the complex character to insert</param>
-        public static void ins_wch(NCursesWCHAR wch)
+        public static void ins_wch(in INCursesWCHAR wch)
         {
-            IntPtr wPtr;
-            using(wch.ToPointer(out wPtr))
-            {
-                NativeNCurses.VerifyNCursesMethod(() => NativeNCurses.NCursesWrapper.ins_wch(wPtr), "ins_wch");
-            }
+            WideStdScrWrapper.ins_wch(wch);
         }
         #endregion
 
@@ -1685,11 +1463,9 @@ namespace NCurses.Core.Interop
         /// <para />native method wrapped with verification.
         /// </summary>
         /// <param name="str">the string to insert</param>
-        public static void ins_wstr(string str)
+        public static void ins_wstr(in string str)
         {
-            NativeNCurses.MarshalNativeWideStringAndExecuteAction((strPtr) =>
-                NativeNCurses.VerifyNCursesMethod(() => NativeNCurses.NCursesWrapper.ins_wstr(strPtr), "ins_wstr"),
-                str, true);
+            WideStrStdScrWrapper.ins_wstr(str);
         }
         #endregion
 
@@ -1699,22 +1475,9 @@ namespace NCurses.Core.Interop
         /// <para />native method wrapped with verification.
         /// </summary>
         /// <param name="str">the string to insert</param>
-        public static void inwstr(StringBuilder str)
+        public static void inwstr(out string str)
         {
-            int size = Constants.SIZEOF_WCHAR_T * str.Capacity;
-            IntPtr strPtr = Marshal.AllocHGlobal(size);
-            GC.AddMemoryPressure(size);
-
-            try
-            {
-                NativeNCurses.VerifyNCursesMethod(() => NativeNCurses.NCursesWrapper.inwstr(strPtr), "inwstr");
-                str.Append(NativeNCurses.MarshalStringFromNativeWideString(strPtr, str.Capacity));
-            }
-            finally
-            {
-                Marshal.FreeHGlobal(strPtr);
-                GC.RemoveMemoryPressure(size);
-            }
+            WideStrStdScrWrapper.inwstr(out str);
         }
         #endregion
 
@@ -1725,13 +1488,9 @@ namespace NCurses.Core.Interop
         /// </summary>
         /// <param name="y">the line number to move to</param>
         /// <param name="x">the column number to move to</param>
-        public static void mvadd_wch(int y, int x, NCursesWCHAR wch)
+        public static void mvadd_wch(int y, int x, in INCursesWCHAR wch)
         {
-            IntPtr wPtr;
-            using (wch.ToPointer(out wPtr))
-            {
-                NativeNCurses.VerifyNCursesMethod(() => NativeNCurses.NCursesWrapper.mvadd_wch(y, x, wPtr), "mvadd_wch");
-            }
+            WideStdScrWrapper.mvadd_wch(y, x, wch);
         }
         #endregion
 
@@ -1742,21 +1501,9 @@ namespace NCurses.Core.Interop
         /// </summary>
         /// <param name="y">the line number to move to</param>
         /// <param name="x">the column number to move to</param>
-        public static void mvadd_wchnstr(int y, int x, NCursesWCHAR[] wchStr, int n)
+        public static void mvadd_wchnstr(int y, int x, in INCursesWCHARStr wchStr, int n)
         {
-            int totalSize = 0;
-            IntPtr arrayPtr = NativeNCurses.MarshallArray(wchStr, true, out totalSize);
-            GC.AddMemoryPressure(totalSize);
-
-            try
-            {
-                NativeNCurses.VerifyNCursesMethod(() => NativeNCurses.NCursesWrapper.mvadd_wchnstr(y, x, arrayPtr, n), "mvadd_wchnstr");
-            }
-            finally
-            {
-                Marshal.FreeHGlobal(arrayPtr);
-                GC.RemoveMemoryPressure(totalSize);
-            }
+            WideStdScrWrapper.mvadd_wchnstr(y, x, wchStr, n);
         }
         #endregion
 
@@ -1767,21 +1514,9 @@ namespace NCurses.Core.Interop
         /// </summary>
         /// <param name="y">the line number to move to</param>
         /// <param name="x">the column number to move to</param>
-        public static void mvadd_wchstr(int y, int x, NCursesWCHAR[] wchStr)
+        public static void mvadd_wchstr(int y, int x, in INCursesWCHARStr wchStr)
         {
-            int totalSize = 0;
-            IntPtr arrayPtr = NativeNCurses.MarshallArray(wchStr, true, out totalSize);
-            GC.AddMemoryPressure(totalSize);
-
-            try
-            {
-                NativeNCurses.VerifyNCursesMethod(() => NativeNCurses.NCursesWrapper.mvadd_wchstr(y, x, arrayPtr), "mvadd_wchstr");
-            }
-            finally
-            {
-                Marshal.FreeHGlobal(arrayPtr);
-                GC.RemoveMemoryPressure(totalSize);
-            }
+            WideStdScrWrapper.mvadd_wchstr(y, x, wchStr);
         }
         #endregion
 
@@ -1792,11 +1527,9 @@ namespace NCurses.Core.Interop
         /// </summary>
         /// <param name="y">the line number to move to</param>
         /// <param name="x">the column number to move to</param>
-        public static void mvaddnwstr(int y, int x, string wstr, int n)
+        public static void mvaddnwstr(int y, int x, in string wstr, int n)
         {
-            NativeNCurses.MarshalNativeWideStringAndExecuteAction((ptr) =>
-                NativeNCurses.VerifyNCursesMethod(() => NativeNCurses.NCursesWrapper.mvaddnwstr(y, x, ptr, n), "mvaddnwstr"),
-                wstr);
+            WideStrStdScrWrapper.mvaddnwstr(y, x, wstr, n);
         }
         #endregion
 
@@ -1807,11 +1540,9 @@ namespace NCurses.Core.Interop
         /// </summary>
         /// <param name="y">the line number to move to</param>
         /// <param name="x">the column number to move to</param>
-        public static void mvaddwstr(int y, int x, string wstr)
+        public static void mvaddwstr(int y, int x, in string wstr)
         {
-            NativeNCurses.MarshalNativeWideStringAndExecuteAction((ptr) =>
-                NativeNCurses.VerifyNCursesMethod(() => NativeNCurses.NCursesWrapper.mvaddwstr(y, x, ptr), "mvaddwstr"),
-                wstr, true);
+            WideStrStdScrWrapper.mvaddwstr(y, x, wstr);
         }
         #endregion
 
@@ -1822,28 +1553,9 @@ namespace NCurses.Core.Interop
         /// </summary>
         /// <param name="y">the line number to move to</param>
         /// <param name="x">the column number to move to</param>
-        public static void mvget_wch(int y, int x, out char wch)
+        public static bool mvget_wch(int y, int x, out char wch, out Key key)
         {
-            IntPtr chPtr = Marshal.AllocHGlobal(Marshal.SizeOf<chtype>());
-            GC.AddMemoryPressure(Marshal.SizeOf<chtype>());
-
-            try
-            {
-                NCursesException.Verify(NativeNCurses.NCursesWrapper.mvget_wch(y, x, chPtr), "mvget_wch");
-
-                byte[] arr = new byte[Marshal.SizeOf<chtype>()];
-                Marshal.Copy(chPtr, arr, 0, Marshal.SizeOf<chtype>());
-
-                if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
-                    wch = Encoding.Unicode.GetChars(arr)[0];
-                else
-                    wch = Encoding.UTF32.GetChars(arr)[0];
-            }
-            finally
-            {
-                Marshal.FreeHGlobal(chPtr);
-                GC.RemoveMemoryPressure(Marshal.SizeOf<chtype>());
-            }
+            return WideStrStdScrWrapper.mvget_wch(y, x, out wch, out key);
         }
         #endregion
 
@@ -1854,22 +1566,9 @@ namespace NCurses.Core.Interop
         /// </summary>
         /// <param name="y">the line number to move to</param>
         /// <param name="x">the column number to move to</param>
-        public static void mvget_wstr(int y, int x, StringBuilder wstr)
+        public static void mvget_wstr(int y, int x, out string wstr)
         {
-            int size = Marshal.SizeOf<chtype>() * wstr.Capacity;
-            IntPtr strPtr = Marshal.AllocHGlobal(size);
-            GC.AddMemoryPressure(size);
-
-            try
-            {
-                NativeNCurses.VerifyNCursesMethod(() => NativeNCurses.NCursesWrapper.mvget_wstr(y, x, strPtr), "mvget_wstr");
-                wstr.Append(NativeNCurses.MarshalStringFromNativeWideString(strPtr, wstr.Capacity));
-            }
-            finally
-            {
-                Marshal.FreeHGlobal(strPtr);
-                GC.RemoveMemoryPressure(Marshal.SizeOf<chtype>());
-            }
+            WideStrStdScrWrapper.mvget_wstr(y, x, out wstr);
         }
         #endregion
 
@@ -1880,22 +1579,9 @@ namespace NCurses.Core.Interop
         /// </summary>
         /// <param name="y">the line number to move to</param>
         /// <param name="x">the column number to move to</param>
-        public static void mvgetn_wstr(int y, int x, StringBuilder wstr, int n)
+        public static void mvgetn_wstr(int y, int x, out string wstr, int n)
         {
-            int size = Marshal.SizeOf<chtype>() * n;
-            IntPtr strPtr = Marshal.AllocHGlobal(size);
-            GC.AddMemoryPressure(size);
-
-            try
-            {
-                NativeNCurses.VerifyNCursesMethod(() => NativeNCurses.NCursesWrapper.mvgetn_wstr(y, x, strPtr, n), "mvgetn_wstr");
-                wstr.Append(NativeNCurses.MarshalStringFromNativeWideString(strPtr, n));
-            }
-            finally
-            {
-                Marshal.FreeHGlobal(strPtr);
-                GC.RemoveMemoryPressure(size);
-            }
+            WideStrStdScrWrapper.mvgetn_wstr(y, x, out wstr, n);
         }
         #endregion
 
@@ -1906,13 +1592,9 @@ namespace NCurses.Core.Interop
         /// </summary>
         /// <param name="y">the line number to move to</param>
         /// <param name="x">the column number to move to</param>
-        public static void mvhline_set(int y, int x, NCursesWCHAR wch, int n)
+        public static void mvhline_set(int y, int x, in INCursesWCHAR wch, int n)
         {
-            IntPtr wPtr;
-            using (wch.ToPointer(out wPtr))
-            {
-                NativeNCurses.VerifyNCursesMethod(() => NativeNCurses.NCursesWrapper.mvhline_set(y, x, wPtr, n), "mvhline_set");
-            }
+            WideStdScrWrapper.mvhline_set(y, x, wch, n);
         }
         #endregion
 
@@ -1923,13 +1605,9 @@ namespace NCurses.Core.Interop
         /// </summary>
         /// <param name="y">the line number to move to</param>
         /// <param name="x">the column number to move to</param>
-        public static void mvin_wch(int y, int x, ref NCursesWCHAR wcval)
+        public static void mvin_wch(int y, int x, out INCursesWCHAR wcval)
         {
-            IntPtr wPtr;
-            using (wcval.ToPointer(out wPtr))
-            {
-                NCursesException.Verify(NativeNCurses.NCursesWrapper.mvin_wch(y, x, wPtr), "mvin_wch");
-            }
+            WideStdScrWrapper.mvin_wch(y, x, out wcval);
         }
         #endregion
 
@@ -1940,30 +1618,24 @@ namespace NCurses.Core.Interop
         /// </summary>
         /// <param name="y">the line number to move to</param>
         /// <param name="x">the column number to move to</param>
-        public static void mvin_wchnstr(int y, int x, ref NCursesWCHAR[] wcval, int n)
+        public static void mvin_wchnstr(int y, int x, out INCursesWCHARStr wchStr, int n)
         {
-            if (n != wcval.Length)
-                throw new ArgumentException("lenght of the array and n should be the same");
-
-            int totalSize = 0;
-            IntPtr arrayPtr = NativeNCurses.MarshallArray(wcval, false, out totalSize);
-            GC.AddMemoryPressure(totalSize);
-
-            try
-            {
-                NativeNCurses.VerifyNCursesMethod(() => NativeNCurses.NCursesWrapper.mvin_wchnstr(y, x, arrayPtr, totalSize), "mvin_wchnstr");
-                for (int i = 0; i < wcval.Length; i++)
-                    wcval[i].ToStructure(arrayPtr + (i * wcval[i].Size));
-            }
-            finally
-            {
-                Marshal.FreeHGlobal(arrayPtr);
-                GC.RemoveMemoryPressure(totalSize);
-            }
+            WideStdScrWrapper.mvin_wchnstr(y, x, out wchStr, n);
         }
         #endregion
 
-        /* can not implement mvin_wchstr, returns ERR in ncurses implementation */
+        #region mvin_wchstr
+        /// <summary>
+        /// see <see cref="in_wchnstr"/>
+        /// <para />native method wrapped with verification.
+        /// </summary>
+        /// <param name="y">the line number to move to</param>
+        /// <param name="x">the column number to move to</param>
+        public static void mvin_wchstr(int y, int x, out INCursesWCHARStr wchStr)
+        {
+            WideStdScrWrapper.mvin_wchstr(y, x, out wchStr);
+        }
+        #endregion
 
         #region mvinnwstr
         /// <summary>
@@ -1972,22 +1644,9 @@ namespace NCurses.Core.Interop
         /// </summary>
         /// <param name="y">the line number to move to</param>
         /// <param name="x">the column number to move to</param>
-        public static void mvinnwstr(int y, int x, StringBuilder str, int n)
+        public static void mvinnwstr(int y, int x, out string str, int n, out int read)
         {
-            int size = Constants.SIZEOF_WCHAR_T * n;
-            IntPtr strPtr = Marshal.AllocHGlobal(size);
-            GC.AddMemoryPressure(size);
-
-            try
-            {
-                NativeNCurses.VerifyNCursesMethod(() => NativeNCurses.NCursesWrapper.mvinnwstr(y, x, strPtr, n), "mvinnwstr");
-                str.Append(NativeNCurses.MarshalStringFromNativeWideString(strPtr, n));
-            }
-            finally
-            {
-                Marshal.FreeHGlobal(strPtr);
-                GC.RemoveMemoryPressure(size);
-            }
+            WideStrStdScrWrapper.mvinnwstr(y, x, out str, n, out read);
         }
         #endregion
 
@@ -1998,11 +1657,9 @@ namespace NCurses.Core.Interop
         /// </summary>
         /// <param name="y">the line number to move to</param>
         /// <param name="x">the column number to move to</param>
-        public static void mvins_nwstr(int y, int x, string str, int n)
+        public static void mvins_nwstr(int y, int x, in string str, int n)
         {
-            NativeNCurses.MarshalNativeWideStringAndExecuteAction((strPtr) =>
-                NativeNCurses.VerifyNCursesMethod(() => NativeNCurses.NCursesWrapper.mvins_nwstr(y, x, strPtr, n), "mvins_nwstr"),
-                str);
+            WideStrStdScrWrapper.mvins_nwstr(y, x, str, n);
         }
         #endregion
 
@@ -2013,13 +1670,9 @@ namespace NCurses.Core.Interop
         /// </summary>
         /// <param name="y">the line number to move to</param>
         /// <param name="x">the column number to move to</param>
-        public static void mvins_wch(int y, int x, NCursesWCHAR wch)
+        public static void mvins_wch(int y, int x, in INCursesWCHAR wch)
         {
-            IntPtr wPtr;
-            using (wch.ToPointer(out wPtr))
-            {
-                NativeNCurses.VerifyNCursesMethod(() => NativeNCurses.NCursesWrapper.mvins_wch(y, x, wPtr), "mvins_wch");
-            }
+            WideStdScrWrapper.mvins_wch(y, x, wch);
         }
         #endregion
 
@@ -2030,11 +1683,9 @@ namespace NCurses.Core.Interop
         /// </summary>
         /// <param name="y">the line number to move to</param>
         /// <param name="x">the column number to move to</param>
-        public static void mvins_wstr(int y, int x, string str)
+        public static void mvins_wstr(int y, int x, in string str)
         {
-            NativeNCurses.MarshalNativeWideStringAndExecuteAction((strPtr) =>
-                NativeNCurses.VerifyNCursesMethod(() => NativeNCurses.NCursesWrapper.mvins_wstr(y, x, strPtr), "mvins_wstr"),
-                str, true);
+            WideStrStdScrWrapper.mvins_wstr(y, x, str);
         }
         #endregion
 
@@ -2045,22 +1696,9 @@ namespace NCurses.Core.Interop
         /// </summary>
         /// <param name="y">the line number to move to</param>
         /// <param name="x">the column number to move to</param>
-        public static void mvinwstr(int y, int x, StringBuilder str)
+        public static void mvinwstr(int y, int x, out string wstr)
         {
-            int size = Constants.SIZEOF_WCHAR_T * str.Capacity;
-            IntPtr strPtr = Marshal.AllocHGlobal(size);
-            GC.AddMemoryPressure(size);
-
-            try
-            {
-                NativeNCurses.VerifyNCursesMethod(() => NativeNCurses.NCursesWrapper.mvinwstr(y, x, strPtr), "mvinwstr");
-                str.Append(NativeNCurses.MarshalStringFromNativeWideString(strPtr, str.Capacity));
-            }
-            finally
-            {
-                Marshal.FreeHGlobal(strPtr);
-                GC.RemoveMemoryPressure(size);
-            }
+            WideStrStdScrWrapper.mvinwstr(y, x, out wstr);
         }
         #endregion
 
@@ -2071,13 +1709,9 @@ namespace NCurses.Core.Interop
         /// </summary>
         /// <param name="y">the line number to move to</param>
         /// <param name="x">the column number to move to</param>
-        public static void mvvline_set(int y, int x, NCursesWCHAR wch, int n)
+        public static void mvvline_set(int y, int x, in INCursesWCHAR wch, int n)
         {
-            IntPtr wPtr;
-            using (wch.ToPointer(out wPtr))
-            {
-                NativeNCurses.VerifyNCursesMethod(() => NativeNCurses.NCursesWrapper.mvvline_set(y, x, wPtr, n), "mvvline_set");
-            }
+            WideStdScrWrapper.mvvline_set(y, x, wch, n);
         }
         #endregion
 
@@ -2086,13 +1720,9 @@ namespace NCurses.Core.Interop
         /// see <see cref="hline_set"/>
         /// <para />native method wrapped with verification.
         /// </summary>
-        public static void vline_set(NCursesWCHAR wch, int n)
+        public static void vline_set(in INCursesWCHAR wch, int n)
         {
-            IntPtr wPtr;
-            using (wch.ToPointer(out wPtr))
-            {
-                NativeNCurses.VerifyNCursesMethod(() => NativeNCurses.NCursesWrapper.vline_set(wPtr, n), "vline_set");
-            }
+            WideStdScrWrapper.vline_set(wch, n);
         }
         #endregion
     }

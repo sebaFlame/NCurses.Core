@@ -7,6 +7,6 @@ namespace NCurses.Core
 {
     public class Screen
     {
-        private IntPtr ScreenPtr;
+        //private IntPtr ScreenPtr;
     }
 }

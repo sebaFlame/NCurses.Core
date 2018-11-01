@@ -1,28 +1,28 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
-    <TargetFramework>netstandard1.6</TargetFramework>
+    <TargetFramework>netstandard2.0</TargetFramework>
     <DebugType>portable</DebugType>
     <AssemblyName>NCurses.Core</AssemblyName>
     <PackageId>NCurses.Core</PackageId>
-  </PropertyGroup>
-  
-  <!--Version 5 uses ulong instead of uint for chtype-->
-  <PropertyGroup Condition="'$(Ncurses_Version)' == '5'">
-    <DefineConstants>$(DefineConstants);NCURSES_VERSION_5</DefineConstants>
-  </PropertyGroup>
-  
-  <!--Debian Stretch uses 5.9 as library suffix for a ncurses v 6-->
-  <PropertyGroup Condition="'$(Ncurses_Version)' == '' OR '$(Ncurses_Version)' == '6'">
-    <DefineConstants>$(DefineConstants);NCURSES_VERSION_6</DefineConstants>
+    <LangVersion>7.3</LangVersion>
+    <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
   </PropertyGroup>
 
-  <ItemGroup Condition="'$(RuntimeIdentifier)' == '' OR $([System.String]::Copy('$(RuntimeIdentifier)').ToLower().Contains('win'))">
-    <PackageReference Include="runtime.win.NCurses" Version="6.0.2017.0225" />
+  <!-- Microsoft.DotNet.PlatformAbstractions dependencies (unix) -->
+  <ItemGroup>
+    <PackageReference Include="System.Runtime.InteropServices" Version="4.3.0" />
+    <PackageReference Include="System.Runtime.Extensions" Version="4.3.0" />
+    <PackageReference Include="System.Collections" Version="4.3.0" />
+    <PackageReference Include="System.IO.FileSystem.Primitives" Version="4.3.0" />
   </ItemGroup>
 
-  <ItemGroup Condition=" '$(TargetFramework)' == 'netstandard1.6' ">
+  <ItemGroup>
+    <PackageReference Include="Microsoft.DotNet.PlatformAbstractions" Version="2.1.0" />
     <PackageReference Include="System.Reflection.Emit" Version="4.3.0" />
+    <PackageReference Include="System.Memory" Version="4.5.1" />
+    <PackageReference Include="System.Runtime.CompilerServices.Unsafe" Version="4.5.1" />
+    <PackageReference Include="System.Buffers" Version="4.5.0" />
   </ItemGroup>
 
 </Project>

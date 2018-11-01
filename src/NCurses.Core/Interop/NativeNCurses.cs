@@ -1,198 +1,160 @@
 ﻿using System;
 using System.Text;
 using System.Runtime.InteropServices;
+using System.Runtime.CompilerServices;
+using System.Collections.Generic;
+using NCurses.Core.Interop.Wide;
+using NCurses.Core.Interop.WideStr;
+using NCurses.Core.Interop.Small;
+using NCurses.Core.Interop.SmallStr;
+using NCurses.Core.Interop.Mouse;
+using NCurses.Core.Interop.Platform;
+using NCurses.Core.Interop.Dynamic;
 
-#if NCURSES_VERSION_6
-using chtype = System.UInt32;
-#elif NCURSES_VERSION_5
-using chtype = System.UInt64;
-#endif
+[assembly: InternalsVisibleTo("NCurses.Core.Interop.Dynamic.Generated")]
+[assembly: InternalsVisibleTo("NCurses.Core.Tests")]
 
 namespace NCurses.Core.Interop
 {
+    public delegate int NCURSES_WINDOW_CB(IntPtr window, IntPtr args);
+    public delegate int NCURSES_SCREEN_CB(IntPtr screen, IntPtr args);
+
     /// <summary>
     /// native curses methods.
     /// all methods can be found at http://invisible-island.net/ncurses/man/ncurses.3x.html#h3-Routine-Name-Index
     /// </summary>
     internal static class NativeNCurses
     {
-        internal static chtype[] Acs_Map = new chtype[128];
-        internal static char[] Wacs_Map = new char[128];
-
         private static INCursesWrapper wrapper;
         public static INCursesWrapper NCursesWrapper
         {
             get
             {
-                if(wrapper == null)
+                if (wrapper is null)
                     wrapper = (INCursesWrapper)Activator.CreateInstance(DynamicTypeBuilder.CreateNCursesWrapper(Constants.DLLNAME));
                 return wrapper;
             }
         }
 
-        #region verification
-        /// <summary>
-        /// Verify any NCurses method returning a Constants.ERR or Constants.OK
-        /// </summary>
-        /// <param name="f">The NCurses method needing verification wrapped into a Func&lt;int&gt;</param>
-        /// <param name="methodName">The name of the NCurses method (needed for better debugging)</param>
-        internal static int VerifyNCursesMethod(Func<int> f, string methodName)
-        {
-            int ret = f();
-            NCursesException.Verify(ret, methodName);
-            return ret;
-        }
+        private static bool? hasUnicodeSupport;
+        internal static bool HasUnicodeSupport => hasUnicodeSupport.HasValue ? hasUnicodeSupport.Value : throw new InvalidOperationException(Constants.TypeGenerationExceptionMessage);
+
+        internal static INativeWrapper NCursesCustomTypeWrapper { get; private set; }
+        internal static INativeWrapper NCursesCharTypeWrapper { get; private set; }
 
         /// <summary>
-        /// Verify any NCurses method returning an IntPtr
+        /// These only return a number representation of the symbol, which NCurses can handle internally
         /// </summary>
-        /// <param name="f">The NCurses method needing verification wrapped into a Func&lt;IntPtr&gt;</param>
-        /// <param name="methodName">The name of the NCurses method (needed for better debugging)</param>
-        internal static IntPtr VerifyNCursesMethod(Func<IntPtr> f, string methodName)
+        internal static IACSMap Acs_Map;
+        internal static IACSMap Wacs_Map;
+
+        private static Encoding encoding;
+        internal static Encoding Encoding
         {
-            IntPtr ptr = f();
-            NCursesException.Verify(ptr, methodName);
-            return ptr;
+            get
+            {
+                return (encoding is null)
+                    ? RuntimeInformation.IsOSPlatform(OSPlatform.Windows)
+                        ? (encoding = Encoding.Unicode)
+                        : (encoding = Encoding.UTF32)
+                    : encoding;
+            }
+        }
+
+        private static INativeLoader nativeLoader;
+        private static INativeLoader NativeLoader
+        {
+            get
+            {
+                return (nativeLoader is null)
+                    ? RuntimeInformation.IsOSPlatform(OSPlatform.Windows)
+                        ? nativeLoader = new WindowsLoader()
+                        : nativeLoader = new LinuxLoader()
+                    : nativeLoader;
+            }
+        }
+
+        #region single byte custom type wrapper fields
+        private static INativeNCursesSmallStr smallStrCursesWrapper;
+        private static INativeNCursesSmallStr SmallStrCursesWrapper => smallStrCursesWrapper ?? throw new InvalidOperationException(Constants.TypeGenerationExceptionMessage);
+        private static INativeNCursesWideStr wideStrCursesWrapper;
+        private static INativeNCursesWideStr WideStrCursesWrapper => wideStrCursesWrapper ?? throw new InvalidOperationException(Constants.TypeGenerationExceptionMessage);
+        #endregion
+
+        #region multi byte custom type wrapper fields
+        private static INativeNCursesWide wideNCursesWrapper;
+        private static INativeNCursesWide WideNCursesWrapper => NativeNCurses.HasUnicodeSupport
+              ? wideNCursesWrapper ?? throw new InvalidOperationException(Constants.TypeGenerationExceptionMessage)
+              : throw new InvalidOperationException(Constants.NoUnicodeExceptionMessage);
+        private static INativeNCursesSmall smallCursesWrapper;
+        private static INativeNCursesSmall SmallCursesWrapper => NativeNCurses.HasUnicodeSupport
+              ? smallCursesWrapper ?? throw new InvalidOperationException(Constants.TypeGenerationExceptionMessage)
+              : throw new InvalidOperationException(Constants.NoUnicodeExceptionMessage);
+        #endregion
+
+        #region custom type initialization
+        internal static void CreateCharCustomWrappers()
+        {
+            if (DynamicTypeBuilder.schar is null)
+                throw new InvalidOperationException("Custom types haven't been generated yet.");
+
+            Type customType;
+            if (smallStrCursesWrapper is null)
+            {
+                customType = typeof(NativeNCursesSmallStr<>).MakeGenericType(DynamicTypeBuilder.schar);
+                smallStrCursesWrapper = (INativeNCursesSmallStr)Activator.CreateInstance(customType);
+            }
+        }
+
+        internal static void CreateCustomTypeWrappers()
+        {
+            if ((DynamicTypeBuilder.chtype is null
+                || DynamicTypeBuilder.schar is null)
+                || (NativeNCurses.HasUnicodeSupport
+                    && (DynamicTypeBuilder.cchar_t is null || DynamicTypeBuilder.wchar_t is null)))
+                throw new InvalidOperationException("Custom types haven't been generated yet.");
+
+            Type customType;
+            if (NativeNCurses.HasUnicodeSupport)
+            {
+                if (wideNCursesWrapper is null)
+                {
+                    customType = typeof(NativeNCursesWide<,,,>).MakeGenericType(DynamicTypeBuilder.cchar_t, DynamicTypeBuilder.wchar_t, DynamicTypeBuilder.chtype, DynamicTypeBuilder.schar);
+                    wideNCursesWrapper = (INativeNCursesWide)Activator.CreateInstance(customType);
+                }
+
+                if (wideStrCursesWrapper is null)
+                {
+                    customType = typeof(NativeNCursesWideStr<,>).MakeGenericType(DynamicTypeBuilder.wchar_t, DynamicTypeBuilder.schar);
+                    wideStrCursesWrapper = (INativeNCursesWideStr)Activator.CreateInstance(customType);
+                }
+            }
+
+            if (smallCursesWrapper is null)
+            {
+                customType = typeof(NativeNCursesSmall<,>).MakeGenericType(DynamicTypeBuilder.chtype, DynamicTypeBuilder.schar);
+                smallCursesWrapper = (INativeNCursesSmall)Activator.CreateInstance(customType);
+            }
         }
         #endregion
 
         #region thread-safety
-        
         /// <summary>
         /// Execute a thread-safe WINDOW method with verification.
         /// </summary>
         /// <param name="window">A pointer to the window</param>
         /// <param name="callback">A pointer to a callback function using NCURSES_WINDOW_CB</param>
         /// <param name="args">A pointer to the arguments</param>
-        public static int use_window_v(IntPtr window, IntPtr callback, IntPtr args, string method, bool collect = true)
+        public static void use_window(IntPtr window, NCURSES_WINDOW_CB callback, IntPtr args)
         {
+            IntPtr func = Marshal.GetFunctionPointerForDelegate(callback);
             try
             {
-                return VerifyNCursesMethod(() => NCursesWrapper.use_window(window, callback, args), method);
+                NCursesException.Verify(NCursesWrapper.use_window(window, func, args), "use_window");
             }
             finally
             {
-                if (collect)
-                {
-                    if (callback != IntPtr.Zero)
-                        Marshal.FreeHGlobal(callback);
-                    if (args != IntPtr.Zero)
-                        Marshal.FreeHGlobal(args);
-                }
-            }
-        }
-
-        /// <summary>
-        /// Execute a thread-safe WINDOW method with verification.
-        /// </summary>
-        /// <param name="window">A pointer to the window</param>
-        /// <param name="callback">A pointer to a callback function using NCURSES_WINDOW_CB</param>
-        public static int use_window_v(IntPtr window, IntPtr callback, string method, bool collect = true)
-        {
-            try
-            {
-                return VerifyNCursesMethod(() => NCursesWrapper.use_window(window, callback, IntPtr.Zero), method);
-            }
-            finally
-            {
-                if (collect && callback != IntPtr.Zero)
-                    Marshal.FreeHGlobal(callback);
-            }
-        }
-
-        /// <summary>
-        /// Execute a thread-safe WINDOW method with verification.
-        /// </summary>
-        /// <param name="window">A pointer to the window</param>
-        /// <param name="callback">A pointer to a callback function using NCURSES_WINDOW_CB</param>
-        /// <param name="args">A pointer to the arguments</param>
-        public static int use_window(IntPtr window, IntPtr callback, IntPtr args, bool collect = true)
-        {
-            try
-            {
-                return NCursesWrapper.use_window(window, callback, args);
-            }
-            finally
-            {
-                if (collect)
-                {
-                    if (callback != IntPtr.Zero)
-                        Marshal.FreeHGlobal(callback);
-                    if (args != IntPtr.Zero)
-                        Marshal.FreeHGlobal(args);
-                }
-            }
-        }
-
-        /// <summary>
-        /// Execute a thread-safe WINDOW method with verification.
-        /// </summary>
-        /// <param name="window">A pointer to the window</param>
-        /// <param name="callback">A pointer to a callback function using NCURSES_WINDOW_CB</param>
-        public static int use_window(IntPtr window, IntPtr callback, bool collect = true)
-        {
-            try
-            {
-                return NCursesWrapper.use_window(window, callback, IntPtr.Zero);
-            }
-            finally
-            {
-                if (collect && callback != IntPtr.Zero)
-                    Marshal.FreeHGlobal(callback);
-            }
-        }
-
-        /// <summary>
-        /// Execute a thread-safe WINDOW method with verification.
-        /// </summary>
-        /// <param name="window">A pointer to the window</param>
-        /// <param name="callback">A pointer to a callback function using NCURSES_WINDOW_CB</param>
-        public static int use_window_v(IntPtr window, Func<IntPtr, int> callback)
-        {
-            Func<IntPtr, IntPtr, int> c = (IntPtr w, IntPtr a) => callback(w);
-            return VerifyNCursesMethod(() => NCursesWrapper.use_window(window, Marshal.GetFunctionPointerForDelegate(new NCURSES_WINDOW_CB(c)), IntPtr.Zero), "UserCallback");
-        }
-
-        
-        /// <summary>
-        /// Execute a thread-safe SCREEN method with verification.
-        /// </summary>
-        /// <param name="screen">A pointer to the screen</param>
-        /// <param name="callback">A pointer to a callback function using NCURSES_WINDOW_CB</param>
-        /// <param name="args">A pointer to the arguments</param>
-        public static int use_screen_v(IntPtr screen, IntPtr callback, IntPtr args, string method, bool collect = true)
-        {
-            try
-            {
-                return VerifyNCursesMethod(() => NCursesWrapper.use_screen(screen, callback, args), method);
-            }
-            finally
-            {
-                if (collect)
-                {
-                    if (callback != IntPtr.Zero)
-                        Marshal.FreeHGlobal(callback);
-                    if (args != IntPtr.Zero)
-                        Marshal.FreeHGlobal(args);
-                }
-            }
-        }
-
-        /// <summary>
-        /// Execute a thread-safe SCREEN method with verification.
-        /// </summary>
-        /// <param name="screen">A pointer to the screen</param>
-        /// <param name="callback">A pointer to a callback function using NCURSES_WINDOW_CB</param>
-        public static int use_screen_v(IntPtr screen, IntPtr callback, string method, bool collect = true)
-        {
-            try
-            {
-                return VerifyNCursesMethod(() => NCursesWrapper.use_screen(screen, callback, IntPtr.Zero), method);
-            }
-            finally
-            {
-                if (collect && callback != IntPtr.Zero)
-                    Marshal.FreeHGlobal(callback);
+                Marshal.FreeHGlobal(func);
             }
         }
 
@@ -202,39 +164,16 @@ namespace NCurses.Core.Interop
         /// <param name="screen">A pointer to the screen</param>
         /// <param name="callback">A pointer to a callback function using NCURSES_WINDOW_CB</param>
         /// <param name="args">A pointer to the arguments</param>
-        public static int use_screen(IntPtr screen, IntPtr callback, IntPtr args, bool collect = true)
+        public static void use_screen(IntPtr screen, NCURSES_SCREEN_CB callback, IntPtr args)
         {
+            IntPtr func = Marshal.GetFunctionPointerForDelegate(callback);
             try
             {
-                return NCursesWrapper.use_screen(screen, callback, args);
+                NCursesException.Verify(NCursesWrapper.use_screen(screen, func, args), "use_screen");
             }
             finally
             {
-                if (collect)
-                {
-                    if (callback != IntPtr.Zero)
-                        Marshal.FreeHGlobal(callback);
-                    if (args != IntPtr.Zero)
-                        Marshal.FreeHGlobal(args);
-                }
-            }
-        }
-
-        /// <summary>
-        /// Execute a thread-safe SCREEN method.
-        /// </summary>
-        /// <param name="screen">A pointer to the screen</param>
-        /// <param name="callback">A pointer to a callback function using NCURSES_WINDOW_CB</param>
-        public static int use_screen(IntPtr screen, IntPtr callback, bool collect = true)
-        {
-            try
-            {
-                return NCursesWrapper.use_screen(screen, callback, IntPtr.Zero);
-            }
-            finally
-            {
-                if (collect && callback != IntPtr.Zero)
-                    Marshal.FreeHGlobal(callback);
+                Marshal.FreeHGlobal(func);
             }
         }
         #endregion
@@ -247,28 +186,19 @@ namespace NCurses.Core.Interop
         /// <param name="handleProperty">method to excute on the property pointer</param>
         public static void LoadProperty(string propertyName, Action<IntPtr> handleProperty)
         {
-            IntPtr propertyPtr;
-            IntPtr libPtr;
-            bool freed;
+            IntPtr propertyPtr, libPtr;
 
-            if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
-                libPtr = NativeWindows.LoadLibrary(Constants.DLLNAME);
-            else
-                libPtr = NativeLinux.dlopen(
-                    Constants.DLLNAME.Contains(".so") ? 
-                        Constants.DLLNAME : string.Format("{0}.so", Constants.DLLNAME),
-                    2);
+            libPtr = NativeLoader.LoadModule(Constants.DLLNAME);
 
             if (libPtr == IntPtr.Zero)
-                throw new ArgumentNullException(string.Format("Couldn't load library {0}", Constants.DLLNAME));
+                return;
+                //throw new ArgumentNullException(string.Format("Couldn't load library {0}", Constants.DLLNAME));
 
-            if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
-                propertyPtr = NativeWindows.GetProcAddress(libPtr, propertyName);
-            else
-                propertyPtr = NativeLinux.dlsym(libPtr, propertyName);
+            propertyPtr = NativeLoader.GetSymbolPointer(libPtr, propertyName);
 
             if (propertyPtr == IntPtr.Zero)
-                throw new ArgumentNullException(string.Format("Couldn't find symbol {0} in {1}", propertyName, Constants.DLLNAME));
+                return;
+                //throw new ArgumentNullException(string.Format("Couldn't find symbol {0} in {1}", propertyName, Constants.DLLNAME));
 
             try
             {
@@ -276,141 +206,27 @@ namespace NCurses.Core.Interop
             }
             finally
             {
-                if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
-                    freed = NativeWindows.FreeLibrary(libPtr);
-                else
-                {
-                    int success = NativeLinux.dlclose(libPtr);
-                    freed = success == 0;
-                }
-
-                if (!freed)
-                    throw new ArgumentException(String.Format("Couldn't free {0}", Constants.DLLNAME));
+                NativeLoader.FreeModule(libPtr);
+                //if(!NativeLoader.FreeModule(libPtr))
+                //throw new ArgumentException(string.Format("Couldn't free {0}", Constants.DLLNAME));
             }
         }
         #endregion
 
-        #region custom marshalling
-        /// <summary>
-        /// create a Null terminated array of a custom time, remember to add to GC and to call Marshal.FreeHGlobal
-        /// </summary>
-        /// <typeparam name="T">type of the array</typeparam>
-        /// <param name="array">array of T to convert</param>
-        /// <param name="addNullTerminator">add a null terminator after allocation</param>
-        /// <returns></returns>
-        internal static IntPtr MarshallArray<T>(T[] array, bool addNullTerminator, out int pointerSize)
+        #region input validation
+        internal static bool VerifyInput(string method, int val, out char ch, out Key key)
         {
-            pointerSize = (Marshal.SizeOf<T>() * array.Length) + (addNullTerminator ? Marshal.SizeOf<T>() : 0);
-            IntPtr ptr = Marshal.AllocHGlobal(pointerSize);
-
-            try
+            if(has_key(val))
             {
-                for (int i = 0; i < array.Length; i++)
-                    Marshal.StructureToPtr(array[i], (ptr + (Marshal.SizeOf<T>() * i)), true);
-
-                if (addNullTerminator)
-                    Marshal.Copy(new byte[Marshal.SizeOf<T>()], 0, ptr + (Marshal.SizeOf<T>() * array.Length), Marshal.SizeOf<T>());
-
-                return ptr;
+                ch = '\0';
+                key = (Key)val;
+                return true;
             }
-            catch (Exception)
-            {
-                Marshal.FreeHGlobal(ptr);
-                throw;
-            }
-        }
 
-        /// <summary>
-        /// see <see cref="MarshallArray{T}(T[], bool, out int)"/>
-        /// </summary>
-        internal static IntPtr MarshallArray(NCursesWCHAR[] array, bool addNullTerminator, out int pointerSize)
-        {
-            if(array == null)
-                throw new ArgumentNullException("Array hasn't been initialized");
-
-            if (array.Length == 0)
-                throw new ArgumentException("Empty array has been passed");
-
-            if(array[0].WCHAR == null)
-                throw new ArgumentNullException("Wide character hasn't been initialized");
-
-            pointerSize = (array[0].Size * array.Length) + (addNullTerminator ? array[0].Size : 0);
-            IntPtr ptr = Marshal.AllocHGlobal(pointerSize);
-
-            try
-            {
-                for (int i = 0; i < array.Length; i++)
-                    array[i].ToPointer(ptr + (array[0].Size * i));
-
-                if (addNullTerminator)
-                    Marshal.Copy(new byte[array[0].Size], 0, ptr + (array[0].Size * array.Length), array[0].Size);
-
-                return ptr;
-            }
-            catch (Exception)
-            {
-                Marshal.FreeHGlobal(ptr);
-                throw;
-            }
-        }
-
-        /// <summary>
-        /// converts a string to it's native wide char counterpart
-        /// </summary>
-        /// <param name="action">action to execute after the string has been allocated in native memory</param>
-        /// <param name="wStr">the string to encode</param>
-        /// <param name="addNullTerminator">add a null terminator to the native string</param>
-        internal static void MarshalNativeWideStringAndExecuteAction(Action<IntPtr> action, string wStr, bool addNullTerminator = false)
-        {
-            IntPtr ptr = IntPtr.Zero;
-            int pointerSize = 0;
-            try
-            {
-                if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
-                {
-                    ptr = Marshal.StringToHGlobalUni(wStr);
-                    pointerSize = wStr.Length;
-                }
-                else
-                {
-                    byte[] tmpArray = Encoding.UTF32.GetBytes(wStr);
-                    byte[] wstrArray;
-
-                    if (addNullTerminator)
-                    {
-                        wstrArray = new byte[tmpArray.Length + Constants.SIZEOF_WCHAR_T];
-                        tmpArray.CopyTo(wstrArray, 0);
-                    }
-                    else
-                        wstrArray = tmpArray;
-
-                    ptr = Marshal.AllocHGlobal(wstrArray.Length);
-                    Marshal.Copy(wstrArray, 0, ptr, wstrArray.Length);
-                    pointerSize = wstrArray.Length;
-                }
-
-                GC.AddMemoryPressure(pointerSize);
-                action(ptr);
-            }
-            finally
-            {
-                if(ptr != IntPtr.Zero)
-                    Marshal.FreeHGlobal(ptr);
-
-                if (pointerSize > 0)
-                    GC.RemoveMemoryPressure(pointerSize);
-            }
-        }
-
-        internal static string MarshalStringFromNativeWideString(IntPtr ptr, int length)
-        {
-            if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
-                return Marshal.PtrToStringUni(ptr);
-
-            byte[] wstrArray = new byte[Constants.SIZEOF_WCHAR_T * length];
-
-            Marshal.Copy(ptr, wstrArray, 0, length);
-            return Encoding.UTF32.GetString(wstrArray).Split('\0')[0];
+            NCursesException.Verify(val, method);
+            ch = (char)(sbyte)val;
+            key = default(Key);
+            return false;
         }
         #endregion
 
@@ -432,7 +248,7 @@ namespace NCurses.Core.Interop
         /// </summary>
         public static void beep()
         {
-            VerifyNCursesMethod(() => NCursesWrapper.beep(), "beep");
+            NCursesException.Verify(NCursesWrapper.beep(), "beep");
         }
         #endregion
 
@@ -459,7 +275,7 @@ namespace NCurses.Core.Interop
         /// </summary>
         public static void cbreak()
         {
-            VerifyNCursesMethod(() => NCursesWrapper.cbreak(), "cbreak");
+            NCursesException.Verify(NCursesWrapper.cbreak(), "cbreak");
         }
         #endregion
 
@@ -470,7 +286,7 @@ namespace NCurses.Core.Interop
         /// </summary>
         public static void nocbreak()
         {
-            VerifyNCursesMethod(() => NCursesWrapper.nocbreak(), "nocbreak");
+            NCursesException.Verify(NCursesWrapper.nocbreak(), "nocbreak");
         }
         #endregion
 
@@ -492,35 +308,17 @@ namespace NCurses.Core.Interop
         /// <param name="red">The intensity of red</param>
         /// <param name="green">The intensity fo green</param>
         /// <param name="blue">The intensity of blue</param>
-        public static void color_content(short color, ref short red, ref short green, ref short blue)
+        public static unsafe void color_content(short color, ref short red, ref short green, ref short blue)
         {
-            IntPtr rPtr = Marshal.AllocHGlobal(Marshal.SizeOf(red));
-            Marshal.StructureToPtr(red, rPtr, true);
-            GC.AddMemoryPressure(Marshal.SizeOf(red));
+            Span<short> spanRed = new Span<short>(Unsafe.AsPointer<short>(ref red), Marshal.SizeOf<short>());
+            Span<short> spanGreen = new Span<short>(Unsafe.AsPointer<short>(ref green), Marshal.SizeOf<short>());
+            Span<short> spanBlue = new Span<short>(Unsafe.AsPointer<short>(ref blue), Marshal.SizeOf<short>());
 
-            IntPtr gPtr = Marshal.AllocHGlobal(Marshal.SizeOf(green));
-            Marshal.StructureToPtr(green, gPtr, true);
-            GC.AddMemoryPressure(Marshal.SizeOf(green));
+            ref short redRef = ref spanRed.GetPinnableReference();
+            ref short greenRef = ref spanGreen.GetPinnableReference();
+            ref short blueRef = ref spanBlue.GetPinnableReference();
 
-            IntPtr bPtr = Marshal.AllocHGlobal(Marshal.SizeOf(blue));
-            Marshal.StructureToPtr(blue, bPtr, true);
-            GC.AddMemoryPressure(Marshal.SizeOf(blue));
-
-            try
-            {
-                VerifyNCursesMethod(() => NCursesWrapper.color_content(color, rPtr, gPtr, bPtr), "color_content");
-            }
-            finally
-            {
-                Marshal.FreeHGlobal(rPtr);
-                GC.RemoveMemoryPressure(Marshal.SizeOf(red));
-
-                Marshal.FreeHGlobal(gPtr);
-                GC.RemoveMemoryPressure(Marshal.SizeOf(green));
-
-                Marshal.FreeHGlobal(bPtr);
-                GC.RemoveMemoryPressure(Marshal.SizeOf(blue));
-            }
+            NCursesException.Verify(NCursesWrapper.color_content(color, ref redRef, ref greenRef, ref blueRef), "color_content");
         }
         #endregion
 
@@ -553,19 +351,7 @@ namespace NCurses.Core.Interop
         /// <param name="overlay">1 if copying is non-destructive</param>
         public static void copywin(IntPtr srcwin, IntPtr dstwin, int sminrow, int smincol, int dminrow, int dmincol, int dmaxrow, int dmaxcol, int overlay)
         {
-            NativeNCurses.VerifyNCursesMethod(() =>
-                NCursesWrapper.copywin(srcwin, dstwin, sminrow, smincol, dminrow, dmincol, dmaxrow, dmaxcol, overlay), "copywin");
-        }
-
-        /// <summary>
-        /// see <see cref="copywin"/>
-        /// <para />native method wrapped with verification and thread safety.
-        /// </summary>
-        public static void copywin_t(IntPtr srcwin, IntPtr dstwin, int sminrow, int smincol, int dminrow, int dmincol, int dmaxrow, int dmaxcol, int overlay)
-        {
-            Func<IntPtr, IntPtr, int> callback = (IntPtr w, IntPtr a) =>
-                NCursesWrapper.copywin(srcwin, dstwin, sminrow, smincol, dminrow, dmincol, dmaxrow, dmaxcol, overlay);
-            NativeNCurses.use_window_v(srcwin, Marshal.GetFunctionPointerForDelegate(new NCURSES_WINDOW_CB(callback)), "copywin");
+            NCursesException.Verify(NCursesWrapper.copywin(srcwin, dstwin, sminrow, smincol, dminrow, dmincol, dmaxrow, dmaxcol, overlay), "copywin");
         }
         #endregion
 
@@ -577,7 +363,7 @@ namespace NCurses.Core.Interop
         /// <param name="visibility">invisible, normal, or very visible for visibility equal to 0, 1, or 2 respectively</param>
         public static void curs_set(int visibility)
         {
-            VerifyNCursesMethod(() => NCursesWrapper.curs_set(visibility), "curs_set");
+            NCursesException.Verify(NCursesWrapper.curs_set(visibility), "curs_set");
         }
         #endregion
 
@@ -623,7 +409,7 @@ namespace NCurses.Core.Interop
         /// <param name="ms">the amount of milliseconds to delay the output</param>
         public static void delay_output(int ms)
         {
-            NativeNCurses.VerifyNCursesMethod(() => NCursesWrapper.delay_output(ms), "delay_output");
+            NCursesException.Verify(NCursesWrapper.delay_output(ms), "delay_output");
         }
         #endregion
 
@@ -650,20 +436,7 @@ namespace NCurses.Core.Interop
         /// <param name="window">A pointer to a window</param>
         public static void delwin(IntPtr window)
         {
-            NativeNCurses.VerifyNCursesMethod(() => NCursesWrapper.delwin(window), "delwin");
-        }
-
-        /// <summary>
-        /// Calling delwin deletes the named window,
-        /// freeing all memory associated with it(it does not actually erase the window's screen image).
-        /// Subwindows must  be  deleted  before the main window can be deleted.
-        /// <para />native method wrapped with verification and thread safety.
-        /// </summary>
-        /// <param name="window">A pointer to a window</param>
-        public static void delwin_t(IntPtr window)
-        {
-            Func<IntPtr, IntPtr, int> callback = (IntPtr w, IntPtr a) => NCursesWrapper.delwin(window);
-            NativeNCurses.use_window_v(window, Marshal.GetFunctionPointerForDelegate(new NCURSES_WINDOW_CB(callback)), "delwin");
+            NCursesException.Verify(NCursesWrapper.delwin(window), "delwin");
         }
         #endregion
 
@@ -682,7 +455,7 @@ namespace NCurses.Core.Interop
         /// <returns>A pointer to a new window</returns>
         public static IntPtr derwin(IntPtr window, int nlines, int ncols, int begin_y, int begin_x)
         {
-            return NativeNCurses.VerifyNCursesMethod(() => NCursesWrapper.derwin(window, nlines, ncols, begin_y, begin_x), "derwin");
+            return NCursesException.Verify(NCursesWrapper.derwin(window, nlines, ncols, begin_y, begin_x), "derwin");
         }
         #endregion
 
@@ -693,7 +466,7 @@ namespace NCurses.Core.Interop
         /// </summary>
         public static void doupdate()
         {
-            NativeNCurses.VerifyNCursesMethod(() => NCursesWrapper.doupdate(), "doupdate");
+            NCursesException.Verify(NCursesWrapper.doupdate(), "doupdate");
         }
         #endregion
 
@@ -706,7 +479,7 @@ namespace NCurses.Core.Interop
         /// <returns>A pointer to a new window</returns>
         public static IntPtr dupwin(IntPtr window)
         {
-            return NativeNCurses.VerifyNCursesMethod(() => dupwin(window), "dupwin");
+            return NCursesException.Verify(dupwin(window), "dupwin");
         }
         #endregion
 
@@ -725,7 +498,7 @@ namespace NCurses.Core.Interop
         /// </summary>
         public static void echo()
         {
-            NativeNCurses.VerifyNCursesMethod(() => NCursesWrapper.echo(), "echo");
+            NCursesException.Verify(NCursesWrapper.echo(), "echo");
         }
         #endregion
 
@@ -739,7 +512,7 @@ namespace NCurses.Core.Interop
         /// </summary>
         public static void endwin()
         {
-            NativeNCurses.VerifyNCursesMethod(() => NCursesWrapper.endwin(), "endwin");
+            NCursesException.Verify(NCursesWrapper.endwin(), "endwin");
         }
         #endregion
 
@@ -754,7 +527,7 @@ namespace NCurses.Core.Interop
         /// <returns>The user's current erase character</returns>
         public static char erasechar()
         {
-            return NCursesWrapper.erasechar();
+            return SmallStrCursesWrapper.erasechar();
         }
         #endregion
 
@@ -781,7 +554,7 @@ namespace NCurses.Core.Interop
         /// </summary>
         public static void flash()
         {
-            NativeNCurses.VerifyNCursesMethod(() => NCursesWrapper.flash(), "flash");
+            NCursesException.Verify(NCursesWrapper.flash(), "flash");
         }
         #endregion
 
@@ -794,7 +567,7 @@ namespace NCurses.Core.Interop
         /// </summary>
         public static void flushinp()
         {
-            NativeNCurses.VerifyNCursesMethod(() => NCursesWrapper.flushinp(), "flushinp");
+            NCursesException.Verify(NCursesWrapper.flushinp(), "flushinp");
         }
         #endregion
 
@@ -820,7 +593,7 @@ namespace NCurses.Core.Interop
         /// <param name="tenths">tenths tenths of seconds between 1 and 255</param>
         public static void halfdelay(int tenths)
         {
-            NativeNCurses.VerifyNCursesMethod(() => NCursesWrapper.halfdelay(tenths), "halfdelay");
+            NCursesException.Verify(NCursesWrapper.halfdelay(tenths), "halfdelay");
         }
         #endregion
 
@@ -879,34 +652,70 @@ namespace NCurses.Core.Interop
         /// <returns>returns a pointer to the stdscr on success</returns>
         public static IntPtr initscr()
         {
-            if (RuntimeInformation.IsOSPlatform(OSPlatform.Linux))
-                NativeLinux.setlocale(6, ""); //6 = LC_ALL
+            //TODO: should only be called once
+            if (NativeLoader is LinuxLoader linuxLoader)
+                linuxLoader.SetLocale(6, ""); //6 = LC_ALL
 
-            IntPtr stdScr = NativeNCurses.VerifyNCursesMethod(() => NCursesWrapper.initscr(), "initscr");
+            IntPtr stdScr = NCursesException.Verify(NCursesWrapper.initscr(), "initscr");
 
-            try
+            if(NCursesCharTypeWrapper is null)
+            {
+                NCursesCharTypeWrapper = (INativeWrapper)Activator.CreateInstance(DynamicTypeBuilder.CreateCharTypeWrapper(Constants.DLLNAME));
+                NativeNCurses.CreateCharCustomWrappers();
+                NativeStdScr.CreateCharCustomWrappers();
+                NativeWindow.CreateCharCustomWrappers();
+                NativeScreen.CreateCharCustomWrappers();
+                NativePad.CreateCharCustomWrappers();
+            }
+
+            if (!hasUnicodeSupport.HasValue)
+                hasUnicodeSupport = NativeNCurses._nc_unicode_locale();
+
+            /*TODO
+             * version / platform customization
+             * use correct chtype type
+            */
+            if (NCursesCustomTypeWrapper is null)
+            {
+                //chtype size calculation
+                string version = NativeNCurses.curses_version();
+                int major = (int)char.GetNumericValue(version, version.IndexOf(' ') + 1);
+
+                Type chtypeType;
+                if (major >= 6)
+                    chtypeType = typeof(UInt32);
+                else
+                    chtypeType = typeof(UInt64);
+
+                NCursesCustomTypeWrapper = (INativeWrapper)Activator.CreateInstance(DynamicTypeBuilder.CreateCustomTypeWrapper(Constants.DLLNAME, HasUnicodeSupport));
+                NativeNCurses.CreateCustomTypeWrappers();
+                NativeStdScr.CreateCustomTypeWrappers();
+                NativeWindow.CreateCustomTypeWrappers();
+                NativeScreen.CreateCustomTypeWrappers();
+                NativePad.CreateCustomTypeWrappers();
+            }
+
+            //TODO: put in methods (if it fails and can't return stdScr)
+            if (Acs_Map is null)
             {
                 Action<IntPtr> loadAcs = (IntPtr acsPtr) =>
                 {
-                    for (int i = 0; i < Acs_Map.Length; i++)
-                        Acs_Map[i] = Marshal.PtrToStructure<chtype>(acsPtr + (i * Marshal.SizeOf<chtype>()));
+                    Type acsMapType = typeof(ACSMap<>).MakeGenericType(DynamicTypeBuilder.chtype);
+                    NativeNCurses.Acs_Map = (IACSMap)Activator.CreateInstance(acsMapType, new object[] { acsPtr });
                 };
                 NativeNCurses.LoadProperty("acs_map", loadAcs);
             }
-            finally { }
 
-            try
+            if (HasUnicodeSupport && Wacs_Map is null)
             {
-                NCursesWCHAR dummy = new NCursesWCHAR();
                 Action<IntPtr> loadWacs = (IntPtr wacsPtr) =>
                 {
-                    IntPtr real_wacs = Marshal.ReadIntPtr(wacsPtr);
-                    for (int i = 0; i < Wacs_Map.Length; i++)
-                        Wacs_Map[i] = (char)Marshal.ReadInt16(real_wacs + (i * dummy.Size) + Marshal.SizeOf<chtype>());
+                    IntPtr real_wacsPtr = Marshal.ReadIntPtr(wacsPtr);
+                    Type acsMapType = typeof(ACSMap<>).MakeGenericType(DynamicTypeBuilder.cchar_t);
+                    NativeNCurses.Wacs_Map = (IACSMap)Activator.CreateInstance(acsMapType, new object[] { real_wacsPtr });
                 };
                 NativeNCurses.LoadProperty("_nc_wacs", loadWacs);
             }
-            finally { }
 
             return stdScr;
         }
@@ -931,7 +740,7 @@ namespace NCurses.Core.Interop
         /// <param name="b">The amount of blue in the range 0 through 1000</param>
         public static void init_color(short color, short r, short g, short b)
         {
-            NativeNCurses.VerifyNCursesMethod(() => NCursesWrapper.init_color(color, r, g, b), "init_color");
+            NCursesException.Verify(NCursesWrapper.init_color(color, r, g, b), "init_color");
         }
         #endregion
 
@@ -954,7 +763,7 @@ namespace NCurses.Core.Interop
         /// <param name="b">A color value for the background</param>
         public static void init_pair(short pair, short f, short b)
         {
-            NativeNCurses.VerifyNCursesMethod(() => NCursesWrapper.init_pair(pair, f, b), "init_pair");
+            NCursesException.Verify(NCursesWrapper.init_pair(pair, f, b), "init_pair");
         }
         #endregion
 
@@ -972,7 +781,7 @@ namespace NCurses.Core.Interop
         /// <param name="bf">enbale/disable interrupt</param>
         public static void intrflush(IntPtr win, bool bf)
         {
-            NativeNCurses.VerifyNCursesMethod(() => NCursesWrapper.intrflush(win, bf), "intrflush");
+            NCursesException.Verify(NCursesWrapper.intrflush(win, bf), "intrflush");
         }
         #endregion
 
@@ -997,9 +806,7 @@ namespace NCurses.Core.Interop
         /// <returns>a string representing the key code</returns>
         public static string keyname(int c)
         {
-            //using own marshalling, because .net can't free the allocated memory
-            IntPtr keyNamePtr = NCursesWrapper.keyname(c);
-            return Marshal.PtrToStringAnsi(keyNamePtr);
+            return SmallStrCursesWrapper.keyname(c);
         }
         #endregion
 
@@ -1010,7 +817,7 @@ namespace NCurses.Core.Interop
         /// <returns>the kill character</returns>
         public static char killchar()
         {
-            return NCursesWrapper.killchar();
+            return SmallStrCursesWrapper.killchar();
         }
         #endregion
 
@@ -1028,7 +835,7 @@ namespace NCurses.Core.Interop
         /// <returns>the current terminal verbose description</returns>
         public static string longname()
         {
-            return NCursesWrapper.longname();
+            return SmallStrCursesWrapper.longname();
         }
         #endregion
 
@@ -1051,7 +858,7 @@ namespace NCurses.Core.Interop
         /// <param name="bf">enable/disable</param>
         public static void meta(IntPtr win, bool bf)
         {
-            NativeNCurses.VerifyNCursesMethod(() => NCursesWrapper.meta(win, bf), "meta");
+            NCursesException.Verify(NCursesWrapper.meta(win, bf), "meta");
         }
         #endregion
 
@@ -1067,7 +874,7 @@ namespace NCurses.Core.Interop
         /// <param name="newcol">new column number</param>
         public static void mvcur(int oldrow, int oldcol, int newrow, int newcol)
         {
-            NativeNCurses.VerifyNCursesMethod(() => NCursesWrapper.mvcur(oldrow, oldcol, newrow, newcol), "mvcur");
+            NCursesException.Verify(NCursesWrapper.mvcur(oldrow, oldcol, newrow, newcol), "mvcur");
         }
         #endregion
 
@@ -1083,7 +890,7 @@ namespace NCurses.Core.Interop
         /// <param name="par_x">Column number in the parent window</param>
         public static void mvderwin(IntPtr window, int par_y, int par_x)
         {
-            NativeNCurses.VerifyNCursesMethod(() => NCursesWrapper.mvderwin(window, par_y, par_x), "derwin");
+            NCursesException.Verify(NCursesWrapper.mvderwin(window, par_y, par_x), "derwin");
         }
         #endregion
 
@@ -1100,7 +907,7 @@ namespace NCurses.Core.Interop
         /// <param name="x">column number of the new upper left corner</param>
         public static void mvwin(IntPtr win, int y, int x)
         {
-            NativeNCurses.VerifyNCursesMethod(() => NCursesWrapper.mvwin(win, y, x), "mvwin");
+            NCursesException.Verify(NCursesWrapper.mvwin(win, y, x), "mvwin");
         }
         #endregion
 
@@ -1112,7 +919,7 @@ namespace NCurses.Core.Interop
         /// <param name="ms">The amount of milliseconds to sleep for</param>
         public static void napms(int ms)
         {
-            NativeNCurses.VerifyNCursesMethod(() => NCursesWrapper.napms(ms), "napms");
+            NCursesException.Verify(NCursesWrapper.napms(ms), "napms");
         }
         #endregion
 
@@ -1136,7 +943,7 @@ namespace NCurses.Core.Interop
         /// <returns>A pointer to a new pad (window) on success</returns>
         public static IntPtr newpad(int nlines, int ncols)
         {
-            return NativeNCurses.VerifyNCursesMethod(() => NCursesWrapper.newpad(nlines, ncols), "newpad");
+            return NCursesException.Verify(NCursesWrapper.newpad(nlines, ncols), "newpad");
         }
         #endregion
 
@@ -1159,7 +966,7 @@ namespace NCurses.Core.Interop
         /// <returns>A pointer to a new window</returns>
         public static IntPtr newwin(int nlines, int ncols, int begin_y, int begin_x)
         {
-            return NativeNCurses.VerifyNCursesMethod(() => NCursesWrapper.newwin(nlines, ncols, begin_y, begin_x), "newwin");
+            return NCursesException.Verify(NCursesWrapper.newwin(nlines, ncols, begin_y, begin_x), "newwin");
         }
         #endregion
 
@@ -1177,7 +984,7 @@ namespace NCurses.Core.Interop
         /// </summary>
         public static void nl()
         {
-            NativeNCurses.VerifyNCursesMethod(() => NCursesWrapper.nl(), "nl");
+            NCursesException.Verify(NCursesWrapper.nl(), "nl");
         }
         #endregion
 
@@ -1188,7 +995,7 @@ namespace NCurses.Core.Interop
         /// </summary>
         public static void noecho()
         {
-            NativeNCurses.VerifyNCursesMethod(() => NCursesWrapper.noecho(), "noecho");
+            NCursesException.Verify(NCursesWrapper.noecho(), "noecho");
         }
         #endregion
 
@@ -1199,7 +1006,7 @@ namespace NCurses.Core.Interop
         /// </summary>
         public static void nonl()
         {
-            NativeNCurses.VerifyNCursesMethod(() => NCursesWrapper.nonl(), "nonl");
+            NCursesException.Verify(NCursesWrapper.nonl(), "nonl");
         }
         #endregion
 
@@ -1220,7 +1027,7 @@ namespace NCurses.Core.Interop
         /// </summary>
         public static void noraw()
         {
-            NativeNCurses.VerifyNCursesMethod(() => NCursesWrapper.noraw(), "noraw");
+            NCursesException.Verify(NCursesWrapper.noraw(), "noraw");
         }
         #endregion
 
@@ -1237,7 +1044,7 @@ namespace NCurses.Core.Interop
         /// <param name="destWin">pointer to the destination window</param>
         public static void overlay(IntPtr srcWin, IntPtr destWin)
         {
-            NativeNCurses.VerifyNCursesMethod(() => NCursesWrapper.overlay(srcWin, destWin), "overlay");
+            NCursesException.Verify(NCursesWrapper.overlay(srcWin, destWin), "overlay");
         }
         #endregion
 
@@ -1248,7 +1055,7 @@ namespace NCurses.Core.Interop
         /// </summary>
         public static void overwrite(IntPtr srcWin, IntPtr destWin)
         {
-            NativeNCurses.VerifyNCursesMethod(() => NCursesWrapper.overwrite(srcWin, destWin), "overwrite");
+            NCursesException.Verify(NCursesWrapper.overwrite(srcWin, destWin), "overwrite");
         }
         #endregion
 
@@ -1322,7 +1129,7 @@ namespace NCurses.Core.Interop
         /// </summary>
         public static void raw()
         {
-            NativeNCurses.VerifyNCursesMethod(() => NCursesWrapper.raw(), "raw");
+            NCursesException.Verify(NCursesWrapper.raw(), "raw");
         }
         #endregion
 
@@ -1336,7 +1143,7 @@ namespace NCurses.Core.Interop
         /// </summary>
         public static void resetty()
         {
-            NativeNCurses.VerifyNCursesMethod(() => NCursesWrapper.resetty(), "resetty");
+            NCursesException.Verify(NCursesWrapper.resetty(), "resetty");
         }
         #endregion
 
@@ -1351,7 +1158,7 @@ namespace NCurses.Core.Interop
         /// </summary>
         public static void reset_prog_mode()
         {
-            NativeNCurses.VerifyNCursesMethod(() => NCursesWrapper.reset_prog_mode(), "reset_prog_mode");
+            NCursesException.Verify(NCursesWrapper.reset_prog_mode(), "reset_prog_mode");
         }
         #endregion
 
@@ -1362,7 +1169,7 @@ namespace NCurses.Core.Interop
         /// </summary>
         public static void reset_shell_mode()
         {
-            NativeNCurses.VerifyNCursesMethod(() => NCursesWrapper.reset_prog_mode(), "reset_shell_mode");
+            NCursesException.Verify(NCursesWrapper.reset_prog_mode(), "reset_shell_mode");
         }
         #endregion
 
@@ -1382,9 +1189,10 @@ namespace NCurses.Core.Interop
         {
             IntPtr func = IntPtr.Zero;
             Func<IntPtr, int, int> initCallback = (IntPtr win, int cols) => init(win, cols, func);
-            func = Marshal.GetFunctionPointerForDelegate(new ripoffDelegate(initCallback));
+            func = Marshal.GetFunctionPointerForDelegate(new ripoffDelegate(initCallback)); //TODO: needs to be double wrapped as pointer?
 
-            NativeNCurses.VerifyNCursesMethod(() => NCursesWrapper.ripoffline(line, func), "ripoffline");
+            //TODO: register func for GC
+            NCursesException.Verify(NCursesWrapper.ripoffline(line, func), "ripoffline");
         }
         #endregion
 
@@ -1395,7 +1203,7 @@ namespace NCurses.Core.Interop
         /// </summary>
         public static void savetty()
         {
-            NativeNCurses.VerifyNCursesMethod(() => NCursesWrapper.savetty(), "savetty");
+            NCursesException.Verify(NCursesWrapper.savetty(), "savetty");
         }
         #endregion
 
@@ -1404,9 +1212,9 @@ namespace NCurses.Core.Interop
         /// see <see cref="src_init(string)"/>
         /// <para />native method wrapped with verification.
         /// </summary>
-        public static void scr_dump(string filename)
+        public static void scr_dump(in string filename)
         {
-            NativeNCurses.VerifyNCursesMethod(() => NCursesWrapper.scr_dump(filename), "scr_dump");
+            SmallStrCursesWrapper.scr_dump(filename);
         }
         #endregion
 
@@ -1423,9 +1231,9 @@ namespace NCurses.Core.Interop
         /// been written to since the preceding scr_dump call.
         /// <para />native method wrapped with verification.
         /// </summary>
-        public static void scr_init(string filename)
+        public static void scr_init(in string filename)
         {
-            NativeNCurses.VerifyNCursesMethod(() => NCursesWrapper.scr_init(filename), "scr_init");
+            SmallStrCursesWrapper.scr_init(filename);
         }
         #endregion
 
@@ -1437,9 +1245,9 @@ namespace NCurses.Core.Interop
         /// to the way it looked in the dump file.
         /// <para />native method wrapped with verification.
         /// </summary>
-        public static void scr_restore(string filename)
+        public static void scr_restore(in string filename)
         {
-            NativeNCurses.VerifyNCursesMethod(() => NCursesWrapper.scr_restore(filename), "scr_restore");
+            SmallStrCursesWrapper.scr_restore(filename);
         }
         #endregion
 
@@ -1452,9 +1260,9 @@ namespace NCurses.Core.Interop
         /// as a screen inheritance function.
         /// <para />native method wrapped with verification.
         /// </summary>
-        public static void scr_set(string filename)
+        public static void scr_set(in string filename)
         {
-            NativeNCurses.VerifyNCursesMethod(() => NCursesWrapper.scr_set(filename), "scr_set");
+            SmallStrCursesWrapper.scr_set(filename);
         }
         #endregion
 
@@ -1470,7 +1278,7 @@ namespace NCurses.Core.Interop
         /// <returns>pointer to the previous screen</returns>
         public static IntPtr set_term(IntPtr newScr)
         {
-            return NativeNCurses.VerifyNCursesMethod(() => NCursesWrapper.set_term(newScr), "set_term");
+            return NCursesException.Verify(NCursesWrapper.set_term(newScr), "set_term");
         }
         #endregion
 
@@ -1486,9 +1294,9 @@ namespace NCurses.Core.Interop
         /// <para />native method wrapped with verification.
         /// </summary>
         /// <param name="attr"></param>
-        public static void slk_attroff(chtype attrs)
+        public static void slk_attroff(ulong attrs)
         {
-            NativeNCurses.VerifyNCursesMethod(() => NCursesWrapper.slk_attroff(attrs), "slk_attroff");
+            SmallCursesWrapper.slk_attroff(attrs);
         }
         #endregion
 
@@ -1497,9 +1305,9 @@ namespace NCurses.Core.Interop
         /// see <see cref="NativeStdScr.attr_off(chtype)"/>  (for soft function keys)
         /// <para />native method wrapped with verification.
         /// </summary>
-        public static void slk_attr_off(chtype attrs)
+        public static void slk_attr_off(ulong attrs)
         {
-            NativeNCurses.VerifyNCursesMethod(() => NCursesWrapper.slk_attr_off(attrs, IntPtr.Zero), "slk_attr_off");
+            SmallCursesWrapper.slk_attr_off(attrs);
         }
         #endregion
 
@@ -1509,9 +1317,9 @@ namespace NCurses.Core.Interop
         /// <para />native method wrapped with verification.
         /// </summary>
         /// <param name="attr"></param>
-        public static void slk_attron(chtype attrs)
+        public static void slk_attron(ulong attrs)
         {
-            NativeNCurses.VerifyNCursesMethod(() => NCursesWrapper.slk_attron(attrs), "slk_attron");
+            SmallCursesWrapper.slk_attron(attrs);
         }
         #endregion
 
@@ -1520,9 +1328,9 @@ namespace NCurses.Core.Interop
         /// see <see cref="NativeStdScr.attr_on(chtype)"/> (for soft function keys)
         /// <para />native method wrapped with verification.
         /// </summary>
-        public static void slk_attr_on(chtype attrs)
+        public static void slk_attr_on(ulong attrs)
         {
-            NativeNCurses.VerifyNCursesMethod(() => NCursesWrapper.slk_attr_on(attrs, IntPtr.Zero), "slk_attr_on");
+            SmallCursesWrapper.slk_attr_on(attrs);
         }
         #endregion
 
@@ -1532,9 +1340,9 @@ namespace NCurses.Core.Interop
         /// <para />native method wrapped with verification.
         /// </summary>
         /// <param name="attr"></param>
-        public static void slk_attrset(chtype attrs, short color_pair)
+        public static void slk_attrset(ulong attrs)
         {
-            NativeNCurses.VerifyNCursesMethod(() => NCursesWrapper.slk_attrset(attrs, color_pair, IntPtr.Zero), "slk_attrset");
+            SmallCursesWrapper.slk_attrset(attrs);
         }
         #endregion
 
@@ -1543,9 +1351,9 @@ namespace NCurses.Core.Interop
         /// returns the the attribute used for the soft keys
         /// </summary>
         /// <returns>an attribute</returns>
-        public static chtype slk_attr()
+        public static ulong slk_attr()
         {
-            return NCursesWrapper.slk_attr();
+            return SmallCursesWrapper.slk_attr();
         }
         #endregion
 
@@ -1554,9 +1362,9 @@ namespace NCurses.Core.Interop
         /// see <see cref="NativeStdScr.attr_set(chtype, short)"/> (for soft function keys)
         /// <para />native method wrapped with verification.
         /// </summary>
-        public static void slk_attr_set(chtype attrs, short color_pair)
+        public static void slk_attr_set(ulong attrs, short color_pair)
         {
-            NativeNCurses.VerifyNCursesMethod(() => NCursesWrapper.slk_attr_set(attrs, color_pair, IntPtr.Zero), "slk_attr_set");
+            SmallCursesWrapper.slk_attr_set(attrs, color_pair);
         }
         #endregion
 
@@ -1567,7 +1375,7 @@ namespace NCurses.Core.Interop
         /// </summary>
         public static void slk_clear()
         {
-            NativeNCurses.VerifyNCursesMethod(() => NCursesWrapper.slk_clear(), "slk_clear");
+            NCursesException.Verify(NCursesWrapper.slk_clear(), "slk_clear");
         }
         #endregion
 
@@ -1580,7 +1388,7 @@ namespace NCurses.Core.Interop
         /// </summary>
         public static void slk_color(short color_pair)
         {
-            NativeNCurses.VerifyNCursesMethod(() => NCursesWrapper.slk_color(color_pair), "slk_color");
+            NCursesException.Verify(NCursesWrapper.slk_color(color_pair), "slk_color");
         }
         #endregion
 
@@ -1601,7 +1409,7 @@ namespace NCurses.Core.Interop
         /// <param name="fmt">the format to init the soft labels with</param>
         public static void slk_init(int fmt)
         {
-            NativeNCurses.VerifyNCursesMethod(() => NCursesWrapper.slk_init(fmt), "slk_init");
+            NCursesException.Verify(NCursesWrapper.slk_init(fmt), "slk_init");
         }
         #endregion
 
@@ -1614,7 +1422,7 @@ namespace NCurses.Core.Interop
         /// <returns>label</returns>
         public static string slk_label(int labnum)
         {
-            return NCursesWrapper.slk_label(labnum);
+            return SmallStrCursesWrapper.slk_label(labnum);
         }
         #endregion
 
@@ -1626,7 +1434,7 @@ namespace NCurses.Core.Interop
         /// </summary>
         public static void slk_noutrefresh()
         {
-            NativeNCurses.VerifyNCursesMethod(() => NCursesWrapper.slk_noutrefresh(), "slk_noutrefresh");
+            NCursesException.Verify(NCursesWrapper.slk_noutrefresh(), "slk_noutrefresh");
         }
         #endregion
 
@@ -1637,7 +1445,7 @@ namespace NCurses.Core.Interop
         /// </summary>
         public static void slk_refresh()
         {
-            NativeNCurses.VerifyNCursesMethod(() => NCursesWrapper.slk_refresh(), "slk_refresh");
+            NCursesException.Verify(NCursesWrapper.slk_refresh(), "slk_refresh");
         }
         #endregion
 
@@ -1649,7 +1457,7 @@ namespace NCurses.Core.Interop
         /// </summary>
         public static void slk_restore()
         {
-            NativeNCurses.VerifyNCursesMethod(() => NCursesWrapper.slk_restore(), "slk_restore");
+            NCursesException.Verify(NCursesWrapper.slk_restore(), "slk_restore");
         }
         #endregion
 
@@ -1666,9 +1474,9 @@ namespace NCurses.Core.Interop
         /// <param name="fmt">is  either  0, 1, or 2, indicating whether the
         /// label is to be  left-justified,  centered,  or
         /// right-justified,  respectively, within the label.</param>
-        public static void slk_set(int labnum, string label, int fmt)
+        public static void slk_set(int labnum, in string label, int fmt)
         {
-            NativeNCurses.VerifyNCursesMethod(() => NCursesWrapper.slk_set(labnum, label, fmt), "slk_set");
+            SmallStrCursesWrapper.slk_set(labnum, label, fmt);
         }
         #endregion
 
@@ -1680,7 +1488,7 @@ namespace NCurses.Core.Interop
         /// </summary>
         public static void slk_touch()
         {
-            NativeNCurses.VerifyNCursesMethod(() => NCursesWrapper.slk_touch(), "slk_touch");
+            NCursesException.Verify(NCursesWrapper.slk_touch(), "slk_touch");
         }
         #endregion
 
@@ -1694,7 +1502,7 @@ namespace NCurses.Core.Interop
         /// </summary>
         public static void start_color()
         {
-            NativeNCurses.VerifyNCursesMethod(() => NCursesWrapper.start_color(), "start_color");
+            NCursesException.Verify(NCursesWrapper.start_color(), "start_color");
         }
         #endregion
 
@@ -1717,7 +1525,7 @@ namespace NCurses.Core.Interop
         /// <returns>a pointer to the new pad (window)</returns>
         public static IntPtr subpad(IntPtr orig, int nlines, int ncols, int begin_y, int begin_x)
         {
-            return NativeNCurses.VerifyNCursesMethod(() => NCursesWrapper.subpad(orig, nlines, ncols, begin_y, begin_x), "subpad");
+            return NCursesException.Verify(NCursesWrapper.subpad(orig, nlines, ncols, begin_y, begin_x), "subpad");
         }
         #endregion
 
@@ -1740,7 +1548,7 @@ namespace NCurses.Core.Interop
         /// <returns>a pointer to the new window</returns>
         public static IntPtr subwin(IntPtr orig, int nlines, int ncols, int begin_y, int begin_x)
         {
-            return NativeNCurses.VerifyNCursesMethod(() => NCursesWrapper.subwin(orig, nlines, ncols, begin_y, begin_x), "subpad");
+            return NCursesException.Verify(NCursesWrapper.subwin(orig, nlines, ncols, begin_y, begin_x), "subpad");
         }
         #endregion
 
@@ -1756,9 +1564,9 @@ namespace NCurses.Core.Interop
         /// appearance of the screen.
         /// </summary>
         /// <returns>the supported attributes OR'd together</returns>
-        public static chtype termattrs()
+        public static ulong termattrs()
         {
-            return NCursesWrapper.termattrs();
+            return SmallCursesWrapper.termattrs();
         }
         #endregion
 
@@ -1769,7 +1577,7 @@ namespace NCurses.Core.Interop
         /// <returns>the terminal name</returns>
         public static string termname()
         {
-            return NCursesWrapper.termname();
+            return SmallStrCursesWrapper.termname();
         }
         #endregion
 
@@ -1791,7 +1599,7 @@ namespace NCurses.Core.Interop
         /// <param name="fd">file descriptor to use for typeahead</param>
         public static void typeahead(int fd)
         {
-            NativeNCurses.VerifyNCursesMethod(() => NCursesWrapper.typeahead(fd), "typeahead");
+            NCursesException.Verify(NCursesWrapper.typeahead(fd), "typeahead");
         }
         #endregion
 
@@ -1805,7 +1613,7 @@ namespace NCurses.Core.Interop
         /// <param name="ch">character to place into the input queue</param>
         public static void ungetch(int ch)
         {
-            NativeNCurses.VerifyNCursesMethod(() => NCursesWrapper.ungetch(ch), "ungetch");
+            NCursesException.Verify(NCursesWrapper.ungetch(ch), "ungetch");
         }
         #endregion
 
@@ -1848,9 +1656,9 @@ namespace NCurses.Core.Interop
         /// <para />native method wrapped with verification.
         /// </summary>
         /// <param name="attrs">attributes to show</param>
-        public static void vidattr(chtype attrs)
+        public static void vidattr(ulong attrs)
         {
-            NativeNCurses.VerifyNCursesMethod(() => NCursesWrapper.vidattr(attrs), "vidattr");
+            SmallCursesWrapper.vidattr(attrs);
         }
         #endregion
 
@@ -1863,9 +1671,9 @@ namespace NCurses.Core.Interop
         /// <para />native method wrapped with verification.
         /// </summary>
         /// <param name="attrs">attributes to show</param>
-        public static void vidputs(chtype attrs, Func<int, int> NCURSES_OUTC)
+        public static void vidputs(ulong attrs, Func<int, int> NCURSES_OUTC)
         {
-            NativeNCurses.VerifyNCursesMethod(() => NCursesWrapper.vidputs(attrs, Marshal.GetFunctionPointerForDelegate(NCURSES_OUTC)), "vidputs");
+            SmallCursesWrapper.vidputs(attrs, NCURSES_OUTC);
         }
         #endregion
 
@@ -1882,9 +1690,9 @@ namespace NCurses.Core.Interop
         /// <para>-1     if capname is not a boolean capability</para>
         /// <para>0      if it is canceled or absent from the terminal  description.</para>
         /// </returns>
-        public static int tigetflag(string capName)
+        public static int tigetflag(in string capName)
         {
-            return NCursesWrapper.tigetflag(capName);
+            return SmallStrCursesWrapper.tigetflag(capName);
         }
         #endregion
 
@@ -1897,9 +1705,9 @@ namespace NCurses.Core.Interop
         /// <para>-2     if capname is not a numeric capability</para>
         /// <para>-1     if  it  is canceled or absent from the terminal description.</para>
         /// </returns>
-        public static int tigetnum(string capname)
+        public static int tigetnum(in string capname)
         {
-            return NCursesWrapper.tigetnum(capname);
+            return SmallStrCursesWrapper.tigetnum(capname);
         }
         #endregion
 
@@ -1912,9 +1720,9 @@ namespace NCurses.Core.Interop
         /// <para>(char*)-1              if capname is not a string capability</para>
         /// <para>0      if it is canceled or absent from the terminal  description.</para>
         /// </returns>
-        public static string tigetstr(string capname)
+        public static int tigetstr(in string capname)
         {
-            return NCursesWrapper.tigetstr(capname);
+            return SmallStrCursesWrapper.tigetstr(capname);
         }
         #endregion
 
@@ -1926,9 +1734,9 @@ namespace NCurses.Core.Interop
         /// <para />native method wrapped with verification.
         /// </summary>
         /// <param name="attrs">attributes to show</param>
-        public static void putp(string str)
+        public static void putp(in string str)
         {
-            NativeNCurses.VerifyNCursesMethod(() => NCursesWrapper.putp(str), "putp");
+            SmallStrCursesWrapper.putp(str);
         }
         #endregion
 
@@ -1959,7 +1767,7 @@ namespace NCurses.Core.Interop
         /// <returns>the name of the keycode</returns>
         public static string keybound(int keycode, int count)
         {
-            return NCursesWrapper.keybound(keycode, count);
+            return SmallStrCursesWrapper.keybound(keycode, count);
         }
         #endregion
 
@@ -1970,7 +1778,7 @@ namespace NCurses.Core.Interop
         /// <returns>version string</returns>
         public static string curses_version()
         {
-            return NCursesWrapper.curses_version();
+            return SmallStrCursesWrapper.curses_version();
         }
         #endregion
 
@@ -1985,7 +1793,7 @@ namespace NCurses.Core.Interop
         /// <param name="bg">the default background color</param>
         public static void assume_default_colors(int fg, int bg)
         {
-            NativeNCurses.VerifyNCursesMethod(() => NCursesWrapper.assume_default_colors(fg, bg), "assume_default_colors");
+            NCursesException.Verify(NCursesWrapper.assume_default_colors(fg, bg), "assume_default_colors");
         }
         #endregion
 
@@ -1997,9 +1805,9 @@ namespace NCurses.Core.Interop
         /// terminfo database.
         /// <para />native method wrapped with verification.
         /// </summary>
-        public static void define_key(string definition, int keycode)
+        public static void define_key(in string definition, int keycode)
         {
-            NativeNCurses.VerifyNCursesMethod(() => NCursesWrapper.define_key(definition, keycode), "define_key");
+            SmallStrCursesWrapper.define_key(definition, keycode);
         }
         #endregion
 
@@ -2025,7 +1833,7 @@ namespace NCurses.Core.Interop
         /// </returns>
         public static int key_defined(string definition)
         {
-            return NCursesWrapper.key_defined(definition);
+           return SmallStrCursesWrapper.key_defined(definition);
         }
         #endregion
 
@@ -2040,7 +1848,7 @@ namespace NCurses.Core.Interop
         /// <param name="enable">enable/disable</param>
         public static void keyok(int keycode, bool enable)
         {
-            NativeNCurses.VerifyNCursesMethod(() => NCursesWrapper.keyok(keycode, enable), "keyok");
+            NCursesException.Verify(NCursesWrapper.keyok(keycode, enable), "keyok");
         }
         #endregion
 
@@ -2056,7 +1864,7 @@ namespace NCurses.Core.Interop
         /// </summary>
         public static void resize_term(int lines, int columns)
         {
-            NativeNCurses.VerifyNCursesMethod(() => NCursesWrapper.resize_term(lines, columns), "resize_term");
+            NCursesException.Verify(NCursesWrapper.resize_term(lines, columns), "resize_term");
             //TODO: check for < win 10
             //if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
             //    NativeWindows.NativeWindowsConsoleResize(lines, columns);
@@ -2073,7 +1881,7 @@ namespace NCurses.Core.Interop
         /// </summary>
         public static void resizeterm(int lines, int columns)
         {
-            NativeNCurses.VerifyNCursesMethod(() => NCursesWrapper.resizeterm(lines, columns), "resizeterm");
+            NCursesException.Verify(NCursesWrapper.resizeterm(lines, columns), "resizeterm");
             //TODO:check for < win 10
             //if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
             //    NativeWindows.NativeWindowsConsoleResize(lines, columns);
@@ -2090,7 +1898,7 @@ namespace NCurses.Core.Interop
         /// </summary>
         public static void set_escdelay(int size)
         {
-            NativeNCurses.VerifyNCursesMethod(() => NCursesWrapper.set_escdelay(size), "set_escdelay");
+            NCursesException.Verify(NCursesWrapper.set_escdelay(size), "set_escdelay");
         }
         #endregion
 
@@ -2104,7 +1912,7 @@ namespace NCurses.Core.Interop
         /// </summary>
         public static void set_tabsize(int size)
         {
-            NativeNCurses.VerifyNCursesMethod(() => NCursesWrapper.set_tabsize(size), "set_tabsize");
+            NCursesException.Verify(NCursesWrapper.set_tabsize(size), "set_tabsize");
         }
         #endregion
 
@@ -2120,7 +1928,7 @@ namespace NCurses.Core.Interop
         /// </summary>
         public static void use_default_colors()
         {
-            NativeNCurses.VerifyNCursesMethod(() => NCursesWrapper.use_default_colors(), "use_default_colors");
+            NCursesException.Verify(NCursesWrapper.use_default_colors(), "use_default_colors");
         }
         #endregion
 
@@ -2326,13 +2134,9 @@ namespace NCurses.Core.Interop
         /// <para />native method wrapped with verification.
         /// </summary>
         /// <param name="wch">a reference to store the erase char</param>
-        public static void erasewchar(ref NCursesWCHAR wch)
+        public static void erasewchar(out char wch)
         {
-            IntPtr wPtr;
-            using (wch.ToPointer(out wPtr))
-            {
-                NativeNCurses.VerifyNCursesMethod(() => NCursesWrapper.erasewcharr(wPtr), "erasewchar");
-            }
+            WideStrCursesWrapper.erasewchar(out wch);
         }
         #endregion
 
@@ -2351,28 +2155,9 @@ namespace NCurses.Core.Interop
         /// <param name="wch">a reference to store the string (initialized as StringBuilder(5))</param>
         /// <param name="attrs">a reference to store the attributes in</param>
         /// <param name="color_pair">a reference to store the color pair in</param>
-        public static void getcchar(NCursesWCHAR wcval, StringBuilder wch, out chtype attrs, out short color_pair)
+        public static void getcchar(in INCursesWCHAR wcval, out char wch, out ulong attrs, out short color_pair)
         {
-            IntPtr wPtr, strPtr = IntPtr.Zero;
-            int pointerSize = 0;
-            using (wcval.ToPointer(out wPtr))
-            {
-                try
-                {
-                    strPtr = Marshal.AllocHGlobal((pointerSize = Constants.SIZEOF_WCHAR_T * wch.Capacity));
-                    GC.AddMemoryPressure(pointerSize);
-                    NCursesException.Verify(NCursesWrapper.getcchar(wPtr, strPtr, out attrs, out color_pair, IntPtr.Zero), "getcchar");
-                    wch.Append(MarshalStringFromNativeWideString(strPtr, wch.Capacity));
-                }
-                finally
-                {
-                    if(strPtr != IntPtr.Zero)
-                        Marshal.FreeHGlobal(strPtr);
-
-                    if (pointerSize > 0)
-                        GC.RemoveMemoryPressure(pointerSize);
-                }
-            }
+            WideNCursesWrapper.getcchar(wcval, out wch, out attrs, out color_pair);
         }
         #endregion
 
@@ -2382,11 +2167,9 @@ namespace NCurses.Core.Interop
         /// </summary>
         /// <param name="c">code of the key</param>
         /// <returns>a string representing the key code</returns>
-        public static string key_name(char c)
+        public static string key_name(in char c)
         {
-            //using own marshalling, because .net can't free the allocated memory
-            IntPtr keyNamePtr = NCursesWrapper.key_name(c);
-            return Marshal.PtrToStringAnsi(keyNamePtr);
+            return WideStrCursesWrapper.key_name(c);
         }
         #endregion
 
@@ -2398,9 +2181,9 @@ namespace NCurses.Core.Interop
         /// <para />native method wrapped with verification.
         /// </summary>
         /// <param name="wch">a reference to store the kill char</param>
-        public static void killwchar(ref char wch)
+        public static void killwchar(out char wch)
         {
-            NCursesException.Verify(NCursesWrapper.killwchar(ref wch), "killwchar");
+            WideStrCursesWrapper.killwchar(out wch);
         }
         #endregion
 
@@ -2424,16 +2207,9 @@ namespace NCurses.Core.Interop
         /// <param name="wch">a reference to store the string</param>
         /// <param name="attrs">a reference to store the attributes in</param>
         /// <param name="color_pair">a reference to store the color pair in</param>
-        public static void setcchar(out NCursesWCHAR wcval, string wch, chtype attrs, short color_pair)
+        public static void setcchar(out INCursesWCHAR wcval, in char wch, ulong attrs, short color_pair)
         {
-            wcval = new NCursesWCHAR();
-            IntPtr wPtr;
-            using (wcval.ToPointer(out wPtr))
-            {
-                MarshalNativeWideStringAndExecuteAction((strPtr) =>
-                    NCursesException.Verify(NCursesWrapper.setcchar(wPtr, strPtr, attrs, color_pair, IntPtr.Zero), "setcchar"),
-                    wch, true);
-            }
+            WideNCursesWrapper.setcchar(out wcval, wch, attrs, color_pair);
         }
         #endregion
 
@@ -2442,9 +2218,9 @@ namespace NCurses.Core.Interop
         /// <see cref="slk_set"/>
         /// <para />native method wrapped with verification.
         /// </summary>
-        public static void slk_wset(int labnum, string label, int fmt)
+        public static void slk_wset(int labnum, in string label, int fmt)
         {
-            NativeNCurses.VerifyNCursesMethod(() => NCursesWrapper.slk_wset(labnum, label, fmt), "slk_wset");
+            WideStrCursesWrapper.slk_wset(labnum, label, fmt);
         }
         #endregion
 
@@ -2452,9 +2228,9 @@ namespace NCurses.Core.Interop
         /// <summary>
         /// see <see cref="termattrs"/>
         /// </summary>
-        public static chtype term_attrs()
+        public static ulong term_attrs()
         {
-            return NCursesWrapper.term_attrs();
+            return SmallCursesWrapper.term_attrs();
         }
         #endregion
 
@@ -2469,9 +2245,9 @@ namespace NCurses.Core.Interop
         /// <para />native method wrapped with verification.
         /// </summary>
         /// <param name="wch">a reference to store the kill char</param>
-        public static void unget_wch(char wch)
+        public static void unget_wch(in char wch)
         {
-            NCursesException.Verify(NCursesWrapper.unget_wch(wch), "unget_wch");
+            WideStrCursesWrapper.unget_wch(wch);
         }
         #endregion
 
@@ -2490,9 +2266,9 @@ namespace NCurses.Core.Interop
         /// </summary>
         /// <param name="attrs">attributes to show</param>
         /// <param name="pair">color pair index</param>
-        public static void vid_attr(chtype attrs, short pair)
+        public static void vid_attr(ulong attrs, short pair)
         {
-            NativeNCurses.VerifyNCursesMethod(() => NCursesWrapper.vid_attr(attrs, pair, IntPtr.Zero), "vid_attr");
+            SmallCursesWrapper.vid_attr(attrs, pair);
         }
         #endregion
 
@@ -2501,9 +2277,9 @@ namespace NCurses.Core.Interop
         /// see <see cref="vid_attr"/>
         /// <para />native method wrapped with verification.
         /// </summary>
-        public static void vid_puts(chtype attrs, short pair, Func<int, int> NCURSES_OUTC)
+        public static void vid_puts(ulong attrs, short pair, Func<int, int> NCURSES_OUTC)
         {
-            NativeNCurses.VerifyNCursesMethod(() => NCursesWrapper.vid_puts(attrs, pair, IntPtr.Zero, Marshal.GetFunctionPointerForDelegate(NCURSES_OUTC)), "vid_puts");
+            SmallCursesWrapper.vid_puts(attrs, pair, NCURSES_OUTC);
         }
         #endregion
 
@@ -2516,9 +2292,9 @@ namespace NCurses.Core.Interop
         /// of a wide character.
         /// </summary>
         /// <returns>printable representation of the character</returns>
-        public static string unctrl(chtype ch)
+        public static void unctrl(in INCursesSCHAR ch, out string str)
         {
-            return NCursesWrapper.unctrl(ch);
+            SmallCursesWrapper.unctrl(ch, out str);
         }
         #endregion
 
@@ -2527,22 +2303,9 @@ namespace NCurses.Core.Interop
         /// see <see cref="unctrl"/>
         /// </summary>
         /// <returns>printable representation of the character</returns>
-        public static string wunctrl(NCursesWCHAR wch)
+        public static void wunctrl(in INCursesWCHAR wch, out string str)
         {
-            IntPtr wPtr, strPtr = IntPtr.Zero;
-            using(wch.ToPointer(out wPtr))
-            {
-                try
-                {
-                    strPtr = NativeNCurses.VerifyNCursesMethod(() => NCursesWrapper.wunctrl(wPtr), "wunctrl");
-                    return MarshalStringFromNativeWideString(strPtr, Constants.SIZEOF_WCHAR_T * Constants.CCHARW_MAX);
-                }
-                finally
-                {
-                    if (strPtr != IntPtr.Zero)
-                        Marshal.FreeHGlobal(strPtr);
-                }
-            }
+            WideNCursesWrapper.wunctrl(wch, out str);
         }
         #endregion
 
@@ -2573,20 +2336,9 @@ namespace NCurses.Core.Interop
         /// next older item from the queue.
         /// <para />native method wrapped with verification.
         /// </summary>
-        public static void getmouse(out MEVENT ev)
+        public static void getmouse(out IMEVENT ev)
         {
-            //if(UseWindowsInputOverride)
-            //{
-            //    ev = default(MEVENT);
-            //    //if (NativeWindows.MouseEvent.bstate == 0)
-            //    //{
-            //    //    ev = default(MEVENT);
-            //    //    NCursesException.Verify(Constants.ERR, "getmouse");
-            //    //}
-            //    //ev = NativeWindows.MouseEvent;
-            //}
-            //else
-                NCursesException.Verify(NCursesWrapper.getmouse(out ev), "getmouse");
+            SmallCursesWrapper.getmouse(out ev);
         }
         #endregion
 
@@ -2597,9 +2349,9 @@ namespace NCurses.Core.Interop
         /// screen-relative character-cell coordinates.
         /// <para />native method wrapped with verification.
         /// </summary>
-        public static void ungetmouse(MEVENT ev)
+        public static void ungetmouse(in IMEVENT ev)
         {
-            NCursesException.Verify(NCursesWrapper.ungetmouse(ev), "ungetmouse");
+            SmallCursesWrapper.ungetmouse(ev);
         }
         #endregion
 
@@ -2615,9 +2367,9 @@ namespace NCurses.Core.Interop
         /// mouse event mask.
         /// </summary>
         /// <returns>the supported mousemasks</returns>
-        public static chtype mousemask(chtype newmask, out chtype oldmask)
+        public static ulong mousemask(ulong newmask, out ulong oldmask)
         {
-            return NCursesWrapper.mousemask(newmask, out oldmask);
+            return SmallCursesWrapper.mousemask(newmask, out oldmask);
         }
         #endregion
 
@@ -2654,51 +2406,9 @@ namespace NCurses.Core.Interop
         /// </summary>
         /// <param name="ch">the key code you want to test</param>
         /// <returns>true or false</returns>
-        public static int has_key(int ch)
+        public static bool has_key(int ch)
         {
             return NCursesWrapper.has_key(ch);
-        }
-        #endregion
-
-        #region setfont
-        /// <summary>
-        /// Change the font of the terminal (windows only)
-        /// <para>Do this before resizing, as it changes the max possible window size</para>
-        /// </summary>
-        /// <param name="font">The font you want to change to</param>
-        public static void SetConsoleFont(WindowsConsoleFont font)
-        {
-            return;
-
-            //TODO: check for < win 10
-            if (!RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
-                throw new ArgumentException("Changing the font not available on this platform");
-
-            string fontName = string.Empty;
-            switch (font)
-            {
-                case WindowsConsoleFont.TERMINAL:
-                    fontName = "Terminal";
-                    break;
-                case WindowsConsoleFont.LUCIDA:
-                    fontName = "Lucida Console";
-                    break;
-                case WindowsConsoleFont.CONSOLAS:
-                    fontName = "Consolas";
-                    break;
-            }
-
-            //address of the handle created by CreateConsoleScreenBuffer in NCurses
-            //https://github.com/rprichard/win32-console-docs -> src/harness/WorkerProgram.cc scanForConsoleHandles
-            //TODO: win7 only?
-            IntPtr bufferHandle = new IntPtr(19);
-
-            CONSOLE_FONT_INFO_EX newFont = new CONSOLE_FONT_INFO_EX();
-            newFont.cbSize = (uint)Marshal.SizeOf<CONSOLE_FONT_INFO_EX>();
-            newFont.FaceName = fontName;
-
-            if (!NativeWindows.SetCurrentConsoleFontEx(bufferHandle, false, newFont))
-                throw new ArgumentException("Couldn't set the font");
         }
         #endregion
 

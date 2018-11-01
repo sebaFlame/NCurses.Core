@@ -2,34 +2,41 @@
 using System.Runtime.InteropServices;
 using System.Text;
 using NCurses.Core.Interop;
-
-#if NCURSES_VERSION_6
-using chtype = System.UInt32;
-#elif NCURSES_VERSION_5
-using chtype = System.UInt64;
-#endif
+using NCurses.Core.Interop.Mouse;
+using NCurses.Core.StdScr;
 
 namespace NCurses.Core
 {
+    //TODO: create shared lock (dictionary?)
     public static class NCurses
     {
-        public static Window stdscr = null;
-        internal static bool UnicodeSupported;
+        public static bool UnicodeSupported => NativeNCurses.HasUnicodeSupport;
+
+        public static IWindow StdScr { get; private set; }
+        public static IWindow SingleByteStdScr { get; private set; }
+        public static IWindow MultiByteStdScr => UnicodeSupported ? StdScr : throw new NotSupportedException("Unicode not supported on this machine.");
 
         #region init/end
         /// <summary>
         /// start the NCurses subsystem (auto starts if you're using Windows/Pads)
         /// </summary>
         /// <returns>the standard screen</returns>
-        public static Window Start()
+        public static IWindow Start()
         {
-            if (stdscr != null)
+            if (!(StdScr is null))
                 throw new InvalidOperationException("NCurses was already initialized");
 
-            stdscr = new Window(NativeNCurses.initscr(), false);
-            UnicodeSupported = NativeNCurses._nc_unicode_locale();
+            IntPtr stdScrPtr = NativeNCurses.initscr();
 
-            return stdscr;
+            if (UnicodeSupported)
+            {
+                StdScr = new MultiByteStdScr(stdScrPtr);
+                SingleByteStdScr = new SingleByteStdScr(stdScrPtr);
+            }
+            else
+                StdScr = SingleByteStdScr = new SingleByteStdScr(stdScrPtr);
+
+            return StdScr;
         }
 
         /// <summary>
@@ -38,12 +45,22 @@ namespace NCurses.Core
         /// </summary>
         public static void End()
         {
-            if(stdscr == null)
+            if(StdScr == null)
                 throw new InvalidOperationException("NCurses not initialized yet");
 
-            stdscr.Dispose();
+            //TODO: don't do this? (initscr after endwin)
+            if (WindowBase.DictPtrWindows.Count > 0)
+            {
+                WindowBase[] wins = new WindowBase[WindowBase.DictPtrWindows.Count]; //fuck LINQ
+                WindowBase.DictPtrWindows.Keys.CopyTo(wins, 0);
+                foreach (WindowBase win in wins)
+                    win.Dispose();
+            }
+
+            StdScr = null;
+            SingleByteStdScr = null;
+
             NativeNCurses.endwin();
-            stdscr = null;
         }
         #endregion
 
@@ -60,7 +77,7 @@ namespace NCurses.Core
 
             Func<IntPtr, int, IntPtr, int> initCallback = (IntPtr win, int cols, IntPtr func) =>
             {
-                assignWindow(new Window(win, true), cols);
+                assignWindow(Window.CreateWindow(win), cols);
                 return Constants.OK;
             };
             NativeNCurses.ripoffline(direction, initCallback);
@@ -82,15 +99,6 @@ namespace NCurses.Core
         public static void Resize(int lines, int columns)
         {
             NativeNCurses.resizeterm(lines, columns);
-        }
-
-        /// <summary>
-        /// set the font for the current screen (only available on windows)
-        /// </summary>
-        /// <param name="font">the font to use</param>
-        public static void SetFont(WindowsConsoleFont font)
-        {
-            NativeNCurses.SetConsoleFont(font);
         }
 
         /// <summary>
@@ -132,14 +140,6 @@ namespace NCurses.Core
                     NativeNCurses.nl();
                 else
                     NativeNCurses.nonl();
-            }
-        }
-
-        public static bool Meta
-        {
-            set
-            {
-                NativeNCurses.meta(IntPtr.Zero, value);
             }
         }
 
@@ -240,6 +240,9 @@ namespace NCurses.Core
             int colorCount = NativeNCurses.COLORS();
             int pairCount = NativeNCurses.COLOR_PAIRS();
 
+            if(pairCount <= colorCount * colorCount)
+                colorCount = (int)Math.Sqrt(pairCount);
+
             short pairIndex = 0;
             for (short i = 0; i < colorCount; i++)
             {
@@ -290,7 +293,7 @@ namespace NCurses.Core
         /// <returns>attribute of the color</returns>
         public static ulong ColorPair(short pairIndex)
         {
-            return (chtype)NativeNCurses.COLOR_PAIR(pairIndex);
+            return (ulong)NativeNCurses.COLOR_PAIR(pairIndex);
         }
 
         public static int Colors
@@ -299,47 +302,7 @@ namespace NCurses.Core
         }
         #endregion
 
-        #region NCURSES_CH_T
-        /// <summary>
-        /// get the string representation of a wide char with its attributes and color pair index
-        /// </summary>
-        /// <param name="wch">the wide char you want to convert</param>
-        /// <param name="attrs">will contain the attributes of the wide char</param>
-        /// <param name="pairIndex">will contain the color pair index of the wide char</param>
-        /// <returns>string containing the wide char</returns>
-        public static string GetStringFromWideChar(NCursesWCHAR wch, out ulong attrs, out short pairIndex)
-        {
-            StringBuilder builder = new StringBuilder(Constants.CCHARW_MAX);
-#if NCURSES_VERSION_5
-            NativeNCurses.getcchar(wch, builder, out attrs, out pairIndex);
-#elif NCURSES_VERSION_6
-            chtype attrs_1;
-            NativeNCurses.getcchar(wch, builder, out attrs_1, out pairIndex);
-            attrs = (ulong)attrs_1;
-#endif
-            return builder.ToString();
-        }
-
-        /// <summary>
-        /// get the wide char representation of a string with attributes and color pair index
-        /// </summary>
-        /// <param name="wStr">the string you want to convert</param>
-        /// <param name="attrs">the attributes you want to apply to the string</param>
-        /// <param name="pairIndex">the color pair index you want to apply to the string</param>
-        /// <returns>the wide char represenation of the string</returns>
-        public static NCursesWCHAR GetWideCharFromString(string wStr, ulong attrs, short pairIndex)
-        {
-            NCursesWCHAR wch;
-#if NCURSES_VERSION_5
-            NativeNCurses.setcchar(out wch, wStr, attrs, 4);
-#elif NCURSES_VERSION_6
-            NativeNCurses.setcchar(out wch, wStr, (chtype)attrs, 4);
-#endif
-            return wch;
-        }
-#endregion
-
-#region mouse
+        #region mouse
         /// <summary>
         /// enable the reporting of mouse events
         /// </summary>
@@ -348,54 +311,18 @@ namespace NCurses.Core
         /// <returns>the enabled mouse mask</returns>
         public static ulong EnableMouseMask(ulong mouseMask, out ulong oldMouseMask)
         {
-#if NCURSES_VERSION_5
             return NativeNCurses.mousemask(mouseMask, out oldMouseMask);
-#elif NCURSES_VERSION_6
-            chtype oldMouseMask_1;
-            chtype ret = NativeNCurses.mousemask((chtype)mouseMask, out oldMouseMask_1);
-            oldMouseMask = (ulong)oldMouseMask_1;
-            return ret;
-#endif
         }
 
         /// <summary>
         /// gets the last mouse event
         /// </summary>
         /// <returns>the last mouse event</returns>
-        public static MEVENT GetMouseEvent()
+        public static void GetMouseEvent(out IMEVENT mouseEvent)
         {
-            MEVENT mouseEvent;
             NativeNCurses.getmouse(out mouseEvent);
-            return mouseEvent;
         }
-#endregion
-
-#region keymap
-        /// <summary>
-        /// checks if a function key has been pressed
-        /// </summary>
-        /// <param name="ch">the character you want check</param>
-        /// <param name="key">the returned key</param>
-        /// <returns>true if a function key has been pressed</returns>
-        public static bool GetKey(int ch, out Key key)
-        {
-            key = 0;
-            if (Enum.IsDefined(typeof(Key), (short)ch))
-            {
-                key = (Key)ch;
-                return true;
-            }
-            return false;
-        }
-
-        public static bool IsCtrlKey(int ch, out string keyName)
-        {
-            keyName = NativeNCurses.keyname(ch);
-            if (keyName.StartsWith("^"))
-                return true;
-            return false;
-        }
-#endregion
+        #endregion
 
         /// <summary>
         /// Restores the terminal to the previous state

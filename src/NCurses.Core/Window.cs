@@ -4,53 +4,62 @@ using NCurses.Core.Interop;
 
 namespace NCurses.Core
 {
-    public class Window : WindowBase
+    public abstract class Window : WindowBase
     {
-        internal Window(IntPtr winPtr, bool ownsHandle)
-            : base(winPtr, ownsHandle)
-        { }
-
-        /// <summary>
-        /// create a new window
-        /// </summary>
-        /// <param name="nlines">number of lines of the new window</param>
-        /// <param name="ncols">number of columns of the new window</param>
-        /// <param name="begy">line of the upper left corner of the new window</param>
-        /// <param name="begx">column of the upper left corent of the new window</param>
-        public Window(int nlines, int ncols, int begy, int begx)
+        //for usage with subwindows etc
+        internal Window(IntPtr windowPtr, bool ownsHandle = true)
             : base()
         {
-            DictPtrWindows.Add(this.WindowPtr = NativeNCurses.newwin(nlines, ncols, begy, begx), this);
+            this.OwnsHandle = ownsHandle;
+            DictPtrWindows.Add(this, this.WindowPtr = windowPtr);
         }
 
-        /// <summary>
-        /// create a new window
-        /// </summary>
-        /// <param name="nlines">number of lines of the new window</param>
-        /// <param name="ncols">number of columns of the new window</param>
-        public Window(int nlines, int ncols)
-            : this (nlines, ncols, 0, 0)
-        { }
+        internal Window()
+            : base() { }
 
-        public Window()
-            : this (0, 0, 0, 0)
-        { }
-
-        public Window(Window parentWindow, int nlines, int ncols, int begy, int begx)
-            : base()
+        public override void AttributesOn(ulong attrs)
         {
-            DictPtrWindows.Add(this.WindowPtr = NativeNCurses.subwin(parentWindow.WindowPtr, nlines, ncols, begy, begx), this);
+            NativeWindow.wattr_on(this.WindowPtr, attrs);
         }
 
-        public Window(Window parentWindow)
-            : this(parentWindow, 0, 0, 0, 0) { }
-
-        /// <summary>
-        /// refresh the window with newly added characters
-        /// </summary>
-        public override void Refresh()
+        public override void AttributesOff(ulong attrs)
         {
-            NativeWindow.wrefresh(this.WindowPtr);
+            NativeWindow.wattr_off(this.WindowPtr, attrs);
+        }
+
+        public override void Clear()
+        {
+            NativeWindow.wclear(this.WindowPtr);
+        }
+
+        public override void ClearToBottom()
+        {
+            NativeWindow.wclrtobot(this.WindowPtr);
+        }
+
+        public override void ClearToEol()
+        {
+            NativeWindow.wclrtoeol(this.WindowPtr);
+        }
+
+        public override void CurrentAttributesAndColor(out ulong attrs, out short colorPair)
+        {
+            NativeWindow.wattr_get(this.WindowPtr, out attrs, out colorPair);
+        }
+
+        public override void EnableAttributesAndColor(ulong attrs, short colorPair)
+        {
+            NativeWindow.wattr_set(this.WindowPtr, attrs, colorPair);
+        }
+
+        public override void EnableColor(short colorPair)
+        {
+            NativeWindow.wcolor_set(this.WindowPtr, colorPair);
+        }
+
+        public override void Erase()
+        {
+            NativeWindow.werase(this.WindowPtr);
         }
 
         /// <summary>
@@ -61,29 +70,108 @@ namespace NCurses.Core
             NativeWindow.wnoutrefresh(this.WindowPtr);
         }
 
+        public override void MoveCursor(int lineNumber, int columnNumber)
+        {
+            NativeWindow.wmove(this.WindowPtr, lineNumber, columnNumber);
+        }
+
+        /// <summary>
+        /// Calling mvwin moves the window so that the upper left-hand corner is at position(<paramref name="ncols"/>, <paramref name="nlines"/>).
+        /// </summary>
+        /// <param name="nlines">The line to move the window to</param>
+        /// <param name="ncols">The column to move the window to</param>
+        public void MoveWindow(int nlines, int ncols)
+        {
+            NativeNCurses.mvwin(this.WindowPtr, nlines, ncols);
+        }
+
+        /// <summary>
+        /// refresh the window with newly added characters
+        /// </summary>
+        public override void Refresh()
+        {
+            NativeWindow.wrefresh(this.WindowPtr);
+        }
+
+        public override void ScrollWindow(int lines)
+        {
+            NativeWindow.wscrl(this.WindowPtr, lines);
+        }
+
         /// <summary>
         /// create a subwindow with the current window as parent
         /// </summary>
         /// <returns>the new subwindow</returns>
-        public override WindowBase SubWindow()
+        public Window SubWindow(int nlines, int ncols, int begin_y, int begin_x)
         {
-            return new Window(this);
+            return CreateWindow(NativeNCurses.subwin(this.WindowPtr, nlines, ncols, begin_y, begin_x));
         }
 
+        /// <summary>
+        /// create a subwindow with the current window as parent
+        /// </summary>
+        /// <returns>the new subwindow</returns>
         public Window DerWindow(int nlines, int ncols, int begin_y, int begin_x)
         {
-            return new Window(NativeNCurses.derwin(this.WindowPtr, nlines, ncols, begin_y, begin_x), true);
+            return CreateWindow(NativeNCurses.derwin(this.WindowPtr, nlines, ncols, begin_y, begin_x));
         }
 
-        public void ExecuteThreadSafeMethod(Action<Window> method)
+        /// <summary>
+        /// Creates an exact duplicate of the window win.
+        /// </summary>
+        /// <returns></returns>
+        public abstract Window Duplicate();
+
+        /// <summary>
+        /// Draw a box around the edges of the window
+        /// </summary>
+        /// <param name="verticalChar">the vertical char with attributes to use</param>
+        /// <param name="horizontalChar">the horizontal char with attributes to use</param>
+        public abstract void Box(in INCursesChar verticalChar, in INCursesChar horizontalChar);
+
+        /// <summary>
+        /// Draw a default box around the edges of the window
+        /// </summary>
+        public abstract void Box();
+
+        #region window creation
+        public abstract Window ToSingleByteWindow();
+        public abstract Window ToMultiByteWindow();
+
+        internal static Window CreateWindow(IntPtr windowPtr)
         {
-            Func<IntPtr, int> callback = (IntPtr window) =>
-            {
-                method(this);
-                return Constants.OK;
-            };
-            NativeNCurses.use_window_v(this.WindowPtr, callback);
+            if (NCurses.UnicodeSupported)
+                return CreateMultiByteWindow(windowPtr);
+            return CreateSingleByteWindow(windowPtr);
         }
+
+        public static Window CreateWindow(int nlines, int ncols, int begy, int begx)
+        {
+            if (NCurses.UnicodeSupported)
+                return CreateMultiByteWindow(nlines, ncols, begy, begx);
+            return CreateSingleByteWindow(nlines, ncols, begy, begx);
+        }
+
+        internal static Window CreateMultiByteWindow(IntPtr windowPtr)
+        {
+            return new MultiByteWindow(windowPtr);
+        }
+
+        public static Window CreateMultiByteWindow(int nlines, int ncols, int begy, int begx)
+        {
+            return new MultiByteWindow(nlines, ncols, begy, begx);
+        }
+
+        internal static Window CreateSingleByteWindow(IntPtr windowPtr)
+        {
+            return new SingleByteWindow(windowPtr);
+        }
+
+        public static Window CreateSingleByteWindow(int nlines, int ncols, int begy, int begx)
+        {
+            return new SingleByteWindow(nlines, ncols, begy, begx);
+        }
+        #endregion
 
         #region IDisposable
         protected override void Dispose(bool disposing)
