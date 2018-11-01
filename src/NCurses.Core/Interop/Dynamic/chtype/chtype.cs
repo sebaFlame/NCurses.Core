@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using System.Text;
 using System.Runtime.InteropServices;
-using NCurses.Core.Interop.Small;
+using NCurses.Core.Interop.SingleByte;
 
 namespace NCurses.Core.Interop.Dynamic.chtype
 {

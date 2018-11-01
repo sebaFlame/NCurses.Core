@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Text;
 using NCurses.Core.Interop;
-using NCurses.Core.Interop.Small;
+using NCurses.Core.Interop.SingleByte;
 
 namespace NCurses.Core.StdScr
 {

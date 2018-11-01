@@ -1,8 +1,8 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Runtime.InteropServices;
-using NCurses.Core.Interop.Small;
-using NCurses.Core.Interop.Wide;
+using NCurses.Core.Interop.SingleByte;
+using NCurses.Core.Interop.MultiByte;
 
 namespace NCurses.Core.Interop.Dynamic.cchar_t
 {

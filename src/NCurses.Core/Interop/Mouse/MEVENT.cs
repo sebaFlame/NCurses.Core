@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Text;
-using NCurses.Core.Interop.Small;
+using NCurses.Core.Interop.SingleByte;
 using System.Runtime.InteropServices;
 
 namespace NCurses.Core.Interop.Mouse

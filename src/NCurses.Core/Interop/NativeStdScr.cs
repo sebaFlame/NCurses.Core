@@ -2,10 +2,10 @@
 using System.Text;
 using System.Runtime.InteropServices;
 using System.Buffers;
-using NCurses.Core.Interop.Wide;
-using NCurses.Core.Interop.Small;
-using NCurses.Core.Interop.WideStr;
-using NCurses.Core.Interop.SmallStr;
+using NCurses.Core.Interop.MultiByte;
+using NCurses.Core.Interop.SingleByte;
+using NCurses.Core.Interop.MultiByteString;
+using NCurses.Core.Interop.SingleByteString;
 using NCurses.Core.Interop.Dynamic;
 using System.Collections.Generic;
 using System.Runtime.CompilerServices;

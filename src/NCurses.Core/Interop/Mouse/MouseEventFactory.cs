@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.Text;
 using System.Reflection;
 using System.Linq.Expressions;
-using NCurses.Core.Interop.Small;
+using NCurses.Core.Interop.SingleByte;
 using NCurses.Core.Interop.Dynamic;
 
 namespace NCurses.Core.Interop.Mouse

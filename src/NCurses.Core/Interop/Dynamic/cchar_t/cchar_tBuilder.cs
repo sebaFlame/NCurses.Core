@@ -6,7 +6,7 @@ using System.Runtime.InteropServices;
 using System.Text;
 using System.Collections.Generic;
 using System.Linq;
-using NCurses.Core.Interop.Wide;
+using NCurses.Core.Interop.MultiByte;
 
 namespace NCurses.Core.Interop.Dynamic.cchar_t
 {

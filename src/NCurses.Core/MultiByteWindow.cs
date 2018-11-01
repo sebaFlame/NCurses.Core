@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Text;
 using NCurses.Core.Interop;
-using NCurses.Core.Interop.Wide;
+using NCurses.Core.Interop.MultiByte;
 
 namespace NCurses.Core
 {
