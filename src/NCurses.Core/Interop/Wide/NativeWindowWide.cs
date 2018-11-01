@@ -90,7 +90,7 @@ namespace NCurses.Core.Interop.Wide
 
         public void mvwin_wchstr(IntPtr window, int y, int x, out INCursesWCHARStr wchStr)
         {
-            wchStr = new NCursesWCHARStr<TWide>(1024);
+            wchStr = new NCursesWCHARStr<TWide>(Constants.MAX_STRING_LENGTH);
             NCursesException.Verify(Wrapper.mvwin_wchstr(window, y, x, ref MarshallArray(ref wchStr)), "mvwin_wchstr");
         }
 
@@ -169,7 +169,7 @@ namespace NCurses.Core.Interop.Wide
         public void win_wchstr(IntPtr window, out INCursesWCHARStr wchStr)
         {
             //TODO: can overflow
-            wchStr = new NCursesWCHARStr<TWide>(1024);
+            wchStr = new NCursesWCHARStr<TWide>(Constants.MAX_STRING_LENGTH);
             NCursesException.Verify(Wrapper.win_wchstr(window, ref MarshallArray(ref wchStr)), "win_wchstr");
         }
 

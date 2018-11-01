@@ -134,7 +134,7 @@ namespace NCurses.Core.Interop.WideStr
             unsafe
             {
                 TWideStr* strPtr = stackalloc TWideStr[Constants.MAX_STRING_LENGTH];
-                NCursesException.Verify(this.Wrapper.get_wstr(ref MarshalString(strPtr, 1024, out Span<TWideStr> span)), "get_wstr");
+                NCursesException.Verify(this.Wrapper.get_wstr(ref MarshalString(strPtr, Constants.MAX_STRING_LENGTH, out Span<TWideStr> span)), "get_wstr");
                 wstr = ReadString(ref span);
             }
         }

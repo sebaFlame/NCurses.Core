@@ -138,7 +138,7 @@ namespace NCurses.Core.Interop.Small
         public void inchstr(out INCursesSCHARStr txt, out int read)
         {
             //TODO: can overflow
-            txt = new NCursesSCHARStr<TSmall>(1024);
+            txt = new NCursesSCHARStr<TSmall>(Constants.MAX_STRING_LENGTH);
             read = this.Wrapper.inchstr(ref MarshallArray(ref txt));
             NCursesException.Verify(read, "inchstr");
         }
@@ -189,7 +189,7 @@ namespace NCurses.Core.Interop.Small
         public void mvinchstr(int y, int x, out INCursesSCHARStr chstr, out int read)
         {
             //TODO: can overflow
-            chstr = new NCursesSCHARStr<TSmall>(1024);
+            chstr = new NCursesSCHARStr<TSmall>(Constants.MAX_STRING_LENGTH);
             read = NCursesException.Verify(this.Wrapper.mvinchstr(y, x, ref MarshallArray(ref chstr)), "mvinchstr");
         }
 

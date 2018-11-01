@@ -476,7 +476,7 @@ namespace NCurses.Core
         public abstract char ExtractChar(int nline, int ncol, out ulong attrs, out short pair);
 
         /// <summary>
-        /// read a string of atmost 1024 characters or until the right margin from the console output.
+        /// read a string of atmost <see cref="Constants.MAX_STRING_LENGTH"/> characters or until the right margin from the console output.
         /// </summary>
         /// <returns>the read string</returns>
         public abstract string ExtractString();
@@ -490,7 +490,7 @@ namespace NCurses.Core
         public abstract string ExtractString(int maxChars, out int read);
 
         /// <summary>
-        /// read a string atmost 1024 charactersor until the right margin from the console output from the console output 
+        /// read a string atmost <see cref="Constants.MAX_STRING_LENGTH"/> charactersor until the right margin from the console output from the console output 
         /// on line <paramref name="nline"/> and column <paramref name="ncol"/>. 
         /// </summary>
         /// <param name="nline">the line number to start writing</param>
@@ -499,7 +499,7 @@ namespace NCurses.Core
         public abstract string ExtractString(int nline, int ncol);
 
         /// <summary>
-        /// read a string atmost 1024 charactersor until the right margin from the console output from the console output 
+        /// read a string atmost <see cref="Constants.MAX_STRING_LENGTH"/> charactersor until the right margin from the console output from the console output 
         /// on line <paramref name="nline"/> and column <paramref name="ncol"/>. 
         /// </summary>
         /// <param name="nline">the line number to start writing</param>
@@ -510,7 +510,7 @@ namespace NCurses.Core
         public abstract string ExtractString(int nline, int ncol, int maxChars, out int read);
 
         /// <summary>
-        /// read a string with all its attributes of atmost 1024 characters or until the right margin from the console output.
+        /// read a string with all its attributes of atmost <see cref="Constants.MAX_STRING_LENGTH"/> characters or until the right margin from the console output.
         /// </summary>
         /// <param name="charsWithAttributes">The returned charactes with attributes</param>
         public abstract void ExtractString(out INCursesCharStr charsWithAttributes);
@@ -523,7 +523,7 @@ namespace NCurses.Core
         public abstract void ExtractString(out INCursesCharStr charsWithAttributes, int maxChars);
 
         /// <summary>
-        /// read a string with all its attributes of atmost 1024 characters or until the right margin from the console output 
+        /// read a string with all its attributes of atmost <see cref="Constants.MAX_STRING_LENGTH"/> characters or until the right margin from the console output 
         /// on line <paramref name="nline"/> and column <paramref name="ncol"/>. 
         /// </summary>
         /// <param name="nline">the line number to start writing</param>

@@ -111,7 +111,7 @@ namespace NCurses.Core.Interop.Wide
         public void in_wchstr(out INCursesWCHARStr wchStr)
         {
             //TODO: can overflow
-            wchStr = new NCursesWCHARStr<TWide>(1024);
+            wchStr = new NCursesWCHARStr<TWide>(Constants.MAX_STRING_LENGTH);
             NCursesException.Verify(Wrapper.in_wchstr(ref MarshallArray(ref wchStr)), "in_wchstr");
         }
 
