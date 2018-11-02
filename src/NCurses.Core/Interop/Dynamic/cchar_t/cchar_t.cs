@@ -10,7 +10,7 @@ namespace NCurses.Core.Interop.Dynamic.cchar_t
      * temporary test class -> REMOVE
     */
     [StructLayout(LayoutKind.Sequential)]
-    internal struct cchar_t : INCursesWCHAR //cchar_t
+    internal struct cchar_t : INCursesWCHAR, IEquatable<cchar_t> //cchar_t
     {
         private const int charGlobalLength = 10; //Constants.SIZEOF_WCHAR_T * Constants.CCHARW_MAX
 
@@ -145,6 +145,10 @@ namespace NCurses.Core.Interop.Dynamic.cchar_t
             return false;
         }
 
+        public bool Equals(cchar_t other)
+        {
+            return this == other;
+        }
 
         public override bool Equals(object obj)
         {

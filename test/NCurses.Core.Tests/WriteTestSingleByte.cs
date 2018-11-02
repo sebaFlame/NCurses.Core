@@ -78,5 +78,16 @@ namespace NCurses.Core.Tests
             Assert.Equal(Attrs.BOLD | Attrs.ITALIC, resultNCursesString[0].Attributes);
             Assert.Equal(4, resultNCursesString[0].Color);
         }
+
+        [Fact]
+        public void TestWriteStringColorStringEqualitySingleByte()
+        {
+            string testString = "test";
+
+            this.SingleByteStdScr.CreateString(testString, Attrs.BOLD | Attrs.ITALIC, 4, out INCursesCharStr managedString);
+            this.SingleByteStdScr.ExtractString(0, 0, out INCursesCharStr resultNCursesString, testString.Length);
+
+            Assert.StrictEqual(managedString, resultNCursesString);
+        }
     }
 }

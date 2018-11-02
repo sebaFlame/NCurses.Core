@@ -26,7 +26,7 @@ namespace NCurses.Core.Interop.SingleByte
     }
 
     internal class NativeScreenSmall<TSmall, TSmallStr> : NativeSmallBase<TSmall, TSmallStr>, INativeScreenSmall
-        where TSmall : unmanaged, INCursesSCHAR
+        where TSmall : unmanaged, INCursesSCHAR, IEquatable<TSmall>
         where TSmallStr : unmanaged
     {
         public NativeScreenSmall()

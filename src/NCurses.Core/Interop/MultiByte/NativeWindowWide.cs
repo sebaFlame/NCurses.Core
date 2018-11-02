@@ -35,9 +35,9 @@ namespace NCurses.Core.Interop.MultiByte
     }
 
     internal class NativeWindowWide<TWide, TWideStr, TSMall, TSmallStr> : NativeWideBase<TWide, TWideStr, TSMall, TSmallStr>, INativeWindowWide
-        where TWide : unmanaged, INCursesWCHAR
+        where TWide : unmanaged, INCursesWCHAR, IEquatable<TWide>
         where TWideStr : unmanaged
-        where TSMall : unmanaged, INCursesSCHAR
+        where TSMall : unmanaged, INCursesSCHAR, IEquatable<TSMall>
         where TSmallStr : unmanaged
     {
         public NativeWindowWide()

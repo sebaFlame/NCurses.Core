@@ -64,7 +64,8 @@ namespace NCurses.Core.Interop.Dynamic.cchar_t
             typeBuilder.AddInterfaceImplementation(typeof(INCursesChar));
             typeBuilder.AddInterfaceImplementation(typeof(IEquatable<INCursesChar>));
             typeBuilder.AddInterfaceImplementation(typeof(IEquatable<INCursesWCHAR>));
- 
+            typeBuilder.AddInterfaceImplementation(typeof(IEquatable<>).MakeGenericType(typeBuilder.AsType()));
+
             // nested value type for the fixed buffer 
             TypeBuilder nestedTypeBuilder = typeBuilder.DefineNestedType(
                 "nestedFixedBuffer",
@@ -767,6 +768,27 @@ namespace NCurses.Core.Interop.Dynamic.cchar_t
             methodIl.Emit(OpCodes.Br_S, lbl2);
             methodIl.MarkLabel(lbl2);
             methodIl.Emit(OpCodes.Ldloc_2);
+            methodIl.Emit(OpCodes.Ret);
+            #endregion
+
+            #region public bool Equals(cchar_t other)
+            methodBuilder = typeBuilder.DefineMethod("Equals",
+                MethodAttributes.Public | MethodAttributes.Final | MethodAttributes.HideBySig | MethodAttributes.NewSlot | MethodAttributes.Virtual,
+                typeof(bool),
+                new Type[] { typeBuilder.AsType() });
+            methodIl = methodBuilder.GetILGenerator();
+
+            lcl0 = methodIl.DeclareLocal(typeof(bool));
+            lbl1 = methodIl.DefineLabel();
+
+            methodIl.Emit(OpCodes.Nop);
+            methodIl.Emit(OpCodes.Ldarg_0);
+            methodIl.Emit(OpCodes.Ldarga_S, 1);
+            methodIl.Emit(OpCodes.Call, opEquality);
+            methodIl.Emit(OpCodes.Stloc_0);
+            methodIl.Emit(OpCodes.Br_S, lbl1);
+            methodIl.MarkLabel(lbl1);
+            methodIl.Emit(OpCodes.Ldloc_0);
             methodIl.Emit(OpCodes.Ret);
             #endregion
 

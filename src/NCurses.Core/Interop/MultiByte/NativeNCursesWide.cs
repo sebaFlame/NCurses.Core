@@ -16,9 +16,9 @@ namespace NCurses.Core.Interop.MultiByte
     }
 
     internal class NativeNCursesWide<TWide, TWideStr, TSmall, TSmallStr> : NativeWideBase<TWide, TWideStr, TSmall, TSmallStr>, INativeNCursesWide
-        where TWide : unmanaged, INCursesWCHAR
+        where TWide : unmanaged, INCursesWCHAR, IEquatable<TWide>
         where TWideStr : unmanaged
-        where TSmall : unmanaged, INCursesSCHAR
+        where TSmall : unmanaged, INCursesSCHAR, IEquatable<TSmall>
         where TSmallStr : unmanaged
     {
         public NativeNCursesWide()

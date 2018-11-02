@@ -6,11 +6,12 @@ using System.Collections;
 using System.Text;
 using System.Reflection;
 using System.Linq.Expressions;
+using System.Runtime.InteropServices;
 
 namespace NCurses.Core.Interop.MultiByte
 {
     public class NCursesWCHARStr<TWide> : INCursesWCHARStr
-        where TWide : unmanaged, INCursesWCHAR
+        where TWide : unmanaged, INCursesWCHAR, IEquatable<TWide>
     {
         internal Memory<TWide> WCHAR;
         //internal ref readonly TWide this[int index] => ref this.wchar[index];
@@ -217,9 +218,45 @@ namespace NCurses.Core.Interop.MultiByte
             }
         }
 
+        public static bool operator ==(in NCursesWCHARStr<TWide> wchStrLeft, in NCursesWCHARStr<TWide> wchStrRight)
+        {
+            return wchStrLeft.Equals(wchStrRight);
+        }
+
+        public static bool operator !=(in NCursesWCHARStr<TWide> wchStrLeft, in NCursesWCHARStr<TWide> wchStrRight)
+        {
+            return wchStrLeft.Equals(wchStrRight);
+        }
+
+        public bool Equals(INCursesCharStr obj)
+        {
+            if (obj is INCursesWCHARStr other)
+                return this.Equals(other);
+            return false;
+        }
+
+        public bool Equals(INCursesWCHARStr obj)
+        {
+            ReadOnlySpan<TWide> left = new ReadOnlySpan<TWide>(this.wchar);
+            ReadOnlySpan<TWide> right = new ReadOnlySpan<TWide>(this.wchar);
+            return left.SequenceEqual(right);
+        }
+
+        public override bool Equals(object obj)
+        {
+            if (obj is INCursesWCHARStr other)
+                return this.Equals(other);
+            return false;
+        }
+
         public override string ToString()
         {
             return (string)this;
+        }
+
+        public override int GetHashCode()
+        {
+            return 1594223146 + EqualityComparer<TWide[]>.Default.GetHashCode(this.wchar);
         }
 
         public void Dispose()

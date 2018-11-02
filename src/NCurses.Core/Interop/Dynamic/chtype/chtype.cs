@@ -8,7 +8,7 @@ namespace NCurses.Core.Interop.Dynamic.chtype
 {
     //TODO: temporary test class -> REMOVE
     [StructLayout(LayoutKind.Sequential)]
-    internal struct chtype : INCursesSCHAR //chtype & attr_t
+    internal struct chtype : INCursesSCHAR, IEquatable<chtype> //chtype & attr_t
     {
         public UInt32 charWithAttr;
 
@@ -106,6 +106,11 @@ namespace NCurses.Core.Interop.Dynamic.chtype
             if (obj is INCursesSCHAR other) //boxing?
                 return this.Equals(other);
             return false;
+        }
+
+        public bool Equals(chtype other)
+        {
+            return this == other;
         }
 
         public override bool Equals(object obj)

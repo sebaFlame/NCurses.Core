@@ -10,9 +10,9 @@ using wchar_t = System.Char;
 namespace NCurses.Core.Interop.MultiByte
 {
     public abstract class NativeWideBase<TWide, TWideStr, TSMall, TSmallStr> // handles cchar_t
-        where TWide : unmanaged, INCursesWCHAR
+        where TWide : unmanaged, INCursesWCHAR, IEquatable<TWide>
         where TWideStr : unmanaged
-        where TSMall : unmanaged, INCursesSCHAR
+        where TSMall : unmanaged, INCursesSCHAR, IEquatable<TSMall>
         where TSmallStr : unmanaged
     {
         private INCursesWrapperWide<TWide, TWideStr, TSMall, TSmallStr> wrapper;

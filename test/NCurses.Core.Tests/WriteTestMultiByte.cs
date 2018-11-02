@@ -109,5 +109,21 @@ namespace NCurses.Core.Tests
             Assert.Equal(Attrs.BOLD | Attrs.ITALIC, resultNCursesString[0].Attributes);
             Assert.Equal(4, resultNCursesString[0].Color);
         }
+
+        [Fact]
+        public void TestWriteStringColorStringEqualityMultiByte()
+        {
+            if (this.TestUnicode())
+                return;
+
+            string testString = new string(new char[] { '\u0490', '\u0491', '\u0492', '\u0493', '\u0494', '\u0495', '\u0496', '\u0497', '\u0498', '\u0499'
+                , '\u049A', '\u049B', '\u049C', '\u049D', '\u049E', '\u049F' });
+            this.MultiByteStdScr.CreateString(testString, Attrs.BOLD | Attrs.ITALIC, 4, out INCursesCharStr managedString);
+
+            this.MultiByteStdScr.Write(managedString);
+            this.MultiByteStdScr.ExtractString(0, 0, out INCursesCharStr resultNCursesString, testString.Length);
+
+            Assert.StrictEqual(resultNCursesString, managedString);
+        }
     }
 }

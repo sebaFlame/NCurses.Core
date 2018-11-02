@@ -9,7 +9,7 @@ using System.Text;
 namespace NCurses.Core.Interop.SingleByte
 {
     public class NCursesSCHARStr<TSmall> : INCursesSCHARStr
-    where TSmall : unmanaged, INCursesSCHAR
+    where TSmall : unmanaged, INCursesSCHAR, IEquatable<TSmall>
     {
         internal Memory<TSmall> SCHAR;
         //internal ref readonly TSmall this[int index] => ref this.schar[index];
@@ -141,7 +141,7 @@ namespace NCurses.Core.Interop.SingleByte
             this.position = 0;
         }
 
-        //TODO: crashes Visual Studio debugger
+        //TODO: crashes Visual Studio debugger when using netcoreapp2.0
         public static explicit operator string(NCursesSCHARStr<TSmall> str)
         {
             unsafe
@@ -154,9 +154,45 @@ namespace NCurses.Core.Interop.SingleByte
             }
         }
 
+        public static bool operator ==(in NCursesSCHARStr<TSmall> chStrLeft, in NCursesSCHARStr<TSmall> chStrRight)
+        {
+            return chStrLeft.Equals(chStrRight);
+        }
+
+        public static bool operator !=(in NCursesSCHARStr<TSmall> chStrLeft, in NCursesSCHARStr<TSmall> chStrRight)
+        {
+            return chStrLeft.Equals(chStrRight);
+        }
+
+        public bool Equals(INCursesCharStr obj)
+        {
+            if (obj is INCursesSCHARStr other)
+                return this.Equals(other);
+            return false;
+        }
+
+        public bool Equals(INCursesSCHARStr obj)
+        {
+            ReadOnlySpan<TSmall> left = new ReadOnlySpan<TSmall>(this.schar);
+            ReadOnlySpan<TSmall> right = new ReadOnlySpan<TSmall>(this.schar);
+            return left.SequenceEqual(right);
+        }
+
+        public override bool Equals(object obj)
+        {
+            if (obj is INCursesSCHARStr other)
+                return this.Equals(other);
+            return false;
+        }
+
         public override string ToString()
         {
             return (string)this;
+        }
+
+        public override int GetHashCode()
+        {
+            return -158990394 + EqualityComparer<TSmall[]>.Default.GetHashCode(this.schar);
         }
 
         public void Dispose()

@@ -9,7 +9,7 @@ using schar = System.SByte;
 namespace NCurses.Core.Interop.SingleByte
 {
     public abstract class NativeSmallBase<TSmall, TSmallStr> //handles chtype and attr_t
-        where TSmall : unmanaged, INCursesSCHAR
+        where TSmall : unmanaged, INCursesSCHAR, IEquatable<TSmall>
         where TSmallStr : unmanaged
     {
         private INCursesWrapperSmall<TSmall, TSmallStr> wrapper;

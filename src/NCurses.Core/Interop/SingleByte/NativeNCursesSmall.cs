@@ -29,7 +29,7 @@ namespace NCurses.Core.Interop.SingleByte
     }
 
     internal class NativeNCursesSmall<TSmall, TSmallStr> : NativeSmallBase<TSmall, TSmallStr>, INativeNCursesSmall
-        where TSmall : unmanaged, INCursesSCHAR
+        where TSmall : unmanaged, INCursesSCHAR, IEquatable<TSmall>
         where TSmallStr : unmanaged
     {
         public NativeNCursesSmall()

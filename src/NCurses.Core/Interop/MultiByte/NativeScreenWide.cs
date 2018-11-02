@@ -12,9 +12,9 @@ namespace NCurses.Core.Interop.MultiByte
     }
 
     public class NativeScreenWide<TWide, TWideStr, TSmall, TSmallStr> : NativeWideBase<TWide, TWideStr, TSmall, TSmallStr>, INativeScreenWide
-        where TWide : unmanaged, INCursesWCHAR
+        where TWide : unmanaged, INCursesWCHAR, IEquatable<TWide>
         where TWideStr : unmanaged
-        where TSmall : unmanaged, INCursesSCHAR
+        where TSmall : unmanaged, INCursesSCHAR, IEquatable<TSmall>
         where TSmallStr : unmanaged
     {
         public void wunctrl_sp(IntPtr screen, in INCursesWCHAR wch, out string str)

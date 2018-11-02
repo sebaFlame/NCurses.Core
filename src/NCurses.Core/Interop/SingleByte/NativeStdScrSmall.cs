@@ -38,7 +38,7 @@ namespace NCurses.Core.Interop.SingleByte
     }
 
     public class NativeStdScrSmall<TSmall, TSmallStr> : NativeSmallBase<TSmall, TSmallStr>, INativeStdScrSmall
-        where TSmall : unmanaged, INCursesSCHAR
+        where TSmall : unmanaged, INCursesSCHAR, IEquatable<TSmall>
         where TSmallStr : unmanaged
     {
         public NativeStdScrSmall() { }

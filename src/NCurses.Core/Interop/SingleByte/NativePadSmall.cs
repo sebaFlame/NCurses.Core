@@ -10,7 +10,7 @@ namespace NCurses.Core.Interop.SingleByte
     }
     
     public class NativePadSmall<TSmall, TSmallStr> : NativeSmallBase<TSmall, TSmallStr>, INativePadSmall
-        where TSmall : unmanaged, INCursesSCHAR
+        where TSmall : unmanaged, INCursesSCHAR, IEquatable<TSmall>
         where TSmallStr : unmanaged
     {
         public void pechochar(IntPtr pad, in INCursesSCHAR ch)
