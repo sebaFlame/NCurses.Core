@@ -65,7 +65,6 @@ namespace NCurses.Core.Interop.MultiByte
             this.CreateWCHARArray(str.AsSpan(), attrs, pair);
         }
 
-        //TODO: remove char[] allocation
         public NCursesWCHARStr(byte[] str, Encoding encoding)
         {
             this.CreateWCHARArray(str, encoding);
@@ -85,16 +84,6 @@ namespace NCurses.Core.Interop.MultiByte
                 attrs, color);
         }
 
-        //public NCursesWCHARStr(char[] str)
-        //{
-        //    CreateWCHARArray(new ReadOnlySpan<char>(str));
-        //}
-
-        //public NCursesWCHARStr(char[] str, ulong attrs)
-        //{
-        //    CreateWCHARArray(new ReadOnlySpan<char>(str), attrs);
-        //}
-
         public NCursesWCHARStr(int length)
         {
             this.Length = length;
@@ -107,9 +96,6 @@ namespace NCurses.Core.Interop.MultiByte
             this.Dispose();
         }
 
-        /*TODO
-         * encode the entire string at once -> Encoding.Encoder.Convert
-        */
         private unsafe void CreateWCHARArray(ReadOnlySpan<char> charArray, ulong attrs = 0, short colorPair = 0, bool addNullTerminator = true)
         {
             this.wchar = ArrayPool<TWide>.Shared.Rent(charArray.Length + (addNullTerminator ? 1 : 0));
@@ -175,11 +161,6 @@ namespace NCurses.Core.Interop.MultiByte
         {
             return new NCursesWCHARStr<TWide>(str);
         }
-
-        //public static explicit operator NCursesWCHARStr<TWide>(char[] str)
-        //{
-        //    return new NCursesWCHARStr<TWide>(str);
-        //}
 
         public IEnumerator<INCursesWCHAR> GetEnumerator()
         {

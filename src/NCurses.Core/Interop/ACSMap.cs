@@ -25,9 +25,16 @@ namespace NCurses.Core.Interop
                 ReadOnlySpan<TChar> acsSpan = new ReadOnlySpan<TChar>(this.acs_map_handle.ToPointer(), 128);
                 TChar ret = acsSpan[index];
                 if (ret is INCursesSCHAR sret)
-                    return SmallCharFactory.GetSmallChar(sret);
+                {
+                    SmallCharFactory.Instance.GetNativeChar(sret, out INCursesSCHAR res);
+                    return res;
+                }
                 else if (ret is INCursesWCHAR wret)
-                    return WideCharFactory.GetWideChar(wret);
+                {
+                    WideCharFactory.Instance.GetNativeChar(wret, out INCursesWCHAR res);
+                    return res;
+                }
+                    
                 throw new InvalidCastException("Unsupported character type found");
             }
         }

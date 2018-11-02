@@ -6,7 +6,7 @@ using NCurses.Core.Interop.Dynamic;
 
 namespace NCurses.Core.Interop.MultiByte
 {
-    public static class WideCharFactory
+    internal class WideCharFactory : ICharFactory<INCursesWCHAR, INCursesWCHARStr>
     {
         private static Type WideCharType;
         private static Type WideStringType;
@@ -20,8 +20,6 @@ namespace NCurses.Core.Interop.MultiByte
         private static Func<string, INCursesWCHARStr> strCreate;
         private static Func<string, ulong, INCursesWCHARStr> strAttrCreate;
         private static Func<string, ulong, short, INCursesWCHARStr> strAttrColorCreate;
-        //private static Func<char[], INCursesWCHARStr> chArrCreate;
-        //private static Func<char[], ulong, INCursesWCHARStr> chArrAttrCreate;
 
         private static Func<int, INCursesWCHARStr> emptyCreate;
 
@@ -29,8 +27,14 @@ namespace NCurses.Core.Interop.MultiByte
         private static Func<byte[], Encoding, ulong, INCursesWCHARStr> byteAttrCreate;
         private static Func<byte[], Encoding, ulong, short, INCursesWCHARStr> byteAttrColorCreate;
 
+        private static WideCharFactory instance;
+        internal static WideCharFactory Instance => instance ?? (instance = new WideCharFactory());
+        ICharFactory<INCursesWCHAR, INCursesWCHARStr> ICharFactory<INCursesWCHAR, INCursesWCHARStr>.Instance => Instance;
+
         static WideCharFactory()
         {
+            instance = new WideCharFactory();
+
             WideCharType = typeof(NCursesWCHAR<>).MakeGenericType(DynamicTypeBuilder.cchar_t);
             WideStringType = typeof(NCursesWCHARStr<>).MakeGenericType(DynamicTypeBuilder.cchar_t);
 
@@ -72,16 +76,6 @@ namespace NCurses.Core.Interop.MultiByte
             strAttrColorCreate = Expression.Lambda<Func<string, ulong, short, INCursesWCHARStr>>(
                 Expression.Convert(Expression.New(ctor, par1, par2, par3), typeof(INCursesWCHARStr)), par1, par2,par3).Compile();
 
-            //par1 = Expression.Parameter(typeof(char[]));
-            //ctor = WideStringType.GetConstructor(new Type[] { typeof(char[]) });
-            //chArrCreate = Expression.Lambda<Func<char[], INCursesWCHARStr>>(
-            //    Expression.Convert(Expression.New(ctor, par1), typeof(INCursesWCHARStr)), par1).Compile();
-
-            //par2 = Expression.Parameter(typeof(ulong));
-            //ctor = WideStringType.GetConstructor(new Type[] { typeof(char[]), typeof(ulong) });
-            //chArrAttrCreate = Expression.Lambda<Func<char[], ulong, INCursesWCHARStr>>(
-            //    Expression.Convert(Expression.New(ctor, par1, par2), typeof(INCursesWCHARStr)), par1, par2).Compile();
-
             par1 = Expression.Parameter(typeof(int));
             ctor = WideStringType.GetConstructor(new Type[] { typeof(int) });
             emptyCreate = Expression.Lambda<Func<int, INCursesWCHARStr>>(Expression.Convert(
@@ -104,74 +98,64 @@ namespace NCurses.Core.Interop.MultiByte
                 Expression.New(ctor, par1, par2, par3, par4), typeof(INCursesWCHARStr)), par1, par2, par3, par4).Compile();
         }
 
-        public static INCursesWCHAR GetWideChar()
+        public void GetNativeEmptyChar(out INCursesWCHAR res)
         {
-            return charCreate('\0');
+            res = charCreate('\0');
         }
 
-        public static INCursesWCHAR GetWideChar(INCursesChar wch)
+        internal void GetNativeChar(INCursesChar wch, out INCursesWCHAR res)
         {
-            return ncursesCharCreate(wch);
+            res = ncursesCharCreate(wch);
         }
 
-        public static INCursesWCHAR GetWideChar(char ch)
+        public void GetNativeChar(char ch, out INCursesWCHAR res)
         {
-            return charCreate(ch);
+            res = charCreate(ch);
         }
 
-        public static INCursesWCHAR GetWideChar(char ch, ulong attr)
+        public void GetNativeChar(char ch, ulong attr, out INCursesWCHAR res)
         {
-            return charAttrCreate(ch, attr);
+            res = charAttrCreate(ch, attr);
         }
 
-        public static INCursesWCHAR GetWideChar(char ch, ulong attr, short pair)
+        public void GetNativeChar(char ch, ulong attr, short pair, out INCursesWCHAR res)
         {
-            return charAttrColorCreate(ch, attr, pair);
+            res = charAttrColorCreate(ch, attr, pair);
         }
 
-        public static INCursesWCHARStr GetWideString(string str)
+        public void GetNativeEmptyString(int length, out INCursesWCHARStr res)
         {
-            return strCreate(str);
+            res = emptyCreate(length);
         }
 
-        public static INCursesWCHARStr GetWideString(string str, ulong attr)
+        public void GetNativeString(string str, out INCursesWCHARStr res)
         {
-            return strAttrCreate(str, attr);
+            res = strCreate(str);
         }
 
-        public static INCursesWCHARStr GetWideString(string str, ulong attr, short pair)
+        public void GetNativeString(string str, ulong attr, out INCursesWCHARStr res)
         {
-            return strAttrColorCreate(str, attr, pair);
+            res = strAttrCreate(str, attr);
         }
 
-        public static INCursesWCHARStr GetWideString(byte[] str, Encoding encoding)
+        public void GetNativeString(string str, ulong attr, short pair, out INCursesWCHARStr res)
         {
-            return byteCreate(str, encoding);
+            res = strAttrColorCreate(str, attr, pair);
         }
 
-        public static INCursesWCHARStr GetWideString(byte[] str, Encoding encoding, ulong attr)
+        public void GetNativeString(byte[] str, Encoding encoding, out INCursesWCHARStr res)
         {
-            return byteAttrCreate(str, encoding, attr);
+            res = byteCreate(str, encoding);
         }
 
-        public static INCursesWCHARStr GetWideString(byte[] str, Encoding encoding, ulong attr, short pair)
+        public void GetNativeString(byte[] str, Encoding encoding, ulong attr, out INCursesWCHARStr res)
         {
-            return byteAttrColorCreate(str, encoding, attr, pair);
+            res = byteAttrCreate(str, encoding, attr);
         }
 
-        //public static INCursesWCHARStr GetWideString(char[] str)
-        //{
-        //    return chArrCreate(str);
-        //}
-
-        //public static INCursesWCHARStr GetWideString(char[] str, ulong attr)
-        //{
-        //    return chArrAttrCreate(str, attr);
-        //}
-
-        public static INCursesWCHARStr GetWideString(int length)
+        public void GetNativeString(byte[] str, Encoding encoding, ulong attr, short pair, out INCursesWCHARStr res)
         {
-            return emptyCreate(length);
+            res = byteAttrColorCreate(str, encoding, attr, pair);
         }
     }
 }

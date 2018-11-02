@@ -51,39 +51,53 @@ namespace NCurses.Core.StdScr
 
         public override void Border()
         {
-            NativeStdScr.border(SmallCharFactory.GetSmallChar(), SmallCharFactory.GetSmallChar(), SmallCharFactory.GetSmallChar(), SmallCharFactory.GetSmallChar(),
-                SmallCharFactory.GetSmallChar(), SmallCharFactory.GetSmallChar(), SmallCharFactory.GetSmallChar(), SmallCharFactory.GetSmallChar());
+            SmallCharFactory.Instance.GetNativeEmptyChar(out INCursesSCHAR ls);
+            SmallCharFactory.Instance.GetNativeEmptyChar(out INCursesSCHAR rs);
+            SmallCharFactory.Instance.GetNativeEmptyChar(out INCursesSCHAR ts);
+            SmallCharFactory.Instance.GetNativeEmptyChar(out INCursesSCHAR bs);
+            SmallCharFactory.Instance.GetNativeEmptyChar(out INCursesSCHAR tl);
+            SmallCharFactory.Instance.GetNativeEmptyChar(out INCursesSCHAR tr);
+            SmallCharFactory.Instance.GetNativeEmptyChar(out INCursesSCHAR bl);
+            SmallCharFactory.Instance.GetNativeEmptyChar(out INCursesSCHAR br);
+
+            NativeStdScr.border(ls, rs, ts, bs, tl, tr, bl, br);
         }
 
         //TODO: use native override?
         public override void CreateChar(char ch, out INCursesChar chRet)
         {
-            chRet = SmallCharFactory.GetSmallChar(ch);
+            SmallCharFactory.Instance.GetNativeChar(ch, out INCursesSCHAR res);
+            chRet = res;
         }
 
         public override void CreateChar(char ch, ulong attrs, out INCursesChar chRet)
         {
-            chRet = SmallCharFactory.GetSmallChar(ch, attrs);
+            SmallCharFactory.Instance.GetNativeChar(ch, attrs, out INCursesSCHAR res);
+            chRet = res;
         }
 
         public override void CreateChar(char ch, ulong attrs, short pair, out INCursesChar chRet)
         {
-            chRet = SmallCharFactory.GetSmallChar(ch, attrs, pair);
+            SmallCharFactory.Instance.GetNativeChar(ch, attrs, pair, out INCursesSCHAR res);
+            chRet = res;
         }
 
         public override void CreateString(string str, out INCursesCharStr chStr)
         {
-            chStr = SmallCharFactory.GetSmallString(str);
+            SmallCharFactory.Instance.GetNativeString(str, out INCursesSCHARStr res);
+            chStr = res;
         }
 
         public override void CreateString(string str, ulong attrs, out INCursesCharStr chStr)
         {
-            chStr = SmallCharFactory.GetSmallString(str, attrs);
+            SmallCharFactory.Instance.GetNativeString(str, attrs, out INCursesSCHARStr res);
+            chStr = res;
         }
 
         public override void CreateString(string str, ulong attrs, short pair, out INCursesCharStr chStr)
         {
-            chStr = SmallCharFactory.GetSmallString(str, attrs, pair);
+            SmallCharFactory.Instance.GetNativeString(str, attrs, pair, out INCursesSCHARStr res);
+            chStr = res;
         }
 
         public override void ExtractChar(out INCursesChar ch)
@@ -186,22 +200,26 @@ namespace NCurses.Core.StdScr
 
         public override void Insert(char ch)
         {
-            NativeStdScr.insch(SmallCharFactory.GetSmallChar(ch));
+            SmallCharFactory.Instance.GetNativeChar(ch, out INCursesSCHAR res);
+            NativeStdScr.insch(res);
         }
 
         public override void Insert(int nline, int ncol, char ch)
         {
-            NativeStdScr.mvinsch(nline, ncol, SmallCharFactory.GetSmallChar(ch));
+            SmallCharFactory.Instance.GetNativeChar(ch, out INCursesSCHAR res);
+            NativeStdScr.mvinsch(nline, ncol, res);
         }
 
         public override void Insert(char ch, ulong attrs, short pair)
         {
-            NativeStdScr.insch(SmallCharFactory.GetSmallChar(ch, attrs, pair));
+            SmallCharFactory.Instance.GetNativeChar(ch, attrs, pair, out INCursesSCHAR res);
+            NativeStdScr.insch(res);
         }
 
         public override void Insert(int nline, int ncol, char ch, ulong attrs, short pair)
         {
-            NativeStdScr.mvinsch(nline, ncol, SmallCharFactory.GetSmallChar(ch, attrs, pair));
+            SmallCharFactory.Instance.GetNativeChar(ch, attrs, pair, out INCursesSCHAR res);
+            NativeStdScr.mvinsch(nline, ncol, res);
         }
 
         public override void Insert(string str)
@@ -281,7 +299,8 @@ namespace NCurses.Core.StdScr
 
         public override void Write(string str, ulong attrs, short pair)
         {
-            NativeStdScr.addchnstr(SmallCharFactory.GetSmallString(str, attrs, pair), str.Length);
+            SmallCharFactory.Instance.GetNativeString(str, attrs, pair, out INCursesSCHARStr res);
+            NativeStdScr.addchnstr(res, str.Length);
         }
 
         public override void Write(int nline, int ncol, string str)
@@ -291,7 +310,8 @@ namespace NCurses.Core.StdScr
 
         public override void Write(int nline, int ncol, string str, ulong attrs, short pair)
         {
-            NativeStdScr.mvaddchnstr(nline, ncol, SmallCharFactory.GetSmallString(str, attrs, pair), str.Length);
+            SmallCharFactory.Instance.GetNativeString(str, attrs, pair, out INCursesSCHARStr res);
+            NativeStdScr.mvaddchnstr(nline, ncol, res, str.Length);
         }
 
         public override void Write(char ch)
@@ -301,17 +321,20 @@ namespace NCurses.Core.StdScr
 
         public override void Write(char ch, ulong attrs, short pair)
         {
-            NativeStdScr.addch(SmallCharFactory.GetSmallChar(ch, attrs, pair));
+            SmallCharFactory.Instance.GetNativeChar(ch, attrs, pair, out INCursesSCHAR res);
+            NativeStdScr.addch(res);
         }
 
         public override void Write(int nline, int ncol, char ch)
         {
-            NativeStdScr.mvaddch(nline, ncol, SmallCharFactory.GetSmallChar(ch));
+            SmallCharFactory.Instance.GetNativeChar(ch, out INCursesSCHAR res);
+            NativeStdScr.mvaddch(nline, ncol, res);
         }
 
         public override void Write(int nline, int ncol, char ch, ulong attrs, short pair)
         {
-            NativeStdScr.mvaddch(nline, ncol, SmallCharFactory.GetSmallChar(ch, attrs, pair));
+            SmallCharFactory.Instance.GetNativeChar(ch, attrs, pair, out INCursesSCHAR res);
+            NativeStdScr.mvaddch(nline, ncol, res);
         }
 
         public override void Write(byte[] str, Encoding encoding)

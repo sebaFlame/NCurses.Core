@@ -78,8 +78,16 @@ namespace NCurses.Core
 
         public override void Border()
         {
-            this.Border(WideCharFactory.GetWideChar(), WideCharFactory.GetWideChar(), WideCharFactory.GetWideChar(), WideCharFactory.GetWideChar(),
-                WideCharFactory.GetWideChar(), WideCharFactory.GetWideChar(), WideCharFactory.GetWideChar(), WideCharFactory.GetWideChar());
+            WideCharFactory.Instance.GetNativeEmptyChar(out INCursesWCHAR ls);
+            WideCharFactory.Instance.GetNativeEmptyChar(out INCursesWCHAR rs);
+            WideCharFactory.Instance.GetNativeEmptyChar(out INCursesWCHAR ts);
+            WideCharFactory.Instance.GetNativeEmptyChar(out INCursesWCHAR bs);
+            WideCharFactory.Instance.GetNativeEmptyChar(out INCursesWCHAR tl);
+            WideCharFactory.Instance.GetNativeEmptyChar(out INCursesWCHAR tr);
+            WideCharFactory.Instance.GetNativeEmptyChar(out INCursesWCHAR bl);
+            WideCharFactory.Instance.GetNativeEmptyChar(out INCursesWCHAR br);
+
+            NativeWindow.wborder_set(this.WindowPtr, ls, rs, ts, bs, tl, tr, bl, br);
         }
 
         public override void Box(in INCursesChar verticalChar, in INCursesChar horizontalChar)
@@ -89,38 +97,47 @@ namespace NCurses.Core
 
         public override void Box()
         {
-            NativeWindow.box_set(this.WindowPtr, WideCharFactory.GetWideChar(), WideCharFactory.GetWideChar());
+            WideCharFactory.Instance.GetNativeEmptyChar(out INCursesWCHAR verch);
+            WideCharFactory.Instance.GetNativeEmptyChar(out INCursesWCHAR horch);
+
+            NativeWindow.box_set(this.WindowPtr, verch, horch);
         }
 
         //TODO: use native override?
         public override void CreateChar(char ch, out INCursesChar chRet)
         {
-            chRet = WideCharFactory.GetWideChar(ch);
+            WideCharFactory.Instance.GetNativeChar(ch, out INCursesWCHAR res);
+            chRet = res;
         }
 
         public override void CreateChar(char ch, ulong attrs, out INCursesChar chRet)
         {
-            chRet = WideCharFactory.GetWideChar(ch, attrs);
+            WideCharFactory.Instance.GetNativeChar(ch, attrs, out INCursesWCHAR res);
+            chRet = res;
         }
 
         public override void CreateChar(char ch, ulong attrs, short pair, out INCursesChar chRet)
         {
-            chRet = WideCharFactory.GetWideChar(ch, attrs, pair);
+            WideCharFactory.Instance.GetNativeChar(ch, attrs, pair, out INCursesWCHAR res);
+            chRet = res;
         }
 
         public override void CreateString(string str, out INCursesCharStr chStr)
         {
-            chStr = WideCharFactory.GetWideString(str);
+            WideCharFactory.Instance.GetNativeString(str, out INCursesWCHARStr res);
+            chStr = res;
         }
 
         public override void CreateString(string str, ulong attrs, out INCursesCharStr chStr)
         {
-            chStr = WideCharFactory.GetWideString(str, attrs);
+            WideCharFactory.Instance.GetNativeString(str, attrs, out INCursesWCHARStr res);
+            chStr = res;
         }
 
         public override void CreateString(string str, ulong attrs, short pair, out INCursesCharStr chStr)
         {
-            chStr = WideCharFactory.GetWideString(str, attrs, pair);
+            WideCharFactory.Instance.GetNativeString(str, attrs, pair, out INCursesWCHARStr res);
+            chStr = res;
         }
 
         public override Window Duplicate()
@@ -228,22 +245,26 @@ namespace NCurses.Core
 
         public override void Insert(char ch)
         {
-            NativeWindow.wins_wch(this.WindowPtr, WideCharFactory.GetWideChar(ch));
+            WideCharFactory.Instance.GetNativeChar(ch, out INCursesWCHAR res);
+            NativeWindow.wins_wch(this.WindowPtr, res);
         }
 
         public override void Insert(int nline, int ncol, char ch)
         {
-            NativeWindow.mvwins_wch(this.WindowPtr, nline, ncol, WideCharFactory.GetWideChar(ch));
+            WideCharFactory.Instance.GetNativeChar(ch, out INCursesWCHAR res);
+            NativeWindow.mvwins_wch(this.WindowPtr, nline, ncol, res);
         }
 
         public override void Insert(char ch, ulong attrs, short pair)
         {
-            NativeWindow.wins_wch(this.WindowPtr, WideCharFactory.GetWideChar(ch, attrs, pair));
+            WideCharFactory.Instance.GetNativeChar(ch, attrs, pair, out INCursesWCHAR res);
+            NativeWindow.wins_wch(this.WindowPtr, res);
         }
 
         public override void Insert(int nline, int ncol, char ch, ulong attrs, short pair)
         {
-            NativeWindow.mvwins_wch(this.WindowPtr, nline, ncol, WideCharFactory.GetWideChar(ch, attrs, pair));
+            WideCharFactory.Instance.GetNativeChar(ch, attrs, pair, out INCursesWCHAR res);
+            NativeWindow.mvwins_wch(this.WindowPtr, nline, ncol, res);
         }
 
         public override void Insert(string str)
@@ -334,7 +355,8 @@ namespace NCurses.Core
 
         public override void Write(string str, ulong attrs, short pair)
         {
-            NativeWindow.wadd_wchnstr(this.WindowPtr, WideCharFactory.GetWideString(str, attrs, pair), str.Length);
+            WideCharFactory.Instance.GetNativeString(str, attrs, pair, out INCursesWCHARStr res);
+            NativeWindow.wadd_wchnstr(this.WindowPtr, res, str.Length);
         }
 
         public override void Write(int nline, int ncol, string str)
@@ -344,7 +366,8 @@ namespace NCurses.Core
 
         public override void Write(int nline, int ncol, string str, ulong attrs, short pair)
         {
-            NativeWindow.mvwadd_wchnstr(this.WindowPtr, nline, ncol, WideCharFactory.GetWideString(str, attrs, pair), str.Length);
+            WideCharFactory.Instance.GetNativeString(str, attrs, pair, out INCursesWCHARStr res);
+            NativeWindow.mvwadd_wchnstr(this.WindowPtr, nline, ncol, res, str.Length);
         }
 
         //TODO: don't convert?
@@ -355,41 +378,44 @@ namespace NCurses.Core
 
         public override void Write(char ch, ulong attrs, short pair)
         {
-            NativeWindow.wadd_wch(this.WindowPtr, WideCharFactory.GetWideChar(ch, attrs, pair));
+            WideCharFactory.Instance.GetNativeChar(ch, attrs, pair, out INCursesWCHAR res);
+            NativeWindow.wadd_wch(this.WindowPtr, res);
         }
 
         public override void Write(int nline, int ncol, char ch)
         {
-            NativeWindow.mvwadd_wch(this.WindowPtr, nline, ncol, WideCharFactory.GetWideChar(ch));
+            WideCharFactory.Instance.GetNativeChar(ch, out INCursesWCHAR res);
+            NativeWindow.mvwadd_wch(this.WindowPtr, nline, ncol, res);
         }
 
         public override void Write(int nline, int ncol, char ch, ulong attrs, short pair)
         {
-            NativeWindow.mvwadd_wch(this.WindowPtr, nline, ncol, WideCharFactory.GetWideChar(ch, attrs, pair));
+            WideCharFactory.Instance.GetNativeChar(ch, attrs, pair, out INCursesWCHAR res);
+            NativeWindow.mvwadd_wch(this.WindowPtr, nline, ncol, res);
         }
 
         public override void Write(byte[] str, Encoding encoding)
         {
-            INCursesWCHARStr chStr;
-            NativeWindow.wadd_wchnstr(this.WindowPtr, chStr = WideCharFactory.GetWideString(str, encoding), chStr.Length);
+            WideCharFactory.Instance.GetNativeString(str, encoding, out INCursesWCHARStr res);
+            NativeWindow.wadd_wchnstr(this.WindowPtr, res, res.Length);
         }
 
         public override void Write(byte[] str, Encoding encoding, ulong attrs, short pair)
         {
-            INCursesWCHARStr chStr;
-            NativeWindow.wadd_wchnstr(this.WindowPtr, chStr = WideCharFactory.GetWideString(str, encoding, attrs, pair), chStr.Length);
+            WideCharFactory.Instance.GetNativeString(str, encoding, attrs, pair, out INCursesWCHARStr res);
+            NativeWindow.wadd_wchnstr(this.WindowPtr, res, res.Length);
         }
 
         public override void Write(int nline, int ncol, byte[] str, Encoding encoding)
         {
-            INCursesWCHARStr chStr;
-            NativeWindow.mvwadd_wchnstr(this.WindowPtr, nline, ncol, chStr = WideCharFactory.GetWideString(str, encoding), chStr.Length);
+            WideCharFactory.Instance.GetNativeString(str, encoding, out INCursesWCHARStr res);
+            NativeWindow.mvwadd_wchnstr(this.WindowPtr, nline, ncol, res, res.Length);
         }
 
         public override void Write(int nline, int ncol, byte[] str, Encoding encoding, ulong attrs, short pair)
         {
-            INCursesWCHARStr chStr;
-            NativeWindow.mvwadd_wchnstr(this.WindowPtr, nline, ncol, chStr = WideCharFactory.GetWideString(str, encoding, attrs, pair), chStr.Length);
+            WideCharFactory.Instance.GetNativeString(str, encoding, attrs, pair, out INCursesWCHARStr res);
+            NativeWindow.mvwadd_wchnstr(this.WindowPtr, nline, ncol, res, res.Length);
         }
     }
 }

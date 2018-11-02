@@ -41,26 +41,6 @@ namespace NCurses.Core.Interop.SingleByte
             this.CreateSCHARArray(str.AsSpan(), attrs, pair);
         }
 
-        //public NCursesSCHARStr(char[] str)
-        //{
-        //    this.CheckSCHARArr(str);
-        //}
-
-        //public NCursesSCHARStr(char[] str, ulong attrs)
-        //{
-        //    this.CheckSCHARArr(str);
-        //}
-
-        //public NCursesSCHARStr(byte[] str)
-        //{
-        //    this.CreateSCHARArr(str);
-        //}
-
-        //public NCursesSCHARStr(byte[] str, ulong attrs)
-        //{
-        //    this.CreateSCHARArr(str, attrs);
-        //}
-
         public NCursesSCHARStr(int length)
         {
             this.Length = length;

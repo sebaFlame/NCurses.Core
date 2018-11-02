@@ -6,7 +6,7 @@ using NCurses.Core.Interop.Dynamic;
 
 namespace NCurses.Core.Interop.SingleByte
 {
-    public static class SmallCharFactory
+    internal class SmallCharFactory : ICharFactory<INCursesSCHAR, INCursesSCHARStr>
     {
         private static Type SmallCharType;
         private static Type SmallStringType;
@@ -24,14 +24,17 @@ namespace NCurses.Core.Interop.SingleByte
         private static Func<string, INCursesSCHARStr> strCreate;
         private static Func<string, ulong, INCursesSCHARStr> strAttrCreate;
         private static Func<string, ulong, short, INCursesSCHARStr> strAttrColorCreate;
-        //private static Func<byte[], INCursesSCHARStr> byteArrCreate;
-        //private static Func<byte[], ulong, INCursesSCHARStr> byteArrAttrCreate;
-        //private static Func<char[], INCursesSCHARStr> chArrCreate;
-        //private static Func<char[], ulong, INCursesSCHARStr> chArrAttrCreate;
+
         private static Func<int, INCursesSCHARStr> emptyCreate;
+
+        private static SmallCharFactory instance;
+        internal static SmallCharFactory Instance => instance ?? (instance = new SmallCharFactory());
+        ICharFactory<INCursesSCHAR, INCursesSCHARStr> ICharFactory<INCursesSCHAR, INCursesSCHARStr>.Instance => Instance;
 
         static SmallCharFactory()
         {
+            instance = new SmallCharFactory();
+
             SmallCharType = typeof(NCursesSCHAR<>).MakeGenericType(DynamicTypeBuilder.chtype);
             SmallStringType = typeof(NCursesSCHARStr<>).MakeGenericType(DynamicTypeBuilder.chtype);
 
@@ -93,115 +96,75 @@ namespace NCurses.Core.Interop.SingleByte
             strAttrColorCreate = Expression.Lambda<Func<string, ulong, short, INCursesSCHARStr>>(
                 Expression.Convert(Expression.New(ctor, par1, par2, par3), typeof(INCursesSCHARStr)), par1, par2, par3).Compile();
 
-            //par1 = Expression.Parameter(typeof(byte[]));
-            //ctor = SmallStringType.GetConstructor(new Type[] { typeof(byte[]) });
-            //byteArrCreate = Expression.Lambda<Func<byte[], INCursesSCHARStr>>(Expression.Convert(
-            //    Expression.New(ctor, par1), typeof(INCursesSCHARStr)), par1).Compile();
-
-            //par2 = Expression.Parameter(typeof(ulong));
-            //ctor = SmallStringType.GetConstructor(new Type[] { typeof(byte[]), typeof(ulong) });
-            //byteArrAttrCreate = Expression.Lambda<Func<byte[], ulong, INCursesSCHARStr>>(
-            //    Expression.Convert(Expression.New(ctor, par1, par2), typeof(INCursesSCHARStr)), par1, par2).Compile();
-
-            //par1 = Expression.Parameter(typeof(char[]));
-            //ctor = SmallStringType.GetConstructor(new Type[] { typeof(char[]) });
-            //chArrCreate = Expression.Lambda<Func<char[], INCursesSCHARStr>>(
-            //    Expression.Convert(Expression.New(ctor, par1), typeof(INCursesSCHARStr)), par1).Compile();
-
-            //par2 = Expression.Parameter(typeof(ulong));
-            //ctor = SmallStringType.GetConstructor(new Type[] { typeof(char[]), typeof(ulong) });
-            //chArrAttrCreate = Expression.Lambda<Func<char[], ulong, INCursesSCHARStr>>(
-            //    Expression.Convert(Expression.New(ctor, par1, par2), typeof(INCursesSCHARStr)), par1, par2).Compile();
-
             par1 = Expression.Parameter(typeof(int));
             ctor = SmallStringType.GetConstructor(new Type[] { typeof(int) });
             emptyCreate = Expression.Lambda<Func<int, INCursesSCHARStr>>(Expression.Convert(
                 Expression.New(ctor, par1), typeof(INCursesSCHARStr)), par1).Compile();
         }
 
-        public static INCursesSCHAR GetAttribute(ulong attrs)
+        public void GetAttribute(ulong attrs, out INCursesSCHAR res)
         {
-            return attrCreate(attrs);
+            res = attrCreate(attrs);
         }
 
-        public static INCursesSCHAR GetSmallChar()
+        public void GetNativeEmptyChar(out INCursesSCHAR res)
         {
-            return charCreate('\0');
+            res = charCreate('\0');
         }
 
-        public static INCursesSCHAR GetSmallChar(INCursesChar ch)
+        internal void GetNativeChar(INCursesChar ch, out INCursesSCHAR res)
         {
-            return ncursesCharCreate(ch);
+            res = ncursesCharCreate(ch);
         }
 
-        public static INCursesSCHAR GetSmallChar(char ch)
+        public void GetNativeChar(char ch, out INCursesSCHAR res)
         {
-            return charCreate(ch);
+            res = charCreate(ch);
         }
 
-        public static INCursesSCHAR GetSmallChar(char ch, ulong attr)
+        public void GetNativeChar(char ch, ulong attr, out INCursesSCHAR res)
         {
-            return charAttrCreate(ch, attr);
+            res = charAttrCreate(ch, attr);
         }
 
-        public static INCursesSCHAR GetSmallChar(char ch, ulong attr, short pair)
+        public void GetNativeChar(char ch, ulong attr, short pair, out INCursesSCHAR res)
         {
-            return charAttrColorCreate(ch, attr, pair);
+            res = charAttrColorCreate(ch, attr, pair);
         }
 
-        public static INCursesSCHAR GetSmallChar(sbyte ch)
+        public void GetNativeEmptyString(int length, out INCursesSCHARStr res)
         {
-            return byteCreate(ch);
+            res = emptyCreate(length);
         }
 
-        public static INCursesSCHAR GetSmallChar(sbyte ch, ulong attr)
+        public void GetNativeString(string str, out INCursesSCHARStr res)
         {
-            return byteAttrCreate(ch, attr);
+            res = strCreate(str);
         }
 
-        public static INCursesSCHAR GetSmallChar(sbyte ch, ulong attr, short pair)
+        public void GetNativeString(string str, ulong attr, out INCursesSCHARStr res)
         {
-            return byteAttrColorCreate(ch, attr, pair);
+            res = strAttrCreate(str, attr);
         }
 
-        //public static INCursesSCHARStr GetSmallString(byte[] str)
-        //{
-        //    return byteArrCreate(str);
-        //}
-
-        //public static INCursesSCHARStr GetSmallString(byte[] str, ulong attr)
-        //{
-        //    return byteArrAttrCreate(str, attr);
-        //}
-
-        public static INCursesSCHARStr GetSmallString(string str)
+        public void GetNativeString(string str, ulong attr, short color, out INCursesSCHARStr res)
         {
-            return strCreate(str);
+            res = strAttrColorCreate(str, attr, color);
         }
 
-        public static INCursesSCHARStr GetSmallString(string str, ulong attr)
+        public void GetNativeChar(sbyte ch, out INCursesSCHAR res)
         {
-            return strAttrCreate(str, attr);
+            res = byteCreate(ch);
         }
 
-        public static INCursesSCHARStr GetSmallString(string str, ulong attr, short color)
+        public void GetNativeChar(sbyte ch, ulong attr, out INCursesSCHAR res)
         {
-            return strAttrColorCreate(str, attr, color);
+            res = byteAttrCreate(ch, attr);
         }
 
-        //public static INCursesSCHARStr GetSmallString(char[] str)
-        //{
-        //    return chArrCreate(str);
-        //}
-
-        //public static INCursesSCHARStr GetSmallString(char[] str, ulong attr)
-        //{
-        //    return chArrAttrCreate(str, attr);
-        //}
-
-        public static INCursesSCHARStr GetSmallString(int length)
+        public void GetNativeChar(sbyte ch, ulong attr, short pair, out INCursesSCHAR res)
         {
-            return emptyCreate(length);
+            res = byteAttrColorCreate(ch, attr, pair);
         }
     }
 }

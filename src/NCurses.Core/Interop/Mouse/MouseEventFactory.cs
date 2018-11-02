@@ -20,8 +20,10 @@ namespace NCurses.Core.Interop.Mouse
 
             ConstructorInfo ctor;
             ParameterExpression par1, par2, par3, par4, par5;
+            ConstantExpression factoryInstance;
 
             MethodInfo createChtype = typeof(SmallCharFactory).GetMethod("GetAttribute");
+            factoryInstance = Expression.Constant(SmallCharFactory.Instance);
 
             par1 = Expression.Parameter(typeof(short));
             par2 = Expression.Parameter(typeof(int));
@@ -37,7 +39,7 @@ namespace NCurses.Core.Interop.Mouse
                             par3,
                             par4,
                             Expression.Convert(
-                                Expression.Call(createChtype, par5),
+                                Expression.Call(factoryInstance, createChtype, par5),
                                 DynamicTypeBuilder.chtype)),
                         typeof(IMEVENT)),
                     par1, par2, par3, par4, par5).Compile();

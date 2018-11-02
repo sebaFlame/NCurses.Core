@@ -54,39 +54,53 @@ namespace NCurses.Core.StdScr
 
         public override void Border()
         {
-            NativeStdScr.border_set(WideCharFactory.GetWideChar(), WideCharFactory.GetWideChar(), WideCharFactory.GetWideChar(), WideCharFactory.GetWideChar(),
-                WideCharFactory.GetWideChar(), WideCharFactory.GetWideChar(), WideCharFactory.GetWideChar(), WideCharFactory.GetWideChar());
+            WideCharFactory.Instance.GetNativeEmptyChar(out INCursesWCHAR ls);
+            WideCharFactory.Instance.GetNativeEmptyChar(out INCursesWCHAR rs);
+            WideCharFactory.Instance.GetNativeEmptyChar(out INCursesWCHAR ts);
+            WideCharFactory.Instance.GetNativeEmptyChar(out INCursesWCHAR bs);
+            WideCharFactory.Instance.GetNativeEmptyChar(out INCursesWCHAR tl);
+            WideCharFactory.Instance.GetNativeEmptyChar(out INCursesWCHAR tr);
+            WideCharFactory.Instance.GetNativeEmptyChar(out INCursesWCHAR bl);
+            WideCharFactory.Instance.GetNativeEmptyChar(out INCursesWCHAR br);
+
+            NativeStdScr.border_set(ls, rs, ts, bs, tl, tr, bl, br);
         }
 
         //TODO: use native override?
         public override void CreateChar(char ch, out INCursesChar chRet)
         {
-            chRet = WideCharFactory.GetWideChar(ch);
+            WideCharFactory.Instance.GetNativeChar(ch, out INCursesWCHAR res);
+            chRet = res;
         }
 
         public override void CreateChar(char ch, ulong attrs, out INCursesChar chRet)
         {
-            chRet = WideCharFactory.GetWideChar(ch, attrs);
+            WideCharFactory.Instance.GetNativeChar(ch, attrs, out INCursesWCHAR res);
+            chRet = res;
         }
 
         public override void CreateChar(char ch, ulong attrs, short pair, out INCursesChar chRet)
         {
-            chRet = WideCharFactory.GetWideChar(ch, attrs, pair);
+            WideCharFactory.Instance.GetNativeChar(ch, attrs, pair, out INCursesWCHAR res);
+            chRet = res;
         }
 
         public override void CreateString(string str, out INCursesCharStr chStr)
         {
-            chStr = WideCharFactory.GetWideString(str);
+            WideCharFactory.Instance.GetNativeString(str, out INCursesWCHARStr res);
+            chStr = res;
         }
 
         public override void CreateString(string str, ulong attrs, out INCursesCharStr chStr)
         {
-            chStr = WideCharFactory.GetWideString(str, attrs);
+            WideCharFactory.Instance.GetNativeString(str, attrs, out INCursesWCHARStr res);
+            chStr = res;
         }
 
         public override void CreateString(string str, ulong attrs, short pair, out INCursesCharStr chStr)
         {
-            chStr = WideCharFactory.GetWideString(str, attrs, pair);
+            WideCharFactory.Instance.GetNativeString(str, attrs, pair, out INCursesWCHARStr res);
+            chStr = res;
         }
 
         public override void ExtractChar(out INCursesChar ch)
@@ -189,22 +203,26 @@ namespace NCurses.Core.StdScr
 
         public override void Insert(char ch)
         {
-            NativeStdScr.ins_wch(WideCharFactory.GetWideChar(ch));
+            WideCharFactory.Instance.GetNativeChar(ch, out INCursesWCHAR res);
+            NativeStdScr.ins_wch(res);
         }
 
         public override void Insert(int nline, int ncol, char ch)
         {
-            NativeStdScr.mvins_wch(nline, ncol, WideCharFactory.GetWideChar(ch));
+            WideCharFactory.Instance.GetNativeChar(ch, out INCursesWCHAR res);
+            NativeStdScr.mvins_wch(nline, ncol, res);
         }
 
         public override void Insert(char ch, ulong attrs, short pair)
         {
-            NativeStdScr.ins_wch(WideCharFactory.GetWideChar(ch, attrs, pair));
+            WideCharFactory.Instance.GetNativeChar(ch, attrs, pair, out INCursesWCHAR res);
+            NativeStdScr.ins_wch(res);
         }
 
         public override void Insert(int nline, int ncol, char ch, ulong attrs, short pair)
         {
-            NativeStdScr.mvins_wch(nline, ncol, WideCharFactory.GetWideChar(ch, attrs, pair));
+            WideCharFactory.Instance.GetNativeChar(ch, attrs, pair, out INCursesWCHAR res);
+            NativeStdScr.mvins_wch(nline, ncol, res);
         }
 
         public override void Insert(string str)
@@ -268,7 +286,8 @@ namespace NCurses.Core.StdScr
 
         public override void Write(string str, ulong attrs, short pair)
         {
-            NativeStdScr.add_wchnstr(WideCharFactory.GetWideString(str, attrs, pair), str.Length);
+            WideCharFactory.Instance.GetNativeString(str, attrs, pair, out INCursesWCHARStr res);
+            NativeStdScr.add_wchnstr(res, str.Length);
         }
 
         public override void Write(int nline, int ncol, string str)
@@ -278,7 +297,8 @@ namespace NCurses.Core.StdScr
 
         public override void Write(int nline, int ncol, string str, ulong attrs, short pair)
         {
-            NativeStdScr.mvadd_wchnstr(nline, ncol, WideCharFactory.GetWideString(str, attrs, pair), str.Length);
+            WideCharFactory.Instance.GetNativeString(str, attrs, pair, out INCursesWCHARStr res);
+            NativeStdScr.mvadd_wchnstr(nline, ncol, res, str.Length);
         }
 
         public override void Write(in INCursesChar ch)
@@ -309,41 +329,44 @@ namespace NCurses.Core.StdScr
 
         public override void Write(char ch, ulong attrs, short pair)
         {
-            NativeStdScr.add_wch(WideCharFactory.GetWideChar(ch, attrs, pair));
+            WideCharFactory.Instance.GetNativeChar(ch, attrs, pair, out INCursesWCHAR res);
+            NativeStdScr.add_wch(res);
         }
 
         public override void Write(int nline, int ncol, char ch)
         {
-            NativeStdScr.mvadd_wch(nline, ncol, WideCharFactory.GetWideChar(ch));
+            WideCharFactory.Instance.GetNativeChar(ch, out INCursesWCHAR res);
+            NativeStdScr.mvadd_wch(nline, ncol, res);
         }
 
         public override void Write(int nline, int ncol, char ch, ulong attrs, short pair)
         {
-            NativeStdScr.mvadd_wch(nline, ncol, WideCharFactory.GetWideChar(ch, attrs, pair));
+            WideCharFactory.Instance.GetNativeChar(ch, attrs, pair, out INCursesWCHAR res);
+            NativeStdScr.mvadd_wch(nline, ncol, res);
         }
 
         public override void Write(byte[] str, Encoding encoding)
         {
-            INCursesWCHARStr chStr;
-            NativeStdScr.add_wchnstr(chStr = WideCharFactory.GetWideString(str, encoding), chStr.Length);
+            WideCharFactory.Instance.GetNativeString(str, encoding, out INCursesWCHARStr res);
+            NativeStdScr.add_wchnstr(res, res.Length);
         }
 
         public override void Write(byte[] str, Encoding encoding, ulong attrs, short pair)
         {
-            INCursesWCHARStr chStr;
-            NativeStdScr.add_wchnstr(chStr = WideCharFactory.GetWideString(str, encoding, attrs, pair), chStr.Length);
+            WideCharFactory.Instance.GetNativeString(str, encoding, attrs, pair, out INCursesWCHARStr res);
+            NativeStdScr.add_wchnstr(res, res.Length);
         }
 
         public override void Write(int nline, int ncol, byte[] str, Encoding encoding)
         {
-            INCursesWCHARStr chStr;
-            NativeStdScr.mvadd_wchnstr(nline, ncol, chStr = WideCharFactory.GetWideString(str, encoding), chStr.Length);
+            WideCharFactory.Instance.GetNativeString(str, encoding, out INCursesWCHARStr res);
+            NativeStdScr.mvadd_wchnstr(nline, ncol, res, res.Length);
         }
 
         public override void Write(int nline, int ncol, byte[] str, Encoding encoding, ulong attrs, short pair)
         {
-            INCursesWCHARStr chStr;
-            NativeStdScr.mvadd_wchnstr(nline, ncol, chStr = WideCharFactory.GetWideString(str, encoding, attrs, pair), chStr.Length);
+            WideCharFactory.Instance.GetNativeString(str, encoding, attrs, pair, out INCursesWCHARStr res);
+            NativeStdScr.mvadd_wchnstr(nline, ncol, res, res.Length);
         }
     }
 }
