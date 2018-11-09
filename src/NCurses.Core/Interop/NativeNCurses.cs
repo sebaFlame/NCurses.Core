@@ -10,6 +10,7 @@ using NCurses.Core.Interop.SingleByteString;
 using NCurses.Core.Interop.Mouse;
 using NCurses.Core.Interop.Platform;
 using NCurses.Core.Interop.Dynamic;
+using System.Threading;
 
 [assembly: InternalsVisibleTo("NCurses.Core.Interop.Dynamic.Generated")]
 [assembly: InternalsVisibleTo("NCurses.Core.Tests")]
@@ -92,6 +93,11 @@ namespace NCurses.Core.Interop
               : throw new InvalidOperationException(Constants.NoUnicodeExceptionMessage);
         #endregion
 
+        #region locking
+        internal static readonly object SyncRoot = new object();
+        internal static bool EnableLocking { get; set; }
+        #endregion
+
         #region custom type initialization
         internal static void CreateCharCustomWrappers()
         {
@@ -139,7 +145,7 @@ namespace NCurses.Core.Interop
         }
         #endregion
 
-        #region thread-safety
+        #region native thread-safety
         /// <summary>
         /// Execute a thread-safe WINDOW method with verification.
         /// </summary>

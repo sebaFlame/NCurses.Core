@@ -170,6 +170,35 @@ namespace NCurses.Core
             }
         }
 
+        #region thread safety
+        /// <summary>
+        /// enable/disable locking globally on the lowest level
+        /// can be used by using <see cref="NCurses.CreateThreadSafeDisposable"/>
+        /// </summary>
+        public static bool EnableLocking
+        {
+            get { lock(NativeNCurses.SyncRoot) return NativeNCurses.EnableLocking; }
+            set { lock(NativeNCurses.SyncRoot) NativeNCurses.EnableLocking = value; }
+        }
+
+        /// <summary>
+        /// Create a disposable object to guarantee thread safety until disposal
+        /// Can be used to group several actions as 1
+        /// This will enable (and lock) <see cref="NCurses.EnableLocking"/> until disposal
+        /// Be sure to dispose or you'll be locked out of all NCurses functions
+        /// </summary>
+        /// <example>
+        /// <code>
+        /// using(NCurses.GetThreadSafeDisposable()) //do something with NCurses
+        /// </code>
+        /// </example>
+        /// <returns></returns>
+        public static IDisposable CreateThreadSafeDisposable()
+        {
+            return new InternalLockDisposable();
+        }
+        #endregion
+
         #region color
         /// <summary>
         /// check if the console supports colors

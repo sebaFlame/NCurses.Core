@@ -30,16 +30,27 @@ namespace NCurses.Core.Tests
         public void TestReadCharSingleByte()
         {
             char testChar = 'a';
-            NativeNCurses.ungetch(testChar);
-            Assert.False(this.SingleByteStdScr.ReadKey(out char resultChar, out Key resultKey));
+            char resultChar;
+            using (NCurses.CreateThreadSafeDisposable())
+            {
+                Assert.True(NativeNCurses.EnableLocking);
+                NativeNCurses.ungetch(testChar);
+                Assert.False(this.SingleByteStdScr.ReadKey(out resultChar, out Key resultKey));
+            }
             Assert.Equal(testChar, resultChar);
         }
 
         [Fact]
         public void TestReadFunctionKey()
         {
-            NativeNCurses.ungetch((int)Key.F1);
-            Assert.True(this.SingleByteStdScr.ReadKey(out char resultChar, out Key resultKey));
+            char resultChar;
+            Key resultKey;
+            using (NCurses.CreateThreadSafeDisposable())
+            {
+                Assert.True(NativeNCurses.EnableLocking);
+                NativeNCurses.ungetch((int)Key.F1);
+                Assert.True(this.SingleByteStdScr.ReadKey(out resultChar, out resultKey));
+            }
             Assert.Equal(Key.F1, resultKey);
         }
     }

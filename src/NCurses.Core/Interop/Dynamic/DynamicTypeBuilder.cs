@@ -16,6 +16,7 @@ using NCurses.Core.Interop.Dynamic.cchar_t;
 using NCurses.Core.Interop.Dynamic.chtype;
 using NCurses.Core.Interop.Dynamic.wchar_t;
 using NCurses.Core.Interop.Dynamic.MEVENT;
+using System.Threading;
 
 namespace NCurses.Core.Interop.Dynamic
 {
@@ -137,8 +138,8 @@ namespace NCurses.Core.Interop.Dynamic
             ConstructorInfo ctor;
             MethodBuilder nativeMethod, interfaceMethod;
             ILGenerator interfaceMethodIL;
-            Label lbl;
-            LocalBuilder local;
+            Label lblNoLock, lblNoLockFinally;
+            LocalBuilder local, enableLock;
             Type[][] requiredModifiers;
 
             //get interface method info
@@ -169,16 +170,31 @@ namespace NCurses.Core.Interop.Dynamic
                 retType, null, null, parameterTypes, requiredModifiers, null);
             interfaceMethodIL = interfaceMethod.GetILGenerator();
 
+            enableLock = interfaceMethodIL.DeclareLocal(typeof(bool));
+            lblNoLock = interfaceMethodIL.DefineLabel();
+            lblNoLockFinally = interfaceMethodIL.DefineLabel();
+
             //if native method has a return type, define a local and a label
             if (retType != typeof(void))
-            {
                 local = interfaceMethodIL.DeclareLocal(retType);
-                lbl = interfaceMethodIL.DefineLabel();
-            }
 
+            //begin of try block
+            interfaceMethodIL.BeginExceptionBlock();
+
+            //check if locking is enabled and lock if it is
+            interfaceMethodIL.Emit(OpCodes.Nop);
+            interfaceMethodIL.Emit(OpCodes.Call, typeof(NativeNCurses).GetProperty("EnableLocking", BindingFlags.NonPublic | BindingFlags.Static).GetMethod);
+            interfaceMethodIL.Emit(OpCodes.Stloc_0);
+            interfaceMethodIL.Emit(OpCodes.Ldloc_0);
+            interfaceMethodIL.Emit(OpCodes.Brfalse_S, lblNoLock);
+            interfaceMethodIL.Emit(OpCodes.Ldsfld, typeof(NativeNCurses).GetField("SyncRoot", BindingFlags.NonPublic | BindingFlags.Static));
+            interfaceMethodIL.Emit(OpCodes.Call, typeof(Monitor).GetMethod("Enter", new Type[] { typeof(object) }));
             interfaceMethodIL.Emit(OpCodes.Nop);
 
-            //load arguments (as interface implementation you need to skip Ldarg_0)
+            //when locking is disabled
+            interfaceMethodIL.MarkLabel(lblNoLock);
+
+            //load arguments (as instance you need to skip Ldarg_0)
             for (int i = 0; i < parameterTypes.Length; i++)
             {
                 switch (i)
@@ -203,15 +219,28 @@ namespace NCurses.Core.Interop.Dynamic
 
             //store and load return value
             if (retType != typeof(void))
-            {
-                interfaceMethodIL.Emit(OpCodes.Stloc_0);
-                interfaceMethodIL.Emit(OpCodes.Br_S, lbl);
-                interfaceMethodIL.MarkLabel(lbl);
-                interfaceMethodIL.Emit(OpCodes.Ldloc_0);
-            }
-            else
-                interfaceMethodIL.Emit(OpCodes.Nop);
+                interfaceMethodIL.Emit(OpCodes.Stloc_1);
 
+            //begin of finally block
+            interfaceMethodIL.BeginFinallyBlock();
+
+            //check if locking is enabled and exit lock if it is
+            interfaceMethodIL.Emit(OpCodes.Nop);
+            interfaceMethodIL.Emit(OpCodes.Ldloc_0);
+            interfaceMethodIL.Emit(OpCodes.Brfalse_S, lblNoLockFinally);
+            interfaceMethodIL.Emit(OpCodes.Ldsfld, typeof(NativeNCurses).GetField("SyncRoot", BindingFlags.NonPublic | BindingFlags.Static));
+            interfaceMethodIL.Emit(OpCodes.Call, typeof(Monitor).GetMethod("Exit"));
+            interfaceMethodIL.Emit(OpCodes.Nop);
+
+            //end of finally block
+            interfaceMethodIL.MarkLabel(lblNoLockFinally);
+
+            //end of exception block
+            interfaceMethodIL.EndExceptionBlock();
+
+            //return
+            if (retType != typeof(void))
+                interfaceMethodIL.Emit(OpCodes.Ldloc_1);
             interfaceMethodIL.Emit(OpCodes.Ret);
 
             //define interface implementation as the interface override
