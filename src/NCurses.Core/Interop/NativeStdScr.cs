@@ -61,7 +61,8 @@ namespace NCurses.Core.Interop
             {
                 if (wideStdScrWrapper is null)
                 {
-                    customType = typeof(NativeStdScrWide<,,,>).MakeGenericType(DynamicTypeBuilder.cchar_t, DynamicTypeBuilder.wchar_t, DynamicTypeBuilder.chtype, DynamicTypeBuilder.schar);
+                    customType = typeof(NativeStdScrWide<,,,,>).MakeGenericType(DynamicTypeBuilder.cchar_t, DynamicTypeBuilder.wchar_t,
+                        DynamicTypeBuilder.chtype, DynamicTypeBuilder.schar, DynamicTypeBuilder.MEVENT);
                     wideStdScrWrapper = (INativeStdScrWide)Activator.CreateInstance(customType);
                 }
 
@@ -74,7 +75,7 @@ namespace NCurses.Core.Interop
 
             if (smallStdScrWrapper is null)
             {
-                customType = typeof(NativeStdScrSmall<,>).MakeGenericType(DynamicTypeBuilder.chtype, DynamicTypeBuilder.schar);
+                customType = typeof(NativeStdScrSmall<,,>).MakeGenericType(DynamicTypeBuilder.chtype, DynamicTypeBuilder.schar, DynamicTypeBuilder.MEVENT);
                 smallStdScrWrapper = (INativeStdScrSmall)Activator.CreateInstance(customType);
             }
         }

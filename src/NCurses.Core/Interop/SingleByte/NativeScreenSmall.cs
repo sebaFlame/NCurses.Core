@@ -25,16 +25,17 @@ namespace NCurses.Core.Interop.SingleByte
         void vidputs_sp(IntPtr screen, ulong attrs, Func<int, int> putc);
     }
 
-    internal class NativeScreenSmall<TSmall, TSmallStr> : NativeSmallBase<TSmall, TSmallStr>, INativeScreenSmall
+    internal class NativeScreenSmall<TSmall, TSmallStr, TMouseEvent> : NativeSmallBase<TSmall, TSmallStr, TMouseEvent>, INativeScreenSmall
         where TSmall : unmanaged, INCursesSCHAR, IEquatable<TSmall>
         where TSmallStr : unmanaged
+        where TMouseEvent : unmanaged, IMEVENT
     {
         public NativeScreenSmall()
         { }
 
         public void getmouse_sp(IntPtr screen, out IMEVENT ev)
         {
-            int size = Marshal.SizeOf<MEVENT<TSmall>>();
+            int size = Marshal.SizeOf<TMouseEvent>();
             Span<byte> span;
 
             unsafe
@@ -42,8 +43,8 @@ namespace NCurses.Core.Interop.SingleByte
                 byte* arr = stackalloc byte[size];
                 span = new Span<byte>(arr, size);
 
-                Span<MEVENT<TSmall>> spanEv = MemoryMarshal.Cast<byte, MEVENT<TSmall>>(span);
-                ref MEVENT<TSmall> spanRef = ref spanEv.GetPinnableReference();
+                Span<TMouseEvent> spanEv = MemoryMarshal.Cast<byte, TMouseEvent>(span);
+                ref TMouseEvent spanRef = ref spanEv.GetPinnableReference();
 
                 NCursesException.Verify(this.Wrapper.getmouse_sp(screen, ref spanRef), "getmouse_sp");
                 ev = spanEv[0];
@@ -111,10 +112,10 @@ namespace NCurses.Core.Interop.SingleByte
 
         public void ungetmouse_sp(IntPtr screen, in IMEVENT ev)
         {
-            if (!(ev is MEVENT<TSmall> castedEv))
+            if (!(ev is TMouseEvent castedEv))
                 throw new InvalidCastException("Mouse event not of the correct type");
 
-            int size = Marshal.SizeOf<MEVENT<TSmall>>();
+            int size = Marshal.SizeOf<TMouseEvent>();
             Span<byte> span;
 
             unsafe
@@ -122,7 +123,7 @@ namespace NCurses.Core.Interop.SingleByte
                 byte* arr = stackalloc byte[size];
                 span = new Span<byte>(arr, size);
 
-                Span<MEVENT<TSmall>> spanEv = MemoryMarshal.Cast<byte, MEVENT<TSmall>>(span);
+                Span<TMouseEvent> spanEv = MemoryMarshal.Cast<byte, TMouseEvent>(span);
                 spanEv[0] = castedEv;
 
                 NCursesException.Verify(this.Wrapper.ungetmouse_sp(screen, spanEv.GetPinnableReference()), "ungetmouse_sp");

@@ -317,7 +317,7 @@ namespace NCurses.Core
         #region read input
         /// <summary>
         /// read a character from console input.
-        /// can also be an escaped character/function key <see cref="Constants.CTRL(int)"/> and <see cref="Constants.ALT(int)"/>
+        /// can also be an escaped character/function key <see cref="NativeNCurses.IsCTRL(int)"/> and <see cref="NativeNCurses.IsALT(int, int)"/>
         /// if this returns a multibyte character, it's already decoded (incorrectly), so escaping information is lost
         /// use the appropriate static methods in that case
         /// </summary>
@@ -328,7 +328,7 @@ namespace NCurses.Core
 
         /// <summary>
         /// read a character from console input after moving the cursor to <paramref name="nline"/> and <paramref name="ncol"/>
-        /// can also be an escaped character/function key <see cref="Constants.CTRL(int)"/> and <see cref="Constants.ALT(int)"/>
+        /// can also be an escaped character/function key <see cref="NativeNCurses.IsCTRL(int)"/> and <see cref="NativeNCurses.IsALT(int, int)"/>
         /// if this returns a multibyte character, it's already decoded (incorrectly), so escaping information is lost
         /// use the appropriate static methods in that case
         /// </summary>

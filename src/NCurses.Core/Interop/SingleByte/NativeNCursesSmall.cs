@@ -28,16 +28,17 @@ namespace NCurses.Core.Interop.SingleByte
         void vidputs(ulong attrs, Func<int, int> putc);
     }
 
-    internal class NativeNCursesSmall<TSmall, TSmallStr> : NativeSmallBase<TSmall, TSmallStr>, INativeNCursesSmall
+    internal class NativeNCursesSmall<TSmall, TSmallStr, TMouseEvent> : NativeSmallBase<TSmall, TSmallStr, TMouseEvent>, INativeNCursesSmall
         where TSmall : unmanaged, INCursesSCHAR, IEquatable<TSmall>
         where TSmallStr : unmanaged
+        where TMouseEvent : unmanaged, IMEVENT
     {
         public NativeNCursesSmall()
         { }
 
         public void getmouse(out IMEVENT ev)
         {
-            int size = Marshal.SizeOf<MEVENT<TSmall>>();
+            int size = Marshal.SizeOf<TMouseEvent>();
             Span<byte> span;
 
             unsafe
@@ -45,8 +46,8 @@ namespace NCurses.Core.Interop.SingleByte
                 byte* arr = stackalloc byte[size];
                 span = new Span<byte>(arr, size);
 
-                Span<MEVENT<TSmall>> spanEv = MemoryMarshal.Cast<byte, MEVENT<TSmall>>(span);
-                ref MEVENT<TSmall> spanRef = ref spanEv.GetPinnableReference();
+                Span<TMouseEvent> spanEv = MemoryMarshal.Cast<byte, TMouseEvent>(span);
+                ref TMouseEvent spanRef = ref spanEv.GetPinnableReference();
 
                 NCursesException.Verify(this.Wrapper.getmouse(ref spanRef), "getmouse");
                 ev = spanEv[0]; //TODO: does this get nulled afterwards?
@@ -61,10 +62,9 @@ namespace NCurses.Core.Interop.SingleByte
             TSmall res = this.Wrapper.mousemask(MarshallArrayReadonly(newMouseMask), ref MarshallArray(ref oldMouseMask));
 
             INCursesSCHAR resMouseMask = new NCursesSCHAR<TSmall>(ref res);
-            NCursesException.Verify(resMouseMask.Attributes == 0 ? -1 : 0, "mousemask");
 
-            oldmask = oldMouseMask.Attributes;
-            return resMouseMask.Attributes;
+            oldmask = (ulong)((NCursesSCHAR<TSmall>)oldMouseMask);
+            return (ulong)((NCursesSCHAR<TSmall>)resMouseMask);
         }
 
         public ulong slk_attr()
@@ -131,21 +131,16 @@ namespace NCurses.Core.Interop.SingleByte
 
         public void ungetmouse(in IMEVENT ev)
         {
-            if (!(ev is MEVENT<TSmall> castedEv))
+            if (!(ev is TMouseEvent castedEv))
                 throw new InvalidCastException("Mouse event not of the correct type");
-
-            int size = Marshal.SizeOf<MEVENT<TSmall>>();
-            Span<byte> span;
 
             unsafe
             {
-                byte* arr = stackalloc byte[size];
-                span = new Span<byte>(arr, size);
+                TMouseEvent* arr = stackalloc TMouseEvent[1];
+                Span<TMouseEvent> span = new Span<TMouseEvent>(arr, 1);
+                span[0] = castedEv;
 
-                Span<MEVENT<TSmall>> spanEv = MemoryMarshal.Cast<byte, MEVENT<TSmall>>(span);
-                spanEv[0] = castedEv;
-
-                NCursesException.Verify(this.Wrapper.ungetmouse(spanEv.GetPinnableReference()), "ungetmouse");
+                NCursesException.Verify(this.Wrapper.ungetmouse(span.GetPinnableReference()), "ungetmouse");
             }
         }
 

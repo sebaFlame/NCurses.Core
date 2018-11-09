@@ -119,7 +119,8 @@ namespace NCurses.Core.Interop
             {
                 if (wideNCursesWrapper is null)
                 {
-                    customType = typeof(NativeNCursesWide<,,,>).MakeGenericType(DynamicTypeBuilder.cchar_t, DynamicTypeBuilder.wchar_t, DynamicTypeBuilder.chtype, DynamicTypeBuilder.schar);
+                    customType = typeof(NativeNCursesWide<,,,,>).MakeGenericType(DynamicTypeBuilder.cchar_t, DynamicTypeBuilder.wchar_t, 
+                        DynamicTypeBuilder.chtype, DynamicTypeBuilder.schar, DynamicTypeBuilder.MEVENT);
                     wideNCursesWrapper = (INativeNCursesWide)Activator.CreateInstance(customType);
                 }
 
@@ -132,7 +133,7 @@ namespace NCurses.Core.Interop
 
             if (smallCursesWrapper is null)
             {
-                customType = typeof(NativeNCursesSmall<,>).MakeGenericType(DynamicTypeBuilder.chtype, DynamicTypeBuilder.schar);
+                customType = typeof(NativeNCursesSmall<,,>).MakeGenericType(DynamicTypeBuilder.chtype, DynamicTypeBuilder.schar, DynamicTypeBuilder.MEVENT);
                 smallCursesWrapper = (INativeNCursesSmall)Activator.CreateInstance(customType);
             }
         }
@@ -214,12 +215,51 @@ namespace NCurses.Core.Interop
         #endregion
 
         #region input validation
+        /// <summary>
+        /// checks if a function key has been pressed
+        /// </summary>
+        /// <param name="ch">the character you want check</param>
+        /// <param name="key">the returned key</param>
+        /// <returns>true if a function key has been pressed</returns>
+        public static bool HasKey(int ch, out Key key)
+        {
+            key = 0;
+            if (Enum.IsDefined(typeof(Key), (short)ch))
+            {
+                key = (Key)ch;
+                return true;
+            }
+            return false;
+        }
+
+        public static bool IsCtrl(int key, int value)
+        {
+            return value == CTRL(key);
+        }
+
+        public static bool IsALT(int key, int value)
+        {
+            return value == ALT(key);
+        }
+
+        //https://github.com/rofl0r/motor/blob/master/kkconsui/include/conscommon.h
+        private static int CTRL(int key)
+        {
+            return (key & 0x1F);
+        }
+
+        //https://github.com/rofl0r/motor/blob/master/kkconsui/include/conscommon.h
+        private static int ALT(int key)
+        {
+            return (int)(0x200 | (uint)key);
+        }
+
         internal static bool VerifyInput(string method, int val, out char ch, out Key key)
         {
-            if(has_key(val))
+            //if(has_key(val)) //TODO: does not work on windows
+            if (HasKey(val, out key))
             {
                 ch = '\0';
-                key = (Key)val;
                 return true;
             }
 
@@ -2435,12 +2475,20 @@ namespace NCurses.Core.Interop
         /// The has_key routine takes a key-code value from the above
         /// list, and returns TRUE or FALSE according to  whether the
         /// current terminal type recognizes a key with that value.
+        /// this function doesn't work on windows, use the managed alternative <see cref="HasKey(int, out Key)"/>
         /// </summary>
         /// <param name="ch">the key code you want to test</param>
         /// <returns>true or false</returns>
-        public static bool has_key(int ch)
+        public static bool has_key(int ch, out Key key)
         {
-            return NCursesWrapper.has_key(ch);
+            if (NCursesWrapper.has_key(ch))
+            {
+                key = (Key)ch;
+                return true;
+            }
+
+            key = 0;
+            return false;
         }
         #endregion
 

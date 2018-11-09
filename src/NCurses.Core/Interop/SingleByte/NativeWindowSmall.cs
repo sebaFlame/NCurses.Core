@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Text;
+using NCurses.Core.Interop.Mouse;
 
 namespace NCurses.Core.Interop.SingleByte
 {
@@ -38,9 +39,10 @@ namespace NCurses.Core.Interop.SingleByte
         void wvline(IntPtr window, in INCursesSCHAR ch, int n);
     }
 
-    internal class NativeWindowSmall<TSmall, TSmallStr> : NativeSmallBase<TSmall, TSmallStr>, INativeWindowSmall
+    internal class NativeWindowSmall<TSmall, TSmallStr, TMouseEvent> : NativeSmallBase<TSmall, TSmallStr, TMouseEvent>, INativeWindowSmall
         where TSmall : unmanaged, INCursesSCHAR, IEquatable<TSmall>
         where TSmallStr : unmanaged
+        where TMouseEvent : unmanaged, IMEVENT
     {
         public NativeWindowSmall()
         { }

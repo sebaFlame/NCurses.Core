@@ -6,14 +6,16 @@ using System.Runtime.CompilerServices;
 using NCurses.Core.Interop.SingleByte;
 
 using wchar_t = System.Char;
+using NCurses.Core.Interop.Mouse;
 
 namespace NCurses.Core.Interop.MultiByte
 {
-    public abstract class NativeWideBase<TWide, TWideStr, TSMall, TSmallStr> // handles cchar_t
+    public abstract class NativeWideBase<TWide, TWideStr, TSMall, TSmallStr, TMouseEvent> // handles cchar_t
         where TWide : unmanaged, INCursesWCHAR, IEquatable<TWide>
         where TWideStr : unmanaged
         where TSMall : unmanaged, INCursesSCHAR, IEquatable<TSMall>
         where TSmallStr : unmanaged
+        where TMouseEvent : unmanaged, IMEVENT
     {
         private INCursesWrapperWide<TWide, TWideStr, TSMall, TSmallStr> wrapper;
         internal INCursesWrapperWide<TWide, TWideStr, TSMall, TSmallStr> Wrapper => 

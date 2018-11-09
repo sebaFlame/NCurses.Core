@@ -102,9 +102,10 @@ namespace NCurses.Core.Interop.SingleByte
                 Expression.New(ctor, par1), typeof(INCursesSCHARStr)), par1).Compile();
         }
 
-        public void GetAttribute(ulong attrs, out INCursesSCHAR res)
+        //only used in MouseEventFactory
+        internal INCursesSCHAR GetAttribute(ulong attrs)
         {
-            res = attrCreate(attrs);
+            return attrCreate(attrs);
         }
 
         public void GetNativeEmptyChar(out INCursesSCHAR res)

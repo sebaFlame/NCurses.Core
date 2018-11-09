@@ -55,7 +55,7 @@
             "name": ".NET Core WSL Attach",
             "type": "coreclr",
             "request": "attach",
-            "processId": "${command:pickProcess}",
+            "processId": "",
             "sourceFileMap": {
                 //add a WSLAttachSourceMap to Workspace Settings for the WSL path where your source directory resides
                 "${config:WSLAttachSourceMap}": "${workspaceFolder}"

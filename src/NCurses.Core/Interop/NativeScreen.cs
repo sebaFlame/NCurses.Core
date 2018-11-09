@@ -60,7 +60,8 @@ namespace NCurses.Core.Interop
             {
                 if (wideCursesWrapper is null)
                 {
-                    customType = typeof(NativeScreenWide<,,,>).MakeGenericType(DynamicTypeBuilder.cchar_t, DynamicTypeBuilder.wchar_t, DynamicTypeBuilder.chtype, DynamicTypeBuilder.schar);
+                    customType = typeof(NativeScreenWide<,,,,>).MakeGenericType(DynamicTypeBuilder.cchar_t, DynamicTypeBuilder.wchar_t, 
+                        DynamicTypeBuilder.chtype, DynamicTypeBuilder.schar, DynamicTypeBuilder.MEVENT);
                     wideCursesWrapper = (INativeScreenWide)Activator.CreateInstance(customType);
                 }
 
@@ -73,7 +74,7 @@ namespace NCurses.Core.Interop
 
             if (smallCursesWrapper is null)
             {
-                customType = typeof(NativeScreenSmall<,>).MakeGenericType(DynamicTypeBuilder.chtype, DynamicTypeBuilder.schar);
+                customType = typeof(NativeScreenSmall<,,>).MakeGenericType(DynamicTypeBuilder.chtype, DynamicTypeBuilder.schar, DynamicTypeBuilder.MEVENT);
                 smallCursesWrapper = (INativeScreenSmall)Activator.CreateInstance(customType);
             }
         }

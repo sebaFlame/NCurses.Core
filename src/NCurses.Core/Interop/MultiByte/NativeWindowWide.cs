@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Text;
+using NCurses.Core.Interop.Mouse;
 using NCurses.Core.Interop.SingleByte;
 
 namespace NCurses.Core.Interop.MultiByte
@@ -34,11 +35,12 @@ namespace NCurses.Core.Interop.MultiByte
         void wvline_set(IntPtr window, in INCursesWCHAR wch, int n);
     }
 
-    internal class NativeWindowWide<TWide, TWideStr, TSMall, TSmallStr> : NativeWideBase<TWide, TWideStr, TSMall, TSmallStr>, INativeWindowWide
+    internal class NativeWindowWide<TWide, TWideStr, TSMall, TSmallStr, TMouseEvent> : NativeWideBase<TWide, TWideStr, TSMall, TSmallStr, TMouseEvent>, INativeWindowWide
         where TWide : unmanaged, INCursesWCHAR, IEquatable<TWide>
         where TWideStr : unmanaged
         where TSMall : unmanaged, INCursesSCHAR, IEquatable<TSMall>
         where TSmallStr : unmanaged
+        where TMouseEvent : unmanaged, IMEVENT
     {
         public NativeWindowWide()
         { }

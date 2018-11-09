@@ -5,9 +5,10 @@ using NCurses.Core.Interop.Mouse;
 
 namespace NCurses.Core.Interop.SingleByte
 {
-    internal interface INCursesWrapperSmall<TSmall, TSmallStr> : INativeWrapper
+    internal interface INCursesWrapperSmall<TSmall, TSmallStr, TMouseEvent> : INativeWrapper
         where TSmall : unmanaged, INCursesSCHAR
         where TSmallStr : unmanaged
+        where TMouseEvent : unmanaged, IMEVENT
     {
         //int addch(const chtype ch);
         int addch(TSmall ch);
@@ -38,9 +39,9 @@ namespace NCurses.Core.Interop.SingleByte
         // chtype getbkgd(WINDOW *win);
         TSmall getbkgd(IntPtr window);
         //int getmouse(MEVENT *event);
-        int getmouse(ref MEVENT<TSmall> ev);
+        int getmouse(ref TMouseEvent ev);
         //int getmouse_sp(SCREEN* sp, MEVENT *event);
-        int getmouse_sp(IntPtr screen, ref MEVENT<TSmall> ev);
+        int getmouse_sp(IntPtr screen, ref TMouseEvent ev);
         //int hline(chtype ch, int n);
         int hline(TSmall ch, int count);
         //chtype inch(void);
@@ -132,9 +133,9 @@ namespace NCurses.Core.Interop.SingleByte
         //char *unctrl(chtype c);
         ref TSmallStr unctrl(TSmall ch);
         //int ungetmouse(MEVENT *event);
-        int ungetmouse(in MEVENT<TSmall> ev);
+        int ungetmouse(in TMouseEvent ev);
         //int ungetmouse_sp(SCREEN* sp, MEVENT *event);
-        int ungetmouse_sp(IntPtr screen, in MEVENT<TSmall> ev);
+        int ungetmouse_sp(IntPtr screen, in TMouseEvent ev);
         //int vid_attr(attr_t attrs, short pair, void *opts);
         int vid_attr(TSmall attrs, short pair, IntPtr opts);
         //int vid_attr_sp(SCREEN* sp, attr_t attrs, short pair, void *opts);

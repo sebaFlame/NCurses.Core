@@ -2,6 +2,7 @@
 using System.Runtime.InteropServices;
 using System.Collections.Generic;
 using System.Text;
+using NCurses.Core.Interop.Mouse;
 
 namespace NCurses.Core.Interop.SingleByte
 {
@@ -37,9 +38,10 @@ namespace NCurses.Core.Interop.SingleByte
         void vline(in INCursesSCHAR ch, int n);
     }
 
-    public class NativeStdScrSmall<TSmall, TSmallStr> : NativeSmallBase<TSmall, TSmallStr>, INativeStdScrSmall
+    public class NativeStdScrSmall<TSmall, TSmallStr, TMouseEvent> : NativeSmallBase<TSmall, TSmallStr, TMouseEvent>, INativeStdScrSmall
         where TSmall : unmanaged, INCursesSCHAR, IEquatable<TSmall>
         where TSmallStr : unmanaged
+        where TMouseEvent : unmanaged, IMEVENT
     {
         public NativeStdScrSmall() { }
 

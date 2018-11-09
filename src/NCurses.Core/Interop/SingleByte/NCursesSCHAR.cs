@@ -4,6 +4,7 @@ using System.Text;
 using System.Reflection;
 using System.Linq.Expressions;
 using System.Buffers;
+using System.Runtime.InteropServices;
 
 namespace NCurses.Core.Interop.SingleByte
 {
@@ -134,6 +135,22 @@ namespace NCurses.Core.Interop.SingleByte
         public static bool operator !=(in NCursesSCHAR<TSmall> chLeft, in NCursesSCHAR<TSmall> chRight)
         {
             return !chLeft.schar.Equals(chRight.schar);
+        }
+
+        public static explicit operator ulong(NCursesSCHAR<TSmall> ch)
+        {
+            Span<TSmall> span = new Span<TSmall>(ch.buffer);
+            Span<byte> spanBytes = MemoryMarshal.AsBytes<TSmall>(span);
+            ulong ret;
+            unsafe
+            {
+                fixed (byte* b = spanBytes)
+                {
+                    ulong* val = (ulong*)b;
+                    ret = *val;
+                }
+            }
+            return ret;
         }
 
         public bool Equals(INCursesChar obj)

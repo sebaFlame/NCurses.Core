@@ -8,21 +8,26 @@ using NCurses.Core.Interop.Dynamic;
 
 namespace NCurses.Core.Interop.Mouse
 {
-    public class MouseEventFactory
+    internal class MouseEventFactory
     {
         private static Type MouseEventType;
 
         private static Func<short, int, int, int, ulong, IMEVENT> createMouseEvent;
 
+        private static MouseEventFactory instance;
+        public static MouseEventFactory Instance => instance ?? (instance = new MouseEventFactory());
+
         static MouseEventFactory()
         {
-            MouseEventType = typeof(MEVENT<>).MakeGenericType(DynamicTypeBuilder.chtype);
+            instance = new MouseEventFactory();
+
+            MouseEventType = DynamicTypeBuilder.MEVENT;
 
             ConstructorInfo ctor;
             ParameterExpression par1, par2, par3, par4, par5;
             ConstantExpression factoryInstance;
 
-            MethodInfo createChtype = typeof(SmallCharFactory).GetMethod("GetAttribute");
+            MethodInfo createChtype = typeof(SmallCharFactory).GetMethod("GetAttribute", BindingFlags.NonPublic | BindingFlags.Instance);
             factoryInstance = Expression.Constant(SmallCharFactory.Instance);
 
             par1 = Expression.Parameter(typeof(short));
@@ -30,7 +35,7 @@ namespace NCurses.Core.Interop.Mouse
             par3 = Expression.Parameter(typeof(int));
             par4 = Expression.Parameter(typeof(int));
             par5 = Expression.Parameter(typeof(ulong));
-            ctor = MouseEventType.GetConstructor(new Type[] { typeof(short), typeof(int), typeof(int), typeof(int), DynamicTypeBuilder.chtype });
+            ctor = MouseEventType.GetConstructor(new Type[] { typeof(short), typeof(int), typeof(int), typeof(int), typeof(ulong) });
             createMouseEvent = Expression.Lambda<Func<short, int, int, int, ulong, IMEVENT>>(
                     Expression.Convert(
                         Expression.New(ctor,
@@ -38,16 +43,14 @@ namespace NCurses.Core.Interop.Mouse
                             par2,
                             par3,
                             par4,
-                            Expression.Convert(
-                                Expression.Call(factoryInstance, createChtype, par5),
-                                DynamicTypeBuilder.chtype)),
+                            par5),
                         typeof(IMEVENT)),
                     par1, par2, par3, par4, par5).Compile();
         }
 
-        public static IMEVENT GetMouseEvent(short id, int x, int y, int z, ulong mask)
+        public void GetMouseEvent(short id, int x, int y, int z, ulong mask, out IMEVENT res)
         {
-            return createMouseEvent(id, x, y, z, mask);
+            res = createMouseEvent(id, x, y, z, mask);
         }
     }
 }

@@ -5,6 +5,7 @@ using NCurses.Core.Interop.SingleByte;
 using NCurses.Core.Interop.MultiByteString;
 using System.Runtime.InteropServices;
 using System.Runtime.CompilerServices;
+using NCurses.Core.Interop.Mouse;
 
 namespace NCurses.Core.Interop.MultiByte
 {
@@ -15,11 +16,12 @@ namespace NCurses.Core.Interop.MultiByte
         void wunctrl(in INCursesWCHAR wch, out string str);
     }
 
-    internal class NativeNCursesWide<TWide, TWideStr, TSmall, TSmallStr> : NativeWideBase<TWide, TWideStr, TSmall, TSmallStr>, INativeNCursesWide
+    internal class NativeNCursesWide<TWide, TWideStr, TSmall, TSmallStr, TMouseEvent> : NativeWideBase<TWide, TWideStr, TSmall, TSmallStr, TMouseEvent>, INativeNCursesWide
         where TWide : unmanaged, INCursesWCHAR, IEquatable<TWide>
         where TWideStr : unmanaged
         where TSmall : unmanaged, INCursesSCHAR, IEquatable<TSmall>
         where TSmallStr : unmanaged
+        where TMouseEvent : unmanaged, IMEVENT
     {
         public NativeNCursesWide()
         { }
@@ -35,7 +37,7 @@ namespace NCurses.Core.Interop.MultiByte
 
             //INCursesSCHAR to save attributes
             INCursesSCHAR attrChar = new NCursesSCHAR<TSmall>(0);
-            ref TSmall attrsRef = ref NativeSmallBase<TSmall, TSmallStr>.MarshallArray(ref attrChar);
+            ref TSmall attrsRef = ref NativeSmallBase<TSmall, TSmallStr, TMouseEvent>.MarshallArray(ref attrChar);
 
             //ref for color_pair
             byte[] pairArr = new byte[Marshal.SizeOf<short>()];
@@ -62,7 +64,7 @@ namespace NCurses.Core.Interop.MultiByte
             NCursesException.Verify(this.Wrapper.setcchar(
                 ref MarshallArray(ref wcval), 
                 wideCh, 
-                NativeSmallBase<TSmall, TSmallStr>.MarshallArrayReadonly(schar), 
+                NativeSmallBase<TSmall, TSmallStr, TMouseEvent>.MarshallArrayReadonly(schar), 
                 color_pair, 
                 IntPtr.Zero), "setcchar");
         }

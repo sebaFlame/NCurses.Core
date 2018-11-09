@@ -39,14 +39,15 @@ namespace NCurses.Core.Interop
             {
                 if (widePadWrapper is null)
                 {
-                    customType = typeof(NativePadWide<,,,>).MakeGenericType(DynamicTypeBuilder.cchar_t, DynamicTypeBuilder.wchar_t, DynamicTypeBuilder.chtype, DynamicTypeBuilder.schar);
+                    customType = typeof(NativePadWide<,,,,>).MakeGenericType(DynamicTypeBuilder.cchar_t, DynamicTypeBuilder.wchar_t, 
+                        DynamicTypeBuilder.chtype, DynamicTypeBuilder.schar, DynamicTypeBuilder.MEVENT);
                     widePadWrapper = (INativePadWide)Activator.CreateInstance(customType);
                 }
             }
 
             if (smallPadWrapper is null)
             {
-                customType = typeof(NativePadSmall<,>).MakeGenericType(DynamicTypeBuilder.chtype, DynamicTypeBuilder.schar);
+                customType = typeof(NativePadSmall<,,>).MakeGenericType(DynamicTypeBuilder.chtype, DynamicTypeBuilder.schar, DynamicTypeBuilder.MEVENT);
                 smallPadWrapper = (INativePadSmall)Activator.CreateInstance(customType);
             }
         }

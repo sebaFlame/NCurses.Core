@@ -34,5 +34,13 @@ namespace NCurses.Core.Tests
             Assert.False(this.SingleByteStdScr.ReadKey(out char resultChar, out Key resultKey));
             Assert.Equal(testChar, resultChar);
         }
+
+        [Fact]
+        public void TestReadFunctionKey()
+        {
+            NativeNCurses.ungetch((int)Key.F1);
+            Assert.True(this.SingleByteStdScr.ReadKey(out char resultChar, out Key resultKey));
+            Assert.Equal(Key.F1, resultKey);
+        }
     }
 }

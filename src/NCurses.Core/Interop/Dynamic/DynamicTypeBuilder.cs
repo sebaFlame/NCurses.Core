@@ -15,6 +15,7 @@ using NCurses.Core.Interop.Mouse;
 using NCurses.Core.Interop.Dynamic.cchar_t;
 using NCurses.Core.Interop.Dynamic.chtype;
 using NCurses.Core.Interop.Dynamic.wchar_t;
+using NCurses.Core.Interop.Dynamic.MEVENT;
 
 namespace NCurses.Core.Interop.Dynamic
 {
@@ -25,6 +26,7 @@ namespace NCurses.Core.Interop.Dynamic
         internal static Type chtype { get; private set; }
         internal static Type wchar_t { get; private set; }
         internal static Type schar { get; private set; }
+        internal static Type MEVENT { get; private set; }
 
         #region Reflection.Emit implementation
 
@@ -85,6 +87,7 @@ namespace NCurses.Core.Interop.Dynamic
         internal static Type CreateCustomTypeWrapper(string dllName, bool unicodeSuported)
         {
             chtype = chtypeBuilder.CreateType();
+            MEVENT = MEVENTBuilder.CreateType();
             //if (unicodeSuported) //TODO: can be changed at runtime?
             //{
                 cchar_t = cchar_tBuilder.CreateType();
@@ -115,7 +118,7 @@ namespace NCurses.Core.Interop.Dynamic
             }
 
             //small (chtype) methods
-            interfaceType = typeof(INCursesWrapperSmall<,>).MakeGenericType(chtype, schar);
+            interfaceType = typeof(INCursesWrapperSmall<,,>).MakeGenericType(chtype, schar, MEVENT);
             typeBuilder.AddInterfaceImplementation(interfaceType);
             interfaceMethod = interfaceType.GetMethods();
             foreach (MethodInfo ifMethod in interfaceMethod)

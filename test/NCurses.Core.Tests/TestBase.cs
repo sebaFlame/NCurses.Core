@@ -17,16 +17,18 @@ namespace NCurses.Core.Tests
 
         protected readonly ITestOutputHelper OutputHelper;
 
+        protected IWindow StdScr { get; private set; }
+
         protected TestBase(ITestOutputHelper outputHelper)
         {
             this.OutputHelper = outputHelper;
-            IWindow stdScr = NCurses.Start();
+            this.StdScr = NCurses.Start();
 
             //default options
             NCurses.CBreak = true;
             NCurses.Echo = false;
-            stdScr.KeyPad = true;
-            stdScr.Meta = true;
+            this.StdScr.KeyPad = true;
+            this.StdScr.Meta = true;
         }
 
         protected bool TestUnicode()
@@ -51,6 +53,16 @@ namespace NCurses.Core.Tests
 
             NCurses.StartColor();
             NCurses.InitDefaultPairs();
+            return false;
+        }
+
+        protected bool TestMouse()
+        {
+            if (!NCurses.HasMouse)
+            {
+                this.OutputHelper.WriteLine("Mouse not supported on this machine.");
+                return true;
+            }
             return false;
         }
 

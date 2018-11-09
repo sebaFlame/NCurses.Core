@@ -80,18 +80,6 @@ namespace NCurses.Core.Interop
         {
             return (int)((attr & Attrs.COLOR) >> NCURSES_ATTR_SHIFT);
         }
-
-        //https://github.com/rofl0r/motor/blob/master/kkconsui/include/conscommon.h
-        public static int CTRL(int key)
-        {
-            return (key & 0x1F);
-        }
-
-        //https://github.com/rofl0r/motor/blob/master/kkconsui/include/conscommon.h
-        public static int ALT(int key)
-        {
-            return (int)(0x200 | (uint)key);
-        }
     }
 
     /// <summary>
@@ -666,8 +654,8 @@ namespace NCurses.Core.Interop
         public static ulong BUTTON_CTRL = Constants.NCURSES_MOUSE_MASK(6, 1U);
         public static ulong BUTTON_SHIFT = Constants.NCURSES_MOUSE_MASK(6, 2U);
         public static ulong BUTTON_ALT = Constants.NCURSES_MOUSE_MASK(6, 4U);
-        public static ulong REPORT_MOUSE_POSITION = Constants.NCURSES_MOUSE_MASK(6, 10U);
 
+        public static ulong REPORT_MOUSE_POSITION = Constants.NCURSES_MOUSE_MASK(6, 10U);
         public static ulong ALL_MOUSE_EVENTS = REPORT_MOUSE_POSITION - 1;
     }
 

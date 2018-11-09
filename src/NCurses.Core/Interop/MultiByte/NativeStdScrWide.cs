@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Text;
 using System.Runtime.InteropServices;
 using NCurses.Core.Interop.SingleByte;
+using NCurses.Core.Interop.Mouse;
 
 namespace NCurses.Core.Interop.MultiByte
 {
@@ -33,11 +34,12 @@ namespace NCurses.Core.Interop.MultiByte
         void vline_set(in INCursesWCHAR wch, int n);
     }
 
-    public class NativeStdScrWide<TWide, TWideStr, TSmall, TSmallStr> : NativeWideBase<TWide, TWideStr, TSmall, TSmallStr>, INativeStdScrWide
+    public class NativeStdScrWide<TWide, TWideStr, TSmall, TSmallStr, TMouseEvent> : NativeWideBase<TWide, TWideStr, TSmall, TSmallStr, TMouseEvent>, INativeStdScrWide
         where TWide : unmanaged, INCursesWCHAR, IEquatable<TWide>
         where TWideStr : unmanaged
         where TSmall : unmanaged, INCursesSCHAR, IEquatable<TSmall>
         where TSmallStr : unmanaged
+        where TMouseEvent : unmanaged, IMEVENT
     {
         public NativeStdScrWide()
         { }

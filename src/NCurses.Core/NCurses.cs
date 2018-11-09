@@ -303,6 +303,8 @@ namespace NCurses.Core
         #endregion
 
         #region mouse
+        public static bool HasMouse => NativeNCurses.has_mouse();
+
         /// <summary>
         /// enable the reporting of mouse events
         /// </summary>

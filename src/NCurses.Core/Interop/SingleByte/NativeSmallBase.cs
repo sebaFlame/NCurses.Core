@@ -3,18 +3,18 @@ using System.Collections.Generic;
 using System.Text;
 using System.Runtime.InteropServices;
 using System.Runtime.CompilerServices;
-
-using schar = System.SByte;
+using NCurses.Core.Interop.Mouse;
 
 namespace NCurses.Core.Interop.SingleByte
 {
-    public abstract class NativeSmallBase<TSmall, TSmallStr> //handles chtype and attr_t
+    public abstract class NativeSmallBase<TSmall, TSmallStr, TMouseEvent> //handles chtype and attr_t
         where TSmall : unmanaged, INCursesSCHAR, IEquatable<TSmall>
         where TSmallStr : unmanaged
+        where TMouseEvent : unmanaged, IMEVENT
     {
-        private INCursesWrapperSmall<TSmall, TSmallStr> wrapper;
-        internal INCursesWrapperSmall<TSmall, TSmallStr> Wrapper => 
-            wrapper ?? (wrapper = NativeNCurses.NCursesCustomTypeWrapper as INCursesWrapperSmall<TSmall, TSmallStr>);
+        private INCursesWrapperSmall<TSmall, TSmallStr, TMouseEvent> wrapper;
+        internal INCursesWrapperSmall<TSmall, TSmallStr, TMouseEvent> Wrapper => 
+            wrapper ?? (wrapper = NativeNCurses.NCursesCustomTypeWrapper as INCursesWrapperSmall<TSmall, TSmallStr, TMouseEvent>);
 
         internal static ref readonly TSmall MarshallArrayReadonly(in INCursesSCHAR sChar)
         {
