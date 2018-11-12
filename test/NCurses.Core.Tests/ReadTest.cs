@@ -4,6 +4,7 @@ using System.Text;
 using Xunit;
 using Xunit.Abstractions;
 using NCurses.Core.Interop;
+using System.Runtime.InteropServices;
 
 namespace NCurses.Core.Tests
 {
@@ -13,18 +14,24 @@ namespace NCurses.Core.Tests
             : base(outputHelper) { }
 
         //TODO: doesn't work on windows (blocks on wget_wch)
-        // [Fact]
-        // public void TestReadCharMultiByte()
-        // {
-        //   if (this.TestUnicode())
-        //       return;
+        [Fact]
+        public void TestReadCharMultiByte()
+        {
+            if (this.TestUnicode())
+                return;
 
-        //   char testChar = '\u263A';
-        //   int bleh = testChar;
-        //   NativeNCurses.unget_wch(testChar);
-        //   Assert.False(this.MultiByteStdScr.ReadKey(out char resultChar, out Key resultKey));
-        //   Assert.Equal(testChar, resultChar);
-        // }
+            if(RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
+            {
+                this.OutputHelper.WriteLine("Skipping TestReadCharMultiByte on Windows (multibyte unget does not work).");
+                return;
+            }
+
+            char testChar = '\u263A';
+            int bleh = testChar;
+            NativeNCurses.unget_wch(testChar);
+            Assert.False(this.MultiByteStdScr.ReadKey(out char resultChar, out Key resultKey));
+            Assert.Equal(testChar, resultChar);
+        }
 
         [Fact]
         public void TestReadCharSingleByte()
