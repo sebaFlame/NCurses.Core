@@ -7,15 +7,9 @@ namespace NCurses.Core
     public abstract class Window : WindowBase
     {
         //for usage with subwindows etc
-        internal Window(IntPtr windowPtr, bool ownsHandle = true)
-            : base()
-        {
-            this.OwnsHandle = ownsHandle;
-            DictPtrWindows.Add(this, this.WindowPtr = windowPtr);
-        }
-
-        internal Window()
-            : base() { }
+        internal Window(IntPtr windowPtr, bool ownsHandle = true, bool initizalize = true)
+            : base(windowPtr, ownsHandle, initizalize)
+        {  }
 
         public override void AttributesOn(ulong attrs)
         {
@@ -138,11 +132,11 @@ namespace NCurses.Core
         public abstract Window ToSingleByteWindow();
         public abstract Window ToMultiByteWindow();
 
-        internal static Window CreateWindow(IntPtr windowPtr)
+        internal static Window CreateWindow(IntPtr windowPtr, bool initialize = true)
         {
             if (NCurses.UnicodeSupported)
-                return CreateMultiByteWindow(windowPtr);
-            return CreateSingleByteWindow(windowPtr);
+                return CreateMultiByteWindow(windowPtr, initialize);
+            return CreateSingleByteWindow(windowPtr, initialize);
         }
 
         public static Window CreateWindow(int nlines, int ncols, int begy, int begx)
@@ -152,9 +146,9 @@ namespace NCurses.Core
             return CreateSingleByteWindow(nlines, ncols, begy, begx);
         }
 
-        internal static Window CreateMultiByteWindow(IntPtr windowPtr)
+        internal static Window CreateMultiByteWindow(IntPtr windowPtr, bool initialize = true)
         {
-            return new MultiByteWindow(windowPtr);
+            return new MultiByteWindow(windowPtr, true, initialize);
         }
 
         public static Window CreateMultiByteWindow(int nlines, int ncols, int begy, int begx)
@@ -162,23 +156,14 @@ namespace NCurses.Core
             return new MultiByteWindow(nlines, ncols, begy, begx);
         }
 
-        internal static Window CreateSingleByteWindow(IntPtr windowPtr)
+        internal static Window CreateSingleByteWindow(IntPtr windowPtr, bool initialize = true)
         {
-            return new SingleByteWindow(windowPtr);
+            return new SingleByteWindow(windowPtr, true, initialize);
         }
 
         public static Window CreateSingleByteWindow(int nlines, int ncols, int begy, int begx)
         {
             return new SingleByteWindow(nlines, ncols, begy, begx);
-        }
-        #endregion
-
-        #region IDisposable
-        protected override void Dispose(bool disposing)
-        {
-            if (this.WindowPtr != IntPtr.Zero && this.OwnsHandle)
-                NativeNCurses.delwin(this.WindowPtr);
-            base.Dispose(disposing);
         }
         #endregion
     }

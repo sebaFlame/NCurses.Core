@@ -33,8 +33,8 @@ namespace NCurses.Core
             }
         }
 
-        internal MultiByteWindow(IntPtr windowPtr, bool ownsHandle = true)
-            : base(windowPtr, ownsHandle)
+        internal MultiByteWindow(IntPtr windowPtr, bool ownsHandle = true, bool initialize = true)
+            : base(windowPtr, ownsHandle, initialize)
         { }
 
         ///// <summary>
@@ -45,13 +45,11 @@ namespace NCurses.Core
         ///// <param name="begy">line of the upper left corner of the new window</param>
         ///// <param name="begx">column of the upper left corent of the new window</param>
         public MultiByteWindow(int nlines, int ncols, int begy, int begx)
-            : base()
-        {
-            if (!NCurses.UnicodeSupported)
-                throw new NotSupportedException("Unicode not supported");
-
-            DictPtrWindows.Add(this, this.WindowPtr = NativeNCurses.newwin(nlines, ncols, begy, begx));
-        }
+            : base
+            (
+                 NCurses.UnicodeSupported ? NativeNCurses.newwin(nlines, ncols, begy, begx) : throw new NotSupportedException("Unicode not supported")
+            )
+        {  }
 
         public MultiByteWindow(int nlines, int ncols)
             : this(nlines, ncols, 0, 0)

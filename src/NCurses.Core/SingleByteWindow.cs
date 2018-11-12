@@ -31,8 +31,8 @@ namespace NCurses.Core
             }
         }
 
-        internal SingleByteWindow(IntPtr windowPtr, bool ownsHandle = true)
-            : base(windowPtr, ownsHandle)
+        internal SingleByteWindow(IntPtr windowPtr, bool ownsHandle = true, bool initizalize = true)
+            : base(windowPtr, ownsHandle, initizalize)
         { }
 
         ///// <summary>
@@ -43,13 +43,8 @@ namespace NCurses.Core
         ///// <param name="begy">line of the upper left corner of the new window</param>
         ///// <param name="begx">column of the upper left corent of the new window</param>
         public SingleByteWindow(int nlines, int ncols, int begy, int begx)
-            : base()
-        {
-            if (!NCurses.UnicodeSupported)
-                throw new NotSupportedException("Unicode not supported");
-
-            DictPtrWindows.Add(this, this.WindowPtr = NativeNCurses.newwin(nlines, ncols, begy, begx));
-        }
+            : base(NativeNCurses.newwin(nlines, ncols, begy, begx))
+        {  }
 
         public SingleByteWindow(int nlines, int ncols)
             : this(nlines, ncols, 0, 0)

@@ -734,6 +734,9 @@ namespace NCurses.Core.Interop
             if (NativeLoader is LinuxLoader linuxLoader)
                 linuxLoader.SetLocale(6, ""); //6 = LC_ALL
 
+            if (!hasUnicodeSupport.HasValue)
+                hasUnicodeSupport = NativeNCurses._nc_unicode_locale();
+
             IntPtr stdScr = NCursesException.Verify(NCursesWrapper.initscr(), "initscr");
 
             if(NCursesCharTypeWrapper is null)
@@ -745,9 +748,6 @@ namespace NCurses.Core.Interop
                 NativeScreen.CreateCharCustomWrappers();
                 NativePad.CreateCharCustomWrappers();
             }
-
-            if (!hasUnicodeSupport.HasValue)
-                hasUnicodeSupport = NativeNCurses._nc_unicode_locale();
 
             /*TODO
              * version / platform customization

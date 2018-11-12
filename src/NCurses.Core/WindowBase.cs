@@ -11,29 +11,26 @@ namespace NCurses.Core
     */
     public abstract class WindowBase : IWindow, IDisposable
     {
-        internal static Dictionary<WindowBase, IntPtr> DictPtrWindows { get; private set; }
+        internal static HashSet<WindowBase> DictPtrWindows;
 
-        protected IntPtr WindowPtr;
-        protected bool OwnsHandle;
+        internal IntPtr WindowPtr { get; private set; }
+        private bool OwnsHandle;
 
         static WindowBase()
         {
-            DictPtrWindows = new Dictionary<WindowBase, IntPtr>();
+            DictPtrWindows = new HashSet<WindowBase>();
         }
 
-        //use before all other initialization: NCurses should first be initialized
-        //DO NOT try to pass the window pointer in the constructor
-        internal WindowBase()
+        internal WindowBase(IntPtr windowPtr, bool ownsHandle, bool initialize = true)
         {
-            this.Initialize();
-            this.OwnsHandle = true;
-        }
+            this.OwnsHandle = ownsHandle;
+            this.WindowPtr = windowPtr;
 
-        //ONLY use for StdScr initialization
-        internal WindowBase(IntPtr ptr)
-        {
-            this.OwnsHandle = false;
-            DictPtrWindows.Add(this, this.WindowPtr = ptr);
+            if (this.OwnsHandle)
+                DictPtrWindows.Add(this);
+
+            if(initialize)
+                this.Initialize();
         }
 
         ~WindowBase()
@@ -685,13 +682,22 @@ namespace NCurses.Core
         #region IDisposable
         protected virtual void Dispose(bool disposing)
         {
-            if (this.WindowPtr != IntPtr.Zero)
+            if (this.WindowPtr == IntPtr.Zero)
+                return;
+
+            if (DictPtrWindows.Contains(this))
                 DictPtrWindows.Remove(this);
+
+            if (this.OwnsHandle)
+                NativeNCurses.delwin(this.WindowPtr);
+
+            if (!disposing)
+                return;
         }
 
         public void Dispose()
         {
-            this.Dispose(true);
+            this.Dispose(false);
         }
         #endregion
     }

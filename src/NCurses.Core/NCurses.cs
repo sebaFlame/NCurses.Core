@@ -52,7 +52,7 @@ namespace NCurses.Core
             if (WindowBase.DictPtrWindows.Count > 0)
             {
                 WindowBase[] wins = new WindowBase[WindowBase.DictPtrWindows.Count]; //fuck LINQ
-                WindowBase.DictPtrWindows.Keys.CopyTo(wins, 0);
+                WindowBase.DictPtrWindows.CopyTo(wins, 0);
                 foreach (WindowBase win in wins)
                     win.Dispose();
             }
@@ -77,7 +77,7 @@ namespace NCurses.Core
 
             Func<IntPtr, int, IntPtr, int> initCallback = (IntPtr win, int cols, IntPtr func) =>
             {
-                assignWindow(Window.CreateWindow(win), cols);
+                assignWindow(Window.CreateWindow(win, false), cols);
                 return Constants.OK;
             };
             NativeNCurses.ripoffline(direction, initCallback);

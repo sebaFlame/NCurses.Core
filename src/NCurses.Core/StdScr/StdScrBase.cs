@@ -6,7 +6,7 @@ namespace NCurses.Core.StdScr
     public abstract class StdScrBase : WindowBase
     {
         internal StdScrBase(IntPtr stdScr)
-            : base(stdScr) { }
+            : base(stdScr, false, false) { }
 
         public override void AttributesOn(ulong attrs)
         {

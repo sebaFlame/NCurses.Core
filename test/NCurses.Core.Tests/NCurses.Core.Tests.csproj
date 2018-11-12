@@ -30,5 +30,6 @@
     <!--<Compile Remove="ReadTest.cs" />-->
     <!--<Compile Remove="MouseTest.cs" />-->
     <!--<Compile Remove="ACSTest.cs" />-->
+    <!--<Compile Remove="RipOffTest.cs" />-->
   </ItemGroup>
 </Project>
