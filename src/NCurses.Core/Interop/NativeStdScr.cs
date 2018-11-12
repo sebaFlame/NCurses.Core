@@ -19,19 +19,19 @@ namespace NCurses.Core.Interop
     internal static class NativeStdScr
     {
         #region Custom type wrapper fields
-        private static INativeStdScrWide wideStdScrWrapper;
-        private static INativeStdScrWide WideStdScrWrapper => NativeNCurses.HasUnicodeSupport
-              ? wideStdScrWrapper ?? throw new InvalidOperationException(Constants.TypeGenerationExceptionMessage)
+        private static INativeStdScrMultiByte multiByteNCursesWrapper;
+        private static INativeStdScrMultiByte MultiByteNCursesWrapper => NativeNCurses.HasUnicodeSupport
+              ? multiByteNCursesWrapper ?? throw new InvalidOperationException(Constants.TypeGenerationExceptionMessage)
               : throw new InvalidOperationException(Constants.NoUnicodeExceptionMessage);
-        private static INativeStdScrWideStr wideStrStdScrWrapper;
-        private static INativeStdScrWideStr WideStrStdScrWrapper => NativeNCurses.HasUnicodeSupport
-              ? wideStrStdScrWrapper ?? throw new InvalidOperationException(Constants.TypeGenerationExceptionMessage)
+        private static INativeStdScrMultiByteString multiByteStringNCursesWrapper;
+        private static INativeStdScrMultiByteString MultiByteStringNCursesWrapper => NativeNCurses.HasUnicodeSupport
+              ? multiByteStringNCursesWrapper ?? throw new InvalidOperationException(Constants.TypeGenerationExceptionMessage)
               : throw new InvalidOperationException(Constants.NoUnicodeExceptionMessage);
 
-        private static INativeStdScrSmall smallStdScrWrapper;
-        private static INativeStdScrSmall SmallStdScrWrapper => smallStdScrWrapper ?? throw new InvalidOperationException(Constants.TypeGenerationExceptionMessage);
-        private static INativeStdScrSmallStr smallStrStdScrWrapper;
-        private static INativeStdScrSmallStr SmallStrStdScrWrapper => smallStrStdScrWrapper ?? throw new InvalidOperationException(Constants.TypeGenerationExceptionMessage);
+        private static INativeStdScrSingleByte singleByteNCursesWrapper;
+        private static INativeStdScrSingleByte SingleByteNCursesWrapper => singleByteNCursesWrapper ?? throw new InvalidOperationException(Constants.TypeGenerationExceptionMessage);
+        private static INativeStdScrSingleByteString singleByteStringNCursesWrapper;
+        private static INativeStdScrSingleByteString SingleByteStringNCursesWrapper => singleByteStringNCursesWrapper ?? throw new InvalidOperationException(Constants.TypeGenerationExceptionMessage);
         #endregion
 
         #region custom type initialization
@@ -41,10 +41,10 @@ namespace NCurses.Core.Interop
                 throw new InvalidOperationException("Custom types haven't been generated yet.");
 
             Type customType;
-            if (smallStrStdScrWrapper is null)
+            if (singleByteStringNCursesWrapper is null)
             {
-                customType = typeof(NativeStdScrSmallStr<>).MakeGenericType(DynamicTypeBuilder.schar);
-                smallStrStdScrWrapper = (INativeStdScrSmallStr)Activator.CreateInstance(customType);
+                customType = typeof(NativeStdScrSingleByteString<>).MakeGenericType(DynamicTypeBuilder.schar);
+                singleByteStringNCursesWrapper = (INativeStdScrSingleByteString)Activator.CreateInstance(customType);
             }
         }
 
@@ -59,24 +59,24 @@ namespace NCurses.Core.Interop
             Type customType;
             if (NativeNCurses.HasUnicodeSupport)
             {
-                if (wideStdScrWrapper is null)
+                if (multiByteNCursesWrapper is null)
                 {
-                    customType = typeof(NativeStdScrWide<,,,,>).MakeGenericType(DynamicTypeBuilder.cchar_t, DynamicTypeBuilder.wchar_t,
+                    customType = typeof(NativeStdScrMultiByte<,,,,>).MakeGenericType(DynamicTypeBuilder.cchar_t, DynamicTypeBuilder.wchar_t,
                         DynamicTypeBuilder.chtype, DynamicTypeBuilder.schar, DynamicTypeBuilder.MEVENT);
-                    wideStdScrWrapper = (INativeStdScrWide)Activator.CreateInstance(customType);
+                    multiByteNCursesWrapper = (INativeStdScrMultiByte)Activator.CreateInstance(customType);
                 }
 
-                if (wideStrStdScrWrapper is null)
+                if (multiByteStringNCursesWrapper is null)
                 {
-                    customType = typeof(NativeStdScrWideStr<,>).MakeGenericType(DynamicTypeBuilder.wchar_t, DynamicTypeBuilder.schar);
-                    wideStrStdScrWrapper = (INativeStdScrWideStr)Activator.CreateInstance(customType);
+                    customType = typeof(NativeStdScrMultiByteString<,>).MakeGenericType(DynamicTypeBuilder.wchar_t, DynamicTypeBuilder.schar);
+                    multiByteStringNCursesWrapper = (INativeStdScrMultiByteString)Activator.CreateInstance(customType);
                 }
             }
 
-            if (smallStdScrWrapper is null)
+            if (singleByteNCursesWrapper is null)
             {
-                customType = typeof(NativeStdScrSmall<,,>).MakeGenericType(DynamicTypeBuilder.chtype, DynamicTypeBuilder.schar, DynamicTypeBuilder.MEVENT);
-                smallStdScrWrapper = (INativeStdScrSmall)Activator.CreateInstance(customType);
+                customType = typeof(NativeStdScrSingleByte<,,>).MakeGenericType(DynamicTypeBuilder.chtype, DynamicTypeBuilder.schar, DynamicTypeBuilder.MEVENT);
+                singleByteNCursesWrapper = (INativeStdScrSingleByte)Activator.CreateInstance(customType);
             }
         }
         #endregion
@@ -90,9 +90,9 @@ namespace NCurses.Core.Interop
         /// <para />native method wrapped with verification.
         /// </summary>
         /// <param name="ch">The character you want to add</param>
-        public static void addch(INCursesSCHAR ch)
+        public static void addch(ISingleByteChar ch)
         {
-            SmallStdScrWrapper.addch(ch);
+            SingleByteNCursesWrapper.addch(ch);
         }
         #endregion
 
@@ -106,9 +106,9 @@ namespace NCurses.Core.Interop
         /// </summary>
         /// <param name="txt">the string you want to add</param>
         /// <param name="number">number of elements to copy</param>
-        public static void addchnstr(INCursesSCHARStr txt, int number)
+        public static void addchnstr(ISingleByteCharString txt, int number)
         {
-            SmallStdScrWrapper.addchnstr(txt, number);
+            SingleByteNCursesWrapper.addchnstr(txt, number);
         }
         #endregion
 
@@ -118,9 +118,9 @@ namespace NCurses.Core.Interop
         /// <para />native method wrapped with verification.
         /// </summary>
         /// <param name="txt">the string you want to add</param>
-        public static void addchstr(INCursesSCHARStr txt)
+        public static void addchstr(ISingleByteCharString txt)
         {
-            SmallStdScrWrapper.addchstr(txt);
+            SingleByteNCursesWrapper.addchstr(txt);
         }
         #endregion
 
@@ -136,7 +136,7 @@ namespace NCurses.Core.Interop
         /// <param name="number">number of elements to copy</param>
         public static void addnstr(string txt, int number)
         {
-            SmallStrStdScrWrapper.addnstr(txt, number);
+            SingleByteStringNCursesWrapper.addnstr(txt, number);
         }
         #endregion
 
@@ -148,7 +148,7 @@ namespace NCurses.Core.Interop
         /// <param name="txt">string to add</param>
         public static void addstr(string txt)
         {
-            SmallStrStdScrWrapper.addstr(txt);
+            SingleByteStringNCursesWrapper.addstr(txt);
         }
         #endregion
 
@@ -205,7 +205,7 @@ namespace NCurses.Core.Interop
         /// <param name="attrs">attribute(s) to enable</param>
         public static void attr_on(in ulong attrs)
         {
-            SmallStdScrWrapper.attr_on(attrs);
+            SingleByteNCursesWrapper.attr_on(attrs);
         }
         #endregion
 
@@ -217,7 +217,7 @@ namespace NCurses.Core.Interop
         /// <param name="attrs">attribute(s) to disable</param>
         public static void attr_off(in ulong attrs)
         {
-            SmallStdScrWrapper.attr_off(attrs);
+            SingleByteNCursesWrapper.attr_off(attrs);
         }
         #endregion
 
@@ -232,7 +232,7 @@ namespace NCurses.Core.Interop
         /// <param name="pair">color pair to enable</param>
         public static void attr_set(ulong attrs, short pair)
         {
-            SmallStdScrWrapper.attr_set(attrs, pair);
+            SingleByteNCursesWrapper.attr_set(attrs, pair);
         }
         #endregion
 
@@ -245,7 +245,7 @@ namespace NCurses.Core.Interop
         /// <param name="pair">Pointer to a short to retrieve current color pair</param>
         public static void attr_get(out ulong attrs, out short pair)
         {
-            SmallStdScrWrapper.attr_get(out attrs, out pair);
+            SingleByteNCursesWrapper.attr_get(out attrs, out pair);
         }
         #endregion
 
@@ -259,9 +259,9 @@ namespace NCurses.Core.Interop
         /// <para />native method wrapped with verification.
         /// </summary>
         /// <param name="bkgd">a character to change the background to</param>
-        public static void bkgd(in INCursesSCHAR bkgd)
+        public static void bkgd(in ISingleByteChar bkgd)
         {
-            SmallStdScrWrapper.bkgd(bkgd);
+            SingleByteNCursesWrapper.bkgd(bkgd);
         }
         #endregion
 
@@ -279,9 +279,9 @@ namespace NCurses.Core.Interop
         /// line/character operations.
         /// </summary>
         /// <param name="bkgd">a character to change the background to</param>
-        public static void bkgdset(in INCursesSCHAR bkgd)
+        public static void bkgdset(in ISingleByteChar bkgd)
         {
-            SmallStdScrWrapper.bkgdset(bkgd);
+            SingleByteNCursesWrapper.bkgdset(bkgd);
         }
         #endregion
 
@@ -299,9 +299,9 @@ namespace NCurses.Core.Interop
         /// <param name="tr">top right-hand corner</param>
         /// <param name="bl">bottom left-hand corner</param>
         /// <param name="br">bottom right-hand corner</param>
-        public static void border(in INCursesSCHAR ls, in INCursesSCHAR rs, in INCursesSCHAR ts, in INCursesSCHAR bs, in INCursesSCHAR tl, in INCursesSCHAR tr, in INCursesSCHAR bl, in INCursesSCHAR br)
+        public static void border(in ISingleByteChar ls, in ISingleByteChar rs, in ISingleByteChar ts, in ISingleByteChar bs, in ISingleByteChar tl, in ISingleByteChar tr, in ISingleByteChar bl, in ISingleByteChar br)
         {
-            SmallStdScrWrapper.border(ls, rs, ts, bs, tl, tr, bl, br);
+            SingleByteNCursesWrapper.border(ls, rs, ts, bs, tl, tr, bl, br);
         }
         #endregion
 
@@ -320,7 +320,7 @@ namespace NCurses.Core.Interop
         /// <param name="pair">color pair to enable</param>
         public static void chgat(int number, ulong attrs, short pair)
         {
-            SmallStdScrWrapper.chgat(number, attrs, pair);
+            SingleByteNCursesWrapper.chgat(number, attrs, pair);
         }
         #endregion
 
@@ -420,9 +420,9 @@ namespace NCurses.Core.Interop
         /// <para />native method wrapped with verification.
         /// </summary>
         /// <param name="ch">the character you want to add</param>
-        public static void echochar(in INCursesSCHAR ch)
+        public static void echochar(in ISingleByteChar ch)
         {
-            SmallStdScrWrapper.echochar(ch);
+            SingleByteNCursesWrapper.echochar(ch);
         }
         #endregion
 
@@ -478,7 +478,7 @@ namespace NCurses.Core.Interop
         /// <param name="count">max number or characters to read</param>
         public static void getnstr(out string str, int count)
         {
-            SmallStrStdScrWrapper.getnstr(out str, count);
+            SingleByteStringNCursesWrapper.getnstr(out str, count);
         }
         #endregion
 
@@ -494,7 +494,7 @@ namespace NCurses.Core.Interop
         /// <param name="builder">string reference to read the char(s) into</param>
         public static void getstr(out string str)
         {
-            SmallStrStdScrWrapper.getstr(out str);
+            SingleByteStringNCursesWrapper.getstr(out str);
         }
         #endregion
 
@@ -507,9 +507,9 @@ namespace NCurses.Core.Interop
         /// </summary>
         /// <param name="ch">the character to use as a horizontal line</param>
         /// <param name="count">maximum length of the line</param>
-        public static void hline(INCursesSCHAR ch, int count)
+        public static void hline(ISingleByteChar ch, int count)
         {
-            SmallStdScrWrapper.hline(ch, count);
+            SingleByteNCursesWrapper.hline(ch, count);
         }
         #endregion
 
@@ -523,9 +523,9 @@ namespace NCurses.Core.Interop
         /// to extract the character or attributes alone.
         /// </summary>
         /// <returns>characther with attributes at current position</returns>
-        public static void inch(out INCursesSCHAR ch)
+        public static void inch(out ISingleByteChar ch)
         {
-            SmallStdScrWrapper.inch(out ch);
+            SingleByteNCursesWrapper.inch(out ch);
         }
         #endregion
 
@@ -544,9 +544,9 @@ namespace NCurses.Core.Interop
         /// </summary>
         /// <param name="txt">the array to copy the chars into</param>
         /// <param name="count">number of chars/attributes to copy</param>
-        public static void inchnstr(out INCursesSCHARStr txt, int count, out int read)
+        public static void inchnstr(out ISingleByteCharString txt, int count, out int read)
         {
-            SmallStdScrWrapper.inchnstr(out txt, count, out read);
+            SingleByteNCursesWrapper.inchnstr(out txt, count, out read);
         }
         #endregion
 
@@ -556,9 +556,9 @@ namespace NCurses.Core.Interop
         /// <para />native method wrapped with verification.
         /// </summary>
         /// <param name="txt">the array to copy the chars into</param>
-        public static void inchstr(out INCursesSCHARStr str, out int read)
+        public static void inchstr(out ISingleByteCharString str, out int read)
         {
-            SmallStdScrWrapper.inchstr(out str, out read);
+            SingleByteNCursesWrapper.inchstr(out str, out read);
         }
         #endregion
 
@@ -575,7 +575,7 @@ namespace NCurses.Core.Interop
         /// <param name="n">max length of the leading substring</param>
         public static void innstr(out string str, int n, out int read)
         {
-            SmallStrStdScrWrapper.innstr(out str, n, out read);
+            SingleByteStringNCursesWrapper.innstr(out str, n, out read);
         }
         #endregion
 
@@ -590,9 +590,9 @@ namespace NCurses.Core.Interop
         /// <para />native method wrapped with verification.
         /// </summary>
         /// <param name="ch">The character to insert</param>
-        public static void insch(in INCursesSCHAR ch)
+        public static void insch(in ISingleByteChar ch)
         {
-            SmallStdScrWrapper.insch(ch);
+            SingleByteNCursesWrapper.insch(ch);
         }
         #endregion
 
@@ -638,7 +638,7 @@ namespace NCurses.Core.Interop
         /// <param name="n">The nubmer of characters to insert</param>
         public static void insnstr(in string str, int n)
         {
-            SmallStrStdScrWrapper.insnstr(str, n);
+            SingleByteStringNCursesWrapper.insnstr(str, n);
         }
         #endregion
 
@@ -650,7 +650,7 @@ namespace NCurses.Core.Interop
         /// <param name="str">The string to insert</param>
         public static void insstr(in string str)
         {
-            SmallStrStdScrWrapper.insstr(str);
+            SingleByteStringNCursesWrapper.insstr(str);
         }
         #endregion
 
@@ -662,7 +662,7 @@ namespace NCurses.Core.Interop
         /// <param name="str">Reference to the string you want extracted</param>
         public static void instr(out string str, out int read)
         {
-            SmallStrStdScrWrapper.instr(out str, out read);
+            SingleByteStringNCursesWrapper.instr(out str, out read);
         }
         #endregion
 
@@ -691,9 +691,9 @@ namespace NCurses.Core.Interop
         /// <param name="y">the line number to move to</param>
         /// <param name="x">the column number to move to</param>
         /// <param name="ch">the character to add</param>
-        public static void mvaddch(int y, int x, in INCursesSCHAR ch)
+        public static void mvaddch(int y, int x, in ISingleByteChar ch)
         {
-            SmallStdScrWrapper.mvaddch(y, x, ch);
+            SingleByteNCursesWrapper.mvaddch(y, x, ch);
         }
         #endregion
 
@@ -706,9 +706,9 @@ namespace NCurses.Core.Interop
         /// <param name="x">the column number to move to</param>
         /// <param name="chstr">pointer to a null terminated array of chtype</param>
         /// <param name="n">number of elements to copy</param>
-        public static void mvaddchnstr(int y, int x, in INCursesSCHARStr chstr, int n)
+        public static void mvaddchnstr(int y, int x, in ISingleByteCharString chstr, int n)
         {
-            SmallStdScrWrapper.mvaddchnstr(y, x, chstr, n);
+            SingleByteNCursesWrapper.mvaddchnstr(y, x, chstr, n);
         }
         #endregion
 
@@ -720,9 +720,9 @@ namespace NCurses.Core.Interop
         /// <param name="y">the line number to move to</param>
         /// <param name="x">the column number to move to</param>
         /// <param name="chstr">pointer to a null terminated array of chtype</param>
-        public static void mvaddchstr(int y, int x, in INCursesSCHARStr chstr)
+        public static void mvaddchstr(int y, int x, in ISingleByteCharString chstr)
         {
-            SmallStdScrWrapper.mvaddchstr(y, x, chstr);
+            SingleByteNCursesWrapper.mvaddchstr(y, x, chstr);
         }
         #endregion
 
@@ -735,7 +735,7 @@ namespace NCurses.Core.Interop
         /// </summary>
         public static void mvaddnstr(int y, int x, in string txt, int n)
         {
-            SmallStrStdScrWrapper.mvaddnstr(y, x, txt, n);
+            SingleByteStringNCursesWrapper.mvaddnstr(y, x, txt, n);
         }
         #endregion
 
@@ -748,7 +748,7 @@ namespace NCurses.Core.Interop
         /// </summary>
         public static void mvaddstr(int y, int x, in string txt)
         {
-            SmallStrStdScrWrapper.mvaddstr(y, x, txt);
+            SingleByteStringNCursesWrapper.mvaddstr(y, x, txt);
         }
         #endregion
 
@@ -761,7 +761,7 @@ namespace NCurses.Core.Interop
         /// <param name="x">the column number to move to</param>
         public static void mvchgat(int y, int x, int number, ulong attrs, short pair)
         {
-            SmallStdScrWrapper.mvchgat(y, x, number, attrs, pair);
+            SingleByteNCursesWrapper.mvchgat(y, x, number, attrs, pair);
         }
         #endregion
 
@@ -810,7 +810,7 @@ namespace NCurses.Core.Interop
         /// <param name="x">the column number to move to</param>
         public static void mvgetnstr(int y, int x, out string str, int count)
         {
-            SmallStrStdScrWrapper.mvgetnstr(y, x, out str, count);
+            SingleByteStringNCursesWrapper.mvgetnstr(y, x, out str, count);
         }
         #endregion
 
@@ -823,7 +823,7 @@ namespace NCurses.Core.Interop
         /// <param name="x">the column number to move to</param>
         public static void mvgetstr(int y, int x, out string str)
         {
-            SmallStrStdScrWrapper.mvgetstr(y, x, out str);
+            SingleByteStringNCursesWrapper.mvgetstr(y, x, out str);
         }
         #endregion
 
@@ -834,9 +834,9 @@ namespace NCurses.Core.Interop
         /// </summary>
         /// <param name="y">the line number to move to</param>
         /// <param name="x">the column number to move to</param>
-        public static void mvhline(int y, int x, in INCursesSCHAR ch, int count)
+        public static void mvhline(int y, int x, in ISingleByteChar ch, int count)
         {
-            SmallStdScrWrapper.mvhline(y, x, ch, count);
+            SingleByteNCursesWrapper.mvhline(y, x, ch, count);
         }
         #endregion
 
@@ -847,9 +847,9 @@ namespace NCurses.Core.Interop
         /// <param name="y">the line number to move to</param>
         /// <param name="x">the column number to move to</param>
         /// <returns>Constants.ERR on error or Constants.OK on success</returns>
-        public static void mvinch(int y, int x, out INCursesSCHAR ch)
+        public static void mvinch(int y, int x, out ISingleByteChar ch)
         {
-            SmallStdScrWrapper.mvinch(y, x, out ch);
+            SingleByteNCursesWrapper.mvinch(y, x, out ch);
         }
         #endregion
 
@@ -860,9 +860,9 @@ namespace NCurses.Core.Interop
         /// </summary>
         /// <param name="y">the line number to move to</param>
         /// <param name="x">the column number to move to</param>
-        public static void mvinchnstr(int y, int x, out INCursesSCHARStr txt, int count, out int read)
+        public static void mvinchnstr(int y, int x, out ISingleByteCharString txt, int count, out int read)
         {
-            SmallStdScrWrapper.mvinchnstr(y, x, out txt, count, out read);
+            SingleByteNCursesWrapper.mvinchnstr(y, x, out txt, count, out read);
         }
         #endregion
 
@@ -873,9 +873,9 @@ namespace NCurses.Core.Interop
         /// </summary>
         /// <param name="y">the line number to move to</param>
         /// <param name="x">the column number to move to</param>
-        public static void mvinchstr(int y, int x, out INCursesSCHARStr chstr, out int read)
+        public static void mvinchstr(int y, int x, out ISingleByteCharString chstr, out int read)
         {
-            SmallStdScrWrapper.mvinchstr(y, x, out chstr, out read);
+            SingleByteNCursesWrapper.mvinchstr(y, x, out chstr, out read);
         }
         #endregion
 
@@ -888,7 +888,7 @@ namespace NCurses.Core.Interop
         /// <param name="x">the column number to move to</param>
         public static void mvinnstr(int y, int x, out string str, int n, out int read)
         {
-            SmallStrStdScrWrapper.mvinnstr(y, x, out str, n, out read);
+            SingleByteStringNCursesWrapper.mvinnstr(y, x, out str, n, out read);
         }
         #endregion
 
@@ -899,9 +899,9 @@ namespace NCurses.Core.Interop
         /// </summary>
         /// <param name="y">the line number to move to</param>
         /// <param name="x">the column number to move to</param>
-        public static void mvinsch(int y, int x, in INCursesSCHAR ch)
+        public static void mvinsch(int y, int x, in ISingleByteChar ch)
         {
-            SmallStdScrWrapper.mvinsch(y, x, ch);
+            SingleByteNCursesWrapper.mvinsch(y, x, ch);
         }
         #endregion
 
@@ -914,7 +914,7 @@ namespace NCurses.Core.Interop
         /// <param name="x">the column number to move to</param>
         public static void mvinsnstr(int y, int x, in string str, int n)
         {
-            SmallStrStdScrWrapper.mvinsnstr(y, x, str, n);
+            SingleByteStringNCursesWrapper.mvinsnstr(y, x, str, n);
         }
         #endregion
 
@@ -927,7 +927,7 @@ namespace NCurses.Core.Interop
         /// <param name="x">the column number to move to</param>
         public static void mvinsstr(int y, int x, string str)
         {
-            SmallStrStdScrWrapper.mvinsstr(y, x, str);
+            SingleByteStringNCursesWrapper.mvinsstr(y, x, str);
         }
         #endregion
 
@@ -940,7 +940,7 @@ namespace NCurses.Core.Interop
         /// <param name="x">the column number to move to</param>
         public static void mvinstr(int y, int x, out string str, out int read)
         {
-            SmallStrStdScrWrapper.mvinstr(y, x, out str, out read);
+            SingleByteStringNCursesWrapper.mvinstr(y, x, out str, out read);
         }
         #endregion
 
@@ -953,7 +953,7 @@ namespace NCurses.Core.Interop
         /// <param name="x">the column number to move to</param>
         public static void mvprintw(int y, int x, in string format, params string[] varArg)
         {
-            SmallStrStdScrWrapper.mvprintw(y, x, format, varArg);
+            SingleByteStringNCursesWrapper.mvprintw(y, x, format, varArg);
         }
         #endregion
 
@@ -966,7 +966,7 @@ namespace NCurses.Core.Interop
         /// <param name="x">the column number to move to</param>
         public static void mvscanw(int y, int x, out string format, params string[] argList)
         {
-            SmallStrStdScrWrapper.mvscanw(y, x, out format, argList);
+            SingleByteStringNCursesWrapper.mvscanw(y, x, out format, argList);
         }
         #endregion
 
@@ -977,9 +977,9 @@ namespace NCurses.Core.Interop
         /// </summary>
         /// <param name="y">the line number to move to</param>
         /// <param name="x">the column number to move to</param>
-        public static void mvvline(int y, int x, in INCursesSCHAR ch, int n)
+        public static void mvvline(int y, int x, in ISingleByteChar ch, int n)
         {
-            SmallStdScrWrapper.mvvline(y, x, ch, n);
+            SingleByteNCursesWrapper.mvvline(y, x, ch, n);
         }
         #endregion
 
@@ -995,7 +995,7 @@ namespace NCurses.Core.Interop
         /// <param name="var">the variables</param>
         public static void printw(string format, params string[] argList)
         {
-            SmallStrStdScrWrapper.printw(format, argList);
+            SingleByteStringNCursesWrapper.printw(format, argList);
         }
         #endregion
 
@@ -1029,7 +1029,7 @@ namespace NCurses.Core.Interop
         /// <param name="var">the variables</param>
         public static void scanw(out string format, params string[] argList)
         {
-            SmallStrStdScrWrapper.scanw(out format, argList);
+            SingleByteStringNCursesWrapper.scanw(out format, argList);
         }
         #endregion
 
@@ -1122,9 +1122,9 @@ namespace NCurses.Core.Interop
         /// </summary>
         /// <param name="ch">the character to use as a horizontal line</param>
         /// <param name="count">maximum length of the line</param>
-        public static void vline(in INCursesSCHAR ch, int n)
+        public static void vline(in ISingleByteChar ch, int n)
         {
-            SmallStdScrWrapper.vline(ch, n);
+            SingleByteNCursesWrapper.vline(ch, n);
         }
         #endregion
 
@@ -1136,9 +1136,9 @@ namespace NCurses.Core.Interop
         /// <para />native method wrapped with verification.
         /// </summary>
         /// <param name="wch">The wide character to add</param>
-        public static void add_wch(INCursesWCHAR wch)
+        public static void add_wch(IMultiByteChar wch)
         {
-            WideStdScrWrapper.add_wch(wch);
+            MultiByteNCursesWrapper.add_wch(wch);
         }
         #endregion
 
@@ -1158,9 +1158,9 @@ namespace NCurses.Core.Interop
         /// </summary>
         /// <param name="wchStr">The string of complex characters you want to add</param>
         /// <param name="n">number of elements to copy</param>
-        public static void add_wchnstr(INCursesWCHARStr wchStr, int n)
+        public static void add_wchnstr(IMultiByteCharString wchStr, int n)
         {
-            WideStdScrWrapper.add_wchnstr(wchStr, n);
+            MultiByteNCursesWrapper.add_wchnstr(wchStr, n);
         }
         #endregion
 
@@ -1171,9 +1171,9 @@ namespace NCurses.Core.Interop
         /// </summary>
         /// <param name="wchStr">The string of complex characters you want to add</param>
         /// <param name="n">number of elements to copy</param>
-        public static void add_wchstr(INCursesWCHARStr wchStr)
+        public static void add_wchstr(IMultiByteCharString wchStr)
         {
-            WideStdScrWrapper.add_wchstr(wchStr);
+            MultiByteNCursesWrapper.add_wchstr(wchStr);
         }
         #endregion
 
@@ -1188,7 +1188,7 @@ namespace NCurses.Core.Interop
         /// <param name="n">number of elements to copy</param>
         public static void addnwstr(string wstr, int n)
         {
-            WideStrStdScrWrapper.addnwstr(wstr, n);
+            MultiByteStringNCursesWrapper.addnwstr(wstr, n);
         }
         #endregion
 
@@ -1200,7 +1200,7 @@ namespace NCurses.Core.Interop
         /// <param name="wstr">the string to add</param>
         public static void addwstr(string wstr)
         {
-            WideStrStdScrWrapper.addwstr(wstr);
+            MultiByteStringNCursesWrapper.addwstr(wstr);
         }
         #endregion
 
@@ -1214,9 +1214,9 @@ namespace NCurses.Core.Interop
         /// <para />native method wrapped with verification.
         /// </summary>
         /// <param name="wstr">the string to add</param>
-        public static void bkgrnd(in INCursesWCHAR wch)
+        public static void bkgrnd(in IMultiByteChar wch)
         {
-            WideStdScrWrapper.bkgrnd(wch);
+            MultiByteNCursesWrapper.bkgrnd(wch);
         }
         #endregion
 
@@ -1235,9 +1235,9 @@ namespace NCurses.Core.Interop
         /// line/character operations.
         /// </summary>
         /// <param name="wstr">the string to add</param>
-        public static void bkgrndset(in INCursesWCHAR wch)
+        public static void bkgrndset(in IMultiByteChar wch)
         {
-            WideStdScrWrapper.bkgrndset(wch);
+            MultiByteNCursesWrapper.bkgrndset(wch);
         }
         #endregion
 
@@ -1256,10 +1256,10 @@ namespace NCurses.Core.Interop
         /// <param name="tr">top right-hand corner</param>
         /// <param name="bl">bottom left-hand corner</param>
         /// <param name="br">bottom right-hand corner</param>
-        public static void border_set(in INCursesWCHAR ls, in INCursesWCHAR rs, in INCursesWCHAR ts, in INCursesWCHAR bs, in INCursesWCHAR tl, 
-            in INCursesWCHAR tr, in INCursesWCHAR bl, in INCursesWCHAR br)
+        public static void border_set(in IMultiByteChar ls, in IMultiByteChar rs, in IMultiByteChar ts, in IMultiByteChar bs, in IMultiByteChar tl, 
+            in IMultiByteChar tr, in IMultiByteChar bl, in IMultiByteChar br)
         {
-            WideStdScrWrapper.border_set(ls, rs, ts, bs, tl, tr, bl, br);
+            MultiByteNCursesWrapper.border_set(ls, rs, ts, bs, tl, tr, bl, br);
         }
         #endregion
 
@@ -1275,9 +1275,9 @@ namespace NCurses.Core.Interop
         /// <para />native method wrapped with verification.
         /// </summary>
         /// <param name="wch">the character to echo</param>
-        public static void echo_wchar(in INCursesWCHAR wch)
+        public static void echo_wchar(in IMultiByteChar wch)
         {
-            WideStdScrWrapper.echo_wchar(wch);
+            MultiByteNCursesWrapper.echo_wchar(wch);
         }
         #endregion
 
@@ -1297,7 +1297,7 @@ namespace NCurses.Core.Interop
         /// <param name="wch">a reference to store the returned wide char in</param>
         public static bool get_wch(out char wch, out Key key)
         {
-            return WideStrStdScrWrapper.get_wch(out wch, out key);
+            return MultiByteStringNCursesWrapper.get_wch(out wch, out key);
         }
         #endregion
 
@@ -1317,7 +1317,7 @@ namespace NCurses.Core.Interop
         /// <param name="wstr">a reference to store the returned wide string in</param>
         public static void get_wstr(out string wstr)
         {
-            WideStrStdScrWrapper.get_wstr(out wstr);
+            MultiByteStringNCursesWrapper.get_wstr(out wstr);
         }
         #endregion
 
@@ -1328,9 +1328,9 @@ namespace NCurses.Core.Interop
         /// <para />native method wrapped with verification.
         /// </summary>
         /// <param name="wch">a reference to store the returned background char in</param>
-        public static void getbkgrnd(out INCursesWCHAR wch)
+        public static void getbkgrnd(out IMultiByteChar wch)
         {
-            WideStdScrWrapper.getbkgrnd(out wch);
+            MultiByteNCursesWrapper.getbkgrnd(out wch);
         }
         #endregion
 
@@ -1342,7 +1342,7 @@ namespace NCurses.Core.Interop
         /// <param name="n">the number of wide characters to get</param>
         public static void getn_wstr(out string wstr, int n)
         {
-            WideStrStdScrWrapper.getn_wstr(out wstr, n);
+            MultiByteStringNCursesWrapper.getn_wstr(out wstr, n);
         }
         #endregion
 
@@ -1356,9 +1356,9 @@ namespace NCurses.Core.Interop
         /// </summary>
         /// <param name="wch">the character to use as line</param>
         /// <param name="n">the lenght of the line</param>
-        public static void hline_set(INCursesWCHAR wch, int n)
+        public static void hline_set(IMultiByteChar wch, int n)
         {
-            WideStdScrWrapper.hline_set(wch, n);
+            MultiByteNCursesWrapper.hline_set(wch, n);
         }
         #endregion
 
@@ -1369,9 +1369,9 @@ namespace NCurses.Core.Interop
         /// <para />native method wrapped with verification.
         /// </summary>
         /// <param name="wcval">a reference to store the complex character in</param>
-        public static void in_wch(out INCursesWCHAR wcval)
+        public static void in_wch(out IMultiByteChar wcval)
         {
-            WideStdScrWrapper.in_wch(out wcval);
+            MultiByteNCursesWrapper.in_wch(out wcval);
         }
         #endregion
 
@@ -1384,9 +1384,9 @@ namespace NCurses.Core.Interop
         /// <para />native method wrapped with verification.
         /// </summary>
         /// <param name="wcval">array reference to store the complex characters in</param>
-        public static void in_wchnstr(out INCursesWCHARStr wcval, int n)
+        public static void in_wchnstr(out IMultiByteCharString wcval, int n)
         {
-            WideStdScrWrapper.in_wchnstr(out wcval, n);
+            MultiByteNCursesWrapper.in_wchnstr(out wcval, n);
         }
         #endregion
 
@@ -1396,9 +1396,9 @@ namespace NCurses.Core.Interop
         /// <para />native method wrapped with verification.
         /// </summary>
         /// <param name="wcval">array reference to store the complex characters in</param>
-        public static void in_wchstr(out INCursesWCHARStr wcval)
+        public static void in_wchstr(out IMultiByteCharString wcval)
         {
-            WideStdScrWrapper.in_wchstr(out wcval);
+            MultiByteNCursesWrapper.in_wchstr(out wcval);
         }
         #endregion
 
@@ -1417,7 +1417,7 @@ namespace NCurses.Core.Interop
         /// <param name="n">the number of characters to store</param>
         public static void innwstr(out string str, int n, out int read)
         {
-            WideStrStdScrWrapper.innwstr(out str, n, out read);
+            MultiByteStringNCursesWrapper.innwstr(out str, n, out read);
         }
         #endregion
 
@@ -1438,7 +1438,7 @@ namespace NCurses.Core.Interop
         /// <param name="n">the number of characters to insert</param>
         public static void ins_nwstr(in string str, int n)
         {
-            WideStrStdScrWrapper.ins_nwstr(in str, n);
+            MultiByteStringNCursesWrapper.ins_nwstr(in str, n);
         }
         #endregion
 
@@ -1452,9 +1452,9 @@ namespace NCurses.Core.Interop
         /// <para />native method wrapped with verification.
         /// </summary>
         /// <param name="wch">the complex character to insert</param>
-        public static void ins_wch(in INCursesWCHAR wch)
+        public static void ins_wch(in IMultiByteChar wch)
         {
-            WideStdScrWrapper.ins_wch(wch);
+            MultiByteNCursesWrapper.ins_wch(wch);
         }
         #endregion
 
@@ -1466,7 +1466,7 @@ namespace NCurses.Core.Interop
         /// <param name="str">the string to insert</param>
         public static void ins_wstr(in string str)
         {
-            WideStrStdScrWrapper.ins_wstr(str);
+            MultiByteStringNCursesWrapper.ins_wstr(str);
         }
         #endregion
 
@@ -1478,7 +1478,7 @@ namespace NCurses.Core.Interop
         /// <param name="str">the string to insert</param>
         public static void inwstr(out string str)
         {
-            WideStrStdScrWrapper.inwstr(out str);
+            MultiByteStringNCursesWrapper.inwstr(out str);
         }
         #endregion
 
@@ -1489,9 +1489,9 @@ namespace NCurses.Core.Interop
         /// </summary>
         /// <param name="y">the line number to move to</param>
         /// <param name="x">the column number to move to</param>
-        public static void mvadd_wch(int y, int x, in INCursesWCHAR wch)
+        public static void mvadd_wch(int y, int x, in IMultiByteChar wch)
         {
-            WideStdScrWrapper.mvadd_wch(y, x, wch);
+            MultiByteNCursesWrapper.mvadd_wch(y, x, wch);
         }
         #endregion
 
@@ -1502,9 +1502,9 @@ namespace NCurses.Core.Interop
         /// </summary>
         /// <param name="y">the line number to move to</param>
         /// <param name="x">the column number to move to</param>
-        public static void mvadd_wchnstr(int y, int x, in INCursesWCHARStr wchStr, int n)
+        public static void mvadd_wchnstr(int y, int x, in IMultiByteCharString wchStr, int n)
         {
-            WideStdScrWrapper.mvadd_wchnstr(y, x, wchStr, n);
+            MultiByteNCursesWrapper.mvadd_wchnstr(y, x, wchStr, n);
         }
         #endregion
 
@@ -1515,9 +1515,9 @@ namespace NCurses.Core.Interop
         /// </summary>
         /// <param name="y">the line number to move to</param>
         /// <param name="x">the column number to move to</param>
-        public static void mvadd_wchstr(int y, int x, in INCursesWCHARStr wchStr)
+        public static void mvadd_wchstr(int y, int x, in IMultiByteCharString wchStr)
         {
-            WideStdScrWrapper.mvadd_wchstr(y, x, wchStr);
+            MultiByteNCursesWrapper.mvadd_wchstr(y, x, wchStr);
         }
         #endregion
 
@@ -1530,7 +1530,7 @@ namespace NCurses.Core.Interop
         /// <param name="x">the column number to move to</param>
         public static void mvaddnwstr(int y, int x, in string wstr, int n)
         {
-            WideStrStdScrWrapper.mvaddnwstr(y, x, wstr, n);
+            MultiByteStringNCursesWrapper.mvaddnwstr(y, x, wstr, n);
         }
         #endregion
 
@@ -1543,7 +1543,7 @@ namespace NCurses.Core.Interop
         /// <param name="x">the column number to move to</param>
         public static void mvaddwstr(int y, int x, in string wstr)
         {
-            WideStrStdScrWrapper.mvaddwstr(y, x, wstr);
+            MultiByteStringNCursesWrapper.mvaddwstr(y, x, wstr);
         }
         #endregion
 
@@ -1556,7 +1556,7 @@ namespace NCurses.Core.Interop
         /// <param name="x">the column number to move to</param>
         public static bool mvget_wch(int y, int x, out char wch, out Key key)
         {
-            return WideStrStdScrWrapper.mvget_wch(y, x, out wch, out key);
+            return MultiByteStringNCursesWrapper.mvget_wch(y, x, out wch, out key);
         }
         #endregion
 
@@ -1569,7 +1569,7 @@ namespace NCurses.Core.Interop
         /// <param name="x">the column number to move to</param>
         public static void mvget_wstr(int y, int x, out string wstr)
         {
-            WideStrStdScrWrapper.mvget_wstr(y, x, out wstr);
+            MultiByteStringNCursesWrapper.mvget_wstr(y, x, out wstr);
         }
         #endregion
 
@@ -1582,7 +1582,7 @@ namespace NCurses.Core.Interop
         /// <param name="x">the column number to move to</param>
         public static void mvgetn_wstr(int y, int x, out string wstr, int n)
         {
-            WideStrStdScrWrapper.mvgetn_wstr(y, x, out wstr, n);
+            MultiByteStringNCursesWrapper.mvgetn_wstr(y, x, out wstr, n);
         }
         #endregion
 
@@ -1593,9 +1593,9 @@ namespace NCurses.Core.Interop
         /// </summary>
         /// <param name="y">the line number to move to</param>
         /// <param name="x">the column number to move to</param>
-        public static void mvhline_set(int y, int x, in INCursesWCHAR wch, int n)
+        public static void mvhline_set(int y, int x, in IMultiByteChar wch, int n)
         {
-            WideStdScrWrapper.mvhline_set(y, x, wch, n);
+            MultiByteNCursesWrapper.mvhline_set(y, x, wch, n);
         }
         #endregion
 
@@ -1606,9 +1606,9 @@ namespace NCurses.Core.Interop
         /// </summary>
         /// <param name="y">the line number to move to</param>
         /// <param name="x">the column number to move to</param>
-        public static void mvin_wch(int y, int x, out INCursesWCHAR wcval)
+        public static void mvin_wch(int y, int x, out IMultiByteChar wcval)
         {
-            WideStdScrWrapper.mvin_wch(y, x, out wcval);
+            MultiByteNCursesWrapper.mvin_wch(y, x, out wcval);
         }
         #endregion
 
@@ -1619,9 +1619,9 @@ namespace NCurses.Core.Interop
         /// </summary>
         /// <param name="y">the line number to move to</param>
         /// <param name="x">the column number to move to</param>
-        public static void mvin_wchnstr(int y, int x, out INCursesWCHARStr wchStr, int n)
+        public static void mvin_wchnstr(int y, int x, out IMultiByteCharString wchStr, int n)
         {
-            WideStdScrWrapper.mvin_wchnstr(y, x, out wchStr, n);
+            MultiByteNCursesWrapper.mvin_wchnstr(y, x, out wchStr, n);
         }
         #endregion
 
@@ -1632,9 +1632,9 @@ namespace NCurses.Core.Interop
         /// </summary>
         /// <param name="y">the line number to move to</param>
         /// <param name="x">the column number to move to</param>
-        public static void mvin_wchstr(int y, int x, out INCursesWCHARStr wchStr)
+        public static void mvin_wchstr(int y, int x, out IMultiByteCharString wchStr)
         {
-            WideStdScrWrapper.mvin_wchstr(y, x, out wchStr);
+            MultiByteNCursesWrapper.mvin_wchstr(y, x, out wchStr);
         }
         #endregion
 
@@ -1647,7 +1647,7 @@ namespace NCurses.Core.Interop
         /// <param name="x">the column number to move to</param>
         public static void mvinnwstr(int y, int x, out string str, int n, out int read)
         {
-            WideStrStdScrWrapper.mvinnwstr(y, x, out str, n, out read);
+            MultiByteStringNCursesWrapper.mvinnwstr(y, x, out str, n, out read);
         }
         #endregion
 
@@ -1660,7 +1660,7 @@ namespace NCurses.Core.Interop
         /// <param name="x">the column number to move to</param>
         public static void mvins_nwstr(int y, int x, in string str, int n)
         {
-            WideStrStdScrWrapper.mvins_nwstr(y, x, str, n);
+            MultiByteStringNCursesWrapper.mvins_nwstr(y, x, str, n);
         }
         #endregion
 
@@ -1671,9 +1671,9 @@ namespace NCurses.Core.Interop
         /// </summary>
         /// <param name="y">the line number to move to</param>
         /// <param name="x">the column number to move to</param>
-        public static void mvins_wch(int y, int x, in INCursesWCHAR wch)
+        public static void mvins_wch(int y, int x, in IMultiByteChar wch)
         {
-            WideStdScrWrapper.mvins_wch(y, x, wch);
+            MultiByteNCursesWrapper.mvins_wch(y, x, wch);
         }
         #endregion
 
@@ -1686,7 +1686,7 @@ namespace NCurses.Core.Interop
         /// <param name="x">the column number to move to</param>
         public static void mvins_wstr(int y, int x, in string str)
         {
-            WideStrStdScrWrapper.mvins_wstr(y, x, str);
+            MultiByteStringNCursesWrapper.mvins_wstr(y, x, str);
         }
         #endregion
 
@@ -1699,7 +1699,7 @@ namespace NCurses.Core.Interop
         /// <param name="x">the column number to move to</param>
         public static void mvinwstr(int y, int x, out string wstr)
         {
-            WideStrStdScrWrapper.mvinwstr(y, x, out wstr);
+            MultiByteStringNCursesWrapper.mvinwstr(y, x, out wstr);
         }
         #endregion
 
@@ -1710,9 +1710,9 @@ namespace NCurses.Core.Interop
         /// </summary>
         /// <param name="y">the line number to move to</param>
         /// <param name="x">the column number to move to</param>
-        public static void mvvline_set(int y, int x, in INCursesWCHAR wch, int n)
+        public static void mvvline_set(int y, int x, in IMultiByteChar wch, int n)
         {
-            WideStdScrWrapper.mvvline_set(y, x, wch, n);
+            MultiByteNCursesWrapper.mvvline_set(y, x, wch, n);
         }
         #endregion
 
@@ -1721,9 +1721,9 @@ namespace NCurses.Core.Interop
         /// see <see cref="hline_set"/>
         /// <para />native method wrapped with verification.
         /// </summary>
-        public static void vline_set(in INCursesWCHAR wch, int n)
+        public static void vline_set(in IMultiByteChar wch, int n)
         {
-            WideStdScrWrapper.vline_set(wch, n);
+            MultiByteNCursesWrapper.vline_set(wch, n);
         }
         #endregion
     }

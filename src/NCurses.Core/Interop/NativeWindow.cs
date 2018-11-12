@@ -18,19 +18,19 @@ namespace NCurses.Core.Interop
     internal static class NativeWindow
     {
         #region Custom type wrapper fields
-        private static INativeWindowWide wideWindowWrapper;
-        private static INativeWindowWide WideWindowWrapper => NativeNCurses.HasUnicodeSupport
-              ? wideWindowWrapper ?? throw new InvalidOperationException(Constants.TypeGenerationExceptionMessage)
+        private static INativeWindowMultiByte multiByteNCursesWrapper;
+        private static INativeWindowMultiByte MultiByteNCursesWrapper => NativeNCurses.HasUnicodeSupport
+              ? multiByteNCursesWrapper ?? throw new InvalidOperationException(Constants.TypeGenerationExceptionMessage)
               : throw new InvalidOperationException(Constants.NoUnicodeExceptionMessage);
-        private static INativeWindowWideStr wideStrWindowWrapper;
-        private static INativeWindowWideStr WideStrWindowWrapper => NativeNCurses.HasUnicodeSupport
-              ? wideStrWindowWrapper ?? throw new InvalidOperationException(Constants.TypeGenerationExceptionMessage)
+        private static INativeWindowMultiByteString multiByteStringNCursesWrapper;
+        private static INativeWindowMultiByteString MultiByteStringNCursesWrapper => NativeNCurses.HasUnicodeSupport
+              ? multiByteStringNCursesWrapper ?? throw new InvalidOperationException(Constants.TypeGenerationExceptionMessage)
               : throw new InvalidOperationException(Constants.NoUnicodeExceptionMessage);
 
-        private static INativeWindowSmall smallWindowWrapper;
-        private static INativeWindowSmall SmallWindowWrapper => smallWindowWrapper ?? throw new InvalidOperationException(Constants.TypeGenerationExceptionMessage);
-        private static INativeWindowSmallStr smallStrWindowWrapper;
-        private static INativeWindowSmallStr SmallStrWindowWrapper => smallStrWindowWrapper ?? throw new InvalidOperationException(Constants.TypeGenerationExceptionMessage);
+        private static INativeWindowSingleByte singleByteNCursesWrapper;
+        private static INativeWindowSingleByte SingleByteNCursesWrapper => singleByteNCursesWrapper ?? throw new InvalidOperationException(Constants.TypeGenerationExceptionMessage);
+        private static INativeWindowSingleByteString singleByteStringNCursesWrapper;
+        private static INativeWindowSingleByteString SingleByteStringNCursesWrapper => singleByteStringNCursesWrapper ?? throw new InvalidOperationException(Constants.TypeGenerationExceptionMessage);
         #endregion
 
         #region custom type initialization
@@ -40,10 +40,10 @@ namespace NCurses.Core.Interop
                 throw new InvalidOperationException("Custom types haven't been generated yet.");
 
             Type customType;
-            if (smallStrWindowWrapper is null)
+            if (singleByteStringNCursesWrapper is null)
             {
-                customType = typeof(NativeWindowSmallStr<>).MakeGenericType(DynamicTypeBuilder.schar);
-                smallStrWindowWrapper = (INativeWindowSmallStr)Activator.CreateInstance(customType);
+                customType = typeof(NativeWindowSingleByteString<>).MakeGenericType(DynamicTypeBuilder.schar);
+                singleByteStringNCursesWrapper = (INativeWindowSingleByteString)Activator.CreateInstance(customType);
             }
         }
 
@@ -58,24 +58,24 @@ namespace NCurses.Core.Interop
             Type customType;
             if (NativeNCurses.HasUnicodeSupport)
             {
-                if (wideWindowWrapper is null)
+                if (multiByteNCursesWrapper is null)
                 {
-                    customType = typeof(NativeWindowWide<,,,,>).MakeGenericType(DynamicTypeBuilder.cchar_t, DynamicTypeBuilder.wchar_t, 
+                    customType = typeof(NativeWindowMultiByte<,,,,>).MakeGenericType(DynamicTypeBuilder.cchar_t, DynamicTypeBuilder.wchar_t, 
                         DynamicTypeBuilder.chtype, DynamicTypeBuilder.schar, DynamicTypeBuilder.MEVENT);
-                    wideWindowWrapper = (INativeWindowWide)Activator.CreateInstance(customType);
+                    multiByteNCursesWrapper = (INativeWindowMultiByte)Activator.CreateInstance(customType);
                 }
 
-                if (wideStrWindowWrapper is null)
+                if (multiByteStringNCursesWrapper is null)
                 {
-                    customType = typeof(NativeWindowWideStr<,>).MakeGenericType(DynamicTypeBuilder.wchar_t, DynamicTypeBuilder.schar);
-                    wideStrWindowWrapper = (INativeWindowWideStr)Activator.CreateInstance(customType);
+                    customType = typeof(NativeWindowMultiByteString<,>).MakeGenericType(DynamicTypeBuilder.wchar_t, DynamicTypeBuilder.schar);
+                    multiByteStringNCursesWrapper = (INativeWindowMultiByteString)Activator.CreateInstance(customType);
                 }
             }
 
-            if (smallWindowWrapper is null)
+            if (singleByteNCursesWrapper is null)
             {
-                customType = typeof(NativeWindowSmall<,,>).MakeGenericType(DynamicTypeBuilder.chtype, DynamicTypeBuilder.schar, DynamicTypeBuilder.MEVENT);
-                smallWindowWrapper = (INativeWindowSmall)Activator.CreateInstance(customType);
+                customType = typeof(NativeWindowSingleByte<,,>).MakeGenericType(DynamicTypeBuilder.chtype, DynamicTypeBuilder.schar, DynamicTypeBuilder.MEVENT);
+                singleByteNCursesWrapper = (INativeWindowSingleByte)Activator.CreateInstance(customType);
             }
         }
         #endregion
@@ -101,9 +101,9 @@ namespace NCurses.Core.Interop
         /// <para />native method wrapped with verification.
         /// </summary>
         /// <param name="window">A pointer to a window</param>
-        public static void waddch(IntPtr window, in INCursesSCHAR ch)
+        public static void waddch(IntPtr window, in ISingleByteChar ch)
         {
-            SmallWindowWrapper.waddch(window, ch);
+            SingleByteNCursesWrapper.waddch(window, ch);
         }
         #endregion
 
@@ -113,9 +113,9 @@ namespace NCurses.Core.Interop
         /// <para />native method wrapped with verification.
         /// </summary>
         /// <param name="window">A pointer to a window</param>
-        public static void waddchnstr(IntPtr window, in INCursesSCHARStr txt, int number)
+        public static void waddchnstr(IntPtr window, in ISingleByteCharString txt, int number)
         {
-            SmallWindowWrapper.waddchnstr(window, txt, number);
+            SingleByteNCursesWrapper.waddchnstr(window, txt, number);
         }
         #endregion
 
@@ -125,9 +125,9 @@ namespace NCurses.Core.Interop
         /// <para />native method wrapped with verification.
         /// </summary>
         /// <param name="window">A pointer to a window</param>
-        public static void waddchstr(IntPtr window, in INCursesSCHARStr txt)
+        public static void waddchstr(IntPtr window, in ISingleByteCharString txt)
         {
-            SmallWindowWrapper.waddchstr(window, txt);
+            SingleByteNCursesWrapper.waddchstr(window, txt);
         }
         #endregion
 
@@ -139,7 +139,7 @@ namespace NCurses.Core.Interop
         /// <param name="window">A pointer to a window</param>
         public static void waddnstr(IntPtr window, in string txt, int number)
         {
-            SmallStrWindowWrapper.waddnstr(window, txt, number);
+            SingleByteStringNCursesWrapper.waddnstr(window, txt, number);
         }
         #endregion
 
@@ -151,7 +151,7 @@ namespace NCurses.Core.Interop
         /// <param name="window">A pointer to a window</param>
         public static void waddstr(IntPtr window, in string txt)
         {
-            SmallStrWindowWrapper.waddstr(window, txt);
+            SingleByteStringNCursesWrapper.waddstr(window, txt);
         }
         #endregion
 
@@ -199,7 +199,7 @@ namespace NCurses.Core.Interop
         /// <param name="window">A pointer to a window</param>
         public static void wattr_on(IntPtr window, ulong attrs)
         {
-            SmallWindowWrapper.wattr_on(window, attrs);
+            SingleByteNCursesWrapper.wattr_on(window, attrs);
         }
         #endregion
 
@@ -211,7 +211,7 @@ namespace NCurses.Core.Interop
         /// <param name="window">A pointer to a window</param>
         public static void wattr_off(IntPtr window, ulong attrs)
         {
-            SmallWindowWrapper.wattr_off(window, attrs);
+            SingleByteNCursesWrapper.wattr_off(window, attrs);
         }
         #endregion
 
@@ -223,7 +223,7 @@ namespace NCurses.Core.Interop
         /// <param name="window">A pointer to a window</param>
         public static void wattr_set(IntPtr window, ulong attrs, short pair)
         {
-            SmallWindowWrapper.wattr_set(window, attrs, pair);
+            SingleByteNCursesWrapper.wattr_set(window, attrs, pair);
         }
         #endregion
 
@@ -235,7 +235,7 @@ namespace NCurses.Core.Interop
         /// <param name="window">A pointer to a window</param>
         public static void wattr_get(IntPtr window, out ulong attrs, out short pair)
         {
-            SmallWindowWrapper.wattr_get(window, out attrs, out pair);
+            SingleByteNCursesWrapper.wattr_get(window, out attrs, out pair);
         }
         #endregion
 
@@ -245,9 +245,9 @@ namespace NCurses.Core.Interop
         /// <para />native method wrapped with verification.
         /// </summary>
         /// <param name="window">A pointer to a window</param>
-        public static void wbkgd(IntPtr window, in INCursesSCHAR bkgd)
+        public static void wbkgd(IntPtr window, in ISingleByteChar bkgd)
         {
-            SmallWindowWrapper.wbkgd(window, bkgd);
+            SingleByteNCursesWrapper.wbkgd(window, bkgd);
         }
         #endregion
 
@@ -256,9 +256,9 @@ namespace NCurses.Core.Interop
         /// see <see cref="NativeStdScr.bkgdset"/>
         /// </summary>
         /// <param name="window">A pointer to a window</param>
-        public static void wbkgdset(IntPtr window, in INCursesSCHAR bkgd)
+        public static void wbkgdset(IntPtr window, in ISingleByteChar bkgd)
         {
-            SmallWindowWrapper.wbkgdset(window, bkgd);
+            SingleByteNCursesWrapper.wbkgdset(window, bkgd);
         }
         #endregion
 
@@ -268,9 +268,9 @@ namespace NCurses.Core.Interop
         /// <para />native method wrapped with verification.
         /// </summary>
         /// <param name="window">A pointer to a window</param>
-        public static void wborder(IntPtr window, in INCursesSCHAR ls, in INCursesSCHAR rs, in INCursesSCHAR ts, in INCursesSCHAR bs, in INCursesSCHAR tl, in INCursesSCHAR tr, in INCursesSCHAR bl, in INCursesSCHAR br)
+        public static void wborder(IntPtr window, in ISingleByteChar ls, in ISingleByteChar rs, in ISingleByteChar ts, in ISingleByteChar bs, in ISingleByteChar tl, in ISingleByteChar tr, in ISingleByteChar bl, in ISingleByteChar br)
         {
-            SmallWindowWrapper.wborder(window, ls, rs, ts, bs, tl, tr, bl, br);
+            SingleByteNCursesWrapper.wborder(window, ls, rs, ts, bs, tl, tr, bl, br);
         }
         #endregion
 
@@ -283,9 +283,9 @@ namespace NCurses.Core.Interop
         /// <param name="window">A pointer to a window</param>
         /// <param name="verch">vertical character (lr, rs)</param>
         /// <param name="horch">horizontal character (ts, bs)</param>
-        public static void box(IntPtr window, in INCursesSCHAR verch, in INCursesSCHAR horch)
+        public static void box(IntPtr window, in ISingleByteChar verch, in ISingleByteChar horch)
         {
-            SmallWindowWrapper.box(window, verch, horch);
+            SingleByteNCursesWrapper.box(window, verch, horch);
         }
         #endregion
 
@@ -297,7 +297,7 @@ namespace NCurses.Core.Interop
         /// <param name="window">A pointer to a window</param>
         public static void wchgat(IntPtr window, int number, ulong attrs, short pair)
         {
-            SmallWindowWrapper.wchgat(window, number, attrs, pair);
+            SingleByteNCursesWrapper.wchgat(window, number, attrs, pair);
         }
         #endregion
 
@@ -398,9 +398,9 @@ namespace NCurses.Core.Interop
         /// <para />native method wrapped with verification.
         /// </summary>
         /// <param name="window">A pointer to a window</param>
-        public static void wechochar(IntPtr window, in INCursesSCHAR ch)
+        public static void wechochar(IntPtr window, in ISingleByteChar ch)
         {
-            SmallWindowWrapper.wechochar(window, ch);
+            SingleByteNCursesWrapper.wechochar(window, ch);
         }
         #endregion
 
@@ -422,9 +422,9 @@ namespace NCurses.Core.Interop
         /// </summary>
         /// <param name="window">A pointer to a window</param>
         /// <returns>Current window background character/attribute pair</returns>
-        public static INCursesSCHAR getbkgd(IntPtr window)
+        public static ISingleByteChar getbkgd(IntPtr window)
         {
-            return SmallWindowWrapper.getbkgd(window);
+            return SingleByteNCursesWrapper.getbkgd(window);
         }
         #endregion
 
@@ -460,7 +460,7 @@ namespace NCurses.Core.Interop
         /// <param name="window">A pointer to a window</param>
         public static void wgetnstr(IntPtr window, out string str, int count)
         {
-            SmallStrWindowWrapper.wgetnstr(window, out str, count);
+            SingleByteStringNCursesWrapper.wgetnstr(window, out str, count);
         }
         #endregion
 
@@ -472,7 +472,7 @@ namespace NCurses.Core.Interop
         /// <param name="window">A pointer to a window</param>
         public static void wgetstr(IntPtr window, out string str)
         {
-            SmallStrWindowWrapper.wgetstr(window, out str);
+            SingleByteStringNCursesWrapper.wgetstr(window, out str);
         }
         #endregion
 
@@ -482,9 +482,9 @@ namespace NCurses.Core.Interop
         /// <para />native method wrapped with verification.
         /// </summary>
         /// <param name="window">A pointer to a window</param>
-        public static void whline(IntPtr window, in INCursesSCHAR ch, int count)
+        public static void whline(IntPtr window, in ISingleByteChar ch, int count)
         {
-            SmallWindowWrapper.whline(window, ch, count);
+            SingleByteNCursesWrapper.whline(window, ch, count);
         }
         #endregion
 
@@ -544,9 +544,9 @@ namespace NCurses.Core.Interop
         /// </summary>
         /// <param name="window">A pointer to a window</param>
         /// <returns>characther with attributes at current position</returns>
-        public static void winch(IntPtr window, out INCursesSCHAR ch)
+        public static void winch(IntPtr window, out ISingleByteChar ch)
         {
-            SmallWindowWrapper.winch(window, out ch);
+            SingleByteNCursesWrapper.winch(window, out ch);
         }
         #endregion
 
@@ -556,9 +556,9 @@ namespace NCurses.Core.Interop
         /// <para />native method wrapped with verification.
         /// </summary>
         /// <param name="window">A pointer to a window</param>
-        public static void winchnstr(IntPtr window, out INCursesSCHARStr chStr, int count, out int read)
+        public static void winchnstr(IntPtr window, out ISingleByteCharString chStr, int count, out int read)
         {
-            SmallWindowWrapper.winchnstr(window, out chStr, count, out read);
+            SingleByteNCursesWrapper.winchnstr(window, out chStr, count, out read);
         }
 #endregion
 
@@ -568,9 +568,9 @@ namespace NCurses.Core.Interop
         /// <para />native method wrapped with verification.
         /// </summary>
         /// <param name="window">A pointer to a window</param>
-        public static void winchstr(IntPtr window, out INCursesSCHARStr chStr, out int read)
+        public static void winchstr(IntPtr window, out ISingleByteCharString chStr, out int read)
         {
-            SmallWindowWrapper.winchstr(window, out chStr, out read);
+            SingleByteNCursesWrapper.winchstr(window, out chStr, out read);
         }
 #endregion
 
@@ -582,7 +582,7 @@ namespace NCurses.Core.Interop
         /// <param name="window">A pointer to a window</param>
         public static void winnstr(IntPtr window, out string str, int n, out int read)
         {
-            SmallStrWindowWrapper.winnstr(window, out str, n, out read);
+            SingleByteStringNCursesWrapper.winnstr(window, out str, n, out read);
         }
 #endregion
 
@@ -592,9 +592,9 @@ namespace NCurses.Core.Interop
         /// <para />native method wrapped with verification.
         /// </summary>
         /// <param name="window">A pointer to a window</param>
-        public static void winsch(IntPtr window, in INCursesSCHAR ch)
+        public static void winsch(IntPtr window, in ISingleByteChar ch)
         {
-            SmallWindowWrapper.winsch(window, ch);
+            SingleByteNCursesWrapper.winsch(window, ch);
         }
 #endregion
 
@@ -630,7 +630,7 @@ namespace NCurses.Core.Interop
         /// <param name="window">A pointer to a window</param>
         public static void winsnstr(IntPtr window, in string str, int n)
         {
-            SmallStrWindowWrapper.winsnstr(window, str, n);
+            SingleByteStringNCursesWrapper.winsnstr(window, str, n);
         }
 #endregion
 
@@ -642,7 +642,7 @@ namespace NCurses.Core.Interop
         /// <param name="window">A pointer to a window</param>
         public static void winsstr(IntPtr window, string str)
         {
-            SmallStrWindowWrapper.winsstr(window, str);
+            SingleByteStringNCursesWrapper.winsstr(window, str);
         }
 #endregion
 
@@ -654,7 +654,7 @@ namespace NCurses.Core.Interop
         /// <param name="window">A pointer to a window</param>
         public static void winstr(IntPtr window, out string str, out int read)
         {
-            SmallStrWindowWrapper.winstr(window, out str, out read);
+            SingleByteStringNCursesWrapper.winstr(window, out str, out read);
         }
 #endregion
 
@@ -744,9 +744,9 @@ namespace NCurses.Core.Interop
         /// <para />native method wrapped with verification.
         /// </summary>
         /// <param name="window">A pointer to a window</param>
-        public static void mvwaddch(IntPtr window, int y, int x, in INCursesSCHAR ch)
+        public static void mvwaddch(IntPtr window, int y, int x, in ISingleByteChar ch)
         {
-            SmallWindowWrapper.mvwaddch(window, y, x, ch);
+            SingleByteNCursesWrapper.mvwaddch(window, y, x, ch);
         }
 #endregion
 
@@ -756,9 +756,9 @@ namespace NCurses.Core.Interop
         /// <para />native method wrapped with verification.
         /// </summary>
         /// <param name="window">A pointer to a window</param>
-        public static void mvwaddchnstr(IntPtr window, int y, int x, in INCursesSCHARStr chstr, int n)
+        public static void mvwaddchnstr(IntPtr window, int y, int x, in ISingleByteCharString chstr, int n)
         {
-            SmallWindowWrapper.mvwaddchnstr(window, y, x, chstr, n);
+            SingleByteNCursesWrapper.mvwaddchnstr(window, y, x, chstr, n);
         }
 #endregion
 
@@ -768,9 +768,9 @@ namespace NCurses.Core.Interop
         /// <para />native method wrapped with verification.
         /// </summary>
         /// <param name="window">A pointer to a window</param>
-        public static void mvwaddchstr(IntPtr window, int y, int x, in INCursesSCHARStr chstr)
+        public static void mvwaddchstr(IntPtr window, int y, int x, in ISingleByteCharString chstr)
         {
-            SmallWindowWrapper.mvwaddchstr(window, y, x, chstr);
+            SingleByteNCursesWrapper.mvwaddchstr(window, y, x, chstr);
         }
 #endregion
 
@@ -782,7 +782,7 @@ namespace NCurses.Core.Interop
         /// <param name="window">A pointer to a window</param>
         public static void mvwaddnstr(IntPtr window, int y, int x, in string txt, int n)
         {
-            SmallStrWindowWrapper.mvwaddnstr(window, y, x, txt, n);
+            SingleByteStringNCursesWrapper.mvwaddnstr(window, y, x, txt, n);
         }
 #endregion
 
@@ -794,7 +794,7 @@ namespace NCurses.Core.Interop
         /// <param name="window">A pointer to a window</param>
         public static void mvwaddstr(IntPtr window, int y, int x, in string txt)
         {
-            SmallStrWindowWrapper.mvwaddstr(window, y, x, txt);
+            SingleByteStringNCursesWrapper.mvwaddstr(window, y, x, txt);
         }
 #endregion
 
@@ -808,7 +808,7 @@ namespace NCurses.Core.Interop
         /// <param name="x">the column number to move to</param>
         public static void mvwchgat(IntPtr window, int y, int x, int number, ulong attrs, short pair)
         {
-            SmallWindowWrapper.mvwchgat(window, y, x, number, attrs, pair);
+            SingleByteNCursesWrapper.mvwchgat(window, y, x, number, attrs, pair);
         }
 #endregion
 
@@ -860,7 +860,7 @@ namespace NCurses.Core.Interop
         /// <param name="x">the column number to move to</param>
         public static void mvwgetnstr(IntPtr window, int y, int x, out string str, int count)
         {
-            SmallStrWindowWrapper.mvwgetnstr(window, y, x, out str, count);
+            SingleByteStringNCursesWrapper.mvwgetnstr(window, y, x, out str, count);
         }
 #endregion
 
@@ -874,7 +874,7 @@ namespace NCurses.Core.Interop
         /// <param name="x">the column number to move to</param>
         public static void mvwgetstr(IntPtr window, int y, int x, out string str)
         {
-            SmallStrWindowWrapper.mvwgetstr(window, y, x, out str);
+            SingleByteStringNCursesWrapper.mvwgetstr(window, y, x, out str);
         }
 #endregion
 
@@ -886,9 +886,9 @@ namespace NCurses.Core.Interop
         /// <param name="window">A pointer to a window</param>
         /// <param name="y">the line number to move to</param>
         /// <param name="x">the column number to move to</param>
-        public static void mvwhline(IntPtr window, int y, int x, in INCursesSCHAR ch, int count)
+        public static void mvwhline(IntPtr window, int y, int x, in ISingleByteChar ch, int count)
         {
-            SmallWindowWrapper.mvwhline(window, y, x, ch, count);
+            SingleByteNCursesWrapper.mvwhline(window, y, x, ch, count);
         }
 #endregion
 
@@ -896,9 +896,9 @@ namespace NCurses.Core.Interop
         /// <summary>
         /// see <see cref="NativeStdScr.mvinch(int, int)"/>
         /// </summary>
-        public static void mvwinch(IntPtr window, int y, int x, out INCursesSCHAR ch)
+        public static void mvwinch(IntPtr window, int y, int x, out ISingleByteChar ch)
         {
-            SmallWindowWrapper.mvwinch(window, y, x, out ch);
+            SingleByteNCursesWrapper.mvwinch(window, y, x, out ch);
         }
 #endregion
 
@@ -908,9 +908,9 @@ namespace NCurses.Core.Interop
         /// <para />native method wrapped with verification.
         /// </summary>
         /// <param name="window">A pointer to a window</param>
-        public static void mvwinchnstr(IntPtr window, int y, int x, out INCursesSCHARStr chStr, int count, out int read)
+        public static void mvwinchnstr(IntPtr window, int y, int x, out ISingleByteCharString chStr, int count, out int read)
         {
-            SmallWindowWrapper.mvwinchnstr(window, y, x, out chStr, count, out read);
+            SingleByteNCursesWrapper.mvwinchnstr(window, y, x, out chStr, count, out read);
         }
 #endregion
 
@@ -922,9 +922,9 @@ namespace NCurses.Core.Interop
         /// <param name="window">A pointer to a window</param>
         /// <param name="y">the line number to move to</param>
         /// <param name="x">the column number to move to</param>
-        public static void mvwinchstr(IntPtr window, int y, int x, out INCursesSCHARStr chStr, out int read)
+        public static void mvwinchstr(IntPtr window, int y, int x, out ISingleByteCharString chStr, out int read)
         {
-            SmallWindowWrapper.mvwinchstr(window, y, x, out chStr, out read);
+            SingleByteNCursesWrapper.mvwinchstr(window, y, x, out chStr, out read);
         }
 #endregion
 
@@ -938,7 +938,7 @@ namespace NCurses.Core.Interop
         /// <param name="x">the column number to move to</param>
         public static void mvwinnstr(IntPtr window, int y, int x, out string str, int n, out int read)
         {
-            SmallStrWindowWrapper.mvwinnstr(window, y, x, out str, n, out read);
+            SingleByteStringNCursesWrapper.mvwinnstr(window, y, x, out str, n, out read);
         }
 #endregion
 
@@ -950,9 +950,9 @@ namespace NCurses.Core.Interop
         /// <param name="window">A pointer to a window</param>
         /// <param name="y">the line number to move to</param>
         /// <param name="x">the column number to move to</param>
-        public static void mvwinsch(IntPtr window, int y, int x, in INCursesSCHAR ch)
+        public static void mvwinsch(IntPtr window, int y, int x, in ISingleByteChar ch)
         {
-            SmallWindowWrapper.mvwinsch(window, y, x, ch);
+            SingleByteNCursesWrapper.mvwinsch(window, y, x, ch);
         }
 #endregion
 
@@ -966,7 +966,7 @@ namespace NCurses.Core.Interop
         /// <param name="x">the column number to move to</param>
         public static void mvwinsnstr(IntPtr window, int y, int x, in string str, int n)
         {
-            SmallStrWindowWrapper.mvwinsnstr(window, y, x, str, n);
+            SingleByteStringNCursesWrapper.mvwinsnstr(window, y, x, str, n);
         }
 #endregion
 
@@ -980,7 +980,7 @@ namespace NCurses.Core.Interop
         /// <param name="x">the column number to move to</param>
         public static void mvwinsstr(IntPtr window, int y, int x, in string str)
         {
-            SmallStrWindowWrapper.mvwinsstr(window, y, x, str);
+            SingleByteStringNCursesWrapper.mvwinsstr(window, y, x, str);
         }
 #endregion
 
@@ -992,7 +992,7 @@ namespace NCurses.Core.Interop
         /// <param name="window">A pointer to a window</param>
         public static void mvwinstr(IntPtr window, int y, int x, out string str, out int read)
         {
-            SmallStrWindowWrapper.mvwinstr(window, y, x, out str, out read);
+            SingleByteStringNCursesWrapper.mvwinstr(window, y, x, out str, out read);
         }
 #endregion
 
@@ -1004,7 +1004,7 @@ namespace NCurses.Core.Interop
         /// <param name="window">A pointer to a window</param>
         public static void mvwprintw(IntPtr window, int y, int x, string format, params string[] argList)
         {
-            SmallStrWindowWrapper.mvwprintw(window, y, x, format, argList);
+            SingleByteStringNCursesWrapper.mvwprintw(window, y, x, format, argList);
         }
 #endregion
 
@@ -1016,7 +1016,7 @@ namespace NCurses.Core.Interop
         /// <param name="window">A pointer to a window</param>
         public static void mvwscanw(IntPtr window, int y, int x, out string format, params string[] argList)
         {
-            SmallStrWindowWrapper.mvwscanw(window, y, x, out format, argList);
+            SingleByteStringNCursesWrapper.mvwscanw(window, y, x, out format, argList);
         }
 #endregion
 
@@ -1027,9 +1027,9 @@ namespace NCurses.Core.Interop
         /// </summary>
         /// <param name="y">the line number to move to</param>
         /// <param name="x">the column number to move to</param>
-        public static void mvwvline(IntPtr window, int y, int x, in INCursesSCHAR ch, int n)
+        public static void mvwvline(IntPtr window, int y, int x, in ISingleByteChar ch, int n)
         {
-            SmallWindowWrapper.mvwvline(window, y, x, ch, n);
+            SingleByteNCursesWrapper.mvwvline(window, y, x, ch, n);
         }
 #endregion
 
@@ -1079,7 +1079,7 @@ namespace NCurses.Core.Interop
         /// <param name="window">A pointer to a window</param>
         public static void wprintw(IntPtr window, string format, params string[] argList)
         {
-            SmallStrWindowWrapper.wprintw(window, format, argList);
+            SingleByteStringNCursesWrapper.wprintw(window, format, argList);
         }
 #endregion
 
@@ -1091,7 +1091,7 @@ namespace NCurses.Core.Interop
         /// <param name="window">A pointer to a window</param>
         public static void wscanw(IntPtr window, out string format, params string[] argList)
         {
-            SmallStrWindowWrapper.wscanw(window, out format, argList);
+            SingleByteStringNCursesWrapper.wscanw(window, out format, argList);
         }
 #endregion
 
@@ -1254,9 +1254,9 @@ namespace NCurses.Core.Interop
         /// <para />native method wrapped with verification.
         /// </summary>
         /// <param name="window">A pointer to a window</param>
-        public static void wvline(IntPtr window, in INCursesSCHAR ch, int n)
+        public static void wvline(IntPtr window, in ISingleByteChar ch, int n)
         {
-            SmallWindowWrapper.wvline(window, ch, n);
+            SingleByteNCursesWrapper.wvline(window, ch, n);
         }
 #endregion
 
@@ -1649,9 +1649,9 @@ namespace NCurses.Core.Interop
         /// <para />native method wrapped with verification.
         /// </summary>
         /// <param name="window">A pointer to a window</param>
-        public static void wadd_wch(IntPtr window, INCursesWCHAR wch)
+        public static void wadd_wch(IntPtr window, IMultiByteChar wch)
         {
-            WideWindowWrapper.wadd_wch(window, wch);
+            MultiByteNCursesWrapper.wadd_wch(window, wch);
         }
 #endregion
 
@@ -1661,9 +1661,9 @@ namespace NCurses.Core.Interop
         /// <para />native method wrapped with verification.
         /// </summary>
         /// <param name="window">A pointer to a window</param>
-        public static void wadd_wchnstr(IntPtr window, in INCursesWCHARStr wchStr, int n)
+        public static void wadd_wchnstr(IntPtr window, in IMultiByteCharString wchStr, int n)
         {
-            WideWindowWrapper.wadd_wchnstr(window, wchStr, n);
+            MultiByteNCursesWrapper.wadd_wchnstr(window, wchStr, n);
         }
 #endregion
 
@@ -1673,9 +1673,9 @@ namespace NCurses.Core.Interop
         /// <para />native method wrapped with verification.
         /// </summary>
         /// <param name="window">A pointer to a window</param>
-        public static void wadd_wchstr(IntPtr window, in INCursesWCHARStr wchStr)
+        public static void wadd_wchstr(IntPtr window, in IMultiByteCharString wchStr)
         {
-            WideWindowWrapper.wadd_wchstr(window, wchStr);
+            MultiByteNCursesWrapper.wadd_wchstr(window, wchStr);
         }
 #endregion
 
@@ -1687,7 +1687,7 @@ namespace NCurses.Core.Interop
         /// <param name="window">A pointer to a window</param>
         public static void waddnwstr(IntPtr window, in string wstr, int n)
         {
-            WideStrWindowWrapper.waddnwstr(window, wstr, n);
+            MultiByteStringNCursesWrapper.waddnwstr(window, wstr, n);
         }
 #endregion
 
@@ -1699,7 +1699,7 @@ namespace NCurses.Core.Interop
         /// <param name="window">A pointer to a window</param>
         public static void waddwstr(IntPtr window, in string wstr)
         {
-            WideStrWindowWrapper.waddwstr(window, wstr);
+            MultiByteStringNCursesWrapper.waddwstr(window, wstr);
         }
 #endregion
 
@@ -1709,9 +1709,9 @@ namespace NCurses.Core.Interop
         /// <para />native method wrapped with verification.
         /// </summary>
         /// <param name="window">A pointer to a window</param>
-        public static void wbkgrnd(IntPtr window, in INCursesWCHAR wch)
+        public static void wbkgrnd(IntPtr window, in IMultiByteChar wch)
         {
-            WideWindowWrapper.wbkgrnd(window, wch);
+            MultiByteNCursesWrapper.wbkgrnd(window, wch);
         }
 #endregion
 
@@ -1720,9 +1720,9 @@ namespace NCurses.Core.Interop
         /// see <see cref="NativeStdScr.bkgrndset"/>
         /// </summary>
         /// <param name="window">A pointer to a window</param>
-        public static void wbkgrndset(IntPtr window, in INCursesWCHAR wch)
+        public static void wbkgrndset(IntPtr window, in IMultiByteChar wch)
         {
-            WideWindowWrapper.wbkgrndset(window, wch);
+            MultiByteNCursesWrapper.wbkgrndset(window, wch);
         }
 #endregion
 
@@ -1731,10 +1731,10 @@ namespace NCurses.Core.Interop
         /// see <see cref="NativeStdScr.border_set"/>
         /// </summary>
         /// <param name="window">A pointer to a window</param>
-        public static void wborder_set(IntPtr window, in INCursesWCHAR ls, in INCursesWCHAR rs, in INCursesWCHAR ts, in INCursesWCHAR bs, in INCursesWCHAR tl, in INCursesWCHAR tr,
-            in INCursesWCHAR bl, in INCursesWCHAR br)
+        public static void wborder_set(IntPtr window, in IMultiByteChar ls, in IMultiByteChar rs, in IMultiByteChar ts, in IMultiByteChar bs, in IMultiByteChar tl, in IMultiByteChar tr,
+            in IMultiByteChar bl, in IMultiByteChar br)
         {
-            WideWindowWrapper.wborder_set(window, ls, rs, ts, bs, tl, tr, bl, br);
+            MultiByteNCursesWrapper.wborder_set(window, ls, rs, ts, bs, tl, tr, bl, br);
         }
 #endregion
 
@@ -1745,9 +1745,9 @@ namespace NCurses.Core.Interop
         /// <para />native method wrapped with verification.
         /// </summary>
         /// <param name="window">A pointer to a window</param>
-        public static void box_set(IntPtr window, in INCursesWCHAR verch, in INCursesWCHAR horch)
+        public static void box_set(IntPtr window, in IMultiByteChar verch, in IMultiByteChar horch)
         {
-            WideWindowWrapper.box_set(window, verch, horch);
+            MultiByteNCursesWrapper.box_set(window, verch, horch);
         }
 #endregion
 
@@ -1757,9 +1757,9 @@ namespace NCurses.Core.Interop
         /// <para />native method wrapped with verification.
         /// </summary>
         /// <param name="window">A pointer to a window</param>
-        public static void wecho_wchar(IntPtr window, in INCursesWCHAR wch)
+        public static void wecho_wchar(IntPtr window, in IMultiByteChar wch)
         {
-            WideWindowWrapper.wecho_wchar(window, wch);
+            MultiByteNCursesWrapper.wecho_wchar(window, wch);
         }
 #endregion
 
@@ -1771,7 +1771,7 @@ namespace NCurses.Core.Interop
         /// <param name="window">A pointer to a window</param>
         public static bool wget_wch(IntPtr window, out char wch, out Key key)
         {
-            return WideStrWindowWrapper.wget_wch(window, out wch, out key);
+            return MultiByteStringNCursesWrapper.wget_wch(window, out wch, out key);
         }
 #endregion
 
@@ -1783,7 +1783,7 @@ namespace NCurses.Core.Interop
         /// <param name="window">A pointer to a window</param>
         public static void wget_wstr(IntPtr window, out string wstr)
         {
-            WideStrWindowWrapper.wget_wstr(window, out wstr);
+            MultiByteStringNCursesWrapper.wget_wstr(window, out wstr);
         }
 #endregion
 
@@ -1793,9 +1793,9 @@ namespace NCurses.Core.Interop
         /// <para />native method wrapped with verification.
         /// </summary>
         /// <param name="window">A pointer to a window</param>
-        public static void wgetbkgrnd(IntPtr window, out INCursesWCHAR wch)
+        public static void wgetbkgrnd(IntPtr window, out IMultiByteChar wch)
         {
-            WideWindowWrapper.wgetbkgrnd(window, out wch);
+            MultiByteNCursesWrapper.wgetbkgrnd(window, out wch);
         }
 #endregion
 
@@ -1807,7 +1807,7 @@ namespace NCurses.Core.Interop
         /// <param name="window">A pointer to a window</param>
         public static void wgetn_wstr(IntPtr window, out string wstr, int n)
         {
-            WideStrWindowWrapper.wgetn_wstr(window, out wstr, n);
+            MultiByteStringNCursesWrapper.wgetn_wstr(window, out wstr, n);
         }
 #endregion
 
@@ -1817,9 +1817,9 @@ namespace NCurses.Core.Interop
         /// <para />native method wrapped with verification.
         /// </summary>
         /// <param name="window">A pointer to a window</param>
-        public static void whline_set(IntPtr window, in INCursesWCHAR wch, int n)
+        public static void whline_set(IntPtr window, in IMultiByteChar wch, int n)
         {
-            WideWindowWrapper.whline_set(window, wch, n);
+            MultiByteNCursesWrapper.whline_set(window, wch, n);
         }
 #endregion
 
@@ -1829,9 +1829,9 @@ namespace NCurses.Core.Interop
         /// <para />native method wrapped with verification.
         /// </summary>
         /// <param name="window">A pointer to a window</param>
-        public static void win_wch(IntPtr window, out INCursesWCHAR wcval)
+        public static void win_wch(IntPtr window, out IMultiByteChar wcval)
         {
-            WideWindowWrapper.win_wch(window, out wcval);
+            MultiByteNCursesWrapper.win_wch(window, out wcval);
         }
 #endregion
 
@@ -1841,9 +1841,9 @@ namespace NCurses.Core.Interop
         /// <para />native method wrapped with verification.
         /// </summary>
         /// <param name="window">A pointer to a window</param>
-        public static void win_wchnstr(IntPtr window, out INCursesWCHARStr wchStr, int n)
+        public static void win_wchnstr(IntPtr window, out IMultiByteCharString wchStr, int n)
         {
-            WideWindowWrapper.win_wchnstr(window, out wchStr, n);
+            MultiByteNCursesWrapper.win_wchnstr(window, out wchStr, n);
         }
 #endregion
 
@@ -1853,9 +1853,9 @@ namespace NCurses.Core.Interop
         /// <para />native method wrapped with verification.
         /// </summary>
         /// <param name="window">A pointer to a window</param>
-        public static void win_wchstr(IntPtr window, out INCursesWCHARStr wchStr)
+        public static void win_wchstr(IntPtr window, out IMultiByteCharString wchStr)
         {
-            WideWindowWrapper.win_wchstr(window, out wchStr);
+            MultiByteNCursesWrapper.win_wchstr(window, out wchStr);
         }
 #endregion
 
@@ -1867,7 +1867,7 @@ namespace NCurses.Core.Interop
         /// <param name="window">A pointer to a window</param>
         public static void winnwstr(IntPtr window, out string str, int n, out int read)
         {
-            WideStrWindowWrapper.winnwstr(window, out str, n, out read);
+            MultiByteStringNCursesWrapper.winnwstr(window, out str, n, out read);
         }
 #endregion
 
@@ -1879,7 +1879,7 @@ namespace NCurses.Core.Interop
         /// <param name="window">A pointer to a window</param>
         public static void wins_nwstr(IntPtr window, in string str, int n)
         {
-            WideStrWindowWrapper.wins_nwstr(window, str, n);
+            MultiByteStringNCursesWrapper.wins_nwstr(window, str, n);
         }
 #endregion
 
@@ -1890,9 +1890,9 @@ namespace NCurses.Core.Interop
         /// <para />native method wrapped with verification.
         /// </summary>
         /// <param name="window">A pointer to a window</param>
-        public static void wins_wch(IntPtr window, in INCursesWCHAR wch)
+        public static void wins_wch(IntPtr window, in IMultiByteChar wch)
         {
-            WideWindowWrapper.wins_wch(window, wch);
+            MultiByteNCursesWrapper.wins_wch(window, wch);
         }
 #endregion
 
@@ -1904,7 +1904,7 @@ namespace NCurses.Core.Interop
         /// <param name="window">A pointer to a window</param>
         public static void wins_wstr(IntPtr window, in string str)
         {
-            WideStrWindowWrapper.wins_wstr(window, str);
+            MultiByteStringNCursesWrapper.wins_wstr(window, str);
         }
 #endregion
 
@@ -1916,7 +1916,7 @@ namespace NCurses.Core.Interop
         /// <param name="window">A pointer to a window</param>
         public static void winwstr(IntPtr window, out string str)
         {
-            WideStrWindowWrapper.winwstr(window, out str);
+            MultiByteStringNCursesWrapper.winwstr(window, out str);
         }
 #endregion
 
@@ -1926,9 +1926,9 @@ namespace NCurses.Core.Interop
         /// <para />native method wrapped with verification.
         /// </summary>
         /// <param name="window">A pointer to a window</param>
-        public static void mvwadd_wch(IntPtr window, int y, int x, in INCursesWCHAR wch)
+        public static void mvwadd_wch(IntPtr window, int y, int x, in IMultiByteChar wch)
         {
-            WideWindowWrapper.mvwadd_wch(window, y, x, wch);
+            MultiByteNCursesWrapper.mvwadd_wch(window, y, x, wch);
         }
 #endregion
 
@@ -1938,9 +1938,9 @@ namespace NCurses.Core.Interop
         /// <para />native method wrapped with verification.
         /// </summary>
         /// <param name="window">A pointer to a window</param>
-        public static void mvwadd_wchnstr(IntPtr window, int y, int x, in INCursesWCHARStr wchStr, int n)
+        public static void mvwadd_wchnstr(IntPtr window, int y, int x, in IMultiByteCharString wchStr, int n)
         {
-            WideWindowWrapper.mvwadd_wchnstr(window, y, x, wchStr, n);
+            MultiByteNCursesWrapper.mvwadd_wchnstr(window, y, x, wchStr, n);
         }
 #endregion
 
@@ -1950,9 +1950,9 @@ namespace NCurses.Core.Interop
         /// <para />native method wrapped with verification.
         /// </summary>
         /// <param name="window">A pointer to a window</param>
-        public static void mvwadd_wchstr(IntPtr window, int y, int x, in INCursesWCHARStr wchStr)
+        public static void mvwadd_wchstr(IntPtr window, int y, int x, in IMultiByteCharString wchStr)
         {
-            WideWindowWrapper.mvwadd_wchstr(window, y, x, wchStr);
+            MultiByteNCursesWrapper.mvwadd_wchstr(window, y, x, wchStr);
         }
 #endregion
 
@@ -1964,7 +1964,7 @@ namespace NCurses.Core.Interop
         /// <param name="window">A pointer to a window</param>
         public static void mvwaddnwstr(IntPtr window, int y, int x, in string wstr, int n)
         {
-            WideStrWindowWrapper.mvwaddnwstr(window, y, x, wstr, n);
+            MultiByteStringNCursesWrapper.mvwaddnwstr(window, y, x, wstr, n);
         }
 #endregion
 
@@ -1976,7 +1976,7 @@ namespace NCurses.Core.Interop
         /// <param name="window">A pointer to a window</param>
         public static void mvwaddwstr(IntPtr window, int y, int x, in string wstr)
         {
-            WideStrWindowWrapper.mvwaddwstr(window, y, x, wstr);
+            MultiByteStringNCursesWrapper.mvwaddwstr(window, y, x, wstr);
         }
 #endregion
 
@@ -1988,7 +1988,7 @@ namespace NCurses.Core.Interop
         /// <param name="window">A pointer to a window</param>
         public static bool mvwget_wch(IntPtr window, int y, int x, out char wch, out Key key)
         {
-            return WideStrWindowWrapper.mvwget_wch(window, y, x, out wch, out key);
+            return MultiByteStringNCursesWrapper.mvwget_wch(window, y, x, out wch, out key);
         }
 #endregion
 
@@ -2000,7 +2000,7 @@ namespace NCurses.Core.Interop
         /// <param name="window">A pointer to a window</param>
         public static void mvwget_wstr(IntPtr window, int y, int x, out string wstr)
         {
-            WideStrWindowWrapper.mvwget_wstr(window, y, x, out wstr);
+            MultiByteStringNCursesWrapper.mvwget_wstr(window, y, x, out wstr);
         }
 #endregion
 
@@ -2012,7 +2012,7 @@ namespace NCurses.Core.Interop
         /// <param name="window">A pointer to a window</param>
         public static void mvwgetn_wstr(IntPtr window, int y, int x, out string wstr, int n)
         {
-            WideStrWindowWrapper.mvwgetn_wstr(window, y, x, out wstr, n);
+            MultiByteStringNCursesWrapper.mvwgetn_wstr(window, y, x, out wstr, n);
         }
 #endregion
 
@@ -2022,9 +2022,9 @@ namespace NCurses.Core.Interop
         /// <para />native method wrapped with verification.
         /// </summary>
         /// <param name="window">A pointer to a window</param>
-        public static void mvwhline_set(IntPtr window, int y, int x, in INCursesWCHAR wch, int n)
+        public static void mvwhline_set(IntPtr window, int y, int x, in IMultiByteChar wch, int n)
         {
-            WideWindowWrapper.mvwhline_set(window, y, x, wch, n);
+            MultiByteNCursesWrapper.mvwhline_set(window, y, x, wch, n);
         }
 #endregion
 
@@ -2034,9 +2034,9 @@ namespace NCurses.Core.Interop
         /// <para />native method wrapped with verification.
         /// </summary>
         /// <param name="window">A pointer to a window</param>
-        public static void mvwin_wch(IntPtr window, int y, int x, out INCursesWCHAR wcval)
+        public static void mvwin_wch(IntPtr window, int y, int x, out IMultiByteChar wcval)
         {
-            WideWindowWrapper.mvwin_wch(window, y, x, out wcval);
+            MultiByteNCursesWrapper.mvwin_wch(window, y, x, out wcval);
         }
 #endregion
 
@@ -2046,9 +2046,9 @@ namespace NCurses.Core.Interop
         /// <para />native method wrapped with verification.
         /// </summary>
         /// <param name="wcval">array reference to store the complex characters in</param>
-        public static void mvwin_wchnstr(IntPtr window, int y, int x, out INCursesWCHARStr wchStr, int n)
+        public static void mvwin_wchnstr(IntPtr window, int y, int x, out IMultiByteCharString wchStr, int n)
         {
-            WideWindowWrapper.mvwin_wchnstr(window, y, x, out wchStr, n);
+            MultiByteNCursesWrapper.mvwin_wchnstr(window, y, x, out wchStr, n);
         }
         #endregion
 
@@ -2059,9 +2059,9 @@ namespace NCurses.Core.Interop
         /// </summary>
         /// <param name="y">the line number to move to</param>
         /// <param name="x">the column number to move to</param>
-        public static void mvwin_wchstr(IntPtr window, int y, int x, out INCursesWCHARStr wchStr)
+        public static void mvwin_wchstr(IntPtr window, int y, int x, out IMultiByteCharString wchStr)
         {
-            WideWindowWrapper.mvwin_wchstr(window, y, x, out wchStr);
+            MultiByteNCursesWrapper.mvwin_wchstr(window, y, x, out wchStr);
         }
         #endregion
 
@@ -2073,7 +2073,7 @@ namespace NCurses.Core.Interop
         /// <param name="window">A pointer to a window</param>
         public static void mvwinnwstr(IntPtr window, int y, int x, out string str, int n, out int read)
         {
-            WideStrWindowWrapper.mvwinnwstr(window, y, x, out str, n, out read);
+            MultiByteStringNCursesWrapper.mvwinnwstr(window, y, x, out str, n, out read);
         }
 #endregion
 
@@ -2085,7 +2085,7 @@ namespace NCurses.Core.Interop
         /// <param name="window">A pointer to a window</param>
         public static void mvwins_nwstr(IntPtr window, int y, int x, in string str, int n)
         {
-            WideStrWindowWrapper.mvwins_nwstr(window, y, x, str, n);
+            MultiByteStringNCursesWrapper.mvwins_nwstr(window, y, x, str, n);
         }
 #endregion
 
@@ -2095,9 +2095,9 @@ namespace NCurses.Core.Interop
         /// <para />native method wrapped with verification.
         /// </summary>
         /// <param name="window">A pointer to a window</param>
-        public static void mvwins_wch(IntPtr window, int y, int x, in INCursesWCHAR wch)
+        public static void mvwins_wch(IntPtr window, int y, int x, in IMultiByteChar wch)
         {
-            WideWindowWrapper.mvwins_wch(window, y, x, wch);
+            MultiByteNCursesWrapper.mvwins_wch(window, y, x, wch);
         }
 #endregion
 
@@ -2109,7 +2109,7 @@ namespace NCurses.Core.Interop
         /// <param name="window">A pointer to a window</param>
         public static void mvwins_wstr(IntPtr window, int y, int x, in string wstr)
         {
-            WideStrWindowWrapper.mvwins_wstr(window, y, x, wstr);
+            MultiByteStringNCursesWrapper.mvwins_wstr(window, y, x, wstr);
         }
 #endregion
 
@@ -2121,7 +2121,7 @@ namespace NCurses.Core.Interop
         /// <param name="window">A pointer to a window</param>
         public static void mvwinwstr(IntPtr window, int y, int x, out string str)
         {
-            WideStrWindowWrapper.mvwinwstr(window, y, x, out str);
+            MultiByteStringNCursesWrapper.mvwinwstr(window, y, x, out str);
         }
 #endregion
 
@@ -2131,9 +2131,9 @@ namespace NCurses.Core.Interop
         /// <para />native method wrapped with verification.
         /// </summary>
         /// <param name="window">A pointer to a window</param>
-        public static void mvwvline_set(IntPtr window, int y, int x, in INCursesWCHAR wch, int n)
+        public static void mvwvline_set(IntPtr window, int y, int x, in IMultiByteChar wch, int n)
         {
-            WideWindowWrapper.mvwvline_set(window, y, x, wch, n);
+            MultiByteNCursesWrapper.mvwvline_set(window, y, x, wch, n);
         }
 #endregion
 
@@ -2143,9 +2143,9 @@ namespace NCurses.Core.Interop
         /// <para />native method wrapped with verification.
         /// </summary>
         /// <param name="window">A pointer to a window</param>
-        public static void wvline_set(IntPtr window, in INCursesWCHAR wch, int n)
+        public static void wvline_set(IntPtr window, in IMultiByteChar wch, int n)
         {
-            WideWindowWrapper.wvline_set(window, wch, n);
+            MultiByteNCursesWrapper.wvline_set(window, wch, n);
         }
 #endregion
 

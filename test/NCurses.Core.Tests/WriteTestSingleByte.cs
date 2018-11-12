@@ -70,7 +70,7 @@ namespace NCurses.Core.Tests
         {
             string testString = "test";
             this.SingleByteStdScr.Write(testString, Attrs.BOLD | Attrs.ITALIC, 4);
-            this.SingleByteStdScr.ExtractString(0, 0, out INCursesCharStr resultNCursesString, testString.Length);
+            this.SingleByteStdScr.ExtractString(0, 0, out INCursesCharString resultNCursesString, testString.Length);
 
             Assert.Equal(testString.Length, resultNCursesString.Length);
             string resultString = resultNCursesString.ToString();
@@ -84,8 +84,8 @@ namespace NCurses.Core.Tests
         {
             string testString = "test";
 
-            this.SingleByteStdScr.CreateString(testString, Attrs.BOLD | Attrs.ITALIC, 4, out INCursesCharStr managedString);
-            this.SingleByteStdScr.ExtractString(0, 0, out INCursesCharStr resultNCursesString, testString.Length);
+            this.SingleByteStdScr.CreateString(testString, Attrs.BOLD | Attrs.ITALIC, 4, out INCursesCharString managedString);
+            this.SingleByteStdScr.ExtractString(0, 0, out INCursesCharString resultNCursesString, testString.Length);
 
             Assert.StrictEqual(managedString, resultNCursesString);
         }

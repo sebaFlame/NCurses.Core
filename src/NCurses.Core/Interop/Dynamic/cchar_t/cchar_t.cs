@@ -10,7 +10,7 @@ namespace NCurses.Core.Interop.Dynamic.cchar_t
      * temporary test class -> REMOVE
     */
     [StructLayout(LayoutKind.Sequential)]
-    internal struct cchar_t : INCursesWCHAR, IEquatable<cchar_t> //cchar_t
+    internal struct cchar_t : IMultiByteChar, IEquatable<cchar_t> //cchar_t
     {
         private const int charGlobalLength = 10; //Constants.SIZEOF_WCHAR_T * Constants.CCHARW_MAX
 
@@ -131,7 +131,7 @@ namespace NCurses.Core.Interop.Dynamic.cchar_t
             }
         }
 
-        public bool Equals(INCursesWCHAR obj)
+        public bool Equals(IMultiByteChar obj)
         {
             if (obj is cchar_t other) //boxing?
                 return this == other;
@@ -140,7 +140,7 @@ namespace NCurses.Core.Interop.Dynamic.cchar_t
 
         public bool Equals(INCursesChar obj)
         {
-            if (obj is INCursesWCHAR other) //boxing?
+            if (obj is IMultiByteChar other) //boxing?
                 return this.Equals(other);
             return false;
         }

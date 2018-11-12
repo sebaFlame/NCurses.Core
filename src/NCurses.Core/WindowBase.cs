@@ -204,7 +204,7 @@ namespace NCurses.Core
         /// write a (generated) string of an NCurses type to the window
         /// </summary>
         /// <param name="str">the string to write to the window</param>
-        public abstract void Write(in INCursesCharStr str);
+        public abstract void Write(in INCursesCharString str);
 
         /// <summary>
         /// write string <paramref name="str"/> to the window.
@@ -510,14 +510,14 @@ namespace NCurses.Core
         /// read a string with all its attributes of atmost <see cref="Constants.MAX_STRING_LENGTH"/> characters or until the right margin from the console output.
         /// </summary>
         /// <param name="charsWithAttributes">The returned charactes with attributes</param>
-        public abstract void ExtractString(out INCursesCharStr charsWithAttributes);
+        public abstract void ExtractString(out INCursesCharString charsWithAttributes);
 
         /// <summary>
         /// read a string with all its attributes of atmost paramref name="maxChars"/> characters or until the right margin from the console output.
         /// </summary>
         /// <param name="charsWithAttributes">The returned charactes with attributes</param>
         /// <param name="maxChars">The number of characters to extract</param>
-        public abstract void ExtractString(out INCursesCharStr charsWithAttributes, int maxChars);
+        public abstract void ExtractString(out INCursesCharString charsWithAttributes, int maxChars);
 
         /// <summary>
         /// read a string with all its attributes of atmost <see cref="Constants.MAX_STRING_LENGTH"/> characters or until the right margin from the console output 
@@ -526,7 +526,7 @@ namespace NCurses.Core
         /// <param name="nline">the line number to start writing</param>
         /// <param name="ncol">the column number to start writing</param>
         /// <param name="charsWithAttributes">The returned charactes with attributes</param>
-        public abstract void ExtractString(int nline, int ncol, out INCursesCharStr charsWithAttributes);
+        public abstract void ExtractString(int nline, int ncol, out INCursesCharString charsWithAttributes);
 
         /// <summary>
         /// read a string with all its attributes of atmost <paramref name="maxChars"/> characters or until the right margin from the console output 
@@ -536,7 +536,7 @@ namespace NCurses.Core
         /// <param name="ncol">the column number to start writing</param>
         /// <param name="charsWithAttributes">The returned charactes with attributes</param>
         /// <param name="maxChars">The number of characters to extract</param>
-        public abstract void ExtractString(int nline, int ncol, out INCursesCharStr charsWithAttributes, int maxChars);
+        public abstract void ExtractString(int nline, int ncol, out INCursesCharString charsWithAttributes, int maxChars);
         #endregion
 
         //TODO: strings
@@ -570,7 +570,7 @@ namespace NCurses.Core
         /// </summary>
         /// <param name="str">The string to convert</param>
         /// <returns>The converted str</returns>
-        public abstract void CreateString(string str, out INCursesCharStr chStr);
+        public abstract void CreateString(string str, out INCursesCharString chStr);
 
         /// <summary>
         /// Get a native string representing <paramref name="str"/>
@@ -578,7 +578,7 @@ namespace NCurses.Core
         /// <param name="str">The string to convert</param>
         /// <param name="attrs">attributes applied to the character</param>
         /// <returns>The converted str</returns>
-        public abstract void CreateString(string str, ulong attrs, out INCursesCharStr chStr);
+        public abstract void CreateString(string str, ulong attrs, out INCursesCharString chStr);
 
         /// <summary>
         /// Get a native string representing <paramref name="str"/> with attributes/color applied
@@ -587,7 +587,7 @@ namespace NCurses.Core
         /// <param name="attrs">attributes applied to the character</param>
         /// <param name="pair">pair number applied to the character</param>
         /// <returns>The converted cahracter</returns>
-        public abstract void CreateString(string str, ulong attrs, short pair, out INCursesCharStr chStr);
+        public abstract void CreateString(string str, ulong attrs, short pair, out INCursesCharString chStr);
         #endregion
 
         #region border

@@ -56,7 +56,7 @@ namespace NCurses.Core.Tests
 
         //TODO: crashes on windows using netcoreapp2.0
         /// <summary>
-        /// <see cref="INCursesWrapperWideStr{TWideStr, TSmallStr}.mvinnwstr(int, int, ref TWideStr, int)"/>
+        /// <see cref="IMultiByteStringWrapper{TWideStr, TSmallStr}.mvinnwstr(int, int, ref TWideStr, int)"/>
         /// </summary>
         [Fact]
         public void TestWriteStringMultiByte()
@@ -75,7 +75,7 @@ namespace NCurses.Core.Tests
 
         //TODO: crashes on windows using netcoreapp2.0
         /// <summary>
-        /// <see cref="INCursesWrapperWideStr{TWideStr, TSmallStr}.mvinnwstr(int, int, ref TWideStr, int)"/>
+        /// <see cref="IMultiByteStringWrapper{TWideStr, TSmallStr}.mvinnwstr(int, int, ref TWideStr, int)"/>
         /// </summary>
         [Fact]
         public void TestMoveWriteStringMultiByte()
@@ -102,7 +102,7 @@ namespace NCurses.Core.Tests
                 , '\u049A', '\u049B', '\u049C', '\u049D', '\u049E', '\u049F' });
             this.MultiByteStdScr.Write(testString, Attrs.BOLD | Attrs.ITALIC, 4);
 
-            this.MultiByteStdScr.ExtractString(0, 0, out INCursesCharStr resultNCursesString, testString.Length);
+            this.MultiByteStdScr.ExtractString(0, 0, out INCursesCharString resultNCursesString, testString.Length);
             Assert.Equal(testString.Length, resultNCursesString.Length);
             string resultString = resultNCursesString.ToString();
             Assert.Equal(testString, resultString);
@@ -118,10 +118,10 @@ namespace NCurses.Core.Tests
 
             string testString = new string(new char[] { '\u0490', '\u0491', '\u0492', '\u0493', '\u0494', '\u0495', '\u0496', '\u0497', '\u0498', '\u0499'
                 , '\u049A', '\u049B', '\u049C', '\u049D', '\u049E', '\u049F' });
-            this.MultiByteStdScr.CreateString(testString, Attrs.BOLD | Attrs.ITALIC, 4, out INCursesCharStr managedString);
+            this.MultiByteStdScr.CreateString(testString, Attrs.BOLD | Attrs.ITALIC, 4, out INCursesCharString managedString);
 
             this.MultiByteStdScr.Write(managedString);
-            this.MultiByteStdScr.ExtractString(0, 0, out INCursesCharStr resultNCursesString, testString.Length);
+            this.MultiByteStdScr.ExtractString(0, 0, out INCursesCharString resultNCursesString, testString.Length);
 
             Assert.StrictEqual(resultNCursesString, managedString);
         }

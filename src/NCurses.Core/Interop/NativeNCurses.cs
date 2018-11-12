@@ -76,20 +76,20 @@ namespace NCurses.Core.Interop
         }
 
         #region single byte custom type wrapper fields
-        private static INativeNCursesSmallStr smallStrCursesWrapper;
-        private static INativeNCursesSmallStr SmallStrCursesWrapper => smallStrCursesWrapper ?? throw new InvalidOperationException(Constants.TypeGenerationExceptionMessage);
-        private static INativeNCursesWideStr wideStrCursesWrapper;
-        private static INativeNCursesWideStr WideStrCursesWrapper => wideStrCursesWrapper ?? throw new InvalidOperationException(Constants.TypeGenerationExceptionMessage);
+        private static INativeNCursesSingleByteString singleByteStringNCursesWrapper;
+        private static INativeNCursesSingleByteString SingleByteStringNCursesWrapper => singleByteStringNCursesWrapper ?? throw new InvalidOperationException(Constants.TypeGenerationExceptionMessage);
+        private static INativeNCursesMultiByteString multiByteStringNCursesWrapper;
+        private static INativeNCursesMultiByteString MultiByteStringNCursesWrapper => multiByteStringNCursesWrapper ?? throw new InvalidOperationException(Constants.TypeGenerationExceptionMessage);
         #endregion
 
         #region multi byte custom type wrapper fields
-        private static INativeNCursesWide wideNCursesWrapper;
-        private static INativeNCursesWide WideNCursesWrapper => NativeNCurses.HasUnicodeSupport
-              ? wideNCursesWrapper ?? throw new InvalidOperationException(Constants.TypeGenerationExceptionMessage)
+        private static INativeNCursesMultiByte multiByteNCursesWrapper;
+        private static INativeNCursesMultiByte MultiByteNCursesWrapper => NativeNCurses.HasUnicodeSupport
+              ? multiByteNCursesWrapper ?? throw new InvalidOperationException(Constants.TypeGenerationExceptionMessage)
               : throw new InvalidOperationException(Constants.NoUnicodeExceptionMessage);
-        private static INativeNCursesSmall smallCursesWrapper;
-        private static INativeNCursesSmall SmallCursesWrapper => NativeNCurses.HasUnicodeSupport
-              ? smallCursesWrapper ?? throw new InvalidOperationException(Constants.TypeGenerationExceptionMessage)
+        private static INativeNCursesSingleByte singleByteNCursesWrapper;
+        private static INativeNCursesSingleByte SingelByteNCursesWrapper => NativeNCurses.HasUnicodeSupport
+              ? singleByteNCursesWrapper ?? throw new InvalidOperationException(Constants.TypeGenerationExceptionMessage)
               : throw new InvalidOperationException(Constants.NoUnicodeExceptionMessage);
         #endregion
 
@@ -105,10 +105,10 @@ namespace NCurses.Core.Interop
                 throw new InvalidOperationException("Custom types haven't been generated yet.");
 
             Type customType;
-            if (smallStrCursesWrapper is null)
+            if (singleByteStringNCursesWrapper is null)
             {
-                customType = typeof(NativeNCursesSmallStr<>).MakeGenericType(DynamicTypeBuilder.schar);
-                smallStrCursesWrapper = (INativeNCursesSmallStr)Activator.CreateInstance(customType);
+                customType = typeof(NativeNCursesSingleByteString<>).MakeGenericType(DynamicTypeBuilder.schar);
+                singleByteStringNCursesWrapper = (INativeNCursesSingleByteString)Activator.CreateInstance(customType);
             }
         }
 
@@ -123,24 +123,24 @@ namespace NCurses.Core.Interop
             Type customType;
             if (NativeNCurses.HasUnicodeSupport)
             {
-                if (wideNCursesWrapper is null)
+                if (multiByteNCursesWrapper is null)
                 {
-                    customType = typeof(NativeNCursesWide<,,,,>).MakeGenericType(DynamicTypeBuilder.cchar_t, DynamicTypeBuilder.wchar_t, 
+                    customType = typeof(NativeNCursesMultiByte<,,,,>).MakeGenericType(DynamicTypeBuilder.cchar_t, DynamicTypeBuilder.wchar_t, 
                         DynamicTypeBuilder.chtype, DynamicTypeBuilder.schar, DynamicTypeBuilder.MEVENT);
-                    wideNCursesWrapper = (INativeNCursesWide)Activator.CreateInstance(customType);
+                    multiByteNCursesWrapper = (INativeNCursesMultiByte)Activator.CreateInstance(customType);
                 }
 
-                if (wideStrCursesWrapper is null)
+                if (multiByteStringNCursesWrapper is null)
                 {
-                    customType = typeof(NativeNCursesWideStr<,>).MakeGenericType(DynamicTypeBuilder.wchar_t, DynamicTypeBuilder.schar);
-                    wideStrCursesWrapper = (INativeNCursesWideStr)Activator.CreateInstance(customType);
+                    customType = typeof(NativeNCursesMultiByteString<,>).MakeGenericType(DynamicTypeBuilder.wchar_t, DynamicTypeBuilder.schar);
+                    multiByteStringNCursesWrapper = (INativeNCursesMultiByteString)Activator.CreateInstance(customType);
                 }
             }
 
-            if (smallCursesWrapper is null)
+            if (singleByteNCursesWrapper is null)
             {
-                customType = typeof(NativeNCursesSmall<,,>).MakeGenericType(DynamicTypeBuilder.chtype, DynamicTypeBuilder.schar, DynamicTypeBuilder.MEVENT);
-                smallCursesWrapper = (INativeNCursesSmall)Activator.CreateInstance(customType);
+                customType = typeof(NativeNCursesSingleByte<,,>).MakeGenericType(DynamicTypeBuilder.chtype, DynamicTypeBuilder.schar, DynamicTypeBuilder.MEVENT);
+                singleByteNCursesWrapper = (INativeNCursesSingleByte)Activator.CreateInstance(customType);
             }
         }
         #endregion
@@ -605,7 +605,7 @@ namespace NCurses.Core.Interop
         /// <returns>The user's current erase character</returns>
         public static char erasechar()
         {
-            return SmallStrCursesWrapper.erasechar();
+            return SingleByteStringNCursesWrapper.erasechar();
         }
         #endregion
 
@@ -884,7 +884,7 @@ namespace NCurses.Core.Interop
         /// <returns>a string representing the key code</returns>
         public static string keyname(int c)
         {
-            return SmallStrCursesWrapper.keyname(c);
+            return SingleByteStringNCursesWrapper.keyname(c);
         }
         #endregion
 
@@ -895,7 +895,7 @@ namespace NCurses.Core.Interop
         /// <returns>the kill character</returns>
         public static char killchar()
         {
-            return SmallStrCursesWrapper.killchar();
+            return SingleByteStringNCursesWrapper.killchar();
         }
         #endregion
 
@@ -913,7 +913,7 @@ namespace NCurses.Core.Interop
         /// <returns>the current terminal verbose description</returns>
         public static string longname()
         {
-            return SmallStrCursesWrapper.longname();
+            return SingleByteStringNCursesWrapper.longname();
         }
         #endregion
 
@@ -1292,7 +1292,7 @@ namespace NCurses.Core.Interop
         /// </summary>
         public static void scr_dump(in string filename)
         {
-            SmallStrCursesWrapper.scr_dump(filename);
+            SingleByteStringNCursesWrapper.scr_dump(filename);
         }
         #endregion
 
@@ -1311,7 +1311,7 @@ namespace NCurses.Core.Interop
         /// </summary>
         public static void scr_init(in string filename)
         {
-            SmallStrCursesWrapper.scr_init(filename);
+            SingleByteStringNCursesWrapper.scr_init(filename);
         }
         #endregion
 
@@ -1325,7 +1325,7 @@ namespace NCurses.Core.Interop
         /// </summary>
         public static void scr_restore(in string filename)
         {
-            SmallStrCursesWrapper.scr_restore(filename);
+            SingleByteStringNCursesWrapper.scr_restore(filename);
         }
         #endregion
 
@@ -1340,7 +1340,7 @@ namespace NCurses.Core.Interop
         /// </summary>
         public static void scr_set(in string filename)
         {
-            SmallStrCursesWrapper.scr_set(filename);
+            SingleByteStringNCursesWrapper.scr_set(filename);
         }
         #endregion
 
@@ -1374,7 +1374,7 @@ namespace NCurses.Core.Interop
         /// <param name="attr"></param>
         public static void slk_attroff(ulong attrs)
         {
-            SmallCursesWrapper.slk_attroff(attrs);
+            SingelByteNCursesWrapper.slk_attroff(attrs);
         }
         #endregion
 
@@ -1385,7 +1385,7 @@ namespace NCurses.Core.Interop
         /// </summary>
         public static void slk_attr_off(ulong attrs)
         {
-            SmallCursesWrapper.slk_attr_off(attrs);
+            SingelByteNCursesWrapper.slk_attr_off(attrs);
         }
         #endregion
 
@@ -1397,7 +1397,7 @@ namespace NCurses.Core.Interop
         /// <param name="attr"></param>
         public static void slk_attron(ulong attrs)
         {
-            SmallCursesWrapper.slk_attron(attrs);
+            SingelByteNCursesWrapper.slk_attron(attrs);
         }
         #endregion
 
@@ -1408,7 +1408,7 @@ namespace NCurses.Core.Interop
         /// </summary>
         public static void slk_attr_on(ulong attrs)
         {
-            SmallCursesWrapper.slk_attr_on(attrs);
+            SingelByteNCursesWrapper.slk_attr_on(attrs);
         }
         #endregion
 
@@ -1420,7 +1420,7 @@ namespace NCurses.Core.Interop
         /// <param name="attr"></param>
         public static void slk_attrset(ulong attrs)
         {
-            SmallCursesWrapper.slk_attrset(attrs);
+            SingelByteNCursesWrapper.slk_attrset(attrs);
         }
         #endregion
 
@@ -1431,7 +1431,7 @@ namespace NCurses.Core.Interop
         /// <returns>an attribute</returns>
         public static ulong slk_attr()
         {
-            return SmallCursesWrapper.slk_attr();
+            return SingelByteNCursesWrapper.slk_attr();
         }
         #endregion
 
@@ -1442,7 +1442,7 @@ namespace NCurses.Core.Interop
         /// </summary>
         public static void slk_attr_set(ulong attrs, short color_pair)
         {
-            SmallCursesWrapper.slk_attr_set(attrs, color_pair);
+            SingelByteNCursesWrapper.slk_attr_set(attrs, color_pair);
         }
         #endregion
 
@@ -1500,7 +1500,7 @@ namespace NCurses.Core.Interop
         /// <returns>label</returns>
         public static string slk_label(int labnum)
         {
-            return SmallStrCursesWrapper.slk_label(labnum);
+            return SingleByteStringNCursesWrapper.slk_label(labnum);
         }
         #endregion
 
@@ -1554,7 +1554,7 @@ namespace NCurses.Core.Interop
         /// right-justified,  respectively, within the label.</param>
         public static void slk_set(int labnum, in string label, int fmt)
         {
-            SmallStrCursesWrapper.slk_set(labnum, label, fmt);
+            SingleByteStringNCursesWrapper.slk_set(labnum, label, fmt);
         }
         #endregion
 
@@ -1644,7 +1644,7 @@ namespace NCurses.Core.Interop
         /// <returns>the supported attributes OR'd together</returns>
         public static ulong termattrs()
         {
-            return SmallCursesWrapper.termattrs();
+            return SingelByteNCursesWrapper.termattrs();
         }
         #endregion
 
@@ -1655,7 +1655,7 @@ namespace NCurses.Core.Interop
         /// <returns>the terminal name</returns>
         public static string termname()
         {
-            return SmallStrCursesWrapper.termname();
+            return SingleByteStringNCursesWrapper.termname();
         }
         #endregion
 
@@ -1736,7 +1736,7 @@ namespace NCurses.Core.Interop
         /// <param name="attrs">attributes to show</param>
         public static void vidattr(ulong attrs)
         {
-            SmallCursesWrapper.vidattr(attrs);
+            SingelByteNCursesWrapper.vidattr(attrs);
         }
         #endregion
 
@@ -1751,7 +1751,7 @@ namespace NCurses.Core.Interop
         /// <param name="attrs">attributes to show</param>
         public static void vidputs(ulong attrs, Func<int, int> NCURSES_OUTC)
         {
-            SmallCursesWrapper.vidputs(attrs, NCURSES_OUTC);
+            SingelByteNCursesWrapper.vidputs(attrs, NCURSES_OUTC);
         }
         #endregion
 
@@ -1770,7 +1770,7 @@ namespace NCurses.Core.Interop
         /// </returns>
         public static int tigetflag(in string capName)
         {
-            return SmallStrCursesWrapper.tigetflag(capName);
+            return SingleByteStringNCursesWrapper.tigetflag(capName);
         }
         #endregion
 
@@ -1785,7 +1785,7 @@ namespace NCurses.Core.Interop
         /// </returns>
         public static int tigetnum(in string capname)
         {
-            return SmallStrCursesWrapper.tigetnum(capname);
+            return SingleByteStringNCursesWrapper.tigetnum(capname);
         }
         #endregion
 
@@ -1800,7 +1800,7 @@ namespace NCurses.Core.Interop
         /// </returns>
         public static int tigetstr(in string capname)
         {
-            return SmallStrCursesWrapper.tigetstr(capname);
+            return SingleByteStringNCursesWrapper.tigetstr(capname);
         }
         #endregion
 
@@ -1814,7 +1814,7 @@ namespace NCurses.Core.Interop
         /// <param name="attrs">attributes to show</param>
         public static void putp(in string str)
         {
-            SmallStrCursesWrapper.putp(str);
+            SingleByteStringNCursesWrapper.putp(str);
         }
         #endregion
 
@@ -1845,7 +1845,7 @@ namespace NCurses.Core.Interop
         /// <returns>the name of the keycode</returns>
         public static string keybound(int keycode, int count)
         {
-            return SmallStrCursesWrapper.keybound(keycode, count);
+            return SingleByteStringNCursesWrapper.keybound(keycode, count);
         }
         #endregion
 
@@ -1856,7 +1856,7 @@ namespace NCurses.Core.Interop
         /// <returns>version string</returns>
         public static string curses_version()
         {
-            return SmallStrCursesWrapper.curses_version();
+            return SingleByteStringNCursesWrapper.curses_version();
         }
         #endregion
 
@@ -1885,7 +1885,7 @@ namespace NCurses.Core.Interop
         /// </summary>
         public static void define_key(in string definition, int keycode)
         {
-            SmallStrCursesWrapper.define_key(definition, keycode);
+            SingleByteStringNCursesWrapper.define_key(definition, keycode);
         }
         #endregion
 
@@ -1911,7 +1911,7 @@ namespace NCurses.Core.Interop
         /// </returns>
         public static int key_defined(string definition)
         {
-           return SmallStrCursesWrapper.key_defined(definition);
+           return SingleByteStringNCursesWrapper.key_defined(definition);
         }
         #endregion
 
@@ -2214,7 +2214,7 @@ namespace NCurses.Core.Interop
         /// <param name="wch">a reference to store the erase char</param>
         public static void erasewchar(out char wch)
         {
-            WideStrCursesWrapper.erasewchar(out wch);
+            MultiByteStringNCursesWrapper.erasewchar(out wch);
         }
         #endregion
 
@@ -2233,9 +2233,9 @@ namespace NCurses.Core.Interop
         /// <param name="wch">a reference to store the string (initialized as StringBuilder(5))</param>
         /// <param name="attrs">a reference to store the attributes in</param>
         /// <param name="color_pair">a reference to store the color pair in</param>
-        public static void getcchar(in INCursesWCHAR wcval, out char wch, out ulong attrs, out short color_pair)
+        public static void getcchar(in IMultiByteChar wcval, out char wch, out ulong attrs, out short color_pair)
         {
-            WideNCursesWrapper.getcchar(wcval, out wch, out attrs, out color_pair);
+            MultiByteNCursesWrapper.getcchar(wcval, out wch, out attrs, out color_pair);
         }
         #endregion
 
@@ -2247,7 +2247,7 @@ namespace NCurses.Core.Interop
         /// <returns>a string representing the key code</returns>
         public static string key_name(in char c)
         {
-            return WideStrCursesWrapper.key_name(c);
+            return MultiByteStringNCursesWrapper.key_name(c);
         }
         #endregion
 
@@ -2261,7 +2261,7 @@ namespace NCurses.Core.Interop
         /// <param name="wch">a reference to store the kill char</param>
         public static void killwchar(out char wch)
         {
-            WideStrCursesWrapper.killwchar(out wch);
+            MultiByteStringNCursesWrapper.killwchar(out wch);
         }
         #endregion
 
@@ -2278,16 +2278,16 @@ namespace NCurses.Core.Interop
         /// Additional nonspacing characters are ignored.</para>
         /// <para>The string may  contain a  single control character
         /// instead.  In that case, no nonspacing  characters are
-        /// allowed. Color attributes will be OR'd into <see cref="NCursesWCHAR.attr"/> .
+        /// allowed. Color attributes will be OR'd into <see cref="MultiByteChar.attr"/> .
         /// <para />native method wrapped with verification.
         /// </summary>
         /// <param name="wcval">the NCURSES_CH_T to get all properties from</param>
         /// <param name="wch">a reference to store the string</param>
         /// <param name="attrs">a reference to store the attributes in</param>
         /// <param name="color_pair">a reference to store the color pair in</param>
-        public static void setcchar(out INCursesWCHAR wcval, in char wch, ulong attrs, short color_pair)
+        public static void setcchar(out IMultiByteChar wcval, in char wch, ulong attrs, short color_pair)
         {
-            WideNCursesWrapper.setcchar(out wcval, wch, attrs, color_pair);
+            MultiByteNCursesWrapper.setcchar(out wcval, wch, attrs, color_pair);
         }
         #endregion
 
@@ -2298,7 +2298,7 @@ namespace NCurses.Core.Interop
         /// </summary>
         public static void slk_wset(int labnum, in string label, int fmt)
         {
-            WideStrCursesWrapper.slk_wset(labnum, label, fmt);
+            MultiByteStringNCursesWrapper.slk_wset(labnum, label, fmt);
         }
         #endregion
 
@@ -2308,7 +2308,7 @@ namespace NCurses.Core.Interop
         /// </summary>
         public static ulong term_attrs()
         {
-            return SmallCursesWrapper.term_attrs();
+            return SingelByteNCursesWrapper.term_attrs();
         }
         #endregion
 
@@ -2325,7 +2325,7 @@ namespace NCurses.Core.Interop
         /// <param name="wch">a reference to store the kill char</param>
         public static void unget_wch(in char wch)
         {
-            WideStrCursesWrapper.unget_wch(wch);
+            MultiByteStringNCursesWrapper.unget_wch(wch);
         }
         #endregion
 
@@ -2346,7 +2346,7 @@ namespace NCurses.Core.Interop
         /// <param name="pair">color pair index</param>
         public static void vid_attr(ulong attrs, short pair)
         {
-            SmallCursesWrapper.vid_attr(attrs, pair);
+            SingelByteNCursesWrapper.vid_attr(attrs, pair);
         }
         #endregion
 
@@ -2357,7 +2357,7 @@ namespace NCurses.Core.Interop
         /// </summary>
         public static void vid_puts(ulong attrs, short pair, Func<int, int> NCURSES_OUTC)
         {
-            SmallCursesWrapper.vid_puts(attrs, pair, NCURSES_OUTC);
+            SingelByteNCursesWrapper.vid_puts(attrs, pair, NCURSES_OUTC);
         }
         #endregion
 
@@ -2370,9 +2370,9 @@ namespace NCurses.Core.Interop
         /// of a wide character.
         /// </summary>
         /// <returns>printable representation of the character</returns>
-        public static void unctrl(in INCursesSCHAR ch, out string str)
+        public static void unctrl(in ISingleByteChar ch, out string str)
         {
-            SmallCursesWrapper.unctrl(ch, out str);
+            SingelByteNCursesWrapper.unctrl(ch, out str);
         }
         #endregion
 
@@ -2381,9 +2381,9 @@ namespace NCurses.Core.Interop
         /// see <see cref="unctrl"/>
         /// </summary>
         /// <returns>printable representation of the character</returns>
-        public static void wunctrl(in INCursesWCHAR wch, out string str)
+        public static void wunctrl(in IMultiByteChar wch, out string str)
         {
-            WideNCursesWrapper.wunctrl(wch, out str);
+            MultiByteNCursesWrapper.wunctrl(wch, out str);
         }
         #endregion
 
@@ -2416,7 +2416,7 @@ namespace NCurses.Core.Interop
         /// </summary>
         public static void getmouse(out IMEVENT ev)
         {
-            SmallCursesWrapper.getmouse(out ev);
+            SingelByteNCursesWrapper.getmouse(out ev);
         }
         #endregion
 
@@ -2429,7 +2429,7 @@ namespace NCurses.Core.Interop
         /// </summary>
         public static void ungetmouse(in IMEVENT ev)
         {
-            SmallCursesWrapper.ungetmouse(ev);
+            SingelByteNCursesWrapper.ungetmouse(ev);
         }
         #endregion
 
@@ -2447,7 +2447,7 @@ namespace NCurses.Core.Interop
         /// <returns>the supported mousemasks</returns>
         public static ulong mousemask(ulong newmask, out ulong oldmask)
         {
-            return SmallCursesWrapper.mousemask(newmask, out oldmask);
+            return SingelByteNCursesWrapper.mousemask(newmask, out oldmask);
         }
         #endregion
 

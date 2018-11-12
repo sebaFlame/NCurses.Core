@@ -55,9 +55,9 @@ namespace NCurses.Core
         { }
 
         //TODO: same reference????
-        private INCursesSCHAR VerifyChar(in INCursesChar ch)
+        private ISingleByteChar VerifyChar(in INCursesChar ch)
         {
-            if (!(ch is INCursesSCHAR tmp))
+            if (!(ch is ISingleByteChar tmp))
                 throw new InvalidCastException("Character is in incorrect format");
             return tmp;
         }
@@ -71,14 +71,14 @@ namespace NCurses.Core
 
         public override void Border()
         {
-            SmallCharFactory.Instance.GetNativeEmptyChar(out INCursesSCHAR ls);
-            SmallCharFactory.Instance.GetNativeEmptyChar(out INCursesSCHAR rs);
-            SmallCharFactory.Instance.GetNativeEmptyChar(out INCursesSCHAR ts);
-            SmallCharFactory.Instance.GetNativeEmptyChar(out INCursesSCHAR bs);
-            SmallCharFactory.Instance.GetNativeEmptyChar(out INCursesSCHAR tl);
-            SmallCharFactory.Instance.GetNativeEmptyChar(out INCursesSCHAR tr);
-            SmallCharFactory.Instance.GetNativeEmptyChar(out INCursesSCHAR bl);
-            SmallCharFactory.Instance.GetNativeEmptyChar(out INCursesSCHAR br);
+            SingleByteCharFactory.Instance.GetNativeEmptyChar(out ISingleByteChar ls);
+            SingleByteCharFactory.Instance.GetNativeEmptyChar(out ISingleByteChar rs);
+            SingleByteCharFactory.Instance.GetNativeEmptyChar(out ISingleByteChar ts);
+            SingleByteCharFactory.Instance.GetNativeEmptyChar(out ISingleByteChar bs);
+            SingleByteCharFactory.Instance.GetNativeEmptyChar(out ISingleByteChar tl);
+            SingleByteCharFactory.Instance.GetNativeEmptyChar(out ISingleByteChar tr);
+            SingleByteCharFactory.Instance.GetNativeEmptyChar(out ISingleByteChar bl);
+            SingleByteCharFactory.Instance.GetNativeEmptyChar(out ISingleByteChar br);
 
             NativeWindow.wborder(this.WindowPtr, ls, rs, ts, bs, tl, tr, bl, br);
         }
@@ -90,8 +90,8 @@ namespace NCurses.Core
 
         public override void Box()
         {
-            SmallCharFactory.Instance.GetNativeEmptyChar(out INCursesSCHAR verch);
-            SmallCharFactory.Instance.GetNativeEmptyChar(out INCursesSCHAR horch);
+            SingleByteCharFactory.Instance.GetNativeEmptyChar(out ISingleByteChar verch);
+            SingleByteCharFactory.Instance.GetNativeEmptyChar(out ISingleByteChar horch);
 
             NativeWindow.box(this.WindowPtr, verch, horch);
         }
@@ -99,37 +99,37 @@ namespace NCurses.Core
         //TODO: use native override?
         public override void CreateChar(char ch, out INCursesChar chRet)
         {
-            SmallCharFactory.Instance.GetNativeChar(ch, out INCursesSCHAR res);
+            SingleByteCharFactory.Instance.GetNativeChar(ch, out ISingleByteChar res);
             chRet = res;
         }
 
         public override void CreateChar(char ch, ulong attrs, out INCursesChar chRet)
         {
-            SmallCharFactory.Instance.GetNativeChar(ch, attrs, out INCursesSCHAR res);
+            SingleByteCharFactory.Instance.GetNativeChar(ch, attrs, out ISingleByteChar res);
             chRet = res;
         }
 
         public override void CreateChar(char ch, ulong attrs, short pair, out INCursesChar chRet)
         {
-            SmallCharFactory.Instance.GetNativeChar(ch, attrs, pair, out INCursesSCHAR res);
+            SingleByteCharFactory.Instance.GetNativeChar(ch, attrs, pair, out ISingleByteChar res);
             chRet = res;
         }
 
-        public override void CreateString(string str, out INCursesCharStr chStr)
+        public override void CreateString(string str, out INCursesCharString chStr)
         {
-            SmallCharFactory.Instance.GetNativeString(str, out INCursesSCHARStr res);
+            SingleByteCharFactory.Instance.GetNativeString(str, out ISingleByteCharString res);
             chStr = res;
         }
 
-        public override void CreateString(string str, ulong attrs, out INCursesCharStr chStr)
+        public override void CreateString(string str, ulong attrs, out INCursesCharString chStr)
         {
-            SmallCharFactory.Instance.GetNativeString(str, attrs, out INCursesSCHARStr res);
+            SingleByteCharFactory.Instance.GetNativeString(str, attrs, out ISingleByteCharString res);
             chStr = res;
         }
 
-        public override void CreateString(string str, ulong attrs, short pair, out INCursesCharStr chStr)
+        public override void CreateString(string str, ulong attrs, short pair, out INCursesCharString chStr)
         {
-            SmallCharFactory.Instance.GetNativeString(str, attrs, pair, out INCursesSCHARStr res);
+            SingleByteCharFactory.Instance.GetNativeString(str, attrs, pair, out ISingleByteCharString res);
             chStr = res;
         }
 
@@ -140,31 +140,31 @@ namespace NCurses.Core
 
         public override char ExtractChar()
         {
-            NativeWindow.winch(this.WindowPtr, out INCursesSCHAR ch);
+            NativeWindow.winch(this.WindowPtr, out ISingleByteChar ch);
             return ch.Char;
         }
 
         public override void ExtractChar(out INCursesChar ch)
         {
-            NativeWindow.winch(this.WindowPtr, out INCursesSCHAR sch);
+            NativeWindow.winch(this.WindowPtr, out ISingleByteChar sch);
             ch = sch;
         }
 
         public override void ExtractChar(int nline, int ncol, out INCursesChar ch)
         {
-            NativeWindow.mvwinch(this.WindowPtr, nline, ncol, out INCursesSCHAR sch);
+            NativeWindow.mvwinch(this.WindowPtr, nline, ncol, out ISingleByteChar sch);
             ch = sch;
         }
 
         public override char ExtractChar(int nline, int ncol)
         {
-            NativeWindow.mvwinch(this.WindowPtr, nline, ncol, out INCursesSCHAR ch);
+            NativeWindow.mvwinch(this.WindowPtr, nline, ncol, out ISingleByteChar ch);
             return ch.Char;
         }
 
         public override char ExtractChar(out ulong attrs, out short pair)
         {
-            NativeWindow.winch(this.WindowPtr, out INCursesSCHAR ch);
+            NativeWindow.winch(this.WindowPtr, out ISingleByteChar ch);
             attrs = ch.Attributes;
             pair = ch.Color;
             return ch.Char;
@@ -172,7 +172,7 @@ namespace NCurses.Core
 
         public override char ExtractChar(int nline, int ncol, out ulong attrs, out short pair)
         {
-            NativeWindow.mvwinch(this.WindowPtr, nline, ncol, out INCursesSCHAR ch);
+            NativeWindow.mvwinch(this.WindowPtr, nline, ncol, out ISingleByteChar ch);
             attrs = ch.Attributes;
             pair = ch.Color;
             return ch.Char;
@@ -202,27 +202,27 @@ namespace NCurses.Core
             return str;
         }
 
-        public override void ExtractString(out INCursesCharStr charsWithAttributes)
+        public override void ExtractString(out INCursesCharString charsWithAttributes)
         {
-            NativeWindow.winchstr(this.WindowPtr, out INCursesSCHARStr str, out int read);
+            NativeWindow.winchstr(this.WindowPtr, out ISingleByteCharString str, out int read);
             charsWithAttributes = str;
         }
 
-        public override void ExtractString(out INCursesCharStr charsWithAttributes, int maxChars)
+        public override void ExtractString(out INCursesCharString charsWithAttributes, int maxChars)
         {
-            NativeWindow.winchnstr(this.WindowPtr, out INCursesSCHARStr str, maxChars, out int read);
+            NativeWindow.winchnstr(this.WindowPtr, out ISingleByteCharString str, maxChars, out int read);
             charsWithAttributes = str;
         }
 
-        public override void ExtractString(int nline, int ncol, out INCursesCharStr charsWithAttributes)
+        public override void ExtractString(int nline, int ncol, out INCursesCharString charsWithAttributes)
         {
-            NativeWindow.mvwinchstr(this.WindowPtr, nline, ncol, out INCursesSCHARStr str, out int read);
+            NativeWindow.mvwinchstr(this.WindowPtr, nline, ncol, out ISingleByteCharString str, out int read);
             charsWithAttributes = str;
         }
 
-        public override void ExtractString(int nline, int ncol, out INCursesCharStr charsWithAttributes, int maxChars)
+        public override void ExtractString(int nline, int ncol, out INCursesCharString charsWithAttributes, int maxChars)
         {
-            NativeWindow.mvwinchnstr(this.WindowPtr, nline, ncol, out INCursesSCHARStr str, maxChars, out int read);
+            NativeWindow.mvwinchnstr(this.WindowPtr, nline, ncol, out ISingleByteCharString str, maxChars, out int read);
             charsWithAttributes = str;
         }
 
@@ -238,25 +238,25 @@ namespace NCurses.Core
 
         public override void Insert(char ch)
         {
-            SmallCharFactory.Instance.GetNativeChar(ch, out INCursesSCHAR res);
+            SingleByteCharFactory.Instance.GetNativeChar(ch, out ISingleByteChar res);
             NativeWindow.winsch(this.WindowPtr, res);
         }
 
         public override void Insert(int nline, int ncol, char ch)
         {
-            SmallCharFactory.Instance.GetNativeChar(ch, out INCursesSCHAR res);
+            SingleByteCharFactory.Instance.GetNativeChar(ch, out ISingleByteChar res);
             NativeWindow.mvwinsch(this.WindowPtr, nline, ncol, res);
         }
 
         public override void Insert(char ch, ulong attrs, short pair)
         {
-            SmallCharFactory.Instance.GetNativeChar(ch, attrs, pair, out INCursesSCHAR res);
+            SingleByteCharFactory.Instance.GetNativeChar(ch, attrs, pair, out ISingleByteChar res);
             NativeWindow.winsch(this.WindowPtr, res);
         }
 
         public override void Insert(int nline, int ncol, char ch, ulong attrs, short pair)
         {
-            SmallCharFactory.Instance.GetNativeChar(ch, attrs, pair, out INCursesSCHAR res);
+            SingleByteCharFactory.Instance.GetNativeChar(ch, attrs, pair, out ISingleByteChar res);
             NativeWindow.mvwinsch(this.WindowPtr, nline, ncol, res);
         }
 
@@ -330,15 +330,15 @@ namespace NCurses.Core
 
         public override void Write(in INCursesChar ch)
         {
-            if (ch is INCursesSCHAR schar)
+            if (ch is ISingleByteChar schar)
                 NativeWindow.waddch(this.WindowPtr, schar);
             else
                 throw new InvalidOperationException("Unsupported character");
         }
 
-        public override void Write(in INCursesCharStr str)
+        public override void Write(in INCursesCharString str)
         {
-            if (str is INCursesSCHARStr scharStr)
+            if (str is ISingleByteCharString scharStr)
                 NativeWindow.waddchstr(this.WindowPtr, scharStr);
             else
                 throw new InvalidOperationException("Unsupported string");
@@ -351,7 +351,7 @@ namespace NCurses.Core
 
         public override void Write(string str, ulong attrs, short pair)
         {
-            SmallCharFactory.Instance.GetNativeString(str, attrs, pair, out INCursesSCHARStr res);
+            SingleByteCharFactory.Instance.GetNativeString(str, attrs, pair, out ISingleByteCharString res);
             NativeWindow.waddchnstr(this.WindowPtr, res, str.Length);
         }
 
@@ -362,7 +362,7 @@ namespace NCurses.Core
 
         public override void Write(int nline, int ncol, string str, ulong attrs, short pair)
         {
-            SmallCharFactory.Instance.GetNativeString(str, attrs, pair, out INCursesSCHARStr res);
+            SingleByteCharFactory.Instance.GetNativeString(str, attrs, pair, out ISingleByteCharString res);
             NativeWindow.mvwaddchnstr(this.WindowPtr, nline, ncol, res, str.Length);
         }
 
@@ -373,19 +373,19 @@ namespace NCurses.Core
 
         public override void Write(char ch, ulong attrs, short pair)
         {
-            SmallCharFactory.Instance.GetNativeChar(ch, attrs, pair, out INCursesSCHAR res);
+            SingleByteCharFactory.Instance.GetNativeChar(ch, attrs, pair, out ISingleByteChar res);
             NativeWindow.waddch(this.WindowPtr, res);
         }
 
         public override void Write(int nline, int ncol, char ch)
         {
-            SmallCharFactory.Instance.GetNativeChar(ch, out INCursesSCHAR res);
+            SingleByteCharFactory.Instance.GetNativeChar(ch, out ISingleByteChar res);
             NativeWindow.mvwaddch(this.WindowPtr, nline, ncol, res);
         }
 
         public override void Write(int nline, int ncol, char ch, ulong attrs, short pair)
         {
-            SmallCharFactory.Instance.GetNativeChar(ch, attrs, pair, out INCursesSCHAR res);
+            SingleByteCharFactory.Instance.GetNativeChar(ch, attrs, pair, out ISingleByteChar res);
             NativeWindow.mvwaddch(this.WindowPtr, nline, ncol, res);
         }
 

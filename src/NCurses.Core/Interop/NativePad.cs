@@ -11,13 +11,13 @@ namespace NCurses.Core.Interop
     internal static class NativePad
     {
         #region Custom type wrapper fields
-        private static INativePadWide widePadWrapper;
-        private static INativePadWide WidePadWrapper => NativeNCurses.HasUnicodeSupport
-              ? widePadWrapper ?? throw new InvalidOperationException(Constants.TypeGenerationExceptionMessage)
+        private static INativePadMultiByte multiByteNCursesWrapper;
+        private static INativePadMultiByte MultiByteNCursesWrapper => NativeNCurses.HasUnicodeSupport
+              ? multiByteNCursesWrapper ?? throw new InvalidOperationException(Constants.TypeGenerationExceptionMessage)
               : throw new InvalidOperationException(Constants.NoUnicodeExceptionMessage);
 
-        private static INativePadSmall smallPadWrapper;
-        private static INativePadSmall SmallPadWrapper => smallPadWrapper ?? throw new InvalidOperationException(Constants.TypeGenerationExceptionMessage);
+        private static INativePadSingleByte singleByteNCursesWrapper;
+        private static INativePadSingleByte SingleByteNCursesWrapper => singleByteNCursesWrapper ?? throw new InvalidOperationException(Constants.TypeGenerationExceptionMessage);
         #endregion
 
         #region custom type initialization
@@ -37,18 +37,18 @@ namespace NCurses.Core.Interop
             Type customType;
             if (NativeNCurses.HasUnicodeSupport)
             {
-                if (widePadWrapper is null)
+                if (multiByteNCursesWrapper is null)
                 {
-                    customType = typeof(NativePadWide<,,,,>).MakeGenericType(DynamicTypeBuilder.cchar_t, DynamicTypeBuilder.wchar_t, 
+                    customType = typeof(NativePadMultiByte<,,,,>).MakeGenericType(DynamicTypeBuilder.cchar_t, DynamicTypeBuilder.wchar_t, 
                         DynamicTypeBuilder.chtype, DynamicTypeBuilder.schar, DynamicTypeBuilder.MEVENT);
-                    widePadWrapper = (INativePadWide)Activator.CreateInstance(customType);
+                    multiByteNCursesWrapper = (INativePadMultiByte)Activator.CreateInstance(customType);
                 }
             }
 
-            if (smallPadWrapper is null)
+            if (singleByteNCursesWrapper is null)
             {
-                customType = typeof(NativePadSmall<,,>).MakeGenericType(DynamicTypeBuilder.chtype, DynamicTypeBuilder.schar, DynamicTypeBuilder.MEVENT);
-                smallPadWrapper = (INativePadSmall)Activator.CreateInstance(customType);
+                customType = typeof(NativePadSingleByte<,,>).MakeGenericType(DynamicTypeBuilder.chtype, DynamicTypeBuilder.schar, DynamicTypeBuilder.MEVENT);
+                singleByteNCursesWrapper = (INativePadSingleByte)Activator.CreateInstance(customType);
             }
         }
         #endregion
@@ -67,9 +67,9 @@ namespace NCurses.Core.Interop
         /// </summary>
         /// <param name="pad">a pointer to the pad</param>
         /// <param name="ch">the character you want to echo</param>
-        public static void pechochar(IntPtr pad, in INCursesSCHAR ch)
+        public static void pechochar(IntPtr pad, in ISingleByteChar ch)
         {
-            SmallPadWrapper.pechochar(pad, ch);
+            SingleByteNCursesWrapper.pechochar(pad, ch);
         }
         #endregion
 
@@ -126,9 +126,9 @@ namespace NCurses.Core.Interop
         /// arguments to prefresh.
         /// <para />native method wrapped with verification and thread safety.
         /// </summary>
-        public static void pecho_wchar(IntPtr pad, INCursesWCHAR wch)
+        public static void pecho_wchar(IntPtr pad, IMultiByteChar wch)
         {
-            WidePadWrapper.pecho_wchar(pad, wch);
+            MultiByteNCursesWrapper.pecho_wchar(pad, wch);
         }
         #endregion
     }

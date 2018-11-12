@@ -16,7 +16,7 @@ namespace NCurses.Core.Interop.SingleByteString
         public schar_t(char ch)
         {
             if(ch > sbyte.MaxValue)
-                throw new InvalidOperationException("This character can not be expressed in 1 byte, please use the correct wide overrides");
+                throw new InvalidOperationException("This character can not be expressed in 1 byte, please use the correct multibyte overrides");
 
             this.ch = (sbyte)ch;
         }

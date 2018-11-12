@@ -18,19 +18,19 @@ namespace NCurses.Core.Interop
     internal static class NativeScreen
     {
         #region Custom type wrapper fields
-        private static INativeScreenWide wideCursesWrapper;
-        private static INativeScreenWide WideCursesWrapper => NativeNCurses.HasUnicodeSupport
-              ? wideCursesWrapper ?? throw new InvalidOperationException(Constants.TypeGenerationExceptionMessage)
+        private static INativeScreenMultiByte multiByteNCursesWrapper;
+        private static INativeScreenMultiByte MultiByteNCursesWrapper => NativeNCurses.HasUnicodeSupport
+              ? multiByteNCursesWrapper ?? throw new InvalidOperationException(Constants.TypeGenerationExceptionMessage)
               : throw new InvalidOperationException(Constants.NoUnicodeExceptionMessage);
-        private static INativeScreenWideStr wideStrCursesWrapper;
-        private static INativeScreenWideStr WideStrCursesWrapper => NativeNCurses.HasUnicodeSupport
-              ? wideStrCursesWrapper ?? throw new InvalidOperationException(Constants.TypeGenerationExceptionMessage)
+        private static INativeScreenMultiByteString multiByteStringNCursesWrapper;
+        private static INativeScreenMultiByteString MultiByteStringNCursesWrapper => NativeNCurses.HasUnicodeSupport
+              ? multiByteStringNCursesWrapper ?? throw new InvalidOperationException(Constants.TypeGenerationExceptionMessage)
               : throw new InvalidOperationException(Constants.NoUnicodeExceptionMessage);
 
-        private static INativeScreenSmall smallCursesWrapper;
-        private static INativeScreenSmall SmallCursesWrapper => smallCursesWrapper ?? throw new InvalidOperationException(Constants.TypeGenerationExceptionMessage);
-        private static INativeScreenSmallStr smallStrCursesWrapper;
-        private static INativeScreenSmallStr SmallStrCursesWrapper => smallStrCursesWrapper ?? throw new InvalidOperationException(Constants.TypeGenerationExceptionMessage);
+        private static INativeScreenSingleByte singleByteNCursesWrapper;
+        private static INativeScreenSingleByte SingleByteNCursesWrapper => singleByteNCursesWrapper ?? throw new InvalidOperationException(Constants.TypeGenerationExceptionMessage);
+        private static INativeScreenSingleByteString singleByteStringNCursesWrapper;
+        private static INativeScreenSingleByteString SingleByteStringNCursesWrapper => singleByteStringNCursesWrapper ?? throw new InvalidOperationException(Constants.TypeGenerationExceptionMessage);
         #endregion
 
         #region custom type initialization
@@ -40,10 +40,10 @@ namespace NCurses.Core.Interop
                 throw new InvalidOperationException("Custom types haven't been generated yet.");
 
             Type customType;
-            if (smallStrCursesWrapper is null)
+            if (singleByteStringNCursesWrapper is null)
             {
-                customType = typeof(NativeScreenSmallStr<>).MakeGenericType(DynamicTypeBuilder.schar);
-                smallStrCursesWrapper = (INativeScreenSmallStr)Activator.CreateInstance(customType);
+                customType = typeof(NativeScreenSingleByteString<>).MakeGenericType(DynamicTypeBuilder.schar);
+                singleByteStringNCursesWrapper = (INativeScreenSingleByteString)Activator.CreateInstance(customType);
             }
         }
 
@@ -58,24 +58,24 @@ namespace NCurses.Core.Interop
             Type customType;
             if (NativeNCurses.HasUnicodeSupport)
             {
-                if (wideCursesWrapper is null)
+                if (multiByteNCursesWrapper is null)
                 {
-                    customType = typeof(NativeScreenWide<,,,,>).MakeGenericType(DynamicTypeBuilder.cchar_t, DynamicTypeBuilder.wchar_t, 
+                    customType = typeof(NativeScreenMultiByte<,,,,>).MakeGenericType(DynamicTypeBuilder.cchar_t, DynamicTypeBuilder.wchar_t, 
                         DynamicTypeBuilder.chtype, DynamicTypeBuilder.schar, DynamicTypeBuilder.MEVENT);
-                    wideCursesWrapper = (INativeScreenWide)Activator.CreateInstance(customType);
+                    multiByteNCursesWrapper = (INativeScreenMultiByte)Activator.CreateInstance(customType);
                 }
 
-                if (wideStrCursesWrapper is null)
+                if (multiByteStringNCursesWrapper is null)
                 {
-                    customType = typeof(NativeScreenWideStr<,>).MakeGenericType(DynamicTypeBuilder.wchar_t, DynamicTypeBuilder.schar);
-                    wideStrCursesWrapper = (INativeScreenWideStr)Activator.CreateInstance(customType);
+                    customType = typeof(NativeScreenMultiByteString<,>).MakeGenericType(DynamicTypeBuilder.wchar_t, DynamicTypeBuilder.schar);
+                    multiByteStringNCursesWrapper = (INativeScreenMultiByteString)Activator.CreateInstance(customType);
                 }
             }
 
-            if (smallCursesWrapper is null)
+            if (singleByteNCursesWrapper is null)
             {
-                customType = typeof(NativeScreenSmall<,,>).MakeGenericType(DynamicTypeBuilder.chtype, DynamicTypeBuilder.schar, DynamicTypeBuilder.MEVENT);
-                smallCursesWrapper = (INativeScreenSmall)Activator.CreateInstance(customType);
+                customType = typeof(NativeScreenSingleByte<,,>).MakeGenericType(DynamicTypeBuilder.chtype, DynamicTypeBuilder.schar, DynamicTypeBuilder.MEVENT);
+                singleByteNCursesWrapper = (INativeScreenSingleByte)Activator.CreateInstance(customType);
             }
         }
         #endregion
@@ -241,7 +241,7 @@ namespace NCurses.Core.Interop
         /// <returns>The user's current erase character</returns>
         public static char erasechar(IntPtr screen)
         {
-            return SmallStrCursesWrapper.erasechar_sp(screen);
+            return SingleByteStringNCursesWrapper.erasechar_sp(screen);
         }
         #endregion
 
@@ -377,7 +377,7 @@ namespace NCurses.Core.Interop
         /// </summary>
         public static string keyname(IntPtr screen, int c)
         {
-            return SmallStrCursesWrapper.keyname_sp(screen, c);
+            return SingleByteStringNCursesWrapper.keyname_sp(screen, c);
         }
         #endregion
 
@@ -387,7 +387,7 @@ namespace NCurses.Core.Interop
         /// </summary>
         public static char killchar(IntPtr screen)
         {
-            return SmallStrCursesWrapper.killchar_sp(screen);
+            return SingleByteStringNCursesWrapper.killchar_sp(screen);
         }
         #endregion
 
@@ -397,7 +397,7 @@ namespace NCurses.Core.Interop
         /// </summary>
         public static string longname(IntPtr screen)
         {
-            return SmallStrCursesWrapper.longname_sp(screen);
+            return SingleByteStringNCursesWrapper.longname_sp(screen);
         }
         #endregion
 
@@ -603,7 +603,7 @@ namespace NCurses.Core.Interop
         /// <param name="screen">A pointer to a screen</param>
         public static void scr_dump(IntPtr screen, in string filename)
         {
-            SmallStrCursesWrapper.scr_dump_sp(screen, filename);
+            SingleByteStringNCursesWrapper.scr_dump_sp(screen, filename);
         }
         #endregion
 
@@ -615,7 +615,7 @@ namespace NCurses.Core.Interop
         /// <param name="screen">A pointer to a screen</param>
         public static void scr_init(IntPtr screen, in string filename)
         {
-            SmallStrCursesWrapper.scr_init_sp(screen, filename);
+            SingleByteStringNCursesWrapper.scr_init_sp(screen, filename);
         }
         #endregion
 
@@ -626,7 +626,7 @@ namespace NCurses.Core.Interop
         /// /// <param name="screen">A pointer to a screen</param>
         public static void scr_restore(IntPtr screen, in string filename)
         {
-            SmallStrCursesWrapper.scr_restore_sp(screen, filename);
+            SingleByteStringNCursesWrapper.scr_restore_sp(screen, filename);
         }
         #endregion
 
@@ -638,7 +638,7 @@ namespace NCurses.Core.Interop
         /// /// <param name="screen">A pointer to a screen</param>
         public static void scr_set(IntPtr screen, string filename)
         {
-            SmallStrCursesWrapper.scr_set_sp(screen, filename);
+            SingleByteStringNCursesWrapper.scr_set_sp(screen, filename);
         }
         #endregion
 
@@ -650,7 +650,7 @@ namespace NCurses.Core.Interop
         /// /// <param name="screen">A pointer to a screen</param>
         public static void slk_attroff(IntPtr screen, ulong attrs)
         {
-            SmallCursesWrapper.slk_attroff_sp(screen, attrs);
+            SingleByteNCursesWrapper.slk_attroff_sp(screen, attrs);
         }
         #endregion
 
@@ -662,7 +662,7 @@ namespace NCurses.Core.Interop
         /// /// <param name="screen">A pointer to a screen</param>
         public static void slk_attron(IntPtr screen, ulong attrs)
         {
-            SmallCursesWrapper.slk_attron_sp(screen, attrs);
+            SingleByteNCursesWrapper.slk_attron_sp(screen, attrs);
         }
         #endregion
 
@@ -674,7 +674,7 @@ namespace NCurses.Core.Interop
         /// /// <param name="screen">A pointer to a screen</param>
         public static void slk_attrset(IntPtr screen, ulong attrs)
         {
-            SmallCursesWrapper.slk_attrset_sp(screen, attrs);
+            SingleByteNCursesWrapper.slk_attrset_sp(screen, attrs);
         }
         #endregion
 
@@ -685,7 +685,7 @@ namespace NCurses.Core.Interop
         /// <returns>an attribute</returns>
         public static ulong slk_attr(IntPtr screen)
         {
-            return SmallCursesWrapper.slk_attr_sp(screen);
+            return SingleByteNCursesWrapper.slk_attr_sp(screen);
         }
         #endregion
 
@@ -697,7 +697,7 @@ namespace NCurses.Core.Interop
         /// <param name="screen">A pointer to a screen</param>
         public static void slk_attr_set(IntPtr screen, ulong attrs, short color_pair)
         {
-            SmallCursesWrapper.slk_attr_set_sp(screen, attrs, color_pair);
+            SingleByteNCursesWrapper.slk_attr_set_sp(screen, attrs, color_pair);
         }
         #endregion
 
@@ -745,7 +745,7 @@ namespace NCurses.Core.Interop
         /// <returns>label</returns>
         public static string slk_label(IntPtr screen, int labnum)
         {
-            return SmallStrCursesWrapper.slk_label_sp(screen, labnum);
+            return SingleByteStringNCursesWrapper.slk_label_sp(screen, labnum);
         }
         #endregion
 
@@ -793,7 +793,7 @@ namespace NCurses.Core.Interop
         /// <param name="screen">A pointer to a screen</param>
         public static void slk_set(IntPtr screen, int labnum, in string label, int fmt)
         {
-            SmallStrCursesWrapper.slk_set_sp(screen, labnum, label, fmt);
+            SingleByteStringNCursesWrapper.slk_set_sp(screen, labnum, label, fmt);
         }
         #endregion
 
@@ -827,7 +827,7 @@ namespace NCurses.Core.Interop
         /// </summary>
         public static ulong termattrs(IntPtr screen)
         {
-            return SmallCursesWrapper.termattrs_sp(screen);
+            return SingleByteNCursesWrapper.termattrs_sp(screen);
         }
         #endregion
 
@@ -838,7 +838,7 @@ namespace NCurses.Core.Interop
         /// <returns>the terminal name</returns>
         public static string termname(IntPtr screen)
         {
-            return SmallStrCursesWrapper.termname_sp(screen);
+            return SingleByteStringNCursesWrapper.termname_sp(screen);
         }
         #endregion
 
@@ -894,7 +894,7 @@ namespace NCurses.Core.Interop
         /// <param name="screen">A pointer to a screen</param>
         public static void vidattr(IntPtr screen, ulong attrs)
         {
-            SmallCursesWrapper.vidattr_sp(screen, attrs);
+            SingleByteNCursesWrapper.vidattr_sp(screen, attrs);
         }
         #endregion
 
@@ -906,7 +906,7 @@ namespace NCurses.Core.Interop
         /// <param name="screen">A pointer to a screen</param>
         public static void vidputs(IntPtr screen, ulong attrs, Func<int, int> NCURSES_OUTC)
         {
-            SmallCursesWrapper.vidputs_sp(screen, attrs, NCURSES_OUTC);
+            SingleByteNCursesWrapper.vidputs_sp(screen, attrs, NCURSES_OUTC);
         }
         #endregion
 
@@ -917,7 +917,7 @@ namespace NCurses.Core.Interop
         /// <param name="screen">A pointer to a screen</param>
         public static int tigetflag(IntPtr screen, in string capname)
         {
-            return SmallStrCursesWrapper.tigetflag_sp(screen, capname);
+            return SingleByteStringNCursesWrapper.tigetflag_sp(screen, capname);
         }
         #endregion
 
@@ -928,7 +928,7 @@ namespace NCurses.Core.Interop
         /// <param name="screen">A pointer to a screen</param>
         public static int tigetnum(IntPtr screen, in string capname)
         {
-            return SmallStrCursesWrapper.tigetnum_sp(screen, capname);
+            return SingleByteStringNCursesWrapper.tigetnum_sp(screen, capname);
         }
         #endregion
 
@@ -939,7 +939,7 @@ namespace NCurses.Core.Interop
         /// <param name="screen">A pointer to a screen</param>
         public static int tigetstr(IntPtr screen, in string capname)
         {
-            return SmallStrCursesWrapper.tigetstr_sp(screen, capname);
+            return SingleByteStringNCursesWrapper.tigetstr_sp(screen, capname);
         }
         #endregion
 
@@ -951,7 +951,7 @@ namespace NCurses.Core.Interop
         /// <param name="screen">A pointer to a screen</param>
         public static void putp(IntPtr screen, in string str)
         {
-            SmallStrCursesWrapper.putp_sp(screen, str);
+            SingleByteStringNCursesWrapper.putp_sp(screen, str);
         }
         #endregion
 
@@ -973,7 +973,7 @@ namespace NCurses.Core.Interop
         /// <param name="screen">A pointer to a screen</param>
         public static string keybound(IntPtr screen, int keycode, int count)
         {
-            return SmallStrCursesWrapper.keybound_sp(screen, keycode, count);
+            return SingleByteStringNCursesWrapper.keybound_sp(screen, keycode, count);
         }
         #endregion
 
@@ -996,7 +996,7 @@ namespace NCurses.Core.Interop
         /// <param name="screen">A pointer to a screen</param>
         public static void define_key(IntPtr screen, in string definition, int keycode)
         {
-            SmallStrCursesWrapper.define_key_sp(screen, definition, keycode);
+            SingleByteStringNCursesWrapper.define_key_sp(screen, definition, keycode);
         }
         #endregion
 
@@ -1018,7 +1018,7 @@ namespace NCurses.Core.Interop
         /// <param name="screen">A pointer to a screen</param>
         public static int key_defined(IntPtr screen, string definition)
         {
-            return SmallStrCursesWrapper.key_defined_sp(screen, definition);
+            return SingleByteStringNCursesWrapper.key_defined_sp(screen, definition);
         }
         #endregion
 
@@ -1130,7 +1130,7 @@ namespace NCurses.Core.Interop
         /// <param name="screen">A pointer to a screen</param>
         public static ulong term_attrs(IntPtr screen)
         {
-            return SmallCursesWrapper.term_attrs_sp(screen);
+            return SingleByteNCursesWrapper.term_attrs_sp(screen);
         }
         #endregion
 
@@ -1142,7 +1142,7 @@ namespace NCurses.Core.Interop
         /// <param name="screen">A pointer to a screen</param>
         public static void unget_wch(IntPtr screen, in char wch)
         {
-            WideStrCursesWrapper.unget_wch_sp(screen, wch);
+            MultiByteStringNCursesWrapper.unget_wch_sp(screen, wch);
         }
         #endregion
 
@@ -1151,9 +1151,9 @@ namespace NCurses.Core.Interop
         /// see <see cref="NativeNCurses.wunctrl"/>
         /// </summary>
         /// <param name="screen">A pointer to a screen</param>
-        public static void wunctrl(IntPtr screen, in INCursesWCHAR wch, out string str)
+        public static void wunctrl(IntPtr screen, in IMultiByteChar wch, out string str)
         {
-            WideCursesWrapper.wunctrl_sp(screen, wch, out str);
+            MultiByteNCursesWrapper.wunctrl_sp(screen, wch, out str);
         }
         #endregion
 
@@ -1165,7 +1165,7 @@ namespace NCurses.Core.Interop
         /// <param name="screen">A pointer to a screen</param>
         public static void vid_attr(IntPtr screen, ulong attrs, short pair)
         {
-            SmallCursesWrapper.vid_attr_sp(screen, attrs, pair);
+            SingleByteNCursesWrapper.vid_attr_sp(screen, attrs, pair);
         }
         #endregion
 
@@ -1177,7 +1177,7 @@ namespace NCurses.Core.Interop
         /// <param name="screen">A pointer to a screen</param>
         public static void vid_puts(IntPtr screen, ulong attrs, short pair, Func<int, int> NCURSES_OUTC)
         {
-            SmallCursesWrapper.vid_puts_sp(screen, attrs, pair, NCURSES_OUTC);
+            SingleByteNCursesWrapper.vid_puts_sp(screen, attrs, pair, NCURSES_OUTC);
         }
         #endregion
 
@@ -1199,7 +1199,7 @@ namespace NCurses.Core.Interop
         /// <param name="screen">A pointer to a screen</param>
         public static void getmouse(IntPtr screen, out IMEVENT ev)
         {
-            SmallCursesWrapper.getmouse_sp(screen, out ev);
+            SingleByteNCursesWrapper.getmouse_sp(screen, out ev);
         }
         #endregion
 
@@ -1210,7 +1210,7 @@ namespace NCurses.Core.Interop
         /// <param name="screen">A pointer to a screen</param>
         public static void ungetmouse(IntPtr screen, in IMEVENT ev)
         {
-            SmallCursesWrapper.ungetmouse_sp(screen, ev);
+            SingleByteNCursesWrapper.ungetmouse_sp(screen, ev);
         }
         #endregion
 
@@ -1222,7 +1222,7 @@ namespace NCurses.Core.Interop
         /// <param name="screen">A pointer to a screen</param>
         public static ulong mousemask(IntPtr screen, ulong newmask, out ulong oldmask)
         {
-            return SmallCursesWrapper.mousemask_sp(screen, newmask, out oldmask);
+            return SingleByteNCursesWrapper.mousemask_sp(screen, newmask, out oldmask);
         }
         #endregion
 

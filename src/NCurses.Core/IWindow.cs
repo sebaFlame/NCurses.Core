@@ -28,9 +28,9 @@ namespace NCurses.Core
         void CreateChar(char ch, out INCursesChar chRet);
         void CreateChar(char ch, ulong attrs, out INCursesChar chRet);
         void CreateChar(char ch, ulong attrs, short pair, out INCursesChar chRet);
-        void CreateString(string str, out INCursesCharStr chStr);
-        void CreateString(string str, ulong attrs, out INCursesCharStr chStr);
-        void CreateString(string str, ulong attrs, short pair, out INCursesCharStr chStr);
+        void CreateString(string str, out INCursesCharString chStr);
+        void CreateString(string str, ulong attrs, out INCursesCharString chStr);
+        void CreateString(string str, ulong attrs, short pair, out INCursesCharString chStr);
         void CurrentAttributesAndColor(out ulong attrs, out short colorPair);
         void EnableAttributesAndColor(ulong attrs, short colorPair);
         void EnableColor(short colorPair);
@@ -45,10 +45,10 @@ namespace NCurses.Core
         string ExtractString(int maxChars, out int read);
         string ExtractString(int nline, int ncol);
         string ExtractString(int nline, int ncol, int maxChars, out int read);
-        void ExtractString(int nline, int ncol, out INCursesCharStr charsWithAttributes);
-        void ExtractString(int nline, int ncol, out INCursesCharStr charsWithAttributes, int maxChars);
-        void ExtractString(out INCursesCharStr charsWithAttributes);
-        void ExtractString(out INCursesCharStr charsWithAttributes, int maxChars);
+        void ExtractString(int nline, int ncol, out INCursesCharString charsWithAttributes);
+        void ExtractString(int nline, int ncol, out INCursesCharString charsWithAttributes, int maxChars);
+        void ExtractString(out INCursesCharString charsWithAttributes);
+        void ExtractString(out INCursesCharString charsWithAttributes, int maxChars);
         void HorizontalLine(in INCursesChar lineChar, int length);
         void HorizontalLine(int nline, int ncol, in INCursesChar lineChar, int length);
         void Insert(char ch);
@@ -74,7 +74,7 @@ namespace NCurses.Core
         void Write(char ch);
         void Write(char ch, ulong attrs, short pair);
         void Write(in INCursesChar ch);
-        void Write(in INCursesCharStr str);
+        void Write(in INCursesCharString str);
         void Write(int nline, int ncol, byte[] str, Encoding encoding);
         void Write(int nline, int ncol, byte[] str, Encoding encoding, ulong attrs, short pair);
         void Write(int nline, int ncol, char ch);

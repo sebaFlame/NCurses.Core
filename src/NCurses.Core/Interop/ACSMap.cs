@@ -24,14 +24,14 @@ namespace NCurses.Core.Interop
                 int size = Marshal.SizeOf<TChar>();
                 ReadOnlySpan<TChar> acsSpan = new ReadOnlySpan<TChar>(this.acs_map_handle.ToPointer(), 128);
                 TChar ret = acsSpan[index];
-                if (ret is INCursesSCHAR sret)
+                if (ret is ISingleByteChar sret)
                 {
-                    SmallCharFactory.Instance.GetNativeChar(sret, out INCursesSCHAR res);
+                    SingleByteCharFactory.Instance.GetNativeChar(sret, out ISingleByteChar res);
                     return res;
                 }
-                else if (ret is INCursesWCHAR wret)
+                else if (ret is IMultiByteChar wret)
                 {
-                    WideCharFactory.Instance.GetNativeChar(wret, out INCursesWCHAR res);
+                    MultiByteCharFactory.Instance.GetNativeChar(wret, out IMultiByteChar res);
                     return res;
                 }
                     

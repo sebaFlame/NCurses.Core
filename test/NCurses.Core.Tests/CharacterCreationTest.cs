@@ -20,8 +20,8 @@ namespace NCurses.Core.Tests
                 return;
 
             char testChar = '\u263A';
-            NativeNCurses.setcchar(out INCursesWCHAR nativeWch, testChar, 0, 0);
-            WideCharFactory.Instance.GetNativeChar(testChar, out INCursesWCHAR managedWch);
+            NativeNCurses.setcchar(out IMultiByteChar nativeWch, testChar, 0, 0);
+            MultiByteCharFactory.Instance.GetNativeChar(testChar, out IMultiByteChar managedWch);
             Assert.StrictEqual(nativeWch, managedWch);
         }
 
@@ -32,8 +32,8 @@ namespace NCurses.Core.Tests
                 return;
 
             char testChar = '\u263A';
-            NativeNCurses.setcchar(out INCursesWCHAR nativeWch, testChar, Attrs.BOLD | Attrs.ITALIC, 0);
-            WideCharFactory.Instance.GetNativeChar(testChar, Attrs.BOLD | Attrs.ITALIC, out INCursesWCHAR managedWch);
+            NativeNCurses.setcchar(out IMultiByteChar nativeWch, testChar, Attrs.BOLD | Attrs.ITALIC, 0);
+            MultiByteCharFactory.Instance.GetNativeChar(testChar, Attrs.BOLD | Attrs.ITALIC, out IMultiByteChar managedWch);
             Assert.StrictEqual(nativeWch, managedWch);
         }
 
@@ -44,8 +44,8 @@ namespace NCurses.Core.Tests
                 return;
 
             char testChar = '\u263A';
-            NativeNCurses.setcchar(out INCursesWCHAR nativeWch, testChar, Attrs.BOLD | Attrs.ITALIC, 4);
-            WideCharFactory.Instance.GetNativeChar(testChar, Attrs.BOLD | Attrs.ITALIC, 4, out INCursesWCHAR managedWch);
+            NativeNCurses.setcchar(out IMultiByteChar nativeWch, testChar, Attrs.BOLD | Attrs.ITALIC, 4);
+            MultiByteCharFactory.Instance.GetNativeChar(testChar, Attrs.BOLD | Attrs.ITALIC, 4, out IMultiByteChar managedWch);
             Assert.StrictEqual(nativeWch, managedWch);
         }
 
@@ -56,7 +56,7 @@ namespace NCurses.Core.Tests
                 return;
 
             char testChar = '\u263A';
-            WideCharFactory.Instance.GetNativeChar(testChar, out INCursesWCHAR managedWch);
+            MultiByteCharFactory.Instance.GetNativeChar(testChar, out IMultiByteChar managedWch);
             NativeNCurses.getcchar(managedWch, out char resChar, out ulong resAttrs, out short resPair);
             Assert.Equal(testChar, resChar);
             Assert.Equal((ulong)0, resAttrs);
@@ -71,7 +71,7 @@ namespace NCurses.Core.Tests
 
             char testChar = '\u263A';
             ulong attrs = Attrs.BOLD | Attrs.ITALIC;
-            WideCharFactory.Instance.GetNativeChar(testChar, attrs, out INCursesWCHAR managedWch);
+            MultiByteCharFactory.Instance.GetNativeChar(testChar, attrs, out IMultiByteChar managedWch);
             NativeNCurses.getcchar(managedWch, out char resChar, out ulong resAttrs, out short resPair);
             Assert.Equal(testChar, resChar);
             Assert.Equal(attrs, resAttrs);
@@ -87,7 +87,7 @@ namespace NCurses.Core.Tests
             char testChar = '\u263A';
             ulong attrs = Attrs.BOLD | Attrs.ITALIC;
             short pair = 4;
-            WideCharFactory.Instance.GetNativeChar(testChar, attrs, pair, out INCursesWCHAR managedWch);
+            MultiByteCharFactory.Instance.GetNativeChar(testChar, attrs, pair, out IMultiByteChar managedWch);
             NativeNCurses.getcchar(managedWch, out char resChar, out ulong resAttrs, out short resPair);
             Assert.Equal(testChar, resChar);
             Assert.Equal(attrs, resAttrs);

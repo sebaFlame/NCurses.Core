@@ -74,7 +74,7 @@ namespace NCurses.Core.Interop.Dynamic
             typeBuilder.AddInterfaceImplementation(typeof(INativeWrapper));
 
             //small string (char) methods
-            interfaceType = typeof(INCursesWrapperSmallStr<>).MakeGenericType(schar);
+            interfaceType = typeof(ISingleByteStringWrapper<>).MakeGenericType(schar);
             typeBuilder.AddInterfaceImplementation(interfaceType);
             interfaceMethod = interfaceType.GetMethods();
             foreach (MethodInfo ifMethod in interfaceMethod)
@@ -104,14 +104,14 @@ namespace NCurses.Core.Interop.Dynamic
             if (unicodeSuported)
             {
                 //wide (cchar_t) methods
-                interfaceType = typeof(INCursesWrapperWide<,,,>).MakeGenericType(cchar_t, wchar_t, chtype, schar);
+                interfaceType = typeof(IMultiByteWrapper<,,,>).MakeGenericType(cchar_t, wchar_t, chtype, schar);
                 typeBuilder.AddInterfaceImplementation(interfaceType);
                 interfaceMethod = interfaceType.GetMethods();
                 foreach (MethodInfo ifMethod in interfaceMethod)
                     createInterfaceImplementation(dllName, typeBuilder, ifMethod);
 
                 //wide string (wchar_t) methods
-                interfaceType = typeof(INCursesWrapperWideStr<,>).MakeGenericType(wchar_t, schar);
+                interfaceType = typeof(IMultiByteStringWrapper<,>).MakeGenericType(wchar_t, schar);
                 typeBuilder.AddInterfaceImplementation(interfaceType);
                 interfaceMethod = interfaceType.GetMethods();
                 foreach (MethodInfo ifMethod in interfaceMethod)
@@ -119,7 +119,7 @@ namespace NCurses.Core.Interop.Dynamic
             }
 
             //small (chtype) methods
-            interfaceType = typeof(INCursesWrapperSmall<,,>).MakeGenericType(chtype, schar, MEVENT);
+            interfaceType = typeof(ISingleByteWrapper<,,>).MakeGenericType(chtype, schar, MEVENT);
             typeBuilder.AddInterfaceImplementation(interfaceType);
             interfaceMethod = interfaceType.GetMethods();
             foreach (MethodInfo ifMethod in interfaceMethod)

@@ -4,7 +4,7 @@ using System.Text;
 
 namespace NCurses.Core.Interop
 {
-    public interface INCursesCharStr : IEnumerable<INCursesChar>, IEnumerator<INCursesChar>, IEquatable<INCursesCharStr>
+    public interface INCursesCharString : IEnumerable<INCursesChar>, IEnumerator<INCursesChar>, IEquatable<INCursesCharString>
     {
         int Length { get; }
         INCursesChar this[int index] { get; }

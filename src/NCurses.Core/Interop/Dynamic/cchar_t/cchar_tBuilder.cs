@@ -60,10 +60,10 @@ namespace NCurses.Core.Interop.Dynamic.cchar_t
                 "cchar_t",
                 TypeAttributes.NotPublic | TypeAttributes.SequentialLayout | TypeAttributes.Sealed | TypeAttributes.BeforeFieldInit,
                 typeof(ValueType));
-            typeBuilder.AddInterfaceImplementation(typeof(INCursesWCHAR));
+            typeBuilder.AddInterfaceImplementation(typeof(IMultiByteChar));
             typeBuilder.AddInterfaceImplementation(typeof(INCursesChar));
             typeBuilder.AddInterfaceImplementation(typeof(IEquatable<INCursesChar>));
-            typeBuilder.AddInterfaceImplementation(typeof(IEquatable<INCursesWCHAR>));
+            typeBuilder.AddInterfaceImplementation(typeof(IEquatable<IMultiByteChar>));
             typeBuilder.AddInterfaceImplementation(typeof(IEquatable<>).MakeGenericType(typeBuilder.AsType()));
 
             // nested value type for the fixed buffer 
@@ -685,12 +685,12 @@ namespace NCurses.Core.Interop.Dynamic.cchar_t
             wchEquality = typeBuilder.DefineMethod("Equals",
                 MethodAttributes.Public | MethodAttributes.Final | MethodAttributes.HideBySig | MethodAttributes.NewSlot | MethodAttributes.Virtual,
                 typeof(bool),
-                new Type[] { typeof(INCursesWCHAR) });
+                new Type[] { typeof(IMultiByteChar) });
             methodIl = wchEquality.GetILGenerator();
 
             lcl0 = methodIl.DeclareLocal(typeBuilder.AsType());
             lcl1 = methodIl.DeclareLocal(typeof(bool));
-            lcl2 = methodIl.DeclareLocal(typeof(INCursesWCHAR));
+            lcl2 = methodIl.DeclareLocal(typeof(IMultiByteChar));
             lcl3 = methodIl.DeclareLocal(typeof(bool));
 
             lbl1 = methodIl.DefineLabel();
@@ -738,7 +738,7 @@ namespace NCurses.Core.Interop.Dynamic.cchar_t
                 new Type[] { typeof(INCursesChar) });
             methodIl = methodBuilder.GetILGenerator();
 
-            lcl0 = methodIl.DeclareLocal(typeof(INCursesWCHAR));
+            lcl0 = methodIl.DeclareLocal(typeof(IMultiByteChar));
             lcl1 = methodIl.DeclareLocal(typeof(bool));
             lcl2 = methodIl.DeclareLocal(typeof(bool));
 
@@ -748,7 +748,7 @@ namespace NCurses.Core.Interop.Dynamic.cchar_t
             //if (obj is INCursesWCHAR other)
             methodIl.Emit(OpCodes.Nop);
             methodIl.Emit(OpCodes.Ldarg_1);
-            methodIl.Emit(OpCodes.Isinst, typeof(INCursesWCHAR));
+            methodIl.Emit(OpCodes.Isinst, typeof(IMultiByteChar));
             methodIl.Emit(OpCodes.Dup);
             methodIl.Emit(OpCodes.Stloc_0);
             methodIl.Emit(OpCodes.Ldnull);

@@ -6,7 +6,7 @@ namespace NCurses.Core.Interop
 {
     public interface ICharFactory<TChar, TString>
         where TChar : INCursesChar
-        where TString : INCursesCharStr
+        where TString : INCursesCharString
     {
         ICharFactory<TChar, TString> Instance { get; }
 

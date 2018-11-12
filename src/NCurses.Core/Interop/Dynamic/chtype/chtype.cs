@@ -8,7 +8,7 @@ namespace NCurses.Core.Interop.Dynamic.chtype
 {
     //TODO: temporary test class -> REMOVE
     [StructLayout(LayoutKind.Sequential)]
-    internal struct chtype : INCursesSCHAR, IEquatable<chtype> //chtype & attr_t
+    internal struct chtype : ISingleByteChar, IEquatable<chtype> //chtype & attr_t
     {
         public UInt32 charWithAttr;
 
@@ -94,7 +94,7 @@ namespace NCurses.Core.Interop.Dynamic.chtype
             return chLeft.charWithAttr != chRight.charWithAttr;
         }
 
-        public bool Equals(INCursesSCHAR obj)
+        public bool Equals(ISingleByteChar obj)
         {
             if (obj is chtype other) //boxing?
                 return this == other;
@@ -103,7 +103,7 @@ namespace NCurses.Core.Interop.Dynamic.chtype
 
         public bool Equals(INCursesChar obj)
         {
-            if (obj is INCursesSCHAR other) //boxing?
+            if (obj is ISingleByteChar other) //boxing?
                 return this.Equals(other);
             return false;
         }

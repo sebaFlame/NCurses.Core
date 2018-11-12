@@ -27,8 +27,8 @@ namespace NCurses.Core.Interop.Mouse
             ParameterExpression par1, par2, par3, par4, par5;
             ConstantExpression factoryInstance;
 
-            MethodInfo createChtype = typeof(SmallCharFactory).GetMethod("GetAttribute", BindingFlags.NonPublic | BindingFlags.Instance);
-            factoryInstance = Expression.Constant(SmallCharFactory.Instance);
+            MethodInfo createChtype = typeof(SingleByteCharFactory).GetMethod("GetAttribute", BindingFlags.NonPublic | BindingFlags.Instance);
+            factoryInstance = Expression.Constant(SingleByteCharFactory.Instance);
 
             par1 = Expression.Parameter(typeof(short));
             par2 = Expression.Parameter(typeof(int));
