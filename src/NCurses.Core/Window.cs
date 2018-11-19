@@ -96,7 +96,7 @@ namespace NCurses.Core
         /// create a subwindow with the current window as parent
         /// </summary>
         /// <returns>the new subwindow</returns>
-        public Window SubWindow(int nlines, int ncols, int begin_y, int begin_x)
+        public virtual Window SubWindow(int nlines, int ncols, int begin_y, int begin_x)
         {
             return CreateWindow(NativeNCurses.subwin(this.WindowPtr, nlines, ncols, begin_y, begin_x));
         }
@@ -105,7 +105,7 @@ namespace NCurses.Core
         /// create a subwindow with the current window as parent
         /// </summary>
         /// <returns>the new subwindow</returns>
-        public Window DerWindow(int nlines, int ncols, int begin_y, int begin_x)
+        public virtual Window DerWindow(int nlines, int ncols, int begin_y, int begin_x)
         {
             return CreateWindow(NativeNCurses.derwin(this.WindowPtr, nlines, ncols, begin_y, begin_x));
         }
@@ -127,6 +127,16 @@ namespace NCurses.Core
         /// Draw a default box around the edges of the window
         /// </summary>
         public abstract void Box();
+
+        /// <summary>
+        /// Resize the current window to <paramref name="lines"/> and <paramref name="columns"/>
+        /// </summary>
+        /// <param name="lines">The number of lines to resize to</param>
+        /// <param name="columns">The numbe rof columns to resize to</param>
+        public void Resize(int lines, int columns)
+        {
+            NativeWindow.wresize(this.WindowPtr, lines, columns);
+        }
 
         #region window creation
         public abstract Window ToSingleByteWindow();
