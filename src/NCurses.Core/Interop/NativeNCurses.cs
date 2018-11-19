@@ -32,7 +32,7 @@ namespace NCurses.Core.Interop
             get
             {
                 if (wrapper is null)
-                    wrapper = (INCursesWrapper)Activator.CreateInstance(DynamicTypeBuilder.CreateNCursesWrapper(Constants.DLLNAME));
+                    wrapper = (INCursesWrapper)Activator.CreateInstance(DynamicTypeBuilder.CreateDefaultWrapper<INCursesWrapper>(Constants.DLLNAME));
                 return wrapper;
             }
         }

@@ -16,13 +16,11 @@ namespace NCurses.Core.Tests
         [Fact]
         public void TestPadSingleByte()
         {
-            string testString = loremString.Substring(0, this.StdScr.MaxColumn - 3);
+            string testString = (this.StdScr.MaxColumn < loremString.Length + 3) ? loremString.Substring(0, this.StdScr.MaxColumn - 3) : loremString;
             Pad pad = new SingleBytePad(200, 200);
 
             for (int i = 0; i < 200; i++)
                 pad.Write($"{i.ToString().PadLeft(3, ' ')}{testString}{(i < 199 ? "\n" : "")}");
-
-            pad.Refresh();
 
             string resString = pad.ExtractString(0, 0, 3, out int read);
             if (int.TryParse(resString.Trim(' '), out int lineNumber))
@@ -39,7 +37,7 @@ namespace NCurses.Core.Tests
             if (this.TestUnicode())
                 return;
 
-            string testString = loremString.Substring(0, this.StdScr.MaxColumn - 3);
+            string testString = (this.StdScr.MaxColumn < loremString.Length + 3) ? loremString.Substring(0, this.StdScr.MaxColumn - 3) : loremString;
             Pad pad = Pad.CreatePad(200, 200);
 
             Assert.IsType<MultiBytePad>(pad);

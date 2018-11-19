@@ -48,13 +48,13 @@ namespace NCurses.Core.Interop.Dynamic
         }
 
         #region INCursesWrapper
-        internal static Type CreateNCursesWrapper(string dllName)
+        internal static Type CreateDefaultWrapper<TInterface>(string dllName)
         {
-            TypeBuilder typeBuilder = ModuleBuilder.DefineType("NCursesWrapper", TypeAttributes.Public);
-            typeBuilder.AddInterfaceImplementation(typeof(INCursesWrapper));
+            TypeBuilder typeBuilder = ModuleBuilder.DefineType(typeof(TInterface).Name.Substring(1), TypeAttributes.Public);
+            typeBuilder.AddInterfaceImplementation(typeof(TInterface));
 
             //regular base methods
-            MethodInfo[] interfaceMethod = typeof(INCursesWrapper).GetTypeInfo().GetMethods();
+            MethodInfo[] interfaceMethod = typeof(TInterface).GetTypeInfo().GetMethods();
             foreach (MethodInfo ifMethod in interfaceMethod)
                 createInterfaceImplementation(dllName, typeBuilder, ifMethod);
 

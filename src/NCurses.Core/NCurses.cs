@@ -48,6 +48,14 @@ namespace NCurses.Core
             if(StdScr == null)
                 throw new InvalidOperationException("NCurses not initialized yet");
 
+            if (Panel.DictPanel.Count > 0)
+            {
+                Panel[] panels = new Panel[Panel.DictPanel.Count];
+                Panel.DictPanel.Values.CopyTo(panels, 0);
+                foreach (Panel panel in panels)
+                    panel.Dispose();
+            }
+
             //TODO: don't do this? (initscr after endwin)
             if (WindowBase.DictPtrWindows.Count > 0)
             {

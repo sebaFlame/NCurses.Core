@@ -11,6 +11,7 @@ namespace NCurses.Core.Interop
 
         //TODO: expose these?
         internal static string DLLNAME { get; private set; }
+        internal static string DLLPANELNAME { get; private set; }
         internal static int SIZEOF_WCHAR_T { get; private set; }
         internal static Type CHTYPE_TYPE { get; private set; }
 
@@ -43,6 +44,7 @@ namespace NCurses.Core.Interop
                 case "win81-x86":
                 case "win10-x86":
                     DLLNAME = "libncursesw6";
+                    DLLPANELNAME = "libpanelw6";
                     SIZEOF_WCHAR_T = 2;
                     CHTYPE_TYPE = typeof(UInt32);
                     break;
@@ -50,11 +52,13 @@ namespace NCurses.Core.Interop
                 case "debian.8-x64":
                 case "debian.9-x64":
                     DLLNAME = "libncursesw.so.5.9";
+                    DLLPANELNAME = "libpanelw.so.5.9";
                     SIZEOF_WCHAR_T = 4;
                     CHTYPE_TYPE = typeof(UInt64);
                     break;
                 default:
                     DLLNAME = "libncursesw.so.6";
+                    DLLPANELNAME = "libpanelw.so.6";
                     SIZEOF_WCHAR_T = 4;
                     CHTYPE_TYPE = typeof(UInt32);
                     break;

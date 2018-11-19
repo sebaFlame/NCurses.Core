@@ -691,6 +691,8 @@ namespace NCurses.Core
             if (this.OwnsHandle)
                 NativeNCurses.delwin(this.WindowPtr);
 
+            this.WindowPtr = IntPtr.Zero;
+
             if (!disposing)
                 return;
         }

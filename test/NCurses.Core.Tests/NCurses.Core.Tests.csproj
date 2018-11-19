@@ -24,12 +24,14 @@
   </ItemGroup>
   
   <ItemGroup>
-    <!--<Compile Remove="WriteTestMultiByte.cs" />-->
-    <!--<Compile Remove="WriteTestSingleByte.cs" />-->
-    <!--<Compile Remove="CharacterCreationTest.cs" />-->
-    <!--<Compile Remove="ReadTest.cs" />-->
-    <!--<Compile Remove="MouseTest.cs" />-->
-    <!--<Compile Remove="ACSTest.cs" />-->
-    <!--<Compile Remove="RipOffTest.cs" />-->
+    <!-- <Compile Remove="WriteTestMultiByte.cs" /> -->
+    <!-- <Compile Remove="WriteTestSingleByte.cs" /> -->
+    <!-- <Compile Remove="CharacterCreationTest.cs" /> -->
+    <!-- <Compile Remove="ReadTest.cs" /> -->
+    <!-- <Compile Remove="MouseTest.cs" /> -->
+    <!-- <Compile Remove="ACSTest.cs" /> -->
+    <!-- <Compile Remove="RipOffTest.cs" /> -->
+    <!-- <Compile Remove="TestPad.cs" /> -->
+    <!--<Compile Remove="TestPanel.cs" />-->
   </ItemGroup>
 </Project>
