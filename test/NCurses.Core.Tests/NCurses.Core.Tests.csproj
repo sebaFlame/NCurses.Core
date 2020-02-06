@@ -4,9 +4,9 @@
     <TargetFramework>netcoreapp2.1</TargetFramework>
     <DebugType>portable</DebugType>
     <AssemblyName>NCurses.Core.Tests</AssemblyName>
-    <OutputType>Exe</OutputType>
     <PackageId>NCurses.Core.Tests</PackageId>
-	  <RuntimeIdentifiers>ubuntu.16.04-x64;win10-x64;debian.9-x64</RuntimeIdentifiers>
+    <OutputType>Exe</OutputType>
+	  <RuntimeIdentifiers>ubuntu.16.04-x64;win10-x64;debian.9-x64;ubuntu.18.04-x64</RuntimeIdentifiers>
   </PropertyGroup>
 
   <ItemGroup>
@@ -20,18 +20,21 @@
 
   <ItemGroup>
     <PackageReference Include="xunit" Version="2.4.0" />
-    <PackageReference Include="xunit.runner.utility" Version="2.4.0" />
+    <!--<PackageReference Include="xunit.runner.utility" Version="2.4.0" />-->
+    <PackageReference Include="Microsoft.NET.Test.Sdk" Version="16.2.0" />
+    <PackageReference Include="xunit.runner.visualstudio" Version="2.4.0" />
   </ItemGroup>
   
   <ItemGroup>
-    <!-- <Compile Remove="WriteTestMultiByte.cs" /> -->
+     <Compile Remove="Program.cs" /> 
+     <!--<Compile Remove="WriteTestMultiByte.cs" />--> 
     <!-- <Compile Remove="WriteTestSingleByte.cs" /> -->
-    <!-- <Compile Remove="CharacterCreationTest.cs" /> -->
-    <!-- <Compile Remove="ReadTest.cs" /> -->
-    <!-- <Compile Remove="MouseTest.cs" /> -->
-    <!-- <Compile Remove="ACSTest.cs" /> -->
-    <!-- <Compile Remove="RipOffTest.cs" /> -->
-    <!-- <Compile Remove="TestPad.cs" /> -->
-    <!--<Compile Remove="TestPanel.cs" />-->
+     <!--<Compile Remove="CharacterCreationTest.cs" />--> 
+     <!--<Compile Remove="ReadTest.cs" />--> 
+     <!--<Compile Remove="MouseTest.cs" />--> 
+     <!--<Compile Remove="ACSTest.cs" />--> 
+     <!--<Compile Remove="RipOffTest.cs" />--> 
+     <!--<Compile Remove="TestPad.cs" />--> 
+     <!--<Compile Remove="TestPanel.cs" />-->
   </ItemGroup>
 </Project>

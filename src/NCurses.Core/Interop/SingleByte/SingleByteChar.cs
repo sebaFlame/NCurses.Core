@@ -9,7 +9,7 @@ using System.Runtime.InteropServices;
 namespace NCurses.Core.Interop.SingleByte
 {
     public class SingleByteChar<TSingleByte> : ISingleByteChar, IDisposable
-        where TSingleByte : unmanaged, ISingleByteChar
+        where TSingleByte : unmanaged, ISingleByteChar, IEquatable<TSingleByte>
     {
         internal Memory<TSingleByte> Char;
         internal ref TSingleByte @char => ref this.buffer[0];

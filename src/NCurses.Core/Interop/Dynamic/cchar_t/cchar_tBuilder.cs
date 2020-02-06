@@ -155,45 +155,26 @@ namespace NCurses.Core.Interop.Dynamic.cchar_t
             ctorIl.Emit(OpCodes.Conv_U);
             ctorIl.Emit(OpCodes.Stloc_2);
             ctorIl.Emit(OpCodes.Nop);
-            //NativeNCurses.Encoding.GetEncoder().Convert(ch, 1, b, charGlobalLength, false, out int charsUsed, out int bytesUsed, out completed);
-            ctorIl.Emit(OpCodes.Call, typeof(NativeNCurses).GetProperty("Encoding", BindingFlags.NonPublic | BindingFlags.Static).GetMethod);
-            ctorIl.Emit(OpCodes.Callvirt, typeof(Encoding).GetMethod("GetEncoder"));
+            //NativeNCurses.Encoding.GetBytes(ch, 1, b, charGlobalLength);
+            ctorIl.Emit(OpCodes.Call, typeof(NativeNCurses).GetProperty(nameof(NativeNCurses.Encoding), BindingFlags.NonPublic | BindingFlags.Static).GetMethod);
             ctorIl.Emit(OpCodes.Ldloc_1);
             ctorIl.Emit(OpCodes.Ldc_I4_1);
             ctorIl.Emit(OpCodes.Ldloc_2);
             ctorIl.Emit(OpCodes.Ldc_I4_S, (byte)wcharLength);
-            ctorIl.Emit(OpCodes.Ldc_I4_0);
-            ctorIl.Emit(OpCodes.Ldloca, lcl4);
-            ctorIl.Emit(OpCodes.Ldloca, lcl5);
-            ctorIl.Emit(OpCodes.Ldloca, lcl0);
-            ctorIl.Emit(OpCodes.Callvirt, typeof(Encoder).GetMethod(
-                "Convert",
-                new Type[] 
+            ctorIl.Emit(OpCodes.Callvirt, 
+                typeof(Encoding).GetMethod(nameof(Encoding.GetBytes),
+                new Type[]
                 {
                     typeof(char*), typeof(int),
-                    typeof(byte*), typeof(int),
-                    typeof(bool),
-                    typeof(int).MakeByRefType(), typeof(int).MakeByRefType(), typeof(bool).MakeByRefType()
+                    typeof(byte*), typeof(int)
                 }));
-            ctorIl.Emit(OpCodes.Nop);
+            ctorIl.Emit(OpCodes.Pop);
             ctorIl.Emit(OpCodes.Nop);
             //end fixed
             ctorIl.Emit(OpCodes.Ldc_I4_0);
             ctorIl.Emit(OpCodes.Conv_U);
             ctorIl.Emit(OpCodes.Stloc_3);
             ctorIl.Emit(OpCodes.Nop);
-            //if (!completed)
-            ctorIl.Emit(OpCodes.Ldloc_0);
-            ctorIl.Emit(OpCodes.Ldc_I4_0);
-            ctorIl.Emit(OpCodes.Ceq);
-            ctorIl.Emit(OpCodes.Stloc_S, lcl6);
-            ctorIl.Emit(OpCodes.Ldloc_S, lcl6);
-            ctorIl.Emit(OpCodes.Brfalse_S, lbl1);
-            //throw new InvalidOperationException("Failed to convert character for marshaling");
-            ctorIl.Emit(OpCodes.Ldstr, "Failed to convert character for marshaling");
-            ctorIl.Emit(OpCodes.Newobj, typeof(InvalidOperationException).GetTypeInfo().GetConstructor(new Type[] { typeof(string) }));
-            ctorIl.Emit(OpCodes.Throw);
-            ctorIl.MarkLabel(lbl1);
             ctorIl.Emit(OpCodes.Ret);
             #endregion
 

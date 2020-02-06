@@ -17,7 +17,7 @@ namespace NCurses.Core.Tests
             this.OutputHelper = outputHelper;
         }
 
-        [SkipWindowsFact("Skipping TestReadCharMultiByte on Windows (multibyte unget does not work).")]
+        [SkipWindowsFact("Skipping TestRipOff on Windows")]
         public void TestRipOff()
         {
             NCurses.RipOffLine(-1, this.ripoffAssign);

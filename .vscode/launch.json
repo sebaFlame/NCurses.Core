@@ -24,7 +24,7 @@
             "request": "attach",
             "processId": "${command:pickProcess}"
         },
-        //DO NOT USE THIS (a dedicated console is necessary)
+        //DO NOT USE THIS (a dedicated console is necessary and it's being used to pipe)
         //Download debugger in WSL using
         //curl -sSL https://aka.ms/getvsdbgsh | bash /dev/stdin -v latest -l ~/vsdbg
         {
@@ -33,7 +33,7 @@
             "request": "launch",
             "preLaunchTask": "build_wsl",
             //add a WSLworkspaceFolderMountPath to Workspace Settings to the mount point for your current workspaceFolder
-            "program": "${config:WSLworkspaceFolderMountPath}/test/NCurses.Core.Tests/bin/Debug/netcoreapp2.1/ubuntu.16.04-x64/publish/NCurses.Core.Tests.dll",
+            "program": "${config:WSLworkspaceFolderMountPath}/test/NCurses.Core.Tests/bin/Debug/netcoreapp2.1/ubuntu.18.04-x64/publish/NCurses.Core.Tests.dll",
             "args": [],
             "cwd": "${config:WSLworkspaceFolderMountPath}/test/NCurses.Core.Tests",
             "stopAtEntry": false,
@@ -56,10 +56,6 @@
             "type": "coreclr",
             "request": "attach",
             "processId": "",
-            "sourceFileMap": {
-                //add a WSLAttachSourceMap to Workspace Settings for the WSL path where your source directory resides
-                "${config:WSLAttachSourceMap}": "${workspaceFolder}"
-            },
             "pipeTransport": {
                 "debuggerPath": "~/vsdbg/vsdbg",
                 "pipeCwd": "${workspaceFolder}",

@@ -33,7 +33,8 @@ namespace NCurses.Core.Interop
         //TODO: get WCHAR_T size at runtime (through libc?)
         static Constants()
         {
-            switch (Microsoft.DotNet.PlatformAbstractions.RuntimeEnvironment.GetRuntimeIdentifier())
+            string identifier;
+            switch ((identifier = Microsoft.DotNet.PlatformAbstractions.RuntimeEnvironment.GetRuntimeIdentifier()))
             {
                 case "win7-x64":
                 case "win8-x64":
@@ -49,6 +50,7 @@ namespace NCurses.Core.Interop
                     CHTYPE_TYPE = typeof(UInt32);
                     break;
                 case "ubuntu.16.04-x64":
+                case "ubuntu.18.04-x64":
                 case "debian.8-x64":
                 case "debian.9-x64":
                     DLLNAME = "libncursesw.so.5.9";

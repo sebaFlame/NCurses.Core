@@ -7,7 +7,7 @@ using System.Runtime.InteropServices;
 namespace NCurses.Core.Interop.MultiByte
 {
     public class MultiByteChar<TMultiByte> : IMultiByteChar, IDisposable
-        where TMultiByte : unmanaged, IMultiByteChar
+        where TMultiByte : unmanaged, IMultiByteChar, IEquatable<TMultiByte>
     {
         internal Memory<TMultiByte> Char;
         internal ref TMultiByte @char => ref this.buffer[0];

@@ -60,7 +60,8 @@ namespace NCurses.Core.Interop.SingleByte
 
             fixed (char* originalChars = charArray)
             {
-                int byteCount = NativeNCurses.Encoding.GetEncoder().GetByteCount(originalChars, charArray.Length, false);
+                Encoder encoder = NativeNCurses.Encoding.GetEncoder();
+                int byteCount = encoder.GetByteCount(originalChars, charArray.Length, false);
                 byte* bytePtr = stackalloc byte[byteCount];
                 int bytesUsed = 0, charsUsed = 0, charPosition = 0, bytePosition = 0;
                 bool completed = false;
@@ -69,7 +70,7 @@ namespace NCurses.Core.Interop.SingleByte
                 {
                     charPosition += charsUsed;
                     bytePosition += bytesUsed;
-                    Encoding.ASCII.GetEncoder().Convert(
+                    encoder.Convert(
                         originalChars + charPosition, 1,
                         bytePtr + bytePosition, byteCount - bytePosition,
                         i == charArray.Length - 1 ? true : false,

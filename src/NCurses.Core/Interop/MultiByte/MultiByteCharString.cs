@@ -103,7 +103,8 @@ namespace NCurses.Core.Interop.MultiByte
 
             fixed (char* originalChars = charArray)
             {
-                int byteCount = NativeNCurses.Encoding.GetEncoder().GetByteCount(originalChars, charArray.Length, false);
+                Encoder encoder = NativeNCurses.Encoding.GetEncoder();
+                int byteCount = encoder.GetByteCount(originalChars, charArray.Length, false);
                 byte[] encodedBytes = new byte[byteCount]; //TODO: use buffer? check if IL uses stack
                 int bytesUsed = 0, charsUsed = 0, charPosition = 0, bytePosition = 0;
                 bool completed = false;
@@ -114,7 +115,7 @@ namespace NCurses.Core.Interop.MultiByte
                     {
                         charPosition += charsUsed;
                         bytePosition += bytesUsed;
-                        NativeNCurses.Encoding.GetEncoder().Convert(
+                        encoder.Convert(
                             originalChars + charPosition, 1,
                             bytePtr + bytePosition, byteCount - bytePosition,
                             i == charArray.Length - 1 ? true : false,
@@ -146,9 +147,10 @@ namespace NCurses.Core.Interop.MultiByte
         {
             fixed (byte* originalBytes = bytes)
             {
-                this.Length = encoding.GetDecoder().GetCharCount(originalBytes, bytes.Length, false);
+                Decoder decoder = encoding.GetDecoder();
+                this.Length = decoder.GetCharCount(originalBytes, bytes.Length, false);
                 char* chars = stackalloc char[this.Length];
-                encoding.GetDecoder().Convert(originalBytes, bytes.Length, chars, this.Length, true, out int bytesUsed, out int charsUsed, out bool completed);
+                decoder.Convert(originalBytes, bytes.Length, chars, this.Length, true, out int bytesUsed, out int charsUsed, out bool completed);
                 if (!completed)
                     throw new InvalidOperationException($"Could not cast {encoding.EncodingName} to characters");
 

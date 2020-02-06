@@ -68,6 +68,11 @@ namespace NCurses.Core.Tests
         [Fact]
         public void TestWriteStringColorSingleByte()
         {
+            if (this.TestColor())
+            {
+                return;
+            }
+
             string testString = "test";
             this.SingleByteStdScr.Write(testString, Attrs.BOLD | Attrs.ITALIC, 4);
             this.SingleByteStdScr.ExtractString(0, 0, out INCursesCharString resultNCursesString, testString.Length);
@@ -82,6 +87,11 @@ namespace NCurses.Core.Tests
         [Fact]
         public void TestWriteStringColorStringEqualitySingleByte()
         {
+            if (this.TestColor())
+            {
+                return;
+            }
+
             string testString = "test";
 
             this.SingleByteStdScr.CreateString(testString, Attrs.BOLD | Attrs.ITALIC, 4, out INCursesCharString managedString);

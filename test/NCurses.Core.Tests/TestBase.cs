@@ -5,6 +5,8 @@ using Xunit.Abstractions;
 using Xunit;
 using NCurses.Core.Interop;
 
+[assembly: CollectionBehavior(DisableTestParallelization = true)]
+
 namespace NCurses.Core.Tests
 {
     public abstract class TestBase : IDisposable
@@ -68,7 +70,8 @@ namespace NCurses.Core.Tests
 
         public void Dispose()
         {
-            this.SingleByteStdScr.Clear();
+            this.SingleByteStdScr?.Clear();
+            this.MultiByteStdScr?.Clear();
             NCurses.End();
         }
     }

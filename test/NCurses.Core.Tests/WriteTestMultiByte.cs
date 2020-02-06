@@ -58,7 +58,7 @@ namespace NCurses.Core.Tests
         /// <summary>
         /// <see cref="IMultiByteStringWrapper{TWideStr, TSmallStr}.mvinnwstr(int, int, ref TWideStr, int)"/>
         /// </summary>
-        [Fact]
+        [SkipWindowsFact("Skipping TestWriteStringMultiByte on Windows")]
         public void TestWriteStringMultiByte()
         {
             if (this.TestUnicode())
@@ -77,7 +77,7 @@ namespace NCurses.Core.Tests
         /// <summary>
         /// <see cref="IMultiByteStringWrapper{TWideStr, TSmallStr}.mvinnwstr(int, int, ref TWideStr, int)"/>
         /// </summary>
-        [Fact]
+        [SkipWindowsFact("Skipping TestMoveWriteStringMultiByte on Windows")]
         public void TestMoveWriteStringMultiByte()
         {
             if (this.TestUnicode())
@@ -98,6 +98,11 @@ namespace NCurses.Core.Tests
             if (this.TestUnicode())
                 return;
 
+            if (this.TestColor())
+            {
+                return;
+            }
+
             string testString = new string(new char[] { '\u0490', '\u0491', '\u0492', '\u0493', '\u0494', '\u0495', '\u0496', '\u0497', '\u0498', '\u0499'
                 , '\u049A', '\u049B', '\u049C', '\u049D', '\u049E', '\u049F' });
             this.MultiByteStdScr.Write(testString, Attrs.BOLD | Attrs.ITALIC, 4);
@@ -115,6 +120,11 @@ namespace NCurses.Core.Tests
         {
             if (this.TestUnicode())
                 return;
+
+            if (this.TestColor())
+            {
+                return;
+            }
 
             string testString = new string(new char[] { '\u0490', '\u0491', '\u0492', '\u0493', '\u0494', '\u0495', '\u0496', '\u0497', '\u0498', '\u0499'
                 , '\u049A', '\u049B', '\u049C', '\u049D', '\u049E', '\u049F' });

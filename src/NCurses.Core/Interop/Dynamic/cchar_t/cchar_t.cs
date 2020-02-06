@@ -28,9 +28,6 @@ namespace NCurses.Core.Interop.Dynamic.cchar_t
             this.attr = 0;
             this.ext_color = 0;
 
-            //convert into correct encoding
-            bool completed;
-
             unsafe
             {
                 char* ch = stackalloc char[1];
@@ -38,12 +35,9 @@ namespace NCurses.Core.Interop.Dynamic.cchar_t
                 //TODO: cache bytesUsed as length
                 fixed (byte* b = this.chars)
                 {
-                    NativeNCurses.Encoding.GetEncoder().Convert(ch, 1, b, charGlobalLength, false, out int charsUsed, out int bytesUsed, out completed);
+                    NativeNCurses.Encoding.GetBytes(ch, 1, b, charGlobalLength);
                 }
             }
-
-            if (!completed)
-                throw new InvalidOperationException("Failed to convert character for marshaling");
         }
 
         public cchar_t(char c, ulong attrs)
