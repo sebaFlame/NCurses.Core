@@ -55,36 +55,44 @@ namespace NCurses.Core.Interop.SingleByte
 
         private unsafe void CreateSCHARArray(ReadOnlySpan<char> charArray, ulong attrs = 0, short colorPair = 0, bool addNullTerminator = true)
         {
+            int bytesUsed = 0, charsUsed = 0;
+            bool completed = false;
+
             this.charString = ArrayPool<TSingleByte>.Shared.Rent(charArray.Length + (addNullTerminator ? 1 : 0));
             this.CharString = new Memory<TSingleByte>(this.charString);
 
             fixed (char* originalChars = charArray)
             {
-                Encoder encoder = NativeNCurses.Encoding.GetEncoder();
+                Encoder encoder = Encoding.ASCII.GetEncoder();
                 int byteCount = encoder.GetByteCount(originalChars, charArray.Length, false);
                 byte* bytePtr = stackalloc byte[byteCount];
-                int bytesUsed = 0, charsUsed = 0, charPosition = 0, bytePosition = 0;
-                bool completed = false;
 
-                for (int i = 0; i < charArray.Length; i++)
+
+                encoder.Convert(
+                    originalChars, 
+                    charArray.Length,
+                    bytePtr,
+                    byteCount,
+                    true,
+                    out charsUsed, 
+                    out bytesUsed, 
+                    out completed);
+
+                if (!completed)
                 {
-                    charPosition += charsUsed;
-                    bytePosition += bytesUsed;
-                    encoder.Convert(
-                        originalChars + charPosition, 1,
-                        bytePtr + bytePosition, byteCount - bytePosition,
-                        i == charArray.Length - 1 ? true : false,
-                        out charsUsed, out bytesUsed, out completed);
+                    throw new InvalidOperationException("Could not complete encoding string");
+                }
 
-                    if (!completed)
-                        throw new InvalidOperationException("Could not complete encoding string");
-
+                for (int i = 0; i < byteCount; i++)
+                {
                     this.charString[i] = this.CreateSmallChar((sbyte)bytePtr[i], attrs, colorPair);
                 }
             }
 
             if (addNullTerminator)
-                this.charString[this.charString.Length - 1] = SingleByteChar<TSingleByte>.byteCreate(0);
+            {
+                this.charString[charArray.Length] = SingleByteChar<TSingleByte>.byteCreate(0);
+            }
         }
 
         private TSingleByte CreateSmallChar(sbyte encodedByte, ulong attrs = 0, short colorPair = 0)

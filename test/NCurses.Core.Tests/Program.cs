@@ -3,8 +3,10 @@ using System.Text;
 using System.Collections.Generic;
 using NCurses.Core.Interop;
 using System.Reflection;
+
 using Xunit;
 using Xunit.Abstractions;
+
 using System.Diagnostics;
 using System.Threading;
 using System.Runtime.InteropServices;

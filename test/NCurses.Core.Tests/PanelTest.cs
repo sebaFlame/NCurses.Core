@@ -2,24 +2,35 @@
 using System.Collections.Generic;
 using System.Text;
 using System.Runtime.InteropServices;
+
 using Xunit;
 using Xunit.Abstractions;
 
+using NCurses.Core.Tests.Model;
+
+using NCurses.Core.Interop;
+
 namespace NCurses.Core.Tests
 {
-    public class TestPanel : TestBase
+    //TODO: incorrect -> pass the current stdscr to panel/window creation
+    public abstract class PanelTest : TestBase
     {
-        public TestPanel(ITestOutputHelper outputHelper)
-            : base(outputHelper) { }
+        protected abstract Func<int, int, int, int, Window> CreateWindow { get; }
+
+        public PanelTest(ITestOutputHelper testOutputHelper, StdScrState stdScrState)
+            : base(testOutputHelper, stdScrState)
+        {
+
+        }
 
         [Fact]
         public void TestPanelOrder()
         {
             Window win1, win2, win3, win4;
-            win1 = Window.CreateWindow(20, 20, 0, 0);
-            win2 = Window.CreateWindow(20, 20, 0, 0);
-            win3 = Window.CreateWindow(20, 20, 0, 0);
-            win4 = Window.CreateWindow(20, 20, 0, 0);
+            win1 = this.CreateWindow(20, 20, 0, 0);
+            win2 = this.CreateWindow(20, 20, 0, 0);
+            win3 = this.CreateWindow(20, 20, 0, 0);
+            win4 = this.CreateWindow(20, 20, 0, 0);
 
             Panel panel1, panel2, panel3, resultPanel;
             panel1 = new Panel(win1);

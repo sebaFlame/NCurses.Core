@@ -43,7 +43,7 @@ namespace NCurses.Core.Interop.MultiByteString
         //int mvgetn_wstr(int y, int x, wint_t *wstr, int n);
         int mvgetn_wstr(int y, int x, ref TMultiByteString wstr, int n);
         //int mvinnwstr(int y, int x, wchar_t *wstr, int n);
-        int mvinnwstr(int y, int x, ref TMultiByteString wstr, int n);  //TODO: change return type to IntPtr because it crashes dotnet debugger in netcoreapp2.0
+        int mvinnwstr(int y, int x, ref TMultiByteString wstr, int n);
         //int mvins_nwstr(int y, int x, const wchar_t *wstr, int n);
         int mvins_nwstr(int y, int x, in TMultiByteString wstr, int n);
         //int mvins_wstr(int y, int x, const wchar_t *wstr);

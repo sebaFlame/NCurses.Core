@@ -116,13 +116,19 @@ namespace NCurses.Core.Interop.MultiByte
                         charPosition += charsUsed;
                         bytePosition += bytesUsed;
                         encoder.Convert(
-                            originalChars + charPosition, 1,
-                            bytePtr + bytePosition, byteCount - bytePosition,
+                            originalChars + charPosition, 
+                            1,
+                            bytePtr + bytePosition, 
+                            byteCount - bytePosition,
                             i == charArray.Length - 1 ? true : false,
-                            out charsUsed, out bytesUsed, out completed);
+                            out charsUsed, 
+                            out bytesUsed, 
+                            out completed);
 
                         if (!completed)
+                        {
                             throw new InvalidOperationException("Could not complete encoding string");
+                        }
 
                         this.charString[i] = this.CreateWideChar(new ArraySegment<byte>(encodedBytes, bytePosition, bytesUsed), attrs, colorPair);
                     }
@@ -130,7 +136,9 @@ namespace NCurses.Core.Interop.MultiByte
             }
 
             if (addNullTerminator)
-                this.charString[this.charString.Length - 1] = MultiByteChar<TMultiByte>.charCreate('\0');
+            {
+                this.charString[charArray.Length] = MultiByteChar<TMultiByte>.charCreate('\0');
+            }
         }
 
         private TMultiByte CreateWideChar(ArraySegment<byte> encodedBytes, ulong attrs = 0, short colorPair = 0)

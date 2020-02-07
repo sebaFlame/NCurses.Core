@@ -38,7 +38,25 @@ namespace NCurses.Core.Interop
         }
 
         private static bool? hasUnicodeSupport;
-        internal static bool HasUnicodeSupport => hasUnicodeSupport.HasValue ? hasUnicodeSupport.Value : throw new InvalidOperationException(Constants.TypeGenerationExceptionMessage);
+        internal static bool HasUnicodeSupport 
+        {
+            get
+            {
+                if (hasUnicodeSupport.HasValue)
+                {
+                    return hasUnicodeSupport.Value;
+                }
+
+                if (NativeLoader is LinuxLoader linuxLoader)
+                {
+                    linuxLoader.SetLocale(6, ""); //6 = LC_ALL
+                }
+
+                hasUnicodeSupport = NativeNCurses._nc_unicode_locale();
+
+                return hasUnicodeSupport.Value;
+            }
+        }
 
         internal static INativeWrapper NCursesCustomTypeWrapper { get; private set; }
         internal static INativeWrapper NCursesCharTypeWrapper { get; private set; }
@@ -732,10 +750,9 @@ namespace NCurses.Core.Interop
         {
             //TODO: should only be called once
             if (NativeLoader is LinuxLoader linuxLoader)
+            {
                 linuxLoader.SetLocale(6, ""); //6 = LC_ALL
-
-            if (!hasUnicodeSupport.HasValue)
-                hasUnicodeSupport = NativeNCurses._nc_unicode_locale();
+            }
 
             IntPtr stdScr = NCursesException.Verify(NCursesWrapper.initscr(), "initscr");
 

@@ -45,13 +45,6 @@ namespace NCurses.Core
             return CreateSingleBytePad(windowPtr, initialize);
         }
 
-        public static Pad CreatePad(int nlines, int ncols)
-        {
-            if (NCurses.UnicodeSupported)
-                return CreateMultiBytePad(nlines, ncols);
-            return CreateSingleBytePad(nlines, ncols);
-        }
-
         internal static Pad CreateSingleBytePad(IntPtr windowPtr, bool initialize = true)
         {
             return new SingleBytePad(windowPtr, true, initialize);
@@ -126,5 +119,10 @@ namespace NCurses.Core
         #region echo
         public abstract void Echo(char ch);
         #endregion
+
+        public override void Put(int ch)
+        {
+            this.Window.Put(ch);
+        }
     }
 }

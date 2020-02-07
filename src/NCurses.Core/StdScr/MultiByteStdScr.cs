@@ -368,5 +368,10 @@ namespace NCurses.Core.StdScr
             MultiByteCharFactory.Instance.GetNativeString(str, encoding, attrs, pair, out IMultiByteCharString res);
             NativeStdScr.mvadd_wchnstr(nline, ncol, res, res.Length);
         }
+
+        public override void Put(int ch)
+        {
+            NativeNCurses.unget_wch(Convert.ToChar(ch));
+        }
     }
 }

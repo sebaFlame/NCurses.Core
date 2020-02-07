@@ -149,13 +149,6 @@ namespace NCurses.Core
             return CreateSingleByteWindow(windowPtr, initialize);
         }
 
-        public static Window CreateWindow(int nlines, int ncols, int begy, int begx)
-        {
-            if (NCurses.UnicodeSupported)
-                return CreateMultiByteWindow(nlines, ncols, begy, begx);
-            return CreateSingleByteWindow(nlines, ncols, begy, begx);
-        }
-
         internal static Window CreateMultiByteWindow(IntPtr windowPtr, bool initialize = true)
         {
             return new MultiByteWindow(windowPtr, true, initialize);

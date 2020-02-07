@@ -311,6 +311,10 @@ namespace NCurses.Core
         public abstract void Write(int nline, int ncol, byte[] str, Encoding encoding, ulong attrs, short pair);
         #endregion
 
+        #region write input
+        public abstract void Put(int ch);
+        #endregion
+
         #region read input
         /// <summary>
         /// read a character from console input.

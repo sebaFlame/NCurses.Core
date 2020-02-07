@@ -158,7 +158,7 @@ namespace NCurses.Core.Interop.Dynamic
             ctorParams = new Type[] { typeof(string) };
             ctor = attrType.GetTypeInfo().GetConstructor(ctorParams);
             attrBuilder = new CustomAttributeBuilder(ctor, new object[] { dllName },
-                new FieldInfo[] { attrType.GetTypeInfo().GetField("EntryPoint") },
+                new FieldInfo[] { attrType.GetTypeInfo().GetField(nameof(DllImportAttribute.EntryPoint)) },
                 new object[] { methodName });
             nativeMethod.SetCustomAttribute(attrBuilder);
 
@@ -183,12 +183,12 @@ namespace NCurses.Core.Interop.Dynamic
 
             //check if locking is enabled and lock if it is
             interfaceMethodIL.Emit(OpCodes.Nop);
-            interfaceMethodIL.Emit(OpCodes.Call, typeof(NativeNCurses).GetProperty("EnableLocking", BindingFlags.NonPublic | BindingFlags.Static).GetMethod);
+            interfaceMethodIL.Emit(OpCodes.Call, typeof(NativeNCurses).GetProperty(nameof(NativeNCurses.EnableLocking), BindingFlags.NonPublic | BindingFlags.Static).GetMethod);
             interfaceMethodIL.Emit(OpCodes.Stloc_0);
             interfaceMethodIL.Emit(OpCodes.Ldloc_0);
             interfaceMethodIL.Emit(OpCodes.Brfalse_S, lblNoLock);
-            interfaceMethodIL.Emit(OpCodes.Ldsfld, typeof(NativeNCurses).GetField("SyncRoot", BindingFlags.NonPublic | BindingFlags.Static));
-            interfaceMethodIL.Emit(OpCodes.Call, typeof(Monitor).GetMethod("Enter", new Type[] { typeof(object) }));
+            interfaceMethodIL.Emit(OpCodes.Ldsfld, typeof(NativeNCurses).GetField(nameof(NativeNCurses.SyncRoot), BindingFlags.NonPublic | BindingFlags.Static));
+            interfaceMethodIL.Emit(OpCodes.Call, typeof(Monitor).GetMethod(nameof(Monitor.Enter), new Type[] { typeof(object) }));
             interfaceMethodIL.Emit(OpCodes.Nop);
 
             //when locking is disabled
@@ -228,8 +228,8 @@ namespace NCurses.Core.Interop.Dynamic
             interfaceMethodIL.Emit(OpCodes.Nop);
             interfaceMethodIL.Emit(OpCodes.Ldloc_0);
             interfaceMethodIL.Emit(OpCodes.Brfalse_S, lblNoLockFinally);
-            interfaceMethodIL.Emit(OpCodes.Ldsfld, typeof(NativeNCurses).GetField("SyncRoot", BindingFlags.NonPublic | BindingFlags.Static));
-            interfaceMethodIL.Emit(OpCodes.Call, typeof(Monitor).GetMethod("Exit"));
+            interfaceMethodIL.Emit(OpCodes.Ldsfld, typeof(NativeNCurses).GetField(nameof(NativeNCurses.SyncRoot), BindingFlags.NonPublic | BindingFlags.Static));
+            interfaceMethodIL.Emit(OpCodes.Call, typeof(Monitor).GetMethod(nameof(Monitor.Exit)));
             interfaceMethodIL.Emit(OpCodes.Nop);
 
             //end of finally block

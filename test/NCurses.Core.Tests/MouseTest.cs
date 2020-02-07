@@ -1,34 +1,37 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Text;
+
 using Xunit;
 using Xunit.Abstractions;
+
+using NCurses.Core.Tests.Model;
+
 using NCurses.Core.Interop.Mouse;
 using NCurses.Core.Interop;
-using System.Reflection;
 
 namespace NCurses.Core.Tests
 {
-    public class MouseTest : TestBase
+    public abstract class MouseTest : TestBase
     {
-        public MouseTest(ITestOutputHelper outputHelper)
-            : base(outputHelper) { }
+        public MouseTest(ITestOutputHelper testOutputHelper, StdScrState stdScrState)
+            : base(testOutputHelper, stdScrState)
+        {
+        }
 
         [Fact]
         public void TestMouseEvent()
         {
             ulong newMouseState = NCurses.EnableMouseMask(MouseState.ALL_MOUSE_EVENTS, out ulong oldMouseState);
 
-            if (this.TestMouse())
-                return;
+            Assert.True(this.StdScrState.SupportsMouse);
 
-            Assert.Equal((ulong)0, oldMouseState);
-            Assert.NotEqual((ulong)0, newMouseState);
+            //Assert.NotEqual(oldMouseState, newMouseState);
 
             MouseEventFactory.Instance.GetMouseEvent(1, 1, 1, 1, MouseState.BUTTON1_CLICKED, out IMEVENT mouseEvent);
             NativeNCurses.ungetmouse(mouseEvent);
 
-            Assert.True(this.SingleByteStdScr.ReadKey(out char resultChar, out Key resultKey));
+            Assert.True(this.Window.ReadKey(out char resultChar, out Key resultKey));
             Assert.Equal(Key.MOUSE, resultKey);
 
             NCurses.GetMouseEvent(out IMEVENT resultMouseEvent);

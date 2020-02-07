@@ -203,7 +203,7 @@ namespace NCurses.Core.Interop.MultiByteString
         {
             unsafe
             {
-                TMultiByteString* strPtr = stackalloc TMultiByteString[n];
+                TMultiByteString* strPtr = stackalloc TMultiByteString[n + 1];
                 NCursesException.Verify(this.Wrapper.mvgetn_wstr(y, x, ref MarshalString(strPtr, n, out Span<TMultiByteString> span), n), "mvgetn_wstr");
                 wstr = ReadString(ref span);
             }
@@ -213,7 +213,7 @@ namespace NCurses.Core.Interop.MultiByteString
         {
             unsafe
             {
-                TMultiByteString* strPtr = stackalloc TMultiByteString[n];
+                TMultiByteString* strPtr = stackalloc TMultiByteString[n + 1];
                 read = NCursesException.Verify(this.Wrapper.mvinnwstr(y, x, ref MarshalString(strPtr, n, out Span<TMultiByteString> span), n), "mvinnwstr");
                 wstr = ReadString(ref span);
             }

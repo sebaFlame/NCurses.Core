@@ -83,5 +83,6 @@ namespace NCurses.Core
         void Write(int nline, int ncol, string str, ulong attrs, short pair);
         void Write(string str);
         void Write(string str, ulong attrs, short pair);
+        void Put(int ch);
     }
 }

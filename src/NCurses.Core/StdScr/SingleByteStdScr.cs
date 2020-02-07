@@ -356,5 +356,10 @@ namespace NCurses.Core.StdScr
         {
             throw new NotImplementedException("Only useful in multibyte mode");
         }
+
+        public override void Put(int ch)
+        {
+            NativeNCurses.ungetch(ch);
+        }
     }
 }

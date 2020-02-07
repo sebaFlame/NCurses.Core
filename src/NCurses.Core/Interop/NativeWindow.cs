@@ -2052,7 +2052,7 @@ namespace NCurses.Core.Interop
         }
         #endregion
 
-        #region mvwin_wchstr
+#region mvwin_wchstr
         /// <summary>
         /// see <see cref="mvwin_wchnstr"/>
         /// <para />native method wrapped with verification.
@@ -2063,9 +2063,9 @@ namespace NCurses.Core.Interop
         {
             MultiByteNCursesWrapper.mvwin_wchstr(window, y, x, out wchStr);
         }
-        #endregion
+#endregion
 
-        #region mvwinnwstr
+#region mvwinnwstr
         /// <summary>
         /// see <see cref="NativeStdScr.mvinnwstr"/>
         /// <para />native method wrapped with verification.

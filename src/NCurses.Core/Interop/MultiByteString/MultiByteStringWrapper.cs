@@ -121,6 +121,14 @@ namespace NCurses.Core.Interop.MultiByteString
             }
         }
 
+        internal unsafe static string ReadString(ref Span<byte> strBytes)
+        {
+            fixed (byte* chars = strBytes)
+            {
+                return NativeNCurses.Encoding.GetString(chars, strBytes.Length);
+            }
+        }
+
         public unsafe static string ReadString(ref TMultiByteString strRef)
         {
             TMultiByteString* arr = (TMultiByteString*)Unsafe.AsPointer<TMultiByteString>(ref strRef);

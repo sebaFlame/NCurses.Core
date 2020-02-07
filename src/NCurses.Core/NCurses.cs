@@ -34,7 +34,9 @@ namespace NCurses.Core
                 SingleByteStdScr = new SingleByteStdScr(stdScrPtr);
             }
             else
+            {
                 StdScr = SingleByteStdScr = new SingleByteStdScr(stdScrPtr);
+            }
 
             return StdScr;
         }

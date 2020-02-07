@@ -36,6 +36,20 @@
             ],
             "problemMatcher": "$msCompile",
             "dependsOn": "restore_wsl"
+        },
+        {
+            "label": "test",
+            "command": "dotnet",
+            "type": "shell",
+            "args": [
+                "test",
+                "${workspaceFolder}/test/NCurses.Core.Tests/NCurses.Core.Tests.csproj"
+            ],
+            "dependsOn": "build",
+            "group": {
+                "kind": "test",
+                "isDefault": true
+            }
         }
     ]
 }

@@ -7,7 +7,7 @@ using Xunit.Abstractions;
 
 namespace NCurses.Core.Tests
 {
-    public class RipOffTest : IDisposable
+    public class RipOffTest
     {
         protected readonly ITestOutputHelper OutputHelper;
         private Window ripoffExecuted;
@@ -30,19 +30,13 @@ namespace NCurses.Core.Tests
             string resultString = ripoffExecuted.ExtractString(0, 0, 5, out int read);
             Assert.Equal(5, read);
             Assert.Equal("test1", resultString);
+
+            NCurses.End();
         }
 
         private void ripoffAssign(Window window, int columns)
         {
             this.ripoffExecuted = window;
-        }
-
-        public void Dispose()
-        {
-            if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
-                return;
-
-            NCurses.End();
         }
     }
 }
