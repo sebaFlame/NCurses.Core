@@ -12,50 +12,50 @@ using NCurses.Core.Interop;
 
 namespace NCurses.Core.Tests
 {
-    public abstract class WriteTest : TestBase
+    public abstract class InsertTest : TestBase
     {
         protected abstract char TestChar { get; }
         protected abstract string TestString { get; }
 
-        public WriteTest(ITestOutputHelper testOutputHelper, StdScrState stdScrState)
+        public InsertTest(ITestOutputHelper testOutputHelper, StdScrState stdScrState)
             : base(testOutputHelper, stdScrState)
         {
             
         }
 
         [Fact]
-        public void WriteCharTest()
+        public void InsertCharTest()
         {
-            this.Window.Write(this.TestChar);
+            this.Window.Insert(this.TestChar);
 
             Assert.Equal(0, this.Window.CursorLine);
-            Assert.Equal(1, this.Window.CursorColumn);
+            Assert.Equal(0, this.Window.CursorColumn);
 
             char resultChar = this.Window.ExtractChar(0, 0);
             Assert.Equal(this.TestChar, resultChar);
         }
 
         [Fact]
-        public void MoveAndWriteCharTest()
+        public void MoveAndInsertCharTest()
         {
-            this.Window.Write(1, 1, this.TestChar);
+            this.Window.Insert(1, 1, this.TestChar);
 
             Assert.Equal(1, this.Window.CursorLine);
-            Assert.Equal(1 + 1, this.Window.CursorColumn);
+            Assert.Equal(1, this.Window.CursorColumn);
 
             char resultChar = this.Window.ExtractChar(1, 1);
             Assert.Equal(this.TestChar, resultChar);
         }
 
         [Fact]
-        public void WriteCharWithColorTest()
+        public void InsertCharWithColorTest()
         {
             Assert.True(this.StdScrState.SupportsColor);
 
-            this.Window.Write(this.TestChar, Attrs.BOLD, 4);
+            this.Window.Insert(this.TestChar, Attrs.BOLD, 4);
 
             Assert.Equal(0, this.Window.CursorLine);
-            Assert.Equal(1, this.Window.CursorColumn);
+            Assert.Equal(0, this.Window.CursorColumn);
 
             this.Window.ExtractChar(0, 0, out INCursesChar resultChar);
             Assert.Equal(this.TestChar, resultChar.Char);
@@ -64,12 +64,12 @@ namespace NCurses.Core.Tests
         }
 
         [Fact]
-        public void WriteStringTest()
+        public void InsertStringTest()
         {
-            this.Window.Write(this.TestString);
+            this.Window.Insert(this.TestString);
 
             Assert.Equal(0, this.Window.CursorLine);
-            Assert.Equal(this.TestString.Length, this.Window.CursorColumn);
+            Assert.Equal(0, this.Window.CursorColumn);
 
             string resultString = this.Window.ExtractString(0, 0, this.TestString.Length, out int read);
             Assert.Equal(this.TestString, resultString);
@@ -77,12 +77,12 @@ namespace NCurses.Core.Tests
         }
 
         [Fact]
-        public void MoveAndWriteStringTest()
+        public void MoveAndInsertStringTest()
         {
-            this.Window.Write(1, 1, this.TestString);
+            this.Window.Insert(1, 1, this.TestString);
 
             Assert.Equal(1, this.Window.CursorLine);
-            Assert.Equal(this.TestString.Length + 1, this.Window.CursorColumn);
+            Assert.Equal(1, this.Window.CursorColumn);
 
             string resultString = this.Window.ExtractString(1, 1, this.TestString.Length, out int read);
             Assert.Equal(this.TestString, resultString);
@@ -90,14 +90,14 @@ namespace NCurses.Core.Tests
         }
 
         [Fact]
-        public void WriteStringWithColorTest()
+        public void InsertStringWithColorTest()
         {
             Assert.True(this.StdScrState.SupportsColor);
 
-            this.Window.Write(this.TestString, Attrs.BOLD | Attrs.ITALIC, 4);
+            this.Window.Insert(this.TestString, Attrs.BOLD | Attrs.ITALIC, 4);
 
             Assert.Equal(0, this.Window.CursorLine);
-            Assert.Equal(0, this.Window.CursorColumn); //does not get advanced
+            Assert.Equal(0, this.Window.CursorColumn);
 
             this.Window.ExtractString(0, 0, out INCursesCharString resultNCursesString, this.TestString.Length);
             Assert.Equal(this.TestString.Length, resultNCursesString.Length);
@@ -105,23 +105,6 @@ namespace NCurses.Core.Tests
             Assert.Equal(this.TestString, resultString);
             Assert.Equal(Attrs.BOLD | Attrs.ITALIC, resultNCursesString[0].Attributes);
             Assert.Equal(4, resultNCursesString[0].Color);
-        }
-
-        [Fact]
-        public void WriteStringWithColorAndVerifyEquality()
-        {
-            Assert.True(this.StdScrState.SupportsColor);
-
-            this.Window.CreateString(this.TestString, Attrs.BOLD | Attrs.ITALIC, 4, out INCursesCharString managedString);
-
-            this.Window.Write(managedString);
-
-            Assert.Equal(0, this.Window.CursorLine);
-            Assert.Equal(0, this.Window.CursorColumn); //does not get advanced
-
-            this.Window.ExtractString(0, 0, out INCursesCharString resultNCursesString, this.TestString.Length);
-
-            Assert.StrictEqual(resultNCursesString, managedString);
         }
     }
 }

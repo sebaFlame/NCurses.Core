@@ -9,13 +9,13 @@ using System.Text;
 namespace NCurses.Core.Interop.SingleByte
 {
     public class SingleByteCharString<TSingleByte> : ISingleByteCharString
-    where TSingleByte : unmanaged, ISingleByteChar, IEquatable<TSingleByte>
+        where TSingleByte : unmanaged, ISingleByteChar, IEquatable<TSingleByte>
     {
         internal Memory<TSingleByte> CharString;
         //internal ref readonly TSmall this[int index] => ref this.schar[index];
         internal TSingleByte[] charString;
 
-        private int position;
+        private int position = -1;
 
         ISingleByteChar IEnumerator<ISingleByteChar>.Current => new SingleByteChar<TSingleByte>(ref this.charString[this.position]);
         INCursesChar IEnumerator<INCursesChar>.Current => new SingleByteChar<TSingleByte>(ref this.charString[this.position]);
@@ -127,7 +127,7 @@ namespace NCurses.Core.Interop.SingleByte
 
         public void Reset()
         {
-            this.position = 0;
+            this.position = -1;
         }
 
         //TODO: crashes Visual Studio debugger when using netcoreapp2.0
@@ -186,7 +186,7 @@ namespace NCurses.Core.Interop.SingleByte
 
         public void Dispose()
         {
-            this.position = 0;
+            this.position = -1;
             ArrayPool<TSingleByte>.Shared.Return(this.charString, true);
             GC.SuppressFinalize(this);
         }

@@ -1,5 +1,8 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Text;
+using System.Linq;
+
 using NCurses.Core.Interop;
 using NCurses.Core.Interop.SingleByte;
 
@@ -242,6 +245,30 @@ namespace NCurses.Core
             NativeWindow.winsch(this.WindowPtr, res);
         }
 
+        public override void Insert(in INCursesChar ch)
+        {
+            if (ch is ISingleByteChar sch)
+            {
+                NativeWindow.winsch(this.WindowPtr, in sch);
+            }
+            else
+            {
+                throw new InvalidOperationException("Unsupported string, try using a SingleByteWindow");
+            }
+        }
+
+        public override void Insert(int nline, int ncol, in INCursesChar ch)
+        {
+            if (ch is ISingleByteChar sch)
+            {
+                NativeWindow.mvwinsch(this.WindowPtr, nline, ncol, in sch);
+            }
+            else
+            {
+                throw new InvalidOperationException("Unsupported string, try using a SingleByteWindow");
+            }
+        }
+
         public override void Insert(int nline, int ncol, char ch)
         {
             SingleByteCharFactory.Instance.GetNativeChar(ch, out ISingleByteChar res);
@@ -268,6 +295,17 @@ namespace NCurses.Core
         public override void Insert(int nline, int ncol, string str)
         {
             NativeWindow.mvwinsnstr(this.WindowPtr, nline, ncol, str, str.Length);
+        }
+
+        public override void Insert(string str, ulong attrs, short pair)
+        {
+            SingleByteCharFactory.Instance.GetNativeString(str, attrs, pair, out ISingleByteCharString res);
+
+            IEnumerable<ISingleByteChar> schars = res;
+            foreach (ISingleByteChar sch in schars.Reverse())
+            {
+                NativeWindow.winsch(this.WindowPtr, sch);
+            }
         }
 
         public override bool ReadKey(out char ch, out Key key)
@@ -408,6 +446,32 @@ namespace NCurses.Core
         public override void Write(int nline, int ncol, byte[] str, Encoding encoding, ulong attrs, short pair)
         {
             throw new NotImplementedException("Only useful in multibyte mode");
+        }
+
+        public override void Write(int nline, int ncol, in INCursesChar ch)
+        {
+            if (ch is ISingleByteChar sch)
+            {
+                NativeWindow.mvwaddch(this.WindowPtr, nline, ncol, in sch);
+            }
+            else
+            {
+                throw new InvalidOperationException("Unsupported string, try using a SingleByteWindow");
+            }
+        }
+
+        public override void Write(int nline, int ncol, in INCursesCharString str)
+        {
+            if (str is ISingleByteCharString cStr)
+            {
+                NativeWindow.mvwaddchnstr(this.WindowPtr, nline, ncol, in cStr, cStr.Length);
+            }
+            else
+            {
+                throw new InvalidOperationException("Unsupported string, try using a SingleByteWindow");
+            }
+
+            throw new NotImplementedException();
         }
 
         public override void Put(char ch)

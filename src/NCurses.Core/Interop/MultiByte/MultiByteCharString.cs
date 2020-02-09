@@ -17,7 +17,7 @@ namespace NCurses.Core.Interop.MultiByte
         //internal ref readonly TWide this[int index] => ref this.wchar[index];
         internal TMultiByte[] charString;
 
-        private int position;
+        private int position = -1;
 
         IMultiByteChar IEnumerator<IMultiByteChar>.Current => new MultiByteChar<TMultiByte>(ref this.charString[this.position]);
         INCursesChar IEnumerator<INCursesChar>.Current => new MultiByteChar<TMultiByte>(ref this.charString[this.position]);
@@ -194,7 +194,7 @@ namespace NCurses.Core.Interop.MultiByte
 
         public void Reset()
         {
-            this.position = 0;
+            this.position = -1;
         }
 
         public static explicit operator string(MultiByteCharString<TMultiByte> wStr)
@@ -252,7 +252,7 @@ namespace NCurses.Core.Interop.MultiByte
 
         public void Dispose()
         {
-            this.position = 0;
+            this.position = -1;
             ArrayPool<TMultiByte>.Shared.Return(this.charString, true);
             GC.SuppressFinalize(this);
         }

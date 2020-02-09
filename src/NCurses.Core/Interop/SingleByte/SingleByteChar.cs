@@ -117,6 +117,11 @@ namespace NCurses.Core.Interop.SingleByte
             this.buffer[0] = attrCreate(attrs);
         }
 
+        ~SingleByteChar()
+        {
+            this.Dispose();
+        }
+
         internal ref readonly TSingleByte GetCharReference()
         {
             return ref this.@char;

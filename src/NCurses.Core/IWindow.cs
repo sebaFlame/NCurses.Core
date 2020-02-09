@@ -52,11 +52,14 @@ namespace NCurses.Core
         void HorizontalLine(in INCursesChar lineChar, int length);
         void HorizontalLine(int nline, int ncol, in INCursesChar lineChar, int length);
         void Insert(char ch);
+        void Insert(in INCursesChar ch);
+        void Insert(int nline, int ncol, in INCursesChar ch);
         void Insert(char ch, ulong attrs, short pair);
         void Insert(int nline, int ncol, char ch);
         void Insert(int nline, int ncol, char ch, ulong attrs, short pair);
         void Insert(int nline, int ncol, string str);
         void Insert(string str);
+        void Insert(string str, ulong attrs, short pair);
         void MoveCursor(int lineNumber, int columnNumber);
         void NoOutRefresh();
         bool ReadKey(out char ch, out Key key);
@@ -83,6 +86,8 @@ namespace NCurses.Core
         void Write(int nline, int ncol, string str, ulong attrs, short pair);
         void Write(string str);
         void Write(string str, ulong attrs, short pair);
+        void Write(int nline, int ncol, in INCursesChar ch);
+        void Write(int nline, int ncol, in INCursesCharString str);
         void Put(char ch);
         void Put(Key key);
     }

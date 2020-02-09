@@ -323,6 +323,9 @@ namespace NCurses.Core
         /// <param name="attrs">the attributes you want to add (eg <see cref="Attrs.BOLD"/>)</param>
         /// <param name="pair">the color pair you want to use on this character</param>
         public abstract void Write(int nline, int ncol, byte[] str, Encoding encoding, ulong attrs, short pair);
+
+        public abstract void Write(int nline, int ncol, in INCursesChar ch);
+        public abstract void Write(int nline, int ncol, in INCursesCharString str);
         #endregion
 
         #region write input
@@ -398,6 +401,9 @@ namespace NCurses.Core
         /// <param name="ch">the character to insert</param>
         public abstract void Insert(char ch);
 
+        public abstract void Insert(in INCursesChar ch);
+        public abstract void Insert(int nline, int ncol, in INCursesChar ch);
+
         /// <summary>
         /// insert a character on line <paramref name="nline"/> and column <paramref name="ncol"/>. all characaters on the right move 1 column. character might fall off at the end of the line.
         /// </summary>
@@ -439,6 +445,8 @@ namespace NCurses.Core
         /// <param name="ncol">the column number to start writing</param>
         /// <param name="str">the string to insert</param>
         public abstract void Insert(int nline, int ncol, string str);
+
+        public abstract void Insert(string str, ulong attrs, short pair);
         #endregion
 
         #region extract output

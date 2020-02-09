@@ -1,5 +1,8 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Text;
+using System.Linq;
+
 using NCurses.Core.Interop;
 using NCurses.Core.Interop.SingleByte;
 
@@ -204,6 +207,30 @@ namespace NCurses.Core.StdScr
             NativeStdScr.insch(res);
         }
 
+        public override void Insert(in INCursesChar ch)
+        {
+            if (ch is ISingleByteChar sch)
+            {
+                NativeStdScr.insch(in sch);
+            }
+            else
+            {
+                throw new InvalidOperationException("Unsupported string, try using a SingleByteWindow");
+            }
+        }
+
+        public override void Insert(int nline, int ncol, in INCursesChar ch)
+        {
+            if (ch is ISingleByteChar sch)
+            {
+                NativeStdScr.mvinsch(nline, ncol, in sch);
+            }
+            else
+            {
+                throw new InvalidOperationException("Unsupported string, try using a SingleByteWindow");
+            }
+        }
+
         public override void Insert(int nline, int ncol, char ch)
         {
             SingleByteCharFactory.Instance.GetNativeChar(ch, out ISingleByteChar res);
@@ -230,6 +257,17 @@ namespace NCurses.Core.StdScr
         public override void Insert(int nline, int ncol, string str)
         {
             NativeStdScr.mvinsnstr(nline, ncol, str, str.Length);
+        }
+
+        public override void Insert(string str, ulong attrs, short pair)
+        {
+            SingleByteCharFactory.Instance.GetNativeString(str, attrs, pair, out ISingleByteCharString res);
+
+            IEnumerable<ISingleByteChar> schars = res;
+            foreach (ISingleByteChar sch in schars.Reverse())
+            {
+                NativeStdScr.insch(sch);
+            }
         }
 
         public override bool ReadKey(out char ch, out Key key)
@@ -287,9 +325,13 @@ namespace NCurses.Core.StdScr
         public override void Write(in INCursesCharString str)
         {
             if (str is ISingleByteCharString scharStr)
+            {
                 NativeStdScr.addchstr(scharStr);
+            }
             else
+            {
                 throw new InvalidOperationException("Unsupported string");
+            }
         }
 
         public override void Write(string str)
@@ -356,6 +398,32 @@ namespace NCurses.Core.StdScr
         public override void Write(int nline, int ncol, byte[] str, Encoding encoding, ulong attrs, short pair)
         {
             throw new NotImplementedException("Only useful in multibyte mode");
+        }
+
+        public override void Write(int nline, int ncol, in INCursesChar ch)
+        {
+            if (ch is ISingleByteChar sch)
+            {
+                NativeStdScr.mvaddch(nline, ncol, in sch);
+            }
+            else
+            {
+                throw new InvalidOperationException("Unsupported string, try using a SingleByteWindow");
+            }
+        }
+
+        public override void Write(int nline, int ncol, in INCursesCharString str)
+        {
+            if (str is ISingleByteCharString cStr)
+            {
+                NativeStdScr.mvaddchnstr(nline, ncol, in cStr, cStr.Length);
+            }
+            else
+            {
+                throw new InvalidOperationException("Unsupported string, try using a SingleByteWindow");
+            }
+
+            throw new NotImplementedException();
         }
 
         public override void Put(char ch)

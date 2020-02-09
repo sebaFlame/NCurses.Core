@@ -13,28 +13,42 @@
     <ProjectReference Include="..\..\src\NCurses.Core\NCurses.Core.csproj" />
   </ItemGroup>
 
+  <ItemGroup>
+    <PackageReference Include="xunit" Version="2.4.0" />
+  </ItemGroup>
+
+  <PropertyGroup>
+    <VisualCheck Condition="'$(VisualCheck)' == ''">false</VisualCheck>
+  </PropertyGroup>
+
   <!-- import only when consumed -->
   <ItemGroup Condition="'$(OS)' == 'Windows_NT'">
     <PackageReference Include="runtime.win.NCurses" Version="6.0.2017.0225" />
   </ItemGroup>
 
-  <ItemGroup>
-    <PackageReference Include="xunit" Version="2.4.0" />
-    <!--<PackageReference Include="xunit.runner.utility" Version="2.4.0" />-->
+  <ItemGroup Condition="'$(OS)' == 'Windows_NT' AND '$(VisualCheck)' == 'false'">
     <PackageReference Include="Microsoft.NET.Test.Sdk" Version="16.2.0" />
     <PackageReference Include="xunit.runner.visualstudio" Version="2.4.0" />
-  </ItemGroup>
-
-  <ItemGroup>
     <Content Include="xunit.runner.json" CopyToOutputDirectory="PreserveNewest" />
+    
+    <Compile Remove="Program.cs" />
   </ItemGroup>
 
-  <ItemGroup>
-    <!-- To visually check output -->
-    <Compile Remove="Program.cs" />
+  <ItemGroup Condition="'$(OS)' == 'Windows_NT' AND '$(VisualCheck)' == 'true'">
+    <PackageReference Include="xunit.runner.utility" Version="2.4.0" />
+  </ItemGroup>
 
-     <!--<Compile Remove="MultiByte\*" />-->
-     <!--<Compile Remove="SingleByte\*" />-->
-     <!--<Compile Remove="RipOffTest.cs" />-->
+  <!-- 
+    Under Linux you have to test every test class 1 by 1 using Compile Remove/Include and the included Program.cs  
+    It crashes "randomly" when running all tests through XUnit
+  -->
+  <ItemGroup Condition="'$(OS)' != 'Windows_NT'">
+    <PackageReference Include="xunit.runner.utility" Version="2.4.0" />
+
+    <Compile Remove="MultiByte\*" />
+    <Compile Remove="SingleByte\*" />
+    <Compile Remove="RipOffTest.cs" />
+
+    <Compile Include="MultiByte\*WriteTest.cs" />
   </ItemGroup>
 </Project>

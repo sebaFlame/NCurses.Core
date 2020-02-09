@@ -1,5 +1,8 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Text;
+using System.Linq;
+
 using NCurses.Core.Interop;
 using NCurses.Core.Interop.SingleByte;
 using NCurses.Core.Interop.MultiByte;
@@ -207,6 +210,30 @@ namespace NCurses.Core.StdScr
             NativeStdScr.ins_wch(res);
         }
 
+        public override void Insert(in INCursesChar ch)
+        {
+            if (ch is IMultiByteChar wch)
+            {
+                NativeStdScr.ins_wch(in wch);
+            }
+            else
+            {
+                throw new InvalidOperationException("Unsupported string, try using a SingleByteWindow");
+            }
+        }
+
+        public override void Insert(int nline, int ncol, in INCursesChar ch)
+        {
+            if (ch is IMultiByteChar wch)
+            {
+                NativeStdScr.mvins_wch(nline, ncol, in wch);
+            }
+            else
+            {
+                throw new InvalidOperationException("Unsupported string, try using a SingleByteWindow");
+            }
+        }
+
         public override void Insert(int nline, int ncol, char ch)
         {
             MultiByteCharFactory.Instance.GetNativeChar(ch, out IMultiByteChar res);
@@ -228,6 +255,17 @@ namespace NCurses.Core.StdScr
         public override void Insert(string str)
         {
             NativeStdScr.ins_nwstr(str, str.Length);
+        }
+
+        public override void Insert(string str, ulong attrs, short pair)
+        {
+            MultiByteCharFactory.Instance.GetNativeString(str, attrs, pair, out IMultiByteCharString res);
+
+            IEnumerable<IMultiByteChar> wchars = res;
+            foreach (IMultiByteChar wch in wchars.Reverse())
+            {
+                NativeStdScr.ins_wch(wch);
+            }
         }
 
         public override void Insert(int nline, int ncol, string str)
@@ -368,6 +406,32 @@ namespace NCurses.Core.StdScr
         {
             MultiByteCharFactory.Instance.GetNativeString(str, encoding, attrs, pair, out IMultiByteCharString res);
             NativeStdScr.mvadd_wchnstr(nline, ncol, res, res.Length);
+        }
+
+        public override void Write(int nline, int ncol, in INCursesChar ch)
+        {
+            if (ch is IMultiByteChar wch)
+            {
+                NativeStdScr.mvadd_wch(nline, ncol, in wch);
+            }
+            else
+            {
+                throw new InvalidOperationException("Unsupported string, try using a SingleByteWindow");
+            }
+        }
+
+        public override void Write(int nline, int ncol, in INCursesCharString str)
+        {
+            if (str is IMultiByteCharString wchStr)
+            {
+                NativeStdScr.mvadd_wchnstr(nline, ncol, in wchStr, wchStr.Length);
+            }
+            else
+            {
+                throw new InvalidOperationException("Unsupported string, try using a SingleByteWindow");
+            }
+
+            throw new NotImplementedException();
         }
 
         public override void Put(char ch)

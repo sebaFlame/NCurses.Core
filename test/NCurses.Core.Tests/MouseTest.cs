@@ -17,6 +17,7 @@ namespace NCurses.Core.Tests
         public MouseTest(ITestOutputHelper testOutputHelper, StdScrState stdScrState)
             : base(testOutputHelper, stdScrState)
         {
+            this.Window.KeyPad = true;
         }
 
         [Fact]

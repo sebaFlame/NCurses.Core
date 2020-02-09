@@ -129,5 +129,30 @@ namespace NCurses.Core
         {
             this.Window.Put(key);
         }
+
+        public override void Write(int nline, int ncol, in INCursesChar ch)
+        {
+            this.Window.Write(nline, ncol, in ch);
+        }
+
+        public override void Write(int nline, int ncol, in INCursesCharString str)
+        {
+            this.Window.Write(nline, ncol, in str);
+        }
+
+        public override void Insert(in INCursesChar ch)
+        {
+            this.Window.Insert(in ch);
+        }
+
+        public override void Insert(int nline, int ncol, in INCursesChar ch)
+        {
+            this.Window.Insert(nline, ncol, in ch);
+        }
+
+        public override void Insert(string str, ulong attrs, short pair)
+        {
+            this.Window.Insert(str, attrs, pair);
+        }
     }
 }
