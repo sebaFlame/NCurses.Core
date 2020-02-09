@@ -47,10 +47,7 @@ namespace NCurses.Core.Interop
                     return hasUnicodeSupport.Value;
                 }
 
-                if (NativeLoader is LinuxLoader linuxLoader)
-                {
-                    linuxLoader.SetLocale(6, ""); //6 = LC_ALL
-                }
+                NativeLoader.SetLocale("");
 
                 hasUnicodeSupport = NativeNCurses._nc_unicode_locale();
 
@@ -278,18 +275,51 @@ namespace NCurses.Core.Interop
             return (int)(0x200 | (uint)key);
         }
 
-        internal static bool VerifyInput(string method, int val, out char ch, out Key key)
+        internal static bool VerifyInput(IntPtr windowPtr, string method, int val, out char ch, out Key key)
         {
-            //if(has_key(val)) //TODO: does not work on windows
-            if (HasKey(val, out key))
+            return VerifyInput(method, NativeWindow.is_keypad(windowPtr), val, out ch, out key);
+        }
+
+        internal static bool VerifyInput(IWindow window, string method, int val, out char ch, out Key key)
+        {
+            return VerifyInput(method, window.KeyPad, val, out ch, out key);
+        }
+
+        internal static bool VerifyInput(string method, bool keyPadEnabled, int val, out char ch, out Key key)
+        {
+            NCursesException.Verify(val, method);
+
+            if (keyPadEnabled
+                && HasKey(val, out key))
             {
                 ch = '\0';
                 return true;
             }
 
-            NCursesException.Verify(val, method);
-            ch = (char)(sbyte)val;
-            key = default(Key);
+            key = default;
+
+            if (val < 0
+                && RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
+            {
+                Encoding encoding = Encoding.GetEncoding(437);
+
+                unsafe
+                {
+                    byte* bArr = stackalloc byte[1];
+                    char* cArr = stackalloc char[1];
+
+                    bArr[0] = (byte)val;
+
+                    encoding.GetChars(bArr, 1, cArr, 1);
+
+                    ch = cArr[0];
+                }
+            }
+            else
+            {
+                ch = (char)(sbyte)val;
+            }
+
             return false;
         }
         #endregion
@@ -748,15 +778,11 @@ namespace NCurses.Core.Interop
         /// <returns>returns a pointer to the stdscr on success</returns>
         public static IntPtr initscr()
         {
-            //TODO: should only be called once
-            if (NativeLoader is LinuxLoader linuxLoader)
-            {
-                linuxLoader.SetLocale(6, ""); //6 = LC_ALL
-            }
+            NativeLoader.SetLocale("");
 
             IntPtr stdScr = NCursesException.Verify(NCursesWrapper.initscr(), "initscr");
 
-            if(NCursesCharTypeWrapper is null)
+            if (NCursesCharTypeWrapper is null)
             {
                 NCursesCharTypeWrapper = (INativeWrapper)Activator.CreateInstance(DynamicTypeBuilder.CreateCharTypeWrapper(Constants.DLLNAME));
                 NativeNCurses.CreateCharCustomWrappers();
@@ -778,9 +804,13 @@ namespace NCurses.Core.Interop
 
                 Type chtypeType;
                 if (major >= 6)
+                {
                     chtypeType = typeof(UInt32);
+                }
                 else
+                {
                     chtypeType = typeof(UInt64);
+                }
 
                 NCursesCustomTypeWrapper = (INativeWrapper)Activator.CreateInstance(DynamicTypeBuilder.CreateCustomTypeWrapper(Constants.DLLNAME, HasUnicodeSupport));
                 NativeNCurses.CreateCustomTypeWrappers();

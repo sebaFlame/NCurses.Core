@@ -29,25 +29,10 @@ namespace NCurses.Core.Interop.MultiByteString
         void mvinwstr(int y, int x, out string wstr);
     }
 
-    internal class NativeStdScrMultiByteString<TMultiByteString, TSingleByteString> : MultiByteStringWrapper<TMultiByteString, TSingleByteString>, INativeStdScrMultiByteString, IDisposable
+    internal class NativeStdScrMultiByteString<TMultiByteString, TSingleByteString> : MultiByteStringWrapper<TMultiByteString, TSingleByteString>, INativeStdScrMultiByteString
         where TMultiByteString : unmanaged
         where TSingleByteString : unmanaged
     {
-        private Memory<TMultiByteString> input;
-        private MemoryHandle inputHandle;
-
-        //TODO: thread safety around input
-        public NativeStdScrMultiByteString()
-        {
-            this.input = new Memory<TMultiByteString>(new TMultiByteString[1]);
-            this.inputHandle = input.Pin();
-        }
-
-        ~NativeStdScrMultiByteString()
-        {
-            this.Dispose();
-        }
-
         public void addnwstr(string wstr, int n)
         {
             unsafe
@@ -108,23 +93,32 @@ namespace NCurses.Core.Interop.MultiByteString
             }
         }
 
-        //TODO: reuse same Memory<TWideStr> OR use a stackalloc on every call?
-        //TODO: make overridable and return an ulong containing the char (8 bytes should be enough?) for manual processing
         /// <summary>
         /// read a character
         /// </summary>
         /// <param name="wch">the read wide character</param>
         /// <param name="key">the read function key</param>
+        /// Windows only supports extended ASCII input!
         /// <returns>returns TRUE if a funtion key has been pressed</returns>
         public unsafe bool get_wch(out char wch, out Key key)
         {
-            //zero input
-            TMultiByteString* wideCh = stackalloc TMultiByteString[1];
-            this.input.Span[0] = wideCh[0];
+            if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
+            {
+                return VerifyInput(
+                    "get_wch-getch",
+                    NativeStdScr.getch(),
+                    NCurses.MultiByteStdScr.KeyPad,
+                    out wch,
+                    out key);
+            }
 
-            return VerifyInput("get_wch", 
-                this.Wrapper.get_wch(ref Unsafe.AsRef<TMultiByteString>(this.inputHandle.Pointer)), 
-                this.input.Span, 
+            int* wideCh = stackalloc int[1];
+            Span<int> span = new Span<int>(wideCh, 1);
+
+            return VerifyInput(
+                "get_wch", 
+                this.Wrapper.get_wch(ref span.GetPinnableReference()),
+                in span,
                 out wch, 
                 out key);
         }
@@ -134,7 +128,7 @@ namespace NCurses.Core.Interop.MultiByteString
             unsafe
             {
                 TMultiByteString* strPtr = stackalloc TMultiByteString[Constants.MAX_STRING_LENGTH];
-                NCursesException.Verify(this.Wrapper.get_wstr(ref MarshalString(strPtr, Constants.MAX_STRING_LENGTH, out Span<TMultiByteString> span)), "get_wstr");
+                NCursesException.Verify(this.Wrapper.get_wstr(ref MarshalString(strPtr, Constants.MAX_STRING_LENGTH, out Span<int> span)), "get_wstr");
                 wstr = ReadString(ref span);
             }
         }
@@ -144,7 +138,7 @@ namespace NCurses.Core.Interop.MultiByteString
             unsafe
             {
                 TMultiByteString* strPtr = stackalloc TMultiByteString[n];
-                NCursesException.Verify(this.Wrapper.get_wstr(ref MarshalString(strPtr, n, out Span<TMultiByteString> span)), "get_wstr");
+                NCursesException.Verify(this.Wrapper.get_wstr(ref MarshalString(strPtr, n, out Span<int> span)), "get_wstr");
                 wstr = ReadString(ref span);
             }
         }
@@ -169,7 +163,6 @@ namespace NCurses.Core.Interop.MultiByteString
             }
         }
 
-        //TODO: reuse same Memory<TWideStr> OR use a stackalloc on every call?
         /// <summary>
         /// move cursor and read a character
         /// </summary>
@@ -180,11 +173,23 @@ namespace NCurses.Core.Interop.MultiByteString
         /// <returns>returns TRUE if a funtion key has been pressed</returns>
         public unsafe bool mvget_wch(int y, int x, out char wch, out Key key)
         {
-            TMultiByteString* wideCh = stackalloc TMultiByteString[1];
-            this.input.Span[0] = wideCh[0];
+            if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
+            {
+                return VerifyInput(
+                    "mvget_wch-mvgetch",
+                    NativeStdScr.mvgetch(y, x),
+                    NCurses.MultiByteStdScr.KeyPad,
+                    out wch,
+                    out key);
+            }
 
-            return VerifyInput("mvget_wch", this.Wrapper.mvget_wch(y, x, ref Unsafe.AsRef<TMultiByteString>(this.inputHandle.Pointer)),
-                this.input.Span,
+            int* wideCh = stackalloc int[1];
+            Span<int> span = new Span<int>(wideCh, 1);
+
+            return VerifyInput(
+                "mvget_wch", 
+                this.Wrapper.mvget_wch(y, x, ref span.GetPinnableReference()),
+                in span,
                 out wch,
                 out key);
         }
@@ -194,7 +199,7 @@ namespace NCurses.Core.Interop.MultiByteString
             unsafe
             {
                 TMultiByteString* strPtr = stackalloc TMultiByteString[Constants.MAX_STRING_LENGTH];
-                NCursesException.Verify(this.Wrapper.mvget_wstr(y, x, ref MarshalString(strPtr, Constants.MAX_STRING_LENGTH, out Span<TMultiByteString> span)), "mvget_wstr");
+                NCursesException.Verify(this.Wrapper.mvget_wstr(y, x, ref MarshalString(strPtr, Constants.MAX_STRING_LENGTH, out Span<int> span)), "mvget_wstr");
                 wstr = ReadString(ref span);
             }
         }
@@ -204,7 +209,7 @@ namespace NCurses.Core.Interop.MultiByteString
             unsafe
             {
                 TMultiByteString* strPtr = stackalloc TMultiByteString[n + 1];
-                NCursesException.Verify(this.Wrapper.mvgetn_wstr(y, x, ref MarshalString(strPtr, n, out Span<TMultiByteString> span), n), "mvgetn_wstr");
+                NCursesException.Verify(this.Wrapper.mvgetn_wstr(y, x, ref MarshalString(strPtr, n, out Span<int> span), n), "mvgetn_wstr");
                 wstr = ReadString(ref span);
             }
         }
@@ -248,14 +253,5 @@ namespace NCurses.Core.Interop.MultiByteString
                 wstr = ReadString(ref span);
             }
         }
-
-#region IDisposable
-        public void Dispose()
-        {
-            if(!EqualityComparer<MemoryHandle>.Default.Equals(this.inputHandle, default(MemoryHandle)))
-                this.inputHandle.Dispose();
-            GC.SuppressFinalize(this);
-        }
-#endregion
     }
 }

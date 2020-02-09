@@ -79,7 +79,9 @@ namespace NCurses.Core.Interop.MultiByteString
             charArr[0] = ch;
 
             if (NativeNCurses.Encoding.GetBytes(charArr, 1, byteArray, byteLength) == 0)
+            {
                 throw new InvalidCastException("Can not convert character to correct encoding");
+            }
 
             span = MemoryMarshal.Cast<byte, TMultiByteString>(new ReadOnlySpan<byte>(byteArray, byteLength));
             return ref span.GetPinnableReference();
@@ -108,11 +110,18 @@ namespace NCurses.Core.Interop.MultiByteString
             span = new Span<TMultiByteString>(strPtr, length);
             return ref span.GetPinnableReference();
         }
+
+        internal static unsafe ref int MarshalString(TMultiByteString* strPtr, int length, out Span<int> span)
+        {
+            span = new Span<int>(strPtr, length);
+            return ref span.GetPinnableReference();
+        }
         #endregion
 
         //2 byte char strings
         //TODO: use Encoding Span overrides
-        internal unsafe static string ReadString(ref Span<TMultiByteString> str)
+        internal unsafe static string ReadString<TMultiByte>(ref Span<TMultiByte> str)
+            where TMultiByte : unmanaged
         {
             Span<byte> span = MemoryMarshal.AsBytes(str);
             fixed (byte* chars = span)
@@ -149,15 +158,19 @@ namespace NCurses.Core.Interop.MultiByteString
             return --length;
         }
 
-        internal unsafe static char ReadChar(Span<TMultiByteString> span)
+        internal unsafe static char ReadChar<TMultiByte>(Span<TMultiByte> span)
+            where TMultiByte : unmanaged
         {
-            char* charArr = stackalloc char[1];
+            int charLength = Marshal.SizeOf<TMultiByte>() / Marshal.SizeOf<char>();
+            char* charArr = stackalloc char[charLength];
             Span<byte> chars = MemoryMarshal.AsBytes(span);
 
             fixed (byte* bytes = chars)
             {
-                if (NativeNCurses.Encoding.GetChars(bytes, Marshal.SizeOf<TMultiByteString>(), charArr, 1) != 1)
+                if (NativeNCurses.Encoding.GetChars(bytes, Marshal.SizeOf<TMultiByte>(), charArr, charLength) <= 0)
+                {
                     throw new InvalidCastException("Can not convert character to correct encoding");
+                }
             }
 
             return charArr[0];
@@ -172,11 +185,12 @@ namespace NCurses.Core.Interop.MultiByteString
             return ReadChar(span);
         }
 
-        internal static bool VerifyInput(string method, int ret, in Span<TMultiByteString> span, out char wch, out Key key)
+        internal static bool VerifyInput<TMultiByte>(string method, int ret, in Span<TMultiByte> span, out char wch, out Key key)
+            where TMultiByte : unmanaged
         {
             if (ret == (int)Key.CODE_YES)
             {
-                Span<short> spShort = MemoryMarshal.Cast<TMultiByteString, short>(span);
+                Span<short> spShort = MemoryMarshal.Cast<TMultiByte, short>(span);
                 wch = '\0';
                 key = (Key)spShort[0];
                 return true;
@@ -187,6 +201,31 @@ namespace NCurses.Core.Interop.MultiByteString
             key = default(Key);
             wch = ReadChar(span);
             return false;
+        }
+
+        internal static bool VerifyInput(string method, int ret, bool hasKeyPad, out char wch, out Key key)
+        {
+            bool functionKey = NativeNCurses.VerifyInput(method, hasKeyPad, ret, out char ch, out key);
+
+            //could be a unicode char
+            if ((!functionKey && ret > 0 && (ret != ch))
+                || (functionKey && ret > (int)Key.MAX))
+            {
+                unsafe
+                {
+                    int* byteArr = stackalloc int[1];
+                    byteArr[0] = ret;
+
+                    Span<int> iSpan = new Span<int>(byteArr, 1);
+                    Span<TMultiByteString> cSpan = MemoryMarshal.Cast<int, TMultiByteString>(iSpan);
+                    wch = ReadChar(cSpan);
+                }
+                return false;
+            }
+
+            //not a unicode char
+            wch = ch;
+            return functionKey;
         }
     }
 }

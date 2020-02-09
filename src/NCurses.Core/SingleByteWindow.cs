@@ -368,7 +368,8 @@ namespace NCurses.Core
 
         public override void Write(char ch)
         {
-            NativeWindow.waddnstr(this.WindowPtr, ch.ToString(), 1);
+            SingleByteCharFactory.Instance.GetNativeChar(ch, out ISingleByteChar res);
+            NativeWindow.waddch(this.WindowPtr, res);
         }
 
         public override void Write(char ch, ulong attrs, short pair)
@@ -409,9 +410,14 @@ namespace NCurses.Core
             throw new NotImplementedException("Only useful in multibyte mode");
         }
 
-        public override void Put(int ch)
+        public override void Put(char ch)
         {
             NativeNCurses.ungetch(ch);
+        }
+
+        public override void Put(Key key)
+        {
+            NativeNCurses.ungetch((int)key);
         }
     }
 }

@@ -324,7 +324,8 @@ namespace NCurses.Core.StdScr
         //TODO: don't convert?
         public override void Write(char ch)
         {
-            NativeStdScr.addnwstr(ch.ToString(), 1);
+            MultiByteCharFactory.Instance.GetNativeChar(ch, out IMultiByteChar res);
+            NativeStdScr.add_wch(res);
         }
 
         public override void Write(char ch, ulong attrs, short pair)
@@ -369,9 +370,14 @@ namespace NCurses.Core.StdScr
             NativeStdScr.mvadd_wchnstr(nline, ncol, res, res.Length);
         }
 
-        public override void Put(int ch)
+        public override void Put(char ch)
         {
-            NativeNCurses.unget_wch(Convert.ToChar(ch));
+            NativeNCurses.unget_wch(ch);
+        }
+
+        public override void Put(Key key)
+        {
+            NativeNCurses.ungetch((int)key);
         }
     }
 }

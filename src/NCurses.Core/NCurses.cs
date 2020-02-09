@@ -24,7 +24,9 @@ namespace NCurses.Core
         public static IWindow Start()
         {
             if (!(StdScr is null))
+            {
                 throw new InvalidOperationException("NCurses was already initialized");
+            }
 
             IntPtr stdScrPtr = NativeNCurses.initscr();
 
@@ -62,7 +64,7 @@ namespace NCurses.Core
             if (WindowBase.DictPtrWindows.Count > 0)
             {
                 WindowBase[] wins = new WindowBase[WindowBase.DictPtrWindows.Count]; //fuck LINQ
-                WindowBase.DictPtrWindows.CopyTo(wins, 0);
+                WindowBase.DictPtrWindows.Values.CopyTo(wins, 0);
                 foreach (WindowBase win in wins)
                     win.Dispose();
             }
@@ -83,7 +85,9 @@ namespace NCurses.Core
         public static void RipOffLine(int direction, Action<Window, int> assignWindow)
         {
             if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
+            {
                 throw new InvalidOperationException("RipOffLine is not supported on windows.");
+            }
 
             Func<IntPtr, int, IntPtr, int> initCallback = (IntPtr win, int cols, IntPtr func) =>
             {

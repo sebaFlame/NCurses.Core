@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Text;
+using System.Runtime.InteropServices;
 
 namespace NCurses.Core.Interop.MultiByteString
 {
@@ -54,9 +55,21 @@ namespace NCurses.Core.Interop.MultiByteString
         {
             unsafe
             {
-                TMultiByteString* strPtr = stackalloc TMultiByteString[1];
+                if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
+                {
+                    return VerifyInput(
+                        "mvwget_wch-mvwgetch",
+                        NativeWindow.mvwgetch(window, y, x),
+                        NativeWindow.is_keypad(window),
+                        out wch,
+                        out key);
+                }
+
+                int* wideCh = stackalloc int[1];
+                Span<int> span = new Span<int>(wideCh, 1);
+
                 return VerifyInput("mvwget_wch",
-                    this.Wrapper.mvwget_wch(window, y, x, ref MarshalString(strPtr, 1, out Span<TMultiByteString> span)),
+                    this.Wrapper.mvwget_wch(window, y, x, ref span.GetPinnableReference()),
                     span,
                     out wch,
                     out key);
@@ -68,7 +81,7 @@ namespace NCurses.Core.Interop.MultiByteString
             unsafe
             {
                 TMultiByteString* strPtr = stackalloc TMultiByteString[Constants.MAX_STRING_LENGTH];
-                NCursesException.Verify(this.Wrapper.mvwget_wch(window, y, x, ref MarshalString(strPtr, Constants.MAX_STRING_LENGTH, out Span<TMultiByteString> span)), "mvwget_wch");
+                NCursesException.Verify(this.Wrapper.mvwget_wch(window, y, x, ref MarshalString(strPtr, Constants.MAX_STRING_LENGTH, out Span<int> span)), "mvwget_wch");
                 wstr = ReadString(ref span);
             }
         }
@@ -78,7 +91,7 @@ namespace NCurses.Core.Interop.MultiByteString
             unsafe
             {
                 TMultiByteString* strPtr = stackalloc TMultiByteString[n];
-                NCursesException.Verify(this.Wrapper.mvwgetn_wstr(window, y, x, ref MarshalString(strPtr, n, out Span<TMultiByteString> span), n), "mvwgetn_wstr");
+                NCursesException.Verify(this.Wrapper.mvwgetn_wstr(window, y, x, ref MarshalString(strPtr, n, out Span<int> span), n), "mvwgetn_wstr");
                 wstr = ReadString(ref span);
             }
         }
@@ -147,9 +160,21 @@ namespace NCurses.Core.Interop.MultiByteString
         {
             unsafe
             {
-                TMultiByteString* strPtr = stackalloc TMultiByteString[1];
+                if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
+                {
+                    return VerifyInput(
+                        "wget_wch-wgetch",
+                        NativeWindow.wgetch(window),
+                        NativeWindow.is_keypad(window),
+                        out wch,
+                        out key);
+                }
+
+                int* wideCh = stackalloc int[1];
+                Span<int> span = new Span<int>(wideCh, 1);
+
                 return VerifyInput("wget_wch",
-                    this.Wrapper.wget_wch(window, ref MarshalString(strPtr, 1, out Span<TMultiByteString> span)),
+                    this.Wrapper.wget_wch(window, ref span.GetPinnableReference()),
                     span,
                     out wch,
                     out key);
@@ -161,7 +186,7 @@ namespace NCurses.Core.Interop.MultiByteString
             unsafe
             {
                 TMultiByteString* strPtr = stackalloc TMultiByteString[Constants.MAX_STRING_LENGTH];
-                NCursesException.Verify(this.Wrapper.wget_wstr(window, ref MarshalString(strPtr, Constants.MAX_STRING_LENGTH, out Span<TMultiByteString> span)), "wget_wstr");
+                NCursesException.Verify(this.Wrapper.wget_wstr(window, ref MarshalString(strPtr, Constants.MAX_STRING_LENGTH, out Span<int> span)), "wget_wstr");
                 wstr = ReadString(ref span);
             }
         }
@@ -171,7 +196,7 @@ namespace NCurses.Core.Interop.MultiByteString
             unsafe
             {
                 TMultiByteString* strPtr = stackalloc TMultiByteString[n];
-                NCursesException.Verify(this.Wrapper.wgetn_wstr(window, ref MarshalString(strPtr, n, out Span<TMultiByteString> span), n), "wgetn_wstr");
+                NCursesException.Verify(this.Wrapper.wgetn_wstr(window, ref MarshalString(strPtr, n, out Span<int> span), n), "wgetn_wstr");
                 wstr = ReadString(ref span);
             }
         }

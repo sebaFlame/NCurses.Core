@@ -2,6 +2,8 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
+using System.Runtime.InteropServices;
+
 using NCurses.Core.Interop;
 
 namespace NCurses.Core
@@ -11,14 +13,14 @@ namespace NCurses.Core
     */
     public abstract class WindowBase : IWindow, IDisposable
     {
-        internal static HashSet<WindowBase> DictPtrWindows;
+        internal static Dictionary<IntPtr, WindowBase> DictPtrWindows;
 
         internal IntPtr WindowPtr { get; private set; }
         private bool OwnsHandle;
 
         static WindowBase()
         {
-            DictPtrWindows = new HashSet<WindowBase>();
+            DictPtrWindows = new Dictionary<IntPtr, WindowBase>();
         }
 
         internal WindowBase(IntPtr windowPtr, bool ownsHandle, bool initialize = true)
@@ -27,10 +29,20 @@ namespace NCurses.Core
             this.WindowPtr = windowPtr;
 
             if (this.OwnsHandle)
-                DictPtrWindows.Add(this);
+            {
+                DictPtrWindows.Add(windowPtr, this);
+            }
 
-            if(initialize)
+            if (initialize)
+            {
                 this.Initialize();
+            }
+
+            //this is needed for extended ASCII keyboard input
+            if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
+            {
+                this.Meta = true;
+            }
         }
 
         ~WindowBase()
@@ -41,7 +53,9 @@ namespace NCurses.Core
         private void Initialize()
         {
             if (NCurses.StdScr is null)
+            {
                 NCurses.Start();
+            }
         }
 
         #region properties
@@ -132,7 +146,7 @@ namespace NCurses.Core
         public bool Blocking
         {
             get { return NativeWindow.is_nodelay(this.WindowPtr); }
-            set { NativeWindow.nodelay(this.WindowPtr, value); }
+            set { NativeWindow.nodelay(this.WindowPtr, !value); }
         }
 
         /// <summary>
@@ -312,7 +326,9 @@ namespace NCurses.Core
         #endregion
 
         #region write input
-        public abstract void Put(int ch);
+        public abstract void Put(char ch);
+
+        public abstract void Put(Key key);
         #endregion
 
         #region read input
@@ -687,18 +703,26 @@ namespace NCurses.Core
         protected virtual void Dispose(bool disposing)
         {
             if (this.WindowPtr == IntPtr.Zero)
+            {
                 return;
+            }
 
-            if (DictPtrWindows.Contains(this))
-                DictPtrWindows.Remove(this);
+            if (DictPtrWindows.ContainsKey(this.WindowPtr))
+            {
+                DictPtrWindows.Remove(this.WindowPtr);
+            }
 
             if (this.OwnsHandle)
+            {
                 NativeNCurses.delwin(this.WindowPtr);
+            }
 
             this.WindowPtr = IntPtr.Zero;
 
             if (!disposing)
+            {
                 return;
+            }
         }
 
         public void Dispose()

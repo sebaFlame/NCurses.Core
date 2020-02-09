@@ -25,17 +25,11 @@ namespace NCurses.Core.Tests.Model
         {
             this.StdScr = NCurses.Start();
 
-            NCurses.Echo = false;
-            this.StdScr.KeyPad = true;
-            this.StdScr.Meta = true;
-
             if (this.SupportsColor)
             {
                 this.InitializeColor();
             }
         }
-
-
 
         public void InitializeColor()
         {

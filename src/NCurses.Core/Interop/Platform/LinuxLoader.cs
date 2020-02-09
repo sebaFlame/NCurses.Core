@@ -35,9 +35,10 @@ namespace NCurses.Core.Interop.Platform
             return dlclose(modulePtr) == 0;
         }
 
-        public void SetLocale(int category, string locale)
+        public void SetLocale(string locale)
         {
-            setlocale(category, locale);
+            //LC_ALL = 6
+            setlocale(6, locale);
         }
     }
 }

@@ -11,6 +11,8 @@ using System.Diagnostics;
 using System.Threading;
 using System.Runtime.InteropServices;
 
+using NCurses.Core.Tests.Model;
+
 namespace NCurses.Core.Tests
 {
     public class Program
@@ -36,6 +38,13 @@ namespace NCurses.Core.Tests
             }
 #endif
 
+            //DiscoverAndRunTests();
+
+            //ReadKey();
+        }
+
+        private static void DiscoverAndRunTests()
+        {
             Assembly currentAssembly = Assembly.GetExecutingAssembly();
 
             IRunnerLogger logger = new ConsoleRunnerLogger(true);
@@ -43,7 +52,7 @@ namespace NCurses.Core.Tests
 
             XunitFrontController frontController = new XunitFrontController
             (
-                AppDomainSupport.Denied, 
+                AppDomainSupport.Denied,
                 currentAssembly.GetLocalCodeBase(),
                 sourceInformationProvider: new NullSourceInformationProvider(),
                 diagnosticMessageSink: messageSink
@@ -61,60 +70,25 @@ namespace NCurses.Core.Tests
 
             Console.Write("Press any key to exit...");
             Console.ReadKey();
+        }
 
-            //IWindow stdScr = null;
+        private static void ReadKey()
+        {
+            using (MultiByteStdScrState multiByteStdScrState = new MultiByteStdScrState())
+            {
+                IWindow window = multiByteStdScrState.CurrentStandardScreen;
 
-            //testRipoffLine(ref stdScr);
-            //testPad(ref stdScr);
-            //testColor(ref stdScr);
-            //testWrite(ref stdScr);
-            //testReadFromOutput(ref stdScr);
-            //testInsert(ref stdScr);
-            //testASC(ref stdScr);
-            //testRead(ref stdScr);
-            //testWindowMemLeak(ref stdScr);
+                window.KeyPad = true;
 
-            //stdScr = NCurses.Start();
-
-            //NCurses.CBreak = true;
-            //NCurses.Echo = false;
-
-            //stdScr.KeyPad = true;
-            //stdScr.Meta = true;
-
-            //INCursesChar acs = Acs.ULCORNER;
-            //stdScr.Write(acs);
-
-            //stdScr.Write('\n');
-            //char testChar1 = '\u263A';
-            //stdScr.Write(testChar1);
-            //char resultChar1 = stdScr.ExtractChar();
-            //stdScr.ExtractChar(1, 0, out INCursesChar resultNcursesChar1);
-            //char resultChar2 = resultNcursesChar1.Char;
-            //stdScr.MoveCursor(1, 1);
-
-            //stdScr.Write('\n');
-            //string testString1 = "TestTestTest";
-            //stdScr.Write(testString1);
-            //string resultString1 = stdScr.ExtractString(1, 0, testString1.Length);
-            //stdScr.ExtractString(2, 0, out INCursesCharStr resultNcursesString1, testString1.Length);
-            //string resultString2 = resultNcursesString1.ToString();
-            //stdScr.MoveCursor(2, testString1.Length);
-
-            //stdScr.Write('\n');
-            //string testString2 = new string(new char[] { '\u0490', '\u0491', '\u0492', '\u0493', '\u0494', '\u0495', '\u0496', '\u0497', '\u0498', '\u0499'
-            //    , '\u049A', '\u049B', '\u049C', '\u049D', '\u049E', '\u049F' });
-            //stdScr.Write(testString2);
-            //string resultString3 = stdScr.ExtractString(2, 0, testString2.Length);
-            //stdScr.ExtractString(3, 0, out INCursesCharStr resultNcursesString2, testString2.Length);
-            //string resultString4 = resultNcursesString2.ToString();
-            //stdScr.MoveCursor(3, testString2.Length);
-
-            //stdScr.Refresh();
-
-            //stdScr.ReadKey(out char ch, out Key key);
-
-            //NCurses.End();
+                while (true)
+                {
+                    window.ReadKey(out char ch, out Key key);
+                    if (ch == 'q')
+                    {
+                        break;
+                    }
+                }
+            }
         }
 
         ////TODO: doesn't run on windows

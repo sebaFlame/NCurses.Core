@@ -2,6 +2,9 @@
 using System.Collections.Generic;
 using System.Text;
 using System.Runtime.CompilerServices;
+
+using System.Runtime.InteropServices;
+
 using NCurses.Core.Interop.SingleByteString;
 
 namespace NCurses.Core.Interop.MultiByteString
@@ -63,9 +66,16 @@ namespace NCurses.Core.Interop.MultiByteString
         {
             unsafe
             {
-                int byteLength;
-                byte* byteArray = stackalloc byte[byteLength = GetCharLength()];
-                NCursesException.Verify(this.Wrapper.unget_wch(MarshalChar(wch, byteArray, byteLength)), "unget_wch");
+                if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
+                {
+                    NativeNCurses.NCursesWrapper.ungetch(wch);
+                }
+                else
+                {
+                    int charLength = GetCharLength();
+                    byte* byteArray = stackalloc byte[charLength];
+                    NCursesException.Verify(this.Wrapper.unget_wch(MarshalChar(wch, byteArray, charLength)), "unget_wch");
+                }
             }
         }
     }

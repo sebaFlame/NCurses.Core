@@ -448,7 +448,7 @@ namespace NCurses.Core.Interop
         /// </summary>
         public static bool wgetch(IntPtr window, out char ch, out Key key)
         {
-            return NativeNCurses.VerifyInput("wgetch", NativeNCurses.NCursesWrapper.wgetch(window), out ch, out key);
+            return NativeNCurses.VerifyInput(window, "wgetch", NativeNCurses.NCursesWrapper.wgetch(window), out ch, out key);
         }
         #endregion
 
@@ -846,7 +846,7 @@ namespace NCurses.Core.Interop
         /// </summary>
         public static bool mvwgetch(IntPtr window, int y, int x, out char ch, out Key key)
         {
-            return NativeNCurses.VerifyInput("mvwgetch", NativeNCurses.NCursesWrapper.mvwgetch(window, y, x), out ch, out key);
+            return NativeNCurses.VerifyInput(window, "mvwgetch", NativeNCurses.NCursesWrapper.mvwgetch(window, y, x), out ch, out key);
         }
 #endregion
 

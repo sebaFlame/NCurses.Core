@@ -316,7 +316,8 @@ namespace NCurses.Core.StdScr
 
         public override void Write(char ch)
         {
-            NativeStdScr.addnstr(ch.ToString(), 1);
+            SingleByteCharFactory.Instance.GetNativeChar(ch, out ISingleByteChar res);
+            NativeStdScr.addch(res);
         }
 
         public override void Write(char ch, ulong attrs, short pair)
@@ -357,9 +358,14 @@ namespace NCurses.Core.StdScr
             throw new NotImplementedException("Only useful in multibyte mode");
         }
 
-        public override void Put(int ch)
+        public override void Put(char ch)
         {
             NativeNCurses.ungetch(ch);
+        }
+
+        public override void Put(Key key)
+        {
+            NativeNCurses.ungetch((int)key);
         }
     }
 }

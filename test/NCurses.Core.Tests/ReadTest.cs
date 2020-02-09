@@ -18,7 +18,7 @@ namespace NCurses.Core.Tests
         public ReadTest(ITestOutputHelper testOutputHelper, StdScrState stdScrState)
             : base(testOutputHelper, stdScrState)
         {
-
+            NCurses.Echo = false;
         }
 
         [Fact]
@@ -37,12 +37,14 @@ namespace NCurses.Core.Tests
         [Fact]
         public void ReadFunctionKeyTest()
         {
+            this.Window.KeyPad = true;
+
             char resultChar;
             Key resultKey;
             using (NCurses.CreateThreadSafeDisposable())
             {
                 Assert.True(NativeNCurses.EnableLocking);
-                this.Window.Put((int)Key.F1);
+                this.Window.Put(Key.F1);
                 Assert.True(this.Window.ReadKey(out resultChar, out resultKey));
             }
             Assert.Equal(Key.F1, resultKey);

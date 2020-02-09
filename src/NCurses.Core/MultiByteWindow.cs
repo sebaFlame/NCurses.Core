@@ -371,7 +371,8 @@ namespace NCurses.Core
         //TODO: don't convert?
         public override void Write(char ch)
         {
-            NativeWindow.waddnwstr(this.WindowPtr, ch.ToString(), 1);
+            MultiByteCharFactory.Instance.GetNativeChar(ch, out IMultiByteChar res);
+            NativeWindow.wadd_wch(this.WindowPtr, res);
         }
 
         public override void Write(char ch, ulong attrs, short pair)
@@ -416,9 +417,14 @@ namespace NCurses.Core
             NativeWindow.mvwadd_wchnstr(this.WindowPtr, nline, ncol, res, res.Length);
         }
 
-        public override void Put(int ch)
+        public override void Put(char ch)
         {
-            NativeNCurses.unget_wch(Convert.ToChar(ch));
+            NativeNCurses.unget_wch(ch);
+        }
+
+        public override void Put(Key key)
+        {
+            NativeNCurses.ungetch((int)key);
         }
     }
 }

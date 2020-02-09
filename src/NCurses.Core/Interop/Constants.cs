@@ -1,6 +1,5 @@
 ﻿using System;
-using System.Linq;
-using System.Runtime.InteropServices;
+using System.Text;
 
 //several constants taken from ncurses.h
 namespace NCurses.Core.Interop
@@ -33,6 +32,9 @@ namespace NCurses.Core.Interop
         //TODO: get WCHAR_T size at runtime (through libc?)
         static Constants()
         {
+            //register code pages (for CP 437)
+            Encoding.RegisterProvider(CodePagesEncodingProvider.Instance);
+
             string identifier;
             switch ((identifier = Microsoft.DotNet.PlatformAbstractions.RuntimeEnvironment.GetRuntimeIdentifier()))
             {
@@ -53,6 +55,7 @@ namespace NCurses.Core.Interop
                 case "ubuntu.18.04-x64":
                 case "debian.8-x64":
                 case "debian.9-x64":
+				case "debian.10-x64":
                     DLLNAME = "libncursesw.so.5.9";
                     DLLPANELNAME = "libpanelw.so.5.9";
                     SIZEOF_WCHAR_T = 4;

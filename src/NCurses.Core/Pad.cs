@@ -120,9 +120,14 @@ namespace NCurses.Core
         public abstract void Echo(char ch);
         #endregion
 
-        public override void Put(int ch)
+        public override void Put(char ch)
         {
             this.Window.Put(ch);
+        }
+
+        public override void Put(Key key)
+        {
+            this.Window.Put(key);
         }
     }
 }

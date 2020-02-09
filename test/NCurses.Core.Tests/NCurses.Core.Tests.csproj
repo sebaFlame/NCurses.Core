@@ -29,16 +29,12 @@
     <Content Include="xunit.runner.json" CopyToOutputDirectory="PreserveNewest" />
   </ItemGroup>
 
-  <ItemGroup Condition="'$(OS)' == 'Windows_NT'">
-    <Compile Remove="MultiByte\MultiByteReadTest.cs" />
-  </ItemGroup>
-
   <ItemGroup>
     <!-- To visually check output -->
     <Compile Remove="Program.cs" />
 
-    <!--<Compile Remove="MultiByte\*" />-->
-    <!--<Compile Remove="SingleByte\*" />-->
-    <!--<Compile Remove="RipOffTest.cs" />-->
+     <!--<Compile Remove="MultiByte\*" />-->
+     <!--<Compile Remove="SingleByte\*" />-->
+     <!--<Compile Remove="RipOffTest.cs" />-->
   </ItemGroup>
 </Project>

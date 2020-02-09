@@ -14,6 +14,10 @@ namespace NCurses.Core.Interop.Platform
         [DllImport("kernel32.dll")]
         internal extern static bool FreeLibrary(IntPtr libHandle);
 
+        //should be available in every .NET Core install
+        [DllImport("api-ms-win-crt-locale-l1-1-0")]
+        internal extern static IntPtr setlocale(int category, string locale);
+
         internal WindowsLoader() { }
 
         public IntPtr LoadModule(string moduleName)
@@ -29,6 +33,12 @@ namespace NCurses.Core.Interop.Platform
         public bool FreeModule(IntPtr modulePtr)
         {
             return FreeLibrary(modulePtr);
+        }
+
+        public void SetLocale(string locale)
+        {
+            //LC_ALL = 0
+            setlocale(0, "");
         }
     }
 }

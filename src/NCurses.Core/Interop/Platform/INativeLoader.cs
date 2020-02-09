@@ -7,5 +7,6 @@ namespace NCurses.Core.Interop.Platform
         IntPtr LoadModule(string moduleName);
         IntPtr GetSymbolPointer(IntPtr modulePtr, string symbolName);
         bool FreeModule(IntPtr modulePtr);
+        void SetLocale(string locale);
     }
 }
