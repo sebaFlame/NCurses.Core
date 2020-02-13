@@ -1,20 +1,38 @@
 ﻿using System;
 using System.Runtime.InteropServices;
 using System.Text;
+
 using NCurses.Core.Interop;
 using NCurses.Core.Interop.Mouse;
+using NCurses.Core.Interop.SafeHandles;
+using NCurses.Core.Interop.Wrappers;
+using NCurses.Core.Interop.MultiByte;
+using NCurses.Core.Interop.SingleByte;
 using NCurses.Core.StdScr;
 
 namespace NCurses.Core
 {
+    public delegate void RipoffDelegate(IWindow window, int columns);
+
     //TODO: create shared lock (dictionary?)
     public static class NCurses
     {
         public static bool UnicodeSupported => NativeNCurses.HasUnicodeSupport;
 
         public static IWindow StdScr { get; private set; }
-        public static IWindow SingleByteStdScr { get; private set; }
-        public static IWindow MultiByteStdScr => UnicodeSupported ? StdScr : throw new NotSupportedException("Unicode not supported on this machine.");
+
+        internal static INativeNCursesWrapper<
+            IMultiByteChar,
+            IMultiByteCharString,
+            IChar,
+            ICharString,
+            ISingleByteChar,
+            ISingleByteCharString,
+            IChar,
+            ICharString,
+            IMEVENT> NCursesWrapper => NativeNCurses.NCurses;
+
+        internal static IWindowFactory WindowFactory => NativeNCurses.WindowFactory;
 
         #region init/end
         /// <summary>
@@ -25,20 +43,12 @@ namespace NCurses.Core
         {
             if (!(StdScr is null))
             {
-                throw new InvalidOperationException("NCurses was already initialized");
+                return StdScr;
             }
 
-            IntPtr stdScrPtr = NativeNCurses.initscr();
+            StdScrSafeHandle stdScrSafehandle = NCursesWrapper.initscr();
 
-            if (UnicodeSupported)
-            {
-                StdScr = new MultiByteStdScr(stdScrPtr);
-                SingleByteStdScr = new SingleByteStdScr(stdScrPtr);
-            }
-            else
-            {
-                StdScr = SingleByteStdScr = new SingleByteStdScr(stdScrPtr);
-            }
+            StdScr = CreateStdScr(stdScrSafehandle);
 
             return StdScr;
         }
@@ -49,30 +59,72 @@ namespace NCurses.Core
         /// </summary>
         public static void End()
         {
-            if(StdScr == null)
+            if (StdScr is null)
+            {
                 throw new InvalidOperationException("NCurses not initialized yet");
-
-            if (Panel.DictPanel.Count > 0)
-            {
-                Panel[] panels = new Panel[Panel.DictPanel.Count];
-                Panel.DictPanel.Values.CopyTo(panels, 0);
-                foreach (Panel panel in panels)
-                    panel.Dispose();
             }
 
-            //TODO: don't do this? (initscr after endwin)
-            if (WindowBase.DictPtrWindows.Count > 0)
-            {
-                WindowBase[] wins = new WindowBase[WindowBase.DictPtrWindows.Count]; //fuck LINQ
-                WindowBase.DictPtrWindows.Values.CopyTo(wins, 0);
-                foreach (WindowBase win in wins)
-                    win.Dispose();
-            }
+            NCursesWrapper.endwin();
 
             StdScr = null;
-            SingleByteStdScr = null;
+        }
+        #endregion
 
-            NativeNCurses.endwin();
+        #region StdScr Creation
+        private static IWindow CreateStdScr(StdScrSafeHandle stdScrSafeHandle) => WindowFactory.CreateStdScr(stdScrSafeHandle);
+
+        private static IWindow CreateStdScr(IWindow existingStdScr) => WindowFactory.CreateStdScr(existingStdScr);
+        #endregion
+
+        #region Window Creation
+        public static IWindow CreateWindow(int nlines, int ncols, int begy, int begx)
+        {
+            Start();
+            return WindowFactory.CreateWindow(nlines, ncols, begy, begx);
+        }
+
+        public static IWindow CreateWindow(int nlines, int ncols)
+        {
+            Start();
+            return WindowFactory.CreateWindow(nlines, ncols);
+        }
+
+        public static IWindow CreateWindow()
+        {
+            Start();
+            return WindowFactory.CreateWindow();
+        }
+
+        private static IWindow CreateWindow(WindowBaseSafeHandle windowBaseSafeHandle)
+        {
+            return WindowFactory.CreateWindow(windowBaseSafeHandle);
+        }
+        #endregion
+
+        #region Pad Creation
+        /// <summary>
+        /// Create a new pad according to the current window Unicode support
+        /// </summary>
+        /// <param name="window"></param>
+        /// <param name="nlines"></param>
+        /// <param name="ncols"></param>
+        /// <returns></returns>
+        public static IPad CreatePad(IWindow window, int nlines, int ncols)
+        {
+            return WindowFactory.CreatePad(window, nlines, ncols);
+        }
+
+        public static IPad CreatePad(int nlines, int ncols)
+        {
+            Start();
+            return WindowFactory.CreatePad(nlines, ncols);
+        }
+        #endregion
+
+        #region Panel Creation
+        public static IPanel CreatePanel(IWindow window)
+        {
+            return WindowFactory.CreatePanel(window);
         }
         #endregion
 
@@ -81,20 +133,21 @@ namespace NCurses.Core
         /// call this method before <see cref="Start"/>
         /// </summary>
         /// <param name="direction">-1 for bottom, 1 for top</param>
-        /// <param name="assignWindow">a method to assign the ripped off line during <see cref="Start"/>, also gets passed the amount of columns</param>
-        public static void RipOffLine(int direction, Action<Window, int> assignWindow)
+        /// <param name="assignWindowDelegate">a method to assign the ripped off line during <see cref="Start"/>, also gets passed the amount of columns</param>
+        public static void RipOffLine(int direction, RipoffDelegate assignWindowDelegate)
         {
             if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
             {
                 throw new InvalidOperationException("RipOffLine is not supported on windows.");
             }
 
-            Func<IntPtr, int, IntPtr, int> initCallback = (IntPtr win, int cols, IntPtr func) =>
+            Func<WindowBaseSafeHandle, int, IntPtr, int> initCallback = (WindowBaseSafeHandle win, int cols, IntPtr func) =>
             {
-                assignWindow(Window.CreateWindow(win, false), cols);
+                assignWindowDelegate(CreateWindow(win), cols);
                 return Constants.OK;
             };
-            NativeNCurses.ripoffline(direction, initCallback);
+
+            NCursesWrapper.ripoffline(direction, initCallback);
         }
 
         /// <summary>
@@ -102,7 +155,7 @@ namespace NCurses.Core
         /// </summary>
         public static void Update()
         {
-            NativeNCurses.doupdate();
+            NCursesWrapper.doupdate();
         }
 
         /// <summary>
@@ -112,7 +165,7 @@ namespace NCurses.Core
         /// <param name="columns">number of columns to resize to</param>
         public static void Resize(int lines, int columns)
         {
-            NativeNCurses.resizeterm(lines, columns);
+            NCursesWrapper.resizeterm(lines, columns);
         }
 
         /// <summary>
@@ -123,9 +176,13 @@ namespace NCurses.Core
             set
             {
                 if (value)
-                    NativeNCurses.echo();
+                {
+                    NCursesWrapper.echo();
+                }
                 else
-                    NativeNCurses.noecho();
+                {
+                    NCursesWrapper.noecho();
+                }
             }
         }
 
@@ -137,9 +194,13 @@ namespace NCurses.Core
             set
             {
                 if (value)
-                    NativeNCurses.cbreak();
+                {
+                    NCursesWrapper.cbreak();
+                }
                 else
-                    NativeNCurses.nocbreak();
+                {
+                    NCursesWrapper.nocbreak();
+                }
             }
         }
 
@@ -151,9 +212,13 @@ namespace NCurses.Core
             set
             {
                 if (value)
-                    NativeNCurses.nl();
+                {
+                    NCursesWrapper.nl();
+                }
                 else
-                    NativeNCurses.nonl();
+                {
+                    NCursesWrapper.nonl();
+                }
             }
         }
 
@@ -162,9 +227,13 @@ namespace NCurses.Core
             set
             {
                 if (value)
-                    NativeNCurses.raw();
+                {
+                    NCursesWrapper.raw();
+                }
                 else
-                    NativeNCurses.noraw();
+                {
+                    NCursesWrapper.noraw();
+                }
             }
         }
 
@@ -172,7 +241,7 @@ namespace NCurses.Core
         {
             set
             {
-                NativeNCurses.intrflush(IntPtr.Zero, value);
+                NCursesWrapper.intrflush(value);
             }
         }
 
@@ -180,7 +249,7 @@ namespace NCurses.Core
         {
             set
             {
-                NativeNCurses.curs_set(value);
+                NCursesWrapper.curs_set(value);
             }
         }
 
@@ -191,8 +260,20 @@ namespace NCurses.Core
         /// </summary>
         public static bool EnableLocking
         {
-            get { lock(NativeNCurses.SyncRoot) return NativeNCurses.EnableLocking; }
-            set { lock(NativeNCurses.SyncRoot) NativeNCurses.EnableLocking = value; }
+            get
+            {
+                lock (NativeNCurses.SyncRoot)
+                {
+                    return NativeNCurses.EnableLocking;
+                }
+            }
+            set
+            {
+                lock (NativeNCurses.SyncRoot)
+                {
+                    NativeNCurses.EnableLocking = value;
+                }
+            }
         }
 
         /// <summary>
@@ -207,9 +288,9 @@ namespace NCurses.Core
         /// </code>
         /// </example>
         /// <returns></returns>
-        public static IDisposable CreateThreadSafeDisposable()
+        public static InternalLockDisposable CreateThreadSafeDisposable()
         {
-            return new InternalLockDisposable();
+            return new InternalLockDisposable(NativeNCurses.EnableLocking);
         }
         #endregion
 
@@ -219,7 +300,7 @@ namespace NCurses.Core
         /// </summary>
         public static bool HasColor
         {
-            get { return NativeNCurses.has_colors(); }
+            get { return NCursesWrapper.has_colors(); }
         }
 
         /// <summary>
@@ -227,7 +308,7 @@ namespace NCurses.Core
         /// </summary>
         public static void StartColor()
         {
-            NativeNCurses.start_color();
+            NCursesWrapper.start_color();
         }
 
         /// <summary>
@@ -235,7 +316,7 @@ namespace NCurses.Core
         /// </summary>
         public static void UseDefaultColors()
         {
-            NativeNCurses.use_default_colors();
+            NCursesWrapper.use_default_colors();
         }
 
         /// <summary>
@@ -245,7 +326,7 @@ namespace NCurses.Core
         /// <param name="backGround">the background color to assign</param>
         public static void AssumeDefaultColors(short foreGround, short backGround)
         {
-            NativeNCurses.assume_default_colors(foreGround, backGround);
+            NCursesWrapper.assume_default_colors(foreGround, backGround);
         }
 
         /// <summary>
@@ -264,7 +345,7 @@ namespace NCurses.Core
         /// <param name="backGround">the background color to use</param>
         public static void InitPair(short pairIndex, short foreGround, short backGround)
         {
-            NativeNCurses.init_pair(pairIndex, foreGround, backGround);
+            NCursesWrapper.init_pair(pairIndex, foreGround, backGround);
         }
 
         /// <summary>
@@ -280,8 +361,8 @@ namespace NCurses.Core
         /// </summary>
         public static void InitDefaultPairs()
         {
-            int colorCount = NativeNCurses.COLORS();
-            int pairCount = NativeNCurses.COLOR_PAIRS();
+            int colorCount = NCursesWrapper.COLORS();
+            int pairCount = NCursesWrapper.COLOR_PAIRS();
 
             if(pairCount <= colorCount * colorCount)
                 colorCount = (int)Math.Sqrt(pairCount);
@@ -296,7 +377,7 @@ namespace NCurses.Core
                         pairIndex++;
                         continue;
                     }
-                    NativeNCurses.init_pair(pairIndex++, j, i);
+                    NCursesWrapper.init_pair(pairIndex++, j, i);
                 }
             }
         }
@@ -310,7 +391,7 @@ namespace NCurses.Core
         /// <param name="blue">The amount of blue in the range 0 through 1000</param>
         public static void InitColor(short color, short red, short green, short blue)
         {
-            NativeNCurses.init_color(color, red, green, blue);
+            NCursesWrapper.init_color(color, red, green, blue);
         }
 
         /// <summary>
@@ -318,7 +399,7 @@ namespace NCurses.Core
         /// </summary>
         public static void InitColor(Color color, short red, short green, short blue)
         {
-            NativeNCurses.init_color((short)color, red, green, blue);
+            NCursesWrapper.init_color((short)color, red, green, blue);
         }
 
         /// <summary>
@@ -326,7 +407,7 @@ namespace NCurses.Core
         /// </summary>
         public static int ColorPairs
         {
-           get { return NativeNCurses.COLOR_PAIRS(); }
+           get { return NCursesWrapper.COLOR_PAIRS(); }
         }
 
         /// <summary>
@@ -336,17 +417,17 @@ namespace NCurses.Core
         /// <returns>attribute of the color</returns>
         public static ulong ColorPair(short pairIndex)
         {
-            return (ulong)NativeNCurses.COLOR_PAIR(pairIndex);
+            return (ulong)NCursesWrapper.COLOR_PAIR(pairIndex);
         }
 
         public static int Colors
         {
-            get { return NativeNCurses.COLORS(); }
+            get { return NCursesWrapper.COLORS(); }
         }
         #endregion
 
         #region mouse
-        public static bool HasMouse => NativeNCurses.has_mouse();
+        public static bool HasMouse => NCursesWrapper.has_mouse();
 
         /// <summary>
         /// enable the reporting of mouse events
@@ -356,7 +437,7 @@ namespace NCurses.Core
         /// <returns>the enabled mouse mask</returns>
         public static ulong EnableMouseMask(ulong mouseMask, out ulong oldMouseMask)
         {
-            return NativeNCurses.mousemask(mouseMask, out oldMouseMask);
+            return NCursesWrapper.mousemask(mouseMask, out oldMouseMask);
         }
 
         /// <summary>
@@ -365,7 +446,7 @@ namespace NCurses.Core
         /// <returns>the last mouse event</returns>
         public static void GetMouseEvent(out IMEVENT mouseEvent)
         {
-            NativeNCurses.getmouse(out mouseEvent);
+            NCursesWrapper.getmouse(out mouseEvent);
         }
         #endregion
 
@@ -374,7 +455,7 @@ namespace NCurses.Core
         /// </summary>
         public static void ResetProgramMode()
         {
-            NativeNCurses.reset_prog_mode();
+            NCursesWrapper.reset_prog_mode();
         }
 
         /// <summary>
@@ -382,7 +463,7 @@ namespace NCurses.Core
         /// </summary>
         public static void ResetShellMode()
         {
-            NativeNCurses.reset_shell_mode();
+            NCursesWrapper.reset_shell_mode();
         }
     }
 }

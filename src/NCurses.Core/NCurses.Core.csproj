@@ -26,4 +26,10 @@
     <PackageReference Include="System.Text.Encoding.CodePages" Version="4.5.0" />
   </ItemGroup>
 
+  <!-- Predefined types only work in windows -->
+  <PropertyGroup>
+    <DynamicTypes Condition="'$(DynamicTypes)' == ''">false</DynamicTypes>
+    <DefineConstants Condition="'$(DynamicTypes)' == 'true' OR ('$(DynamicTypes)' == 'false' AND '$(Configuration)' != 'Debug') OR '$(OS)' != 'Windows_NT'">$(DefineConstants);DYNAMICTYPES</DefineConstants>
+  </PropertyGroup>
+
 </Project>

@@ -12,10 +12,12 @@ namespace NCurses.Core.Interop.Dynamic.chtype
     {
         private static Type chtype;// = typeof(chtype);
 
-        internal static Type CreateType()
+        internal static Type CreateType(ModuleBuilder moduleBuilder)
         {
             if (chtype != null)
+            {
                 return chtype;
+            }
 
             FieldBuilder charWithAttrField;
             PropertyBuilder propBuilder, charPropertyBuilder;
@@ -31,9 +33,9 @@ namespace NCurses.Core.Interop.Dynamic.chtype
             if (Constants.CHTYPE_TYPE == typeof(UInt64))
                 isLong = true;
             //TODO: is built into netcoreapp/.NET framework
-            Type readOnlyAttribute = typeof(DynamicTypeBuilder).Assembly.GetType("System.Runtime.CompilerServices.IsReadOnlyAttribute");
+            Type readOnlyAttribute = typeof(chtypeBuilder).Assembly.GetType("System.Runtime.CompilerServices.IsReadOnlyAttribute");
 
-            TypeBuilder typeBuilder = DynamicTypeBuilder.ModuleBuilder.DefineType(
+            TypeBuilder typeBuilder = moduleBuilder.DefineType(
                 "chtype",
                 TypeAttributes.NotPublic | TypeAttributes.SequentialLayout | TypeAttributes.Sealed | TypeAttributes.BeforeFieldInit,
                 typeof(ValueType));

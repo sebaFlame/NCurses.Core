@@ -3,7 +3,7 @@ using System.Collections.Generic;
 
 namespace NCurses.Core.Interop.MultiByte
 {
-    public interface IMultiByteCharString : INCursesCharString, IEnumerable<IMultiByteChar>, IEnumerator<IMultiByteChar>, IEquatable<IMultiByteCharString>
+    public interface IMultiByteCharString : INCursesCharString, IEquatable<IMultiByteCharString>, IEnumerable<IMultiByteChar>
     {
     }
 }

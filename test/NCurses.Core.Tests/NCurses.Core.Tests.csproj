@@ -21,34 +21,36 @@
     <VisualCheck Condition="'$(VisualCheck)' == ''">false</VisualCheck>
   </PropertyGroup>
 
+  <!-- Tests can not be run in batch on any other OS than Windows -->
+  <PropertyGroup Condition="'$(OS)' != 'Windows_NT'">
+    <VisualCheck>true</VisualCheck>
+  </PropertyGroup>
+  
   <!-- import only when consumed -->
   <ItemGroup Condition="'$(OS)' == 'Windows_NT'">
     <PackageReference Include="runtime.win.NCurses" Version="6.0.2017.0225" />
   </ItemGroup>
-
-  <ItemGroup Condition="'$(OS)' == 'Windows_NT' AND '$(VisualCheck)' == 'false'">
+  
+  <ItemGroup Condition="'$(VisualCheck)' == 'false'">
     <PackageReference Include="Microsoft.NET.Test.Sdk" Version="16.2.0" />
     <PackageReference Include="xunit.runner.visualstudio" Version="2.4.0" />
     <Content Include="xunit.runner.json" CopyToOutputDirectory="PreserveNewest" />
     
     <Compile Remove="Program.cs" />
   </ItemGroup>
-
-  <ItemGroup Condition="'$(OS)' == 'Windows_NT' AND '$(VisualCheck)' == 'true'">
-    <PackageReference Include="xunit.runner.utility" Version="2.4.0" />
-  </ItemGroup>
-
+  
   <!-- 
     Under Linux you have to test every test class 1 by 1 using Compile Remove/Include and the included Program.cs  
     It crashes "randomly" when running all tests through XUnit
   -->
-  <ItemGroup Condition="'$(OS)' != 'Windows_NT'">
+  <ItemGroup Condition="'$(VisualCheck)' == 'true'">
     <PackageReference Include="xunit.runner.utility" Version="2.4.0" />
 
     <Compile Remove="MultiByte\*" />
     <Compile Remove="SingleByte\*" />
     <Compile Remove="RipOffTest.cs" />
 
+    <!-- Include any test you want to test here -->
     <Compile Include="MultiByte\*WriteTest.cs" />
   </ItemGroup>
 </Project>

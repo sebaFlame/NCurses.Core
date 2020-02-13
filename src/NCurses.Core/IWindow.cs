@@ -1,9 +1,12 @@
-﻿using System.Text;
+﻿using System;
+using System.Text;
+using System.Buffers;
+
 using NCurses.Core.Interop;
 
 namespace NCurses.Core
 {
-    public interface IWindow
+    public interface IWindow : IEquatable<IWindow>, IDisposable
     {
         INCursesChar BackGround { get; set; }
         bool Blocking { get; set; }
@@ -17,6 +20,7 @@ namespace NCurses.Core
         bool NoTimeout { get; set; }
         bool Scroll { get; set; }
         bool UseHwInsDelLine { get; set; }
+        bool HasUnicodeSupport { get; }
 
         void AttributesOn(ulong attrs);
         void AttributesOff(ulong attrs);
@@ -25,12 +29,20 @@ namespace NCurses.Core
         void Clear();
         void ClearToBottom();
         void ClearToEol();
-        void CreateChar(char ch, out INCursesChar chRet);
-        void CreateChar(char ch, ulong attrs, out INCursesChar chRet);
-        void CreateChar(char ch, ulong attrs, short pair, out INCursesChar chRet);
-        void CreateString(string str, out INCursesCharString chStr);
-        void CreateString(string str, ulong attrs, out INCursesCharString chStr);
-        void CreateString(string str, ulong attrs, short pair, out INCursesCharString chStr);
+
+        IWindow SubWindow(int nlines, int ncols, int begin_y, int begin_x);
+        IWindow DerWindow(int nlines, int ncols, int begin_y, int begin_x);
+
+        IWindow ToSingleByteWindow();
+        IWindow ToMultiByteWindow();
+
+        INCursesChar CreateChar(char ch);
+        INCursesChar CreateChar(char ch, ulong attrs);
+        INCursesChar CreateChar(char ch, ulong attrs, short pair);
+        INCursesCharString CreateString(string str);
+        INCursesCharString CreateString(string str, ulong attrs);
+        INCursesCharString CreateString(string str, ulong attrs, short pair);
+
         void CurrentAttributesAndColor(out ulong attrs, out short colorPair);
         void EnableAttributesAndColor(ulong attrs, short colorPair);
         void EnableColor(short colorPair);
@@ -49,6 +61,12 @@ namespace NCurses.Core
         void ExtractString(int nline, int ncol, out INCursesCharString charsWithAttributes, int maxChars);
         void ExtractString(out INCursesCharString charsWithAttributes);
         void ExtractString(out INCursesCharString charsWithAttributes, int maxChars);
+
+        //void ExtractString(int nline, int ncol, ArrayPool<byte> arrayPool, out byte[] buffer, out INCursesCharString charsWithAttributes);
+        //void ExtractString(int nline, int ncol, ArrayPool<byte> arrayPool, out byte[] buffer, out INCursesCharString charsWithAttributes, int maxChars);
+        //void ExtractString(ArrayPool<byte> arrayPool, out byte[] buffer, out INCursesCharString charsWithAttributes);
+        //void ExtractString(ArrayPool<byte> arrayPool, out byte[] buffer, out INCursesCharString charsWithAttributes, int maxChars);
+
         void HorizontalLine(in INCursesChar lineChar, int length);
         void HorizontalLine(int nline, int ncol, in INCursesChar lineChar, int length);
         void Insert(char ch);

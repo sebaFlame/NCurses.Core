@@ -18,15 +18,5 @@ namespace NCurses.Core.Tests
         {
 
         }
-
-        [Fact]
-        public void WriteACSTest()
-        {
-            this.Window.Write(Acs.ULCORNER);
-            char resultChar = this.Window.ExtractChar(0, 0);
-
-            //does not equal what's rendered
-            Assert.Equal('l', resultChar);
-        }
     }
 }

@@ -10,7 +10,7 @@ namespace NCurses.Core.Tests
     public class RipOffTest
     {
         protected readonly ITestOutputHelper OutputHelper;
-        private Window ripoffExecuted;
+        private IWindow ripoffExecuted;
 
         public RipOffTest(ITestOutputHelper outputHelper)
         {
@@ -34,7 +34,7 @@ namespace NCurses.Core.Tests
             NCurses.End();
         }
 
-        private void ripoffAssign(Window window, int columns)
+        private void ripoffAssign(IWindow window, int columns)
         {
             this.ripoffExecuted = window;
         }

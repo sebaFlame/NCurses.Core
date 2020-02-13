@@ -2,76 +2,64 @@
 using System.Collections.Generic;
 using System.Text;
 using NCurses.Core.Interop.SingleByte;
-using NCurses.Core.Interop.MultiByteString;
+using NCurses.Core.Interop.WideChar;
 using System.Runtime.InteropServices;
 using System.Runtime.CompilerServices;
 using NCurses.Core.Interop.Mouse;
 
 namespace NCurses.Core.Interop.MultiByte
 {
-    internal interface INativeNCursesMultiByte
-    {
-        void getcchar(in IMultiByteChar wcval, out char wch, out ulong attrs, out short color_pair);
-        void setcchar(out IMultiByteChar wcval, in char wch, ulong attrs, short color_pair);
-        void wunctrl(in IMultiByteChar wch, out string str);
-    }
-
-    internal class NativeNCursesMultiByte<TMultiByte, TMultiByteString, TSingleByte, TSingleByteString, TMouseEvent> : MultiByteWrapper<TMultiByte, TMultiByteString, TSingleByte, TSingleByteString, TMouseEvent>, INativeNCursesMultiByte
+    internal class NativeNCursesMultiByte<TMultiByte, TWideChar, TSingleByte, TChar, TMouseEvent> 
+            : MultiByteWrapper<TMultiByte, TWideChar, TSingleByte, TChar, TMouseEvent>, 
+            INativeNCursesMultiByte<TMultiByte, MultiByteCharString<TMultiByte>>
         where TMultiByte : unmanaged, IMultiByteChar, IEquatable<TMultiByte>
-        where TMultiByteString : unmanaged
+        where TWideChar : unmanaged, IChar, IEquatable<TWideChar>
         where TSingleByte : unmanaged, ISingleByteChar, IEquatable<TSingleByte>
-        where TSingleByteString : unmanaged
+        where TChar : unmanaged, IChar, IEquatable<TChar>
         where TMouseEvent : unmanaged, IMEVENT
     {
-        public NativeNCursesMultiByte()
-        { }
+        internal NativeNCursesMultiByte(IMultiByteWrapper<TMultiByte, TWideChar, TSingleByte, TChar> wrapper)
+            : base(wrapper) { }
 
-        public unsafe void getcchar(in IMultiByteChar wcval, out char wch, out ulong attrs, out short color_pair)
+        public unsafe void getcchar(in TMultiByte wcval, out char wch, out ulong attrs, out short color_pair)
         {
-            //wideChar reference
-            ref readonly TMultiByte wcValRef = ref MarshallArrayReadonly(wcval);
+            TWideChar ch = WideCharFactoryInternal<TWideChar>.Instance.GetNativeEmptyCharInternal();
 
-            //array to save new character
-            TMultiByteString* strPtr = stackalloc TMultiByteString[1];
-            ref TMultiByteString ch = ref MultiByteStringWrapper<TMultiByteString, TSingleByteString>.MarshalString(strPtr, 1, out Span<TMultiByteString> chSpan);
+            TSingleByte attrChar = SingleByteCharFactoryInternal<TSingleByte>.Instance.GetNativeEmptyCharInternal();
 
-            //INCursesSCHAR to save attributes
-            ISingleByteChar attrChar = new SingleByteChar<TSingleByte>(0);
-            ref TSingleByte attrsRef = ref SingleByteWrapper<TSingleByte, TSingleByteString, TMouseEvent>.MarshallArray(ref attrChar);
+            color_pair = 0;
 
-            //ref for color_pair
-            byte[] pairArr = new byte[Marshal.SizeOf<short>()];
-            Span<short> spanColorPair = MemoryMarshal.Cast<byte, short>(pairArr);
-            ref short pair = ref spanColorPair.GetPinnableReference();
+            NCursesException.Verify(this.Wrapper.getcchar(in wcval, ref ch, ref attrChar, ref color_pair, IntPtr.Zero), "getcchar");
 
-            NCursesException.Verify(this.Wrapper.getcchar(wcValRef, ref ch, ref attrsRef, ref pair, IntPtr.Zero), "getcchar");
-
-            wch = MultiByteStringWrapper<TMultiByteString, TSingleByteString>.ReadChar(chSpan);
+            wch = ch.Char;
             attrs = attrChar.Attributes;
-            color_pair = spanColorPair[0];
         }
 
-        public unsafe void setcchar(out IMultiByteChar wcval, in char wch, ulong attrs, short color_pair)
+        public unsafe void setcchar(out TMultiByte wcval, in char wch, ulong attrs, short color_pair)
         {
-            wcval = new MultiByteChar<TMultiByte>('\0');
+            TMultiByte output = MultiByteCharFactoryInternal<TMultiByte>.Instance.GetNativeEmptyCharInternal();
 
-            int byteLength;
-            byte* byteArray = stackalloc byte[byteLength = MultiByteStringWrapper<TMultiByteString, TSingleByteString>.GetCharLength()];
-            ref readonly TMultiByteString wideCh = ref MultiByteStringWrapper<TMultiByteString, TSingleByteString>.MarshalChar(wch, byteArray, byteLength);
+            TWideChar wideCh = WideCharFactoryInternal<TWideChar>.Instance.GetNativeCharInternal(wch);
 
-            ISingleByteChar schar = new SingleByteChar<TSingleByte>(attrs);
+            TSingleByte attrChar = SingleByteCharFactoryInternal<TSingleByte>.Instance.GetAttributeInternal(attrs);
 
             NCursesException.Verify(this.Wrapper.setcchar(
-                ref MarshallArray(ref wcval), 
+                ref output, 
                 wideCh, 
-                SingleByteWrapper<TSingleByte, TSingleByteString, TMouseEvent>.MarshallArrayReadonly(schar), 
+                attrChar, 
                 color_pair, 
                 IntPtr.Zero), "setcchar");
+
+            wcval = output;
         }
 
-        public void wunctrl(in IMultiByteChar wch, out string str)
+        public void wunctrl(in TMultiByte wch, out string str)
         {
-            str = MultiByteStringWrapper<TMultiByteString, TSingleByteString>.ReadString(ref this.Wrapper.wunctrl(MarshallArrayReadonly(wch)));
+            ref TWideChar strRef = ref this.Wrapper.wunctrl(CastChar(wch));
+
+            WideCharString<TWideChar> wideStr = WideCharFactoryInternal<TWideChar>.Instance.CreateNativeString(ref strRef);
+
+            str = wideStr.ToString();
         }
     }
 }

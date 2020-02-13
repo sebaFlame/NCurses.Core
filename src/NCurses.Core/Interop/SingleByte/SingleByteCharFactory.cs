@@ -2,170 +2,238 @@
 using System.Collections.Generic;
 using System.Reflection;
 using System.Linq.Expressions;
+using System.Runtime.InteropServices;
+
 using NCurses.Core.Interop.Dynamic;
 
 namespace NCurses.Core.Interop.SingleByte
 {
-    internal class SingleByteCharFactory : ICharFactory<ISingleByteChar, ISingleByteCharString>
+    /// <summary>
+    /// Create native chars strings
+    /// These methods should not be used, because these incur heap allocations and alot of boxing
+    /// </summary>
+    public class SingleByteCharFactory : INCursesCharFactory<ISingleByteChar, ISingleByteCharString>
     {
-        private static Type SingleByteCharType;
-        private static Type SingleByteCharStringType;
+        public static SingleByteCharFactory Instance { get; }
 
-        private static Func<INCursesChar, ISingleByteChar> ncursesCharCreate;
+        internal static INCursesCharFactory<ISingleByteChar, ISingleByteCharString> Factory { get; }
 
-        private static Func<sbyte, ISingleByteChar> byteCreate;
-        private static Func<sbyte, ulong, ISingleByteChar> byteAttrCreate;
-        private static Func<sbyte, ulong, short, ISingleByteChar> byteAttrColorCreate;
-        private static Func<char, ISingleByteChar> charCreate;
-        private static Func<char, ulong, ISingleByteChar> charAttrCreate;
-        private static Func<char, ulong, short, ISingleByteChar> charAttrColorCreate;
-        private static Func<ulong, ISingleByteChar> attrCreate;
-
-        private static Func<string, ISingleByteCharString> strCreate;
-        private static Func<string, ulong, ISingleByteCharString> strAttrCreate;
-        private static Func<string, ulong, short, ISingleByteCharString> strAttrColorCreate;
-
-        private static Func<int, ISingleByteCharString> emptyCreate;
-
-        private static SingleByteCharFactory instance;
-        internal static SingleByteCharFactory Instance => instance ?? (instance = new SingleByteCharFactory());
-        ICharFactory<ISingleByteChar, ISingleByteCharString> ICharFactory<ISingleByteChar, ISingleByteCharString>.Instance => Instance;
+        private static Type FactoryType;
 
         static SingleByteCharFactory()
         {
-            instance = new SingleByteCharFactory();
+            Instance = new SingleByteCharFactory();
 
-            SingleByteCharType = typeof(SingleByteChar<>).MakeGenericType(DynamicTypeBuilder.chtype);
-            SingleByteCharStringType = typeof(SingleByteCharString<>).MakeGenericType(DynamicTypeBuilder.chtype);
+            FactoryType = typeof(SingleByteCharFactoryInternal<>).MakeGenericType(DynamicTypeBuilder.chtype);
+
+            PropertyInfo property = FactoryType.GetProperty("Instance", BindingFlags.NonPublic | BindingFlags.Static);
+            MethodInfo getMethod = property.GetGetMethod(true);
+
+            Factory = (INCursesCharFactory<ISingleByteChar, ISingleByteCharString>)getMethod.Invoke(null, Array.Empty<object>());
+        }
+
+        public ISingleByteChar GetNativeEmptyChar() =>
+            Factory.GetNativeEmptyChar();
+
+        public ISingleByteChar GetNativeChar(char ch) =>
+            Factory.GetNativeChar(ch);
+
+        public ISingleByteChar GetNativeChar(char ch, ulong attrs) =>
+            Factory.GetNativeChar(ch, attrs);
+
+        public ISingleByteChar GetNativeChar(char ch, ulong attrs, short colorPair) =>
+            Factory.GetNativeChar(ch, attrs, colorPair);
+
+        public ISingleByteCharString GetNativeEmptyString(int length) =>
+            Factory.GetNativeEmptyString(length);
+
+        public ISingleByteCharString GetNativeString(string str) =>
+            Factory.GetNativeString(str);
+
+        public ISingleByteCharString GetNativeString(string str, ulong attrs) =>
+            Factory.GetNativeString(str, attrs);
+
+        public ISingleByteCharString GetNativeString(string str, ulong attrs, short colorPair) =>
+            Factory.GetNativeString(str, attrs, colorPair);
+
+        public unsafe ISingleByteCharString GetNativeEmptyString(byte* buffer, int length)
+            => Factory.GetNativeEmptyString(buffer, length);
+
+        public ISingleByteCharString GetNativeEmptyString(byte[] buffer)
+            => Factory.GetNativeEmptyString(buffer);
+
+        public unsafe ISingleByteCharString GetNativeString(byte* buffer, int length, string str)
+            => Factory.GetNativeString(buffer, length, str);
+
+        public ISingleByteCharString GetNativeString(byte[] buffer, string str)
+            => Factory.GetNativeString(buffer, str);
+
+        public unsafe ISingleByteCharString GetNativeString(byte* buffer, int length, string str, ulong attrs)
+            => Factory.GetNativeString(buffer, length, str, attrs);
+
+        public ISingleByteCharString GetNativeString(byte[] buffer, string str, ulong attrs)
+            => Factory.GetNativeString(buffer, str, attrs);
+
+        public unsafe ISingleByteCharString GetNativeString(byte* buffer, int length, string str, ulong attrs, short colorPair)
+            => Factory.GetNativeString(buffer, length, str, attrs, colorPair);
+
+        public ISingleByteCharString GetNativeString(byte[] buffer, string str, ulong attrs, short colorPair)
+            => Factory.GetNativeString(buffer, str, attrs, colorPair);
+
+        public int GetByteCount(string str) => Factory.GetByteCount(str);
+
+        public int GetByteCount(int length) => Factory.GetByteCount(length);
+
+        public int GetCharLength() => Factory.GetCharLength();
+    }
+
+    internal class SingleByteCharFactoryInternal<TSingleByte> :
+        INCursesCharFactoryInternal<ISingleByteChar, ISingleByteCharString, TSingleByte, SingleByteCharString<TSingleByte>>
+        where TSingleByte : unmanaged, ISingleByteChar, IEquatable<TSingleByte>
+    {
+        internal static Func<sbyte, TSingleByte> CreateCharFromByte;
+        internal static Func<sbyte, ulong, TSingleByte> CreateCharWithAttributeFromByte;
+        internal static Func<sbyte, ulong, short, TSingleByte> CreateCharWithAttributeAndColorPairFromByte;
+        internal static Func<ulong, TSingleByte> CreateCharFromAttribute;
+
+        internal static SingleByteCharFactoryInternal<TSingleByte> Instance { get; }
+
+        static SingleByteCharFactoryInternal()
+        {
+            Instance = new SingleByteCharFactoryInternal<TSingleByte>();
 
             ConstructorInfo ctor;
-            ParameterExpression par1, par2, par3;
+            ParameterExpression instance, par1, par2, par3;
 
-            par1 = Expression.Parameter(typeof(INCursesChar));
-            ctor = SingleByteCharType.GetConstructor(new Type[] { typeof(INCursesChar) });
-            ncursesCharCreate = Expression.Lambda<Func<INCursesChar, ISingleByteChar>>(Expression.Convert(
-                Expression.New(ctor, par1), typeof(ISingleByteChar)), par1).Compile();
-
+            instance = Expression.Parameter(typeof(TSingleByte));
             par1 = Expression.Parameter(typeof(sbyte));
-            ctor = SingleByteCharType.GetConstructor(new Type[] { typeof(sbyte) });
-            byteCreate = Expression.Lambda<Func<sbyte, ISingleByteChar>>(Expression.Convert(
-                Expression.New(ctor, par1), typeof(ISingleByteChar)), par1).Compile();
+            ctor = typeof(TSingleByte).GetConstructor(new Type[] { typeof(sbyte) });
+            CreateCharFromByte =
+                Expression.Lambda<Func<sbyte, TSingleByte>>(Expression.New(ctor, par1), par1).Compile();
 
             par2 = Expression.Parameter(typeof(ulong));
-            ctor = SingleByteCharType.GetConstructor(new Type[] { typeof(sbyte), typeof(ulong) });
-            byteAttrCreate = Expression.Lambda<Func<sbyte, ulong, ISingleByteChar>>(
-                Expression.Convert(Expression.New(ctor, par1, par2), typeof(ISingleByteChar)), par1, par2).Compile();
+            ctor = typeof(TSingleByte).GetConstructor(new Type[] { typeof(sbyte), typeof(ulong) });
+            CreateCharWithAttributeFromByte =
+                Expression.Lambda<Func<sbyte, ulong, TSingleByte>>(Expression.New(ctor, par1, par2), par1, par2).Compile();
 
             par3 = Expression.Parameter(typeof(short));
-            ctor = SingleByteCharType.GetConstructor(new Type[] { typeof(sbyte), typeof(ulong), typeof(short) });
-            byteAttrColorCreate = Expression.Lambda<Func<sbyte, ulong, short, ISingleByteChar>>(
-                Expression.Convert(Expression.New(ctor, par1, par2, par3), typeof(ISingleByteChar)), par1, par2, par3).Compile();
-
-            par1 = Expression.Parameter(typeof(char));
-            ctor = SingleByteCharType.GetConstructor(new Type[] { typeof(char) });
-            charCreate = Expression.Lambda<Func<char, ISingleByteChar>>(Expression.Convert(
-                Expression.New(ctor, par1), typeof(ISingleByteChar)), par1).Compile();
-
-            par2 = Expression.Parameter(typeof(ulong));
-            ctor = SingleByteCharType.GetConstructor(new Type[] { typeof(char), typeof(ulong) });
-            charAttrCreate = Expression.Lambda<Func<char, ulong, ISingleByteChar>>(
-                Expression.Convert(Expression.New(ctor, par1, par2), typeof(ISingleByteChar)), par1, par2).Compile();
-
-            par3 = Expression.Parameter(typeof(short));
-            ctor = SingleByteCharType.GetConstructor(new Type[] { typeof(char), typeof(ulong), typeof(short) });
-            charAttrColorCreate = Expression.Lambda<Func<char, ulong, short, ISingleByteChar>>(
-                Expression.Convert(Expression.New(ctor, par1, par2, par3), typeof(ISingleByteChar)), par1, par2, par3).Compile();
+            ctor = typeof(TSingleByte).GetConstructor(new Type[] { typeof(sbyte), typeof(ulong), typeof(short) });
+            CreateCharWithAttributeAndColorPairFromByte =
+                Expression.Lambda<Func<sbyte, ulong, short, TSingleByte>>(Expression.New(ctor, par1, par2, par3), par1, par2, par3).Compile();
 
             par1 = Expression.Parameter(typeof(ulong));
-            ctor = SingleByteCharType.GetConstructor(new Type[] { typeof(ulong) });
-            attrCreate = Expression.Lambda<Func<ulong, ISingleByteChar>>(Expression.Convert(
-                    Expression.New(ctor, par1), typeof(ISingleByteChar)), par1).Compile();
-
-            par1 = Expression.Parameter(typeof(string));
-            ctor = SingleByteCharStringType.GetConstructor(new Type[] { typeof(string) });
-            strCreate = Expression.Lambda<Func<string, ISingleByteCharString>>(
-                Expression.Convert(Expression.New(ctor, par1), typeof(ISingleByteCharString)), par1).Compile();
-
-            par2 = Expression.Parameter(typeof(ulong));
-            ctor = SingleByteCharStringType.GetConstructor(new Type[] { typeof(string), typeof(ulong) });
-            strAttrCreate = Expression.Lambda<Func<string, ulong, ISingleByteCharString>>(
-                Expression.Convert(Expression.New(ctor, par1, par2), typeof(ISingleByteCharString)), par1, par2).Compile();
-
-            par3 = Expression.Parameter(typeof(short));
-            ctor = SingleByteCharStringType.GetConstructor(new Type[] { typeof(string), typeof(ulong), typeof(short) });
-            strAttrColorCreate = Expression.Lambda<Func<string, ulong, short, ISingleByteCharString>>(
-                Expression.Convert(Expression.New(ctor, par1, par2, par3), typeof(ISingleByteCharString)), par1, par2, par3).Compile();
-
-            par1 = Expression.Parameter(typeof(int));
-            ctor = SingleByteCharStringType.GetConstructor(new Type[] { typeof(int) });
-            emptyCreate = Expression.Lambda<Func<int, ISingleByteCharString>>(Expression.Convert(
-                Expression.New(ctor, par1), typeof(ISingleByteCharString)), par1).Compile();
+            ctor = typeof(TSingleByte).GetConstructor(new Type[] { typeof(ulong) });
+            CreateCharFromAttribute =
+                Expression.Lambda<Func<ulong, TSingleByte>>(Expression.New(ctor, par1), par1).Compile();
         }
 
         //only used in MouseEventFactory
-        internal ISingleByteChar GetAttribute(ulong attrs)
-        {
-            return attrCreate(attrs);
-        }
+        internal TSingleByte GetAttributeInternal(ulong attrs) =>
+            CreateCharFromAttribute(attrs);
 
-        public void GetNativeEmptyChar(out ISingleByteChar res)
-        {
-            res = charCreate('\0');
-        }
+        #region ICharFactoryInternal<TChar, TString>
+        public TSingleByte GetNativeEmptyCharInternal() =>
+            CreateCharFromByte(0);
 
-        internal void GetNativeChar(INCursesChar ch, out ISingleByteChar res)
-        {
-            res = ncursesCharCreate(ch);
-        }
+        public TSingleByte GetNativeCharInternal(char ch) =>
+            CreateCharFromByte((sbyte)ch);
 
-        public void GetNativeChar(char ch, out ISingleByteChar res)
-        {
-            res = charCreate(ch);
-        }
+        public unsafe SingleByteCharString<TSingleByte> GetNativeEmptyStringInternal(byte* buffer, int length) =>
+            new SingleByteCharString<TSingleByte>(buffer, length);
 
-        public void GetNativeChar(char ch, ulong attr, out ISingleByteChar res)
-        {
-            res = charAttrCreate(ch, attr);
-        }
+        public SingleByteCharString<TSingleByte> GetNativeEmptyStringInternal(byte[] buffer) =>
+            new SingleByteCharString<TSingleByte>(buffer);
 
-        public void GetNativeChar(char ch, ulong attr, short pair, out ISingleByteChar res)
-        {
-            res = charAttrColorCreate(ch, attr, pair);
-        }
+        public unsafe SingleByteCharString<TSingleByte> GetNativeStringInternal(byte* buffer, int length, string str) =>
+            new SingleByteCharString<TSingleByte>(buffer, length, str);
 
-        public void GetNativeEmptyString(int length, out ISingleByteCharString res)
-        {
-            res = emptyCreate(length);
-        }
+        public SingleByteCharString<TSingleByte> GetNativeStringInternal(byte[] buffer, string str) =>
+            new SingleByteCharString<TSingleByte>(buffer, str);
 
-        public void GetNativeString(string str, out ISingleByteCharString res)
-        {
-            res = strCreate(str);
-        }
+        public int GetByteCount(string str, bool addNullTerminator = true) =>
+            (str.Length * Marshal.SizeOf<TSingleByte>()) + (addNullTerminator ? Marshal.SizeOf<TSingleByte>() : 0);
 
-        public void GetNativeString(string str, ulong attr, out ISingleByteCharString res)
-        {
-            res = strAttrCreate(str, attr);
-        }
+        public int GetByteCount(int length, bool addNullTerminator = true) =>
+            (length * Marshal.SizeOf<TSingleByte>()) + (addNullTerminator ? Marshal.SizeOf<TSingleByte>() : 0);
 
-        public void GetNativeString(string str, ulong attr, short color, out ISingleByteCharString res)
-        {
-            res = strAttrColorCreate(str, attr, color);
-        }
+        public int GetCharLength() => Marshal.SizeOf<TSingleByte>();
 
-        public void GetNativeChar(sbyte ch, out ISingleByteChar res)
-        {
-            res = byteCreate(ch);
-        }
+        public SingleByteCharString<TSingleByte> CreateNativeString(ref TSingleByte strRef)
+            => new SingleByteCharString<TSingleByte>(ref strRef);
+        #endregion
 
-        public void GetNativeChar(sbyte ch, ulong attr, out ISingleByteChar res)
-        {
-            res = byteAttrCreate(ch, attr);
-        }
+        #region ICharFactoryInternal<TCharType, TStringType, TChar, TString>
+        public TSingleByte GetNativeCharInternal(char ch, ulong attrs) =>
+            CreateCharWithAttributeFromByte((sbyte)ch, attrs);
 
-        public void GetNativeChar(sbyte ch, ulong attr, short pair, out ISingleByteChar res)
-        {
-            res = byteAttrColorCreate(ch, attr, pair);
-        }
+        public TSingleByte GetNativeCharInternal(char ch, ulong attrs, short colorPair) =>
+            CreateCharWithAttributeAndColorPairFromByte((sbyte)ch, attrs, colorPair);
+
+        public unsafe SingleByteCharString<TSingleByte> GetNativeStringInternal(byte* buffer, int length, string str, ulong attrs) =>
+            new SingleByteCharString<TSingleByte>(buffer, length, str, attrs);
+
+        public SingleByteCharString<TSingleByte> GetNativeStringInternal(byte[] buffer, string str, ulong attrs) =>
+            new SingleByteCharString<TSingleByte>(buffer, str, attrs);
+
+        public unsafe SingleByteCharString<TSingleByte> GetNativeStringInternal(byte* buffer, int length, string str, ulong attrs, short colorPair) =>
+            new SingleByteCharString<TSingleByte>(buffer, length, str, attrs, colorPair);
+
+        public unsafe SingleByteCharString<TSingleByte> GetNativeStringInternal(byte[] buffer, string str, ulong attrs, short colorPair) =>
+            new SingleByteCharString<TSingleByte>(buffer, str, attrs, colorPair);
+        #endregion
+
+        #region ICharFactory
+        public ISingleByteChar GetNativeEmptyChar() =>
+            GetNativeEmptyCharInternal();
+
+        public ISingleByteChar GetNativeChar(char ch) =>
+            GetNativeCharInternal(ch);
+
+        public ISingleByteChar GetNativeChar(char ch, ulong attrs) =>
+            GetNativeCharInternal(ch, attrs);
+
+        public ISingleByteChar GetNativeChar(char ch, ulong attrs, short colorPair) =>
+            GetNativeChar(ch, attrs, colorPair);
+
+        public unsafe ISingleByteCharString GetNativeEmptyString(byte* buffer, int length)
+            => this.GetNativeEmptyStringInternal(buffer, length);
+
+        public ISingleByteCharString GetNativeEmptyString(byte[] buffer)
+            => this.GetNativeEmptyStringInternal(buffer);
+
+        public ISingleByteCharString GetNativeEmptyString(int length)
+            => this.GetNativeEmptyString(new byte[this.GetByteCount(length)]);
+
+        public unsafe ISingleByteCharString GetNativeString(byte* buffer, int length, string str)
+            => this.GetNativeStringInternal(buffer, length, str);
+
+        public ISingleByteCharString GetNativeString(byte[] buffer, string str)
+            => this.GetNativeStringInternal(buffer, str);
+
+        public ISingleByteCharString GetNativeString(string str)
+            => this.GetNativeString(new byte[this.GetByteCount(str)], str);
+
+        public unsafe ISingleByteCharString GetNativeString(byte* buffer, int length, string str, ulong attrs)
+            => this.GetNativeStringInternal(buffer, length, str, attrs);
+
+        public ISingleByteCharString GetNativeString(byte[] buffer, string str, ulong attrs)
+            => this.GetNativeStringInternal(buffer,  str, attrs);
+
+        public ISingleByteCharString GetNativeString(string str, ulong attrs)
+            => this.GetNativeString(new byte[this.GetByteCount(str)], str, attrs);
+
+        public unsafe ISingleByteCharString GetNativeString(byte* buffer, int length, string str, ulong attrs, short colorPair)
+            => this.GetNativeStringInternal(buffer, length, str, attrs, colorPair);
+
+        public ISingleByteCharString GetNativeString(byte[] buffer, string str, ulong attrs, short colorPair)
+            => this.GetNativeStringInternal(buffer, str, attrs, colorPair);
+
+        public ISingleByteCharString GetNativeString(string str, ulong attrs, short colorPair)
+            => this.GetNativeString(new byte[this.GetByteCount(str)], str, attrs, colorPair);
+
+        public int GetByteCount(string str) => this.GetByteCount(str, true);
+
+        public int GetByteCount(int length) => this.GetByteCount(length, true);
+        #endregion
     }
 }

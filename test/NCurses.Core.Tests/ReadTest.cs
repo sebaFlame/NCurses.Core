@@ -27,7 +27,6 @@ namespace NCurses.Core.Tests
             char resultChar;
             using (NCurses.CreateThreadSafeDisposable())
             {
-                Assert.True(NativeNCurses.EnableLocking);
                 this.Window.Put(this.TestChar);
                 Assert.False(this.Window.ReadKey(out resultChar, out Key resultKey));
             }
@@ -43,7 +42,6 @@ namespace NCurses.Core.Tests
             Key resultKey;
             using (NCurses.CreateThreadSafeDisposable())
             {
-                Assert.True(NativeNCurses.EnableLocking);
                 this.Window.Put(Key.F1);
                 Assert.True(this.Window.ReadKey(out resultChar, out resultKey));
             }

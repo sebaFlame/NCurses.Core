@@ -3,22 +3,34 @@ using System.Collections.Generic;
 using System.Text;
 using System.Linq;
 
+using NCurses.Core.Window;
 using NCurses.Core.Interop;
+using NCurses.Core.Interop.MultiByte;
 using NCurses.Core.Interop.SingleByte;
+using NCurses.Core.Interop.WideChar;
+using NCurses.Core.Interop.Char;
+using NCurses.Core.Interop.Mouse;
+using NCurses.Core.Interop.SafeHandles;
+using NCurses.Core.Interop.Wrappers;
 
 namespace NCurses.Core.StdScr
 {
-    internal class SingleByteStdScr : StdScrBase
+    internal class SingleByteStdScr<TMultiByte, TWideChar, TSingleByte, TChar, TMouseEvent> : StdScrBase<TMultiByte, TWideChar, TSingleByte, TChar, TMouseEvent>
+        where TMultiByte : unmanaged, IMultiByteChar, IEquatable<TMultiByte>
+        where TWideChar : unmanaged, IChar, IEquatable<TWideChar>
+        where TSingleByte : unmanaged, ISingleByteChar, IEquatable<TSingleByte>
+        where TChar : unmanaged, IChar, IEquatable<TChar>
+        where TMouseEvent : unmanaged, IMEVENT
     {
         public override INCursesChar BackGround
         {
             get
             {
-                return NativeWindow.getbkgd(this.WindowPtr);
+                return Window.getbkgd(this.WindowBaseSafeHandle);
             }
             set
             {
-                NativeStdScr.bkgd(VerifyChar(value));
+                StdScr.bkgd(VerifyChar(value));
             }
         }
 
@@ -26,110 +38,155 @@ namespace NCurses.Core.StdScr
         {
             get
             {
-                return NativeWindow.getbkgd(this.WindowPtr);
+                return Window.getbkgd(this.WindowBaseSafeHandle);
             }
             set
             {
-                NativeStdScr.bkgdset(VerifyChar(value));
+                StdScr.bkgdset(VerifyChar(value));
             }
         }
 
-        public SingleByteStdScr(IntPtr stdScr)
+        public override bool HasUnicodeSupport => false;
+
+        public SingleByteStdScr(WindowBaseSafeHandle stdScr)
             : base(stdScr) { }
 
-        //TODO: same reference????
-        private ISingleByteChar VerifyChar(in INCursesChar ch)
+        public SingleByteStdScr(StdScrBase<TMultiByte, TWideChar, TSingleByte, TChar, TMouseEvent> stdScr)
+            : base(stdScr) { }
+
+        internal override WindowInternal<TMultiByte, TWideChar, TSingleByte, TChar, TMouseEvent> CreateWindow(
+            WindowBaseSafeHandle windowBaseSafeHandle,
+            WindowInternal<TMultiByte, TWideChar, TSingleByte, TChar, TMouseEvent> parentWindow)
         {
-            if (!(ch is ISingleByteChar tmp))
+            return new SingleByteWindow<TMultiByte, TWideChar, TSingleByte, TChar, TMouseEvent>(windowBaseSafeHandle, parentWindow);
+        }
+
+        internal override WindowInternal<TMultiByte, TWideChar, TSingleByte, TChar, TMouseEvent> CreateWindow(
+            WindowInternal<TMultiByte, TWideChar, TSingleByte, TChar, TMouseEvent> existingWindow)
+        {
+            throw new NotSupportedException("Can not create a new StdScr from an existing window");
+        }
+
+        private TSingleByte VerifyChar(in INCursesChar ch)
+        {
+            if (!(ch is TSingleByte tmp))
+            {
                 throw new InvalidCastException("Character is in incorrect format");
+            }
+
             return tmp;
         }
 
-        public override void Border(in INCursesChar ls, in INCursesChar rs, in INCursesChar ts, in INCursesChar bs, 
+        private SingleByteCharString<TSingleByte> VerifyString(in INCursesCharString str)
+        {
+            if (!(str is SingleByteCharString<TSingleByte> tmp))
+            {
+                throw new InvalidCastException("String is in incorrect format");
+            }
+
+            return tmp;
+        }
+
+        public override void Border(in INCursesChar ls, in INCursesChar rs, in INCursesChar ts, in INCursesChar bs,
             in INCursesChar tl, in INCursesChar tr, in INCursesChar bl, in INCursesChar br)
         {
-            NativeStdScr.border(this.VerifyChar(ls), this.VerifyChar(rs), this.VerifyChar(ts), this.VerifyChar(bs), 
+            StdScr.border(this.VerifyChar(ls), this.VerifyChar(rs), this.VerifyChar(ts), this.VerifyChar(bs),
                 this.VerifyChar(tl), this.VerifyChar(tr), this.VerifyChar(bl), this.VerifyChar(br));
         }
 
         public override void Border()
         {
-            SingleByteCharFactory.Instance.GetNativeEmptyChar(out ISingleByteChar ls);
-            SingleByteCharFactory.Instance.GetNativeEmptyChar(out ISingleByteChar rs);
-            SingleByteCharFactory.Instance.GetNativeEmptyChar(out ISingleByteChar ts);
-            SingleByteCharFactory.Instance.GetNativeEmptyChar(out ISingleByteChar bs);
-            SingleByteCharFactory.Instance.GetNativeEmptyChar(out ISingleByteChar tl);
-            SingleByteCharFactory.Instance.GetNativeEmptyChar(out ISingleByteChar tr);
-            SingleByteCharFactory.Instance.GetNativeEmptyChar(out ISingleByteChar bl);
-            SingleByteCharFactory.Instance.GetNativeEmptyChar(out ISingleByteChar br);
+            TSingleByte ls = SingleByteCharFactoryInternal<TSingleByte>.Instance.GetNativeEmptyCharInternal();
+            TSingleByte rs = SingleByteCharFactoryInternal<TSingleByte>.Instance.GetNativeEmptyCharInternal();
+            TSingleByte ts = SingleByteCharFactoryInternal<TSingleByte>.Instance.GetNativeEmptyCharInternal();
+            TSingleByte bs = SingleByteCharFactoryInternal<TSingleByte>.Instance.GetNativeEmptyCharInternal();
+            TSingleByte tl = SingleByteCharFactoryInternal<TSingleByte>.Instance.GetNativeEmptyCharInternal();
+            TSingleByte tr = SingleByteCharFactoryInternal<TSingleByte>.Instance.GetNativeEmptyCharInternal();
+            TSingleByte bl = SingleByteCharFactoryInternal<TSingleByte>.Instance.GetNativeEmptyCharInternal();
+            TSingleByte br = SingleByteCharFactoryInternal<TSingleByte>.Instance.GetNativeEmptyCharInternal();
 
-            NativeStdScr.border(ls, rs, ts, bs, tl, tr, bl, br);
+            StdScr.border(ls, rs, ts, bs, tl, tr, bl, br);
+        }
+
+        public override void Box(in INCursesChar verticalChar, in INCursesChar horizontalChar)
+        {
+            Window.box(this.WindowBaseSafeHandle, this.VerifyChar(verticalChar), this.VerifyChar(horizontalChar));
+        }
+
+        public override void Box()
+        {
+            TSingleByte verch = SingleByteCharFactoryInternal<TSingleByte>.Instance.GetNativeEmptyCharInternal();
+            TSingleByte horch = SingleByteCharFactoryInternal<TSingleByte>.Instance.GetNativeEmptyCharInternal();
+
+            Window.box(this.WindowBaseSafeHandle, verch, horch);
         }
 
         //TODO: use native override?
-        public override void CreateChar(char ch, out INCursesChar chRet)
+        public override INCursesChar CreateChar(char ch)
         {
-            SingleByteCharFactory.Instance.GetNativeChar(ch, out ISingleByteChar res);
-            chRet = res;
+            return SingleByteCharFactoryInternal<TSingleByte>.Instance.GetNativeCharInternal(ch);
         }
 
-        public override void CreateChar(char ch, ulong attrs, out INCursesChar chRet)
+        public override INCursesChar CreateChar(char ch, ulong attrs)
         {
-            SingleByteCharFactory.Instance.GetNativeChar(ch, attrs, out ISingleByteChar res);
-            chRet = res;
+            return SingleByteCharFactoryInternal<TSingleByte>.Instance.GetNativeCharInternal(ch, attrs);
         }
 
-        public override void CreateChar(char ch, ulong attrs, short pair, out INCursesChar chRet)
+        public override INCursesChar CreateChar(char ch, ulong attrs, short pair)
         {
-            SingleByteCharFactory.Instance.GetNativeChar(ch, attrs, pair, out ISingleByteChar res);
-            chRet = res;
+            return SingleByteCharFactoryInternal<TSingleByte>.Instance.GetNativeCharInternal(ch, attrs, pair);
         }
 
-        public override void CreateString(string str, out INCursesCharString chStr)
+        public override INCursesCharString CreateString(string str)
         {
-            SingleByteCharFactory.Instance.GetNativeString(str, out ISingleByteCharString res);
-            chStr = res;
+            byte[] buffer = new byte[SingleByteCharFactoryInternal<TSingleByte>.Instance.GetByteCount(str, false)];
+            return SingleByteCharFactoryInternal<TSingleByte>.Instance.GetNativeStringInternal(buffer, str);
         }
 
-        public override void CreateString(string str, ulong attrs, out INCursesCharString chStr)
+        public override INCursesCharString CreateString(string str, ulong attrs)
         {
-            SingleByteCharFactory.Instance.GetNativeString(str, attrs, out ISingleByteCharString res);
-            chStr = res;
+            byte[] buffer = new byte[SingleByteCharFactoryInternal<TSingleByte>.Instance.GetByteCount(str, false)];
+            return SingleByteCharFactoryInternal<TSingleByte>.Instance.GetNativeStringInternal(buffer, str, attrs);
         }
 
-        public override void CreateString(string str, ulong attrs, short pair, out INCursesCharString chStr)
+        public override INCursesCharString CreateString(string str, ulong attrs, short pair)
         {
-            SingleByteCharFactory.Instance.GetNativeString(str, attrs, pair, out ISingleByteCharString res);
-            chStr = res;
+            byte[] buffer = new byte[SingleByteCharFactoryInternal<TSingleByte>.Instance.GetByteCount(str, false)];
+            return SingleByteCharFactoryInternal<TSingleByte>.Instance.GetNativeStringInternal(buffer, str, attrs, pair);
+        }
+
+        public override WindowInternal<TMultiByte, TWideChar, TSingleByte, TChar, TMouseEvent> Duplicate()
+        {
+            return new SingleByteWindow<TMultiByte, TWideChar, TSingleByte, TChar, TMouseEvent>(NCurses.dupwin(this.WindowBaseSafeHandle));
+        }
+
+        public override char ExtractChar()
+        {
+            StdScr.inch(out TSingleByte ch);
+            return ch.Char;
         }
 
         public override void ExtractChar(out INCursesChar ch)
         {
-            NativeStdScr.inch(out ISingleByteChar sch);
+            StdScr.inch(out TSingleByte sch);
             ch = sch;
         }
 
         public override void ExtractChar(int nline, int ncol, out INCursesChar ch)
         {
-            NativeStdScr.mvinch(nline, ncol, out ISingleByteChar sch);
+            StdScr.mvinch(nline, ncol, out TSingleByte sch);
             ch = sch;
-        }
-
-        public override char ExtractChar()
-        {
-            NativeStdScr.inch(out ISingleByteChar ch);
-            return ch.Char;
         }
 
         public override char ExtractChar(int nline, int ncol)
         {
-            NativeStdScr.mvinch(nline, ncol, out ISingleByteChar ch);
+            StdScr.mvinch(nline, ncol, out TSingleByte ch);
             return ch.Char;
         }
 
         public override char ExtractChar(out ulong attrs, out short pair)
         {
-            NativeStdScr.inch(out ISingleByteChar ch);
+            StdScr.inch(out TSingleByte ch);
             attrs = ch.Attributes;
             pair = ch.Color;
             return ch.Char;
@@ -137,7 +194,7 @@ namespace NCurses.Core.StdScr
 
         public override char ExtractChar(int nline, int ncol, out ulong attrs, out short pair)
         {
-            NativeStdScr.mvinch(nline, ncol, out ISingleByteChar ch);
+            StdScr.mvinch(nline, ncol, out TSingleByte ch);
             attrs = ch.Attributes;
             pair = ch.Color;
             return ch.Char;
@@ -145,239 +202,314 @@ namespace NCurses.Core.StdScr
 
         public override string ExtractString()
         {
-            NativeStdScr.instr(out string str, out int read);
-            return str;
+            unsafe
+            {
+                int bufferLength = Constants.MAX_STRING_LENGTH * CharFactoryInternal<TChar>.Instance.GetCharLength();
+                byte* buffer = stackalloc byte[bufferLength];
+                CharString<TChar> chStr = CharFactoryInternal<TChar>.Instance.GetNativeEmptyStringInternal(buffer, bufferLength);
+                StdScr.instr(ref chStr, out int read);
+                return chStr.ToString();
+            }
         }
 
         public override string ExtractString(int maxChars, out int read)
         {
-            NativeStdScr.innstr(out string str, maxChars, out read);
-            return str;
+            unsafe
+            {
+                int bufferLength = maxChars * CharFactoryInternal<TChar>.Instance.GetCharLength();
+                byte* buffer = stackalloc byte[bufferLength];
+                CharString<TChar> chStr = CharFactoryInternal<TChar>.Instance.GetNativeEmptyStringInternal(buffer, bufferLength);
+                StdScr.innstr(ref chStr, maxChars, out read);
+                return chStr.ToString();
+            }
         }
 
         public override string ExtractString(int nline, int ncol)
         {
-            NativeStdScr.mvinstr(nline, ncol, out string str, out int read);
-            return str;
+            unsafe
+            {
+                int bufferLength = Constants.MAX_STRING_LENGTH * CharFactoryInternal<TChar>.Instance.GetCharLength();
+                byte* buffer = stackalloc byte[bufferLength];
+                CharString<TChar> chStr = CharFactoryInternal<TChar>.Instance.GetNativeEmptyStringInternal(buffer, bufferLength);
+                StdScr.mvinstr(nline, ncol, ref chStr, out int read);
+                return chStr.ToString();
+            }
         }
 
         public override string ExtractString(int nline, int ncol, int maxChars, out int read)
         {
-            NativeStdScr.mvinnstr(nline, ncol, out string str, maxChars, out read);
-            return str;
+            unsafe
+            {
+                int bufferLength = maxChars * CharFactoryInternal<TChar>.Instance.GetCharLength();
+                byte* buffer = stackalloc byte[bufferLength];
+                CharString<TChar> chStr = CharFactoryInternal<TChar>.Instance.GetNativeEmptyStringInternal(buffer, bufferLength);
+                StdScr.mvinnstr(nline, ncol, ref chStr, maxChars, out read);
+                return chStr.ToString();
+            }
         }
 
         public override void ExtractString(out INCursesCharString charsWithAttributes)
         {
-            NativeStdScr.inchstr(out ISingleByteCharString str, out int read);
-            charsWithAttributes = str;
+            int bufferLength = Constants.MAX_STRING_LENGTH * SingleByteCharFactoryInternal<TSingleByte>.Instance.GetCharLength();
+            byte[] buffer = new byte[bufferLength];
+            SingleByteCharString<TSingleByte> chStr = SingleByteCharFactoryInternal<TSingleByte>.Instance.GetNativeEmptyStringInternal(buffer);
+            StdScr.inchstr(ref chStr, out int read);
+            charsWithAttributes = chStr;
         }
 
         public override void ExtractString(out INCursesCharString charsWithAttributes, int maxChars)
         {
-            NativeStdScr.inchnstr(out ISingleByteCharString str, maxChars, out int read);
-            charsWithAttributes = str;
+            int bufferLength = maxChars * SingleByteCharFactoryInternal<TSingleByte>.Instance.GetCharLength();
+            byte[] buffer = new byte[bufferLength];
+            SingleByteCharString<TSingleByte> chStr = SingleByteCharFactoryInternal<TSingleByte>.Instance.GetNativeEmptyStringInternal(buffer);
+            StdScr.inchnstr(ref chStr, maxChars, out int read);
+            charsWithAttributes = chStr;
         }
 
         public override void ExtractString(int nline, int ncol, out INCursesCharString charsWithAttributes)
         {
-            NativeStdScr.mvinchstr(nline, ncol, out ISingleByteCharString str, out int read);
-            charsWithAttributes = str;
+            int bufferLength = Constants.MAX_STRING_LENGTH * SingleByteCharFactoryInternal<TSingleByte>.Instance.GetCharLength();
+            byte[] buffer = new byte[bufferLength];
+            SingleByteCharString<TSingleByte> chStr = SingleByteCharFactoryInternal<TSingleByte>.Instance.GetNativeEmptyStringInternal(buffer);
+            StdScr.mvinchstr(nline, ncol, ref chStr, out int read);
+            charsWithAttributes = chStr;
         }
 
         public override void ExtractString(int nline, int ncol, out INCursesCharString charsWithAttributes, int maxChars)
         {
-            NativeStdScr.mvinchnstr(nline, ncol, out ISingleByteCharString str, maxChars, out int read);
-            charsWithAttributes = str;
+            int bufferLength = maxChars * SingleByteCharFactoryInternal<TSingleByte>.Instance.GetCharLength();
+            byte[] buffer = new byte[bufferLength];
+            SingleByteCharString<TSingleByte> chStr = SingleByteCharFactoryInternal<TSingleByte>.Instance.GetNativeEmptyStringInternal(buffer);
+            StdScr.mvinchnstr(nline, ncol, ref chStr, maxChars, out int read);
+            charsWithAttributes = chStr;
         }
 
         public override void HorizontalLine(in INCursesChar lineChar, int length)
         {
-            NativeStdScr.hline(VerifyChar(lineChar), length);
+            StdScr.hline(VerifyChar(lineChar), length);
         }
 
         public override void HorizontalLine(int nline, int ncol, in INCursesChar lineChar, int length)
         {
-            NativeStdScr.mvhline(nline, ncol, VerifyChar(lineChar), length);
+            StdScr.mvhline(nline, ncol, VerifyChar(lineChar), length);
         }
 
         public override void Insert(char ch)
         {
-            SingleByteCharFactory.Instance.GetNativeChar(ch, out ISingleByteChar res);
-            NativeStdScr.insch(res);
+            TSingleByte sch = SingleByteCharFactoryInternal<TSingleByte>.Instance.GetNativeCharInternal(ch);
+            StdScr.insch(in sch);
         }
 
         public override void Insert(in INCursesChar ch)
         {
-            if (ch is ISingleByteChar sch)
-            {
-                NativeStdScr.insch(in sch);
-            }
-            else
-            {
-                throw new InvalidOperationException("Unsupported string, try using a SingleByteWindow");
-            }
+            StdScr.insch(VerifyChar(ch));
         }
 
         public override void Insert(int nline, int ncol, in INCursesChar ch)
         {
-            if (ch is ISingleByteChar sch)
-            {
-                NativeStdScr.mvinsch(nline, ncol, in sch);
-            }
-            else
-            {
-                throw new InvalidOperationException("Unsupported string, try using a SingleByteWindow");
-            }
+            StdScr.mvinsch(nline, ncol, VerifyChar(ch));
         }
 
         public override void Insert(int nline, int ncol, char ch)
         {
-            SingleByteCharFactory.Instance.GetNativeChar(ch, out ISingleByteChar res);
-            NativeStdScr.mvinsch(nline, ncol, res);
+            TSingleByte sch = SingleByteCharFactoryInternal<TSingleByte>.Instance.GetNativeCharInternal(ch);
+            StdScr.mvinsch(nline, ncol, in sch);
         }
 
         public override void Insert(char ch, ulong attrs, short pair)
         {
-            SingleByteCharFactory.Instance.GetNativeChar(ch, attrs, pair, out ISingleByteChar res);
-            NativeStdScr.insch(res);
+            TSingleByte sch = SingleByteCharFactoryInternal<TSingleByte>.Instance.GetNativeCharInternal(ch, attrs, pair);
+            StdScr.insch(in sch);
         }
 
         public override void Insert(int nline, int ncol, char ch, ulong attrs, short pair)
         {
-            SingleByteCharFactory.Instance.GetNativeChar(ch, attrs, pair, out ISingleByteChar res);
-            NativeStdScr.mvinsch(nline, ncol, res);
+            TSingleByte sch = SingleByteCharFactoryInternal<TSingleByte>.Instance.GetNativeCharInternal(ch, attrs, pair);
+            StdScr.mvinsch(nline, ncol, in sch);
         }
 
         public override void Insert(string str)
         {
-            NativeStdScr.insnstr(str, str.Length);
+            unsafe
+            {
+                int byteLength = CharFactoryInternal<TChar>.Instance.GetByteCount(str);
+                byte* buffer = stackalloc byte[byteLength];
+                CharString<TChar> chStr = CharFactoryInternal<TChar>.Instance.GetNativeStringInternal(buffer, byteLength, str);
+                StdScr.insnstr(in chStr, chStr.Length);
+            }
         }
 
         public override void Insert(int nline, int ncol, string str)
         {
-            NativeStdScr.mvinsnstr(nline, ncol, str, str.Length);
+            unsafe
+            {
+                int byteLength = CharFactoryInternal<TChar>.Instance.GetByteCount(str);
+                byte* buffer = stackalloc byte[byteLength];
+                CharString<TChar> chStr = CharFactoryInternal<TChar>.Instance.GetNativeStringInternal(buffer, byteLength, str);
+                StdScr.mvinsnstr(nline, ncol, in chStr, chStr.Length);
+            }
         }
 
         public override void Insert(string str, ulong attrs, short pair)
         {
-            SingleByteCharFactory.Instance.GetNativeString(str, attrs, pair, out ISingleByteCharString res);
-
-            IEnumerable<ISingleByteChar> schars = res;
-            foreach (ISingleByteChar sch in schars.Reverse())
+            unsafe
             {
-                NativeStdScr.insch(sch);
+                int byteLength = SingleByteCharFactoryInternal<TSingleByte>.Instance.GetByteCount(str);
+                byte* buffer = stackalloc byte[byteLength];
+                SingleByteCharString<TSingleByte> sStr = SingleByteCharFactoryInternal<TSingleByte>.Instance.GetNativeStringInternal(buffer, byteLength, str, attrs, pair);
+
+                IEnumerable<ISingleByteChar> wchars = sStr;
+                foreach (ISingleByteChar wch in wchars.Reverse())
+                {
+                    StdScr.insch(VerifyChar(wch));
+                }
             }
         }
 
         public override bool ReadKey(out char ch, out Key key)
         {
-            return NativeStdScr.getch(out ch, out key);
+            return StdScr.getch(out ch, out key);
         }
 
         public override bool ReadKey(int nline, int ncol, out char ch, out Key key)
         {
-            return NativeStdScr.mvgetch(nline, ncol, out ch, out key);
+            return StdScr.mvgetch(nline, ncol, out ch, out key);
         }
 
         public override string ReadLine()
         {
-            NativeStdScr.getstr(out string str);
-            return str;
+            unsafe
+            {
+                int bufferLength = Constants.MAX_STRING_LENGTH * CharFactoryInternal<TChar>.Instance.GetCharLength();
+                byte* buffer = stackalloc byte[bufferLength];
+                CharString<TChar> chStr = CharFactoryInternal<TChar>.Instance.GetNativeEmptyStringInternal(buffer, bufferLength);
+                StdScr.getstr(ref chStr);
+                return chStr.ToString();
+            }
         }
 
         public override string ReadLine(int nline, int ncol)
         {
-            NativeStdScr.mvgetstr(nline, ncol, out string str);
-            return str;
+            unsafe
+            {
+                int bufferLength = Constants.MAX_STRING_LENGTH * CharFactoryInternal<TChar>.Instance.GetCharLength();
+                byte* buffer = stackalloc byte[bufferLength];
+                CharString<TChar> chStr = CharFactoryInternal<TChar>.Instance.GetNativeEmptyStringInternal(buffer, bufferLength);
+                StdScr.mvgetstr(nline, ncol, ref chStr);
+                return chStr.ToString();
+            }
         }
 
         public override string ReadLine(int length)
         {
-            NativeStdScr.getnstr(out string str, length);
-            return str;
+            unsafe
+            {
+                int bufferLength = length * CharFactoryInternal<TChar>.Instance.GetCharLength();
+                byte* buffer = stackalloc byte[bufferLength];
+                CharString<TChar> chStr = CharFactoryInternal<TChar>.Instance.GetNativeEmptyStringInternal(buffer, bufferLength);
+                StdScr.getnstr(ref chStr, length);
+                return chStr.ToString();
+            }
         }
 
         public override string ReadLine(int nline, int ncol, int length)
         {
-            NativeStdScr.mvgetnstr(nline, ncol, out string str, length);
-            return str;
+            unsafe
+            {
+                int bufferLength = length * CharFactoryInternal<TChar>.Instance.GetCharLength();
+                byte* buffer = stackalloc byte[bufferLength];
+                CharString<TChar> chStr = CharFactoryInternal<TChar>.Instance.GetNativeEmptyStringInternal(buffer, bufferLength);
+                StdScr.mvgetnstr(nline, ncol, ref chStr, length);
+                return chStr.ToString();
+            }
         }
 
         public override void VerticalLine(in INCursesChar lineChar, int length)
         {
-            NativeStdScr.vline(VerifyChar(lineChar), length);
+            StdScr.vline(VerifyChar(lineChar), length);
         }
 
         public override void VerticalLine(int nline, int ncol, in INCursesChar lineChar, int length)
         {
-            NativeStdScr.mvvline(nline, ncol, VerifyChar(lineChar), length);
+            StdScr.mvvline(nline, ncol, VerifyChar(lineChar), length);
         }
 
         public override void Write(in INCursesChar ch)
         {
-            if (ch is ISingleByteChar schar)
-                NativeStdScr.addch(schar);
-            else
-                throw new InvalidOperationException("Unsupported character");
+            StdScr.addch(VerifyChar(ch));
         }
 
         public override void Write(in INCursesCharString str)
         {
-            if (str is ISingleByteCharString scharStr)
-            {
-                NativeStdScr.addchstr(scharStr);
-            }
-            else
-            {
-                throw new InvalidOperationException("Unsupported string");
-            }
+            StdScr.addchstr(VerifyString(str));
         }
 
         public override void Write(string str)
         {
-            NativeStdScr.addnstr(str, str.Length);
+            unsafe
+            {
+                int byteLength = CharFactoryInternal<TChar>.Instance.GetByteCount(str);
+                byte* buffer = stackalloc byte[byteLength];
+                CharString<TChar> chStr = CharFactoryInternal<TChar>.Instance.GetNativeStringInternal(buffer, byteLength, str);
+                StdScr.addnstr(in chStr, chStr.Length);
+            }
         }
 
         public override void Write(string str, ulong attrs, short pair)
         {
-            SingleByteCharFactory.Instance.GetNativeString(str, attrs, pair, out ISingleByteCharString res);
-            NativeStdScr.addchnstr(res, str.Length);
+            unsafe
+            {
+                int byteLength = SingleByteCharFactoryInternal<TSingleByte>.Instance.GetByteCount(str);
+                byte* buffer = stackalloc byte[byteLength];
+                SingleByteCharString<TSingleByte> chStr = SingleByteCharFactoryInternal<TSingleByte>.Instance.GetNativeStringInternal(buffer, byteLength, str, attrs, pair);
+                StdScr.addchnstr(in chStr, chStr.Length);
+            }
         }
 
         public override void Write(int nline, int ncol, string str)
         {
-            NativeStdScr.mvaddnstr(nline, ncol, str, str.Length);
+            unsafe
+            {
+                int byteLength = CharFactoryInternal<TChar>.Instance.GetByteCount(str);
+                byte* buffer = stackalloc byte[byteLength];
+                CharString<TChar> chStr = CharFactoryInternal<TChar>.Instance.GetNativeStringInternal(buffer, byteLength, str);
+                StdScr.mvaddnstr(nline, ncol, in chStr, chStr.Length);
+            }
         }
 
         public override void Write(int nline, int ncol, string str, ulong attrs, short pair)
         {
-            SingleByteCharFactory.Instance.GetNativeString(str, attrs, pair, out ISingleByteCharString res);
-            NativeStdScr.mvaddchnstr(nline, ncol, res, str.Length);
+            unsafe
+            {
+                int byteLength = SingleByteCharFactoryInternal<TSingleByte>.Instance.GetByteCount(str);
+                byte* buffer = stackalloc byte[byteLength];
+                SingleByteCharString<TSingleByte> chStr = SingleByteCharFactoryInternal<TSingleByte>.Instance.GetNativeStringInternal(buffer, byteLength, str, attrs, pair);
+                StdScr.mvaddchnstr(nline, ncol, in chStr, chStr.Length);
+            }
         }
 
         public override void Write(char ch)
         {
-            SingleByteCharFactory.Instance.GetNativeChar(ch, out ISingleByteChar res);
-            NativeStdScr.addch(res);
+            TSingleByte sch = SingleByteCharFactoryInternal<TSingleByte>.Instance.GetNativeCharInternal(ch);
+            StdScr.addch(in sch);
         }
 
         public override void Write(char ch, ulong attrs, short pair)
         {
-            SingleByteCharFactory.Instance.GetNativeChar(ch, attrs, pair, out ISingleByteChar res);
-            NativeStdScr.addch(res);
+            TSingleByte sch = SingleByteCharFactoryInternal<TSingleByte>.Instance.GetNativeCharInternal(ch, attrs, pair);
+            StdScr.addch(in sch);
         }
 
         public override void Write(int nline, int ncol, char ch)
         {
-            SingleByteCharFactory.Instance.GetNativeChar(ch, out ISingleByteChar res);
-            NativeStdScr.mvaddch(nline, ncol, res);
+            TSingleByte sch = SingleByteCharFactoryInternal<TSingleByte>.Instance.GetNativeCharInternal(ch);
+            StdScr.mvaddch(nline, ncol, in sch);
         }
 
         public override void Write(int nline, int ncol, char ch, ulong attrs, short pair)
         {
-            SingleByteCharFactory.Instance.GetNativeChar(ch, attrs, pair, out ISingleByteChar res);
-            NativeStdScr.mvaddch(nline, ncol, res);
+            TSingleByte sch = SingleByteCharFactoryInternal<TSingleByte>.Instance.GetNativeCharInternal(ch);
+            StdScr.mvaddch(nline, ncol, in sch);
         }
 
         public override void Write(byte[] str, Encoding encoding)
@@ -402,38 +534,22 @@ namespace NCurses.Core.StdScr
 
         public override void Write(int nline, int ncol, in INCursesChar ch)
         {
-            if (ch is ISingleByteChar sch)
-            {
-                NativeStdScr.mvaddch(nline, ncol, in sch);
-            }
-            else
-            {
-                throw new InvalidOperationException("Unsupported string, try using a SingleByteWindow");
-            }
+            StdScr.mvaddch(nline, ncol, VerifyChar(ch));
         }
 
         public override void Write(int nline, int ncol, in INCursesCharString str)
         {
-            if (str is ISingleByteCharString cStr)
-            {
-                NativeStdScr.mvaddchnstr(nline, ncol, in cStr, cStr.Length);
-            }
-            else
-            {
-                throw new InvalidOperationException("Unsupported string, try using a SingleByteWindow");
-            }
-
-            throw new NotImplementedException();
+            StdScr.mvaddchnstr(nline, ncol, VerifyString(str), str.Length);
         }
 
         public override void Put(char ch)
         {
-            NativeNCurses.ungetch(ch);
+            NCurses.ungetch(ch);
         }
 
         public override void Put(Key key)
         {
-            NativeNCurses.ungetch((int)key);
+            NCurses.ungetch((int)key);
         }
     }
 }

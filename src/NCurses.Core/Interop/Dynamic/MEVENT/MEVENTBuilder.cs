@@ -11,7 +11,7 @@ namespace NCurses.Core.Interop.Dynamic.MEVENT
     {
         private static Type MEVENT;// = typeof(MEVENT);
 
-        internal static Type CreateType()
+        internal static Type CreateType(ModuleBuilder moduleBuilder, Type chtype)
         {
             if (MEVENT != null)
                 return MEVENT;
@@ -22,7 +22,7 @@ namespace NCurses.Core.Interop.Dynamic.MEVENT
             ILGenerator ctorIl, methodIl;
             MethodBuilder methodBuilder;
 
-            TypeBuilder typeBuilder = DynamicTypeBuilder.ModuleBuilder.DefineType(
+            TypeBuilder typeBuilder = moduleBuilder.DefineType(
                 "MEVENT",
                 TypeAttributes.NotPublic | TypeAttributes.SequentialLayout | TypeAttributes.Sealed | TypeAttributes.BeforeFieldInit,
                 typeof(ValueType));
@@ -32,7 +32,7 @@ namespace NCurses.Core.Interop.Dynamic.MEVENT
             xField = typeBuilder.DefineField("x", typeof(int), FieldAttributes.Public);
             yField = typeBuilder.DefineField("y", typeof(int), FieldAttributes.Public);
             zField = typeBuilder.DefineField("z", typeof(int), FieldAttributes.Public);
-            bstateField = typeBuilder.DefineField("bstate", DynamicTypeBuilder.chtype, FieldAttributes.Public);
+            bstateField = typeBuilder.DefineField("bstate", chtype, FieldAttributes.Public);
 
             /* constructors */
             #region public MEVENT(short id, int x, int y, int z, ulong bstate)
@@ -57,7 +57,7 @@ namespace NCurses.Core.Interop.Dynamic.MEVENT
             ctorIl.Emit(OpCodes.Stfld, zField);
             ctorIl.Emit(OpCodes.Ldarg_0);
             ctorIl.Emit(OpCodes.Ldarg_S, (byte)5);
-            ctorIl.Emit(OpCodes.Call, DynamicTypeBuilder.chtype.GetMethod("op_Implicit", new Type[] { typeof(ulong) }));
+            ctorIl.Emit(OpCodes.Call, chtype.GetMethod("op_Implicit", new Type[] { typeof(ulong) }));
             ctorIl.Emit(OpCodes.Stfld, bstateField);
             ctorIl.Emit(OpCodes.Ret);
             #endregion
@@ -144,7 +144,7 @@ namespace NCurses.Core.Interop.Dynamic.MEVENT
 
             methodIl.Emit(OpCodes.Ldarg_0);
             methodIl.Emit(OpCodes.Ldfld, bstateField);
-            methodIl.Emit(OpCodes.Call, DynamicTypeBuilder.chtype.GetMethod("op_Implicit", new Type[] { DynamicTypeBuilder.chtype }));
+            methodIl.Emit(OpCodes.Call, chtype.GetMethod("op_Implicit", new Type[] { chtype }));
             methodIl.Emit(OpCodes.Ret);
 
             propBuilder = typeBuilder.DefineProperty("BState",

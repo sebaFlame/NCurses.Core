@@ -5,14 +5,14 @@ using System.Threading;
 
 namespace NCurses.Core.Interop
 {
-    internal class InternalLockDisposable : IDisposable
+    public struct InternalLockDisposable : IDisposable
     {
         private bool prevVal;
 
-        internal InternalLockDisposable()
+        internal InternalLockDisposable(bool previousValue)
         {
             Monitor.Enter(NativeNCurses.SyncRoot);
-            this.prevVal = NativeNCurses.EnableLocking;
+            this.prevVal = previousValue && NativeNCurses.EnableLocking;
             NativeNCurses.EnableLocking = true;
         }
 

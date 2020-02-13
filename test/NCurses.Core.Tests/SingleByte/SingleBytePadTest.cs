@@ -9,10 +9,8 @@ using NCurses.Core.Tests.Model;
 
 namespace NCurses.Core.Tests.SingleByte
 {
-    public class SingleBytePadTest : PadTest<SingleBytePad>, IClassFixture<SingleByteStdScrState>
+    public class SingleBytePadTest : PadTest, IClassFixture<SingleByteStdScrState>
     {
-        protected override Func<int, int, Pad> CreatePad => (int rows, int cols) => Pad.CreateSingleBytePad(rows, cols);
-
         public SingleBytePadTest(ITestOutputHelper testOutputHelper, SingleByteStdScrState singleByteStdScrState)
             : base(testOutputHelper, singleByteStdScrState)
         {

@@ -112,7 +112,7 @@ namespace NCurses.Core.Tests
         {
             Assert.True(this.StdScrState.SupportsColor);
 
-            this.Window.CreateString(this.TestString, Attrs.BOLD | Attrs.ITALIC, 4, out INCursesCharString managedString);
+            INCursesCharString managedString = this.Window.CreateString(this.TestString, Attrs.BOLD | Attrs.ITALIC, 4);
 
             this.Window.Write(managedString);
 

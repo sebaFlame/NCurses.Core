@@ -4,39 +4,53 @@ using System.Linq;
 using System.Text;
 using System.Runtime.InteropServices;
 
+using NCurses.Core.Interop.MultiByte;
+using NCurses.Core.Interop.SingleByte;
+using NCurses.Core.Interop.WideChar;
+using NCurses.Core.Interop.Char;
+using NCurses.Core.Interop.Mouse;
 using NCurses.Core.Interop;
+using NCurses.Core.Interop.SafeHandles;
+using NCurses.Core.Interop.Wrappers;
 
 namespace NCurses.Core
 {
     /* TODO
      * methods using INCursesChar should allow other types than their own implementation
     */
-    public abstract class WindowBase : IWindow, IDisposable
+    public abstract class WindowBase<TMultiByte, TWideChar, TSingleByte, TChar, TMouseEvent> : IWindow, IEquatable<WindowBase<TMultiByte, TWideChar, TSingleByte, TChar, TMouseEvent>>, IDisposable
+        where TMultiByte : unmanaged, IMultiByteChar, IEquatable<TMultiByte>
+        where TWideChar : unmanaged, IChar, IEquatable<TWideChar>
+        where TSingleByte : unmanaged, ISingleByteChar, IEquatable<TSingleByte>
+        where TChar : unmanaged, IChar, IEquatable<TChar>
+        where TMouseEvent : unmanaged, IMEVENT
     {
-        internal static Dictionary<IntPtr, WindowBase> DictPtrWindows;
+        internal static HashSet<WindowBase<TMultiByte, TWideChar, TSingleByte, TChar, TMouseEvent>> Windows;
 
-        internal IntPtr WindowPtr { get; private set; }
-        private bool OwnsHandle;
+        internal static NativeNCursesInternal<TMultiByte, TWideChar, TSingleByte, TChar, TMouseEvent> NCurses =>
+            NativeCustomTypeWrapper<TMultiByte, TWideChar, TSingleByte, TChar, TMouseEvent>.NCursesInternal;
+        internal static NativeWindowInternal<TMultiByte, TWideChar, TSingleByte, TChar, TMouseEvent> Window =>
+            NativeCustomTypeWrapper<TMultiByte, TWideChar, TSingleByte, TChar, TMouseEvent>.WindowInternal;
+        internal static NativeStdScrInternal<TMultiByte, TWideChar, TSingleByte, TChar, TMouseEvent> StdScr =>
+            NativeCustomTypeWrapper<TMultiByte, TWideChar, TSingleByte, TChar, TMouseEvent>.StdScrInternal;
+        internal static NativeScreenInternal<TMultiByte, TWideChar, TSingleByte, TChar, TMouseEvent> Screen =>
+            NativeCustomTypeWrapper<TMultiByte, TWideChar, TSingleByte, TChar, TMouseEvent>.ScreenInternal;
+        internal static NativePadInternal<TMultiByte, TWideChar, TSingleByte, TChar, TMouseEvent> Pad =>
+            NativeCustomTypeWrapper<TMultiByte, TWideChar, TSingleByte, TChar, TMouseEvent>.PadInternal;
+
+        internal WindowBaseSafeHandle WindowBaseSafeHandle { get; private set; }
+
+        private bool HasAddedRefToExistingSafeHandle = false;
 
         static WindowBase()
         {
-            DictPtrWindows = new Dictionary<IntPtr, WindowBase>();
+            Windows = new HashSet<WindowBase<TMultiByte, TWideChar, TSingleByte, TChar, TMouseEvent>>();
         }
 
-        internal WindowBase(IntPtr windowPtr, bool ownsHandle, bool initialize = true)
+        internal WindowBase(
+            WindowBaseSafeHandle windowBaseSafeHandle)
         {
-            this.OwnsHandle = ownsHandle;
-            this.WindowPtr = windowPtr;
-
-            if (this.OwnsHandle)
-            {
-                DictPtrWindows.Add(windowPtr, this);
-            }
-
-            if (initialize)
-            {
-                this.Initialize();
-            }
+            this.WindowBaseSafeHandle = windowBaseSafeHandle;
 
             //this is needed for extended ASCII keyboard input
             if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
@@ -45,17 +59,17 @@ namespace NCurses.Core
             }
         }
 
-        ~WindowBase()
+        internal WindowBase(
+            WindowBase<TMultiByte, TWideChar, TSingleByte, TChar, TMouseEvent> existingWindow)
         {
-            this.Dispose(true);
+            this.WindowBaseSafeHandle = existingWindow.WindowBaseSafeHandle;
+
+            this.WindowBaseSafeHandle.DangerousAddRef(ref this.HasAddedRefToExistingSafeHandle);
         }
 
-        private void Initialize()
+        ~WindowBase()
         {
-            if (NCurses.StdScr is null)
-            {
-                NCurses.Start();
-            }
+            this.Dispose();
         }
 
         #region properties
@@ -64,7 +78,7 @@ namespace NCurses.Core
         /// </summary>
         public int CursorColumn
         {
-            get { return NativeWindow.getcurx(this.WindowPtr); }
+            get { return Window.getcurx(this.WindowBaseSafeHandle); }
         }
 
         /// <summary>
@@ -72,7 +86,7 @@ namespace NCurses.Core
         /// </summary>
         public int CursorLine
         {
-            get { return NativeWindow.getcury(this.WindowPtr); }
+            get { return Window.getcury(this.WindowBaseSafeHandle); }
         }
 
         /// <summary>
@@ -80,7 +94,7 @@ namespace NCurses.Core
         /// </summary>
         public int MaxColumn
         {
-            get { return NativeWindow.getmaxx(this.WindowPtr); }
+            get { return Window.getmaxx(this.WindowBaseSafeHandle); }
         }
 
         /// <summary>
@@ -88,7 +102,7 @@ namespace NCurses.Core
         /// </summary>
         public int MaxLine
         {
-            get { return NativeWindow.getmaxy(this.WindowPtr); }
+            get { return Window.getmaxy(this.WindowBaseSafeHandle); }
         }
 
         /// <summary>
@@ -107,8 +121,8 @@ namespace NCurses.Core
         /// </summary>
         public bool KeyPad
         {
-            get { return NativeWindow.is_keypad(this.WindowPtr); }
-            set { NativeWindow.keypad(this.WindowPtr, value); }
+            get { return Window.is_keypad(this.WindowBaseSafeHandle); }
+            set { Window.keypad(this.WindowBaseSafeHandle, value); }
         }
 
         /// <summary>
@@ -117,7 +131,7 @@ namespace NCurses.Core
         /// </summary>
         public bool Meta
         {
-            set { NativeNCurses.meta(this.WindowPtr, value); }
+            set { NCurses.meta(this.WindowBaseSafeHandle, value); }
         }
 
         /// <summary>
@@ -126,8 +140,8 @@ namespace NCurses.Core
         /// </summary>
         public bool Scroll
         {
-            get { return NativeWindow.is_scrollok(this.WindowPtr); }
-            set { NativeWindow.scrollok(this.WindowPtr, value); }
+            get { return Window.is_scrollok(this.WindowBaseSafeHandle); }
+            set { Window.scrollok(this.WindowBaseSafeHandle, value); }
         }
 
         /// <summary>
@@ -135,8 +149,8 @@ namespace NCurses.Core
         /// </summary>
         public bool UseHwInsDelLine
         {
-            get { return NativeWindow.is_idlok(this.WindowPtr); }
-            set { NativeWindow.idlok(this.WindowPtr, value); }
+            get { return Window.is_idlok(this.WindowBaseSafeHandle); }
+            set { Window.idlok(this.WindowBaseSafeHandle, value); }
         }
 
         //TODO: gives read error on windows when true
@@ -145,8 +159,8 @@ namespace NCurses.Core
         /// </summary>
         public bool Blocking
         {
-            get { return NativeWindow.is_nodelay(this.WindowPtr); }
-            set { NativeWindow.nodelay(this.WindowPtr, !value); }
+            get { return Window.is_nodelay(this.WindowBaseSafeHandle); }
+            set { Window.nodelay(this.WindowBaseSafeHandle, !value); }
         }
 
         /// <summary>
@@ -156,10 +170,12 @@ namespace NCurses.Core
         /// </summary>
         public bool NoTimeout
         {
-            set { NativeWindow.notimeout(this.WindowPtr, value); }
-            get { return NativeWindow.is_notimeout(this.WindowPtr); }
+            set { Window.notimeout(this.WindowBaseSafeHandle, value); }
+            get { return Window.is_notimeout(this.WindowBaseSafeHandle); }
         }
         #endregion
+
+        public abstract bool HasUnicodeSupport { get; }
 
         #region Cursor
         /// <summary>
@@ -574,7 +590,7 @@ namespace NCurses.Core
         /// </summary>
         /// <param name="ch">The character to convert</param>
         /// <returns>The converted cahracter</returns>
-        public abstract void CreateChar(char ch, out INCursesChar chRet);
+        public abstract INCursesChar CreateChar(char ch);
 
         /// <summary>
         /// Get a native character representing <paramref name="ch"/>
@@ -582,7 +598,7 @@ namespace NCurses.Core
         /// <param name="ch">The character to convert</param>
         /// <param name="attrs">attributes applied to the character</param>
         /// <returns>The converted cahracter</returns>
-        public abstract void CreateChar(char ch, ulong attrs, out INCursesChar chRet);
+        public abstract INCursesChar CreateChar(char ch, ulong attrs);
 
         /// <summary>
         /// Get a native character representing <paramref name="ch"/> with attributes/color applied
@@ -591,14 +607,14 @@ namespace NCurses.Core
         /// <param name="attrs">attributes applied to the character</param>
         /// <param name="pair">pair number applied to the character</param>
         /// <returns>The converted cahracter</returns>
-        public abstract void CreateChar(char ch, ulong attrs, short pair, out INCursesChar chRet);
+        public abstract INCursesChar CreateChar(char ch, ulong attrs, short pair);
 
         /// <summary>
         /// Get a native string representing <paramref name="str"/>
         /// </summary>
         /// <param name="str">The string to convert</param>
         /// <returns>The converted str</returns>
-        public abstract void CreateString(string str, out INCursesCharString chStr);
+        public abstract INCursesCharString CreateString(string str);
 
         /// <summary>
         /// Get a native string representing <paramref name="str"/>
@@ -606,7 +622,7 @@ namespace NCurses.Core
         /// <param name="str">The string to convert</param>
         /// <param name="attrs">attributes applied to the character</param>
         /// <returns>The converted str</returns>
-        public abstract void CreateString(string str, ulong attrs, out INCursesCharString chStr);
+        public abstract INCursesCharString CreateString(string str, ulong attrs);
 
         /// <summary>
         /// Get a native string representing <paramref name="str"/> with attributes/color applied
@@ -615,7 +631,7 @@ namespace NCurses.Core
         /// <param name="attrs">attributes applied to the character</param>
         /// <param name="pair">pair number applied to the character</param>
         /// <returns>The converted cahracter</returns>
-        public abstract void CreateString(string str, ulong attrs, short pair, out INCursesCharString chStr);
+        public abstract INCursesCharString CreateString(string str, ulong attrs, short pair);
         #endregion
 
         #region border
@@ -707,35 +723,73 @@ namespace NCurses.Core
         /// </summary>
         public abstract void NoOutRefresh();
 
-        #region IDisposable
-        protected virtual void Dispose(bool disposing)
+        public abstract IWindow SubWindow(int nlines, int ncols, int begin_y, int begin_x);
+        public abstract IWindow DerWindow(int nlines, int ncols, int begin_y, int begin_x);
+
+        public abstract IWindow ToSingleByteWindow();
+        public abstract IWindow ToMultiByteWindow();
+
+        #region Equality
+        public override bool Equals(object obj)
         {
-            if (this.WindowPtr == IntPtr.Zero)
+            if (obj is WindowBase<TMultiByte, TWideChar, TSingleByte, TChar, TMouseEvent> window)
             {
-                return;
+                return this.Equals(window);
             }
+            return false;
+        }
 
-            if (DictPtrWindows.ContainsKey(this.WindowPtr))
+        public bool Equals(IWindow other)
+        {
+            if(other is WindowBase<TMultiByte, TWideChar, TSingleByte, TChar, TMouseEvent> window)
             {
-                DictPtrWindows.Remove(this.WindowPtr);
+                return this.Equals(window);
             }
+            return false;
+        }
 
-            if (this.OwnsHandle)
+        public bool Equals(WindowBase<TMultiByte, TWideChar, TSingleByte, TChar, TMouseEvent> other)
+        {
+            if (!(this.WindowBaseSafeHandle is null && other.WindowBaseSafeHandle is null))
             {
-                NativeNCurses.delwin(this.WindowPtr);
+                return this.WindowBaseSafeHandle.Equals(other.WindowBaseSafeHandle);
             }
-
-            this.WindowPtr = IntPtr.Zero;
-
-            if (!disposing)
+            else
             {
-                return;
+                return object.ReferenceEquals(this, other);
             }
         }
 
-        public void Dispose()
+        public override int GetHashCode()
         {
-            this.Dispose(false);
+            if (this.WindowBaseSafeHandle is null)
+            {
+                return base.GetHashCode();
+            }
+
+            return this.WindowBaseSafeHandle.GetHashCode();
+        }
+        #endregion
+
+        #region IDisposable
+        public virtual void Dispose()
+        {
+            if (Windows.Contains(this))
+            {
+                Windows.Remove(this);
+            }
+
+            if (this.HasAddedRefToExistingSafeHandle)
+            {
+                this.WindowBaseSafeHandle.DangerousRelease();
+            }
+            else
+            {
+                this.WindowBaseSafeHandle?.Dispose();
+            }
+            this.WindowBaseSafeHandle = null;
+
+            GC.SuppressFinalize(this);
         }
         #endregion
     }

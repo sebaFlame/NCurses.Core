@@ -7,69 +7,46 @@ using NCurses.Core.Interop.Mouse;
 
 namespace NCurses.Core.Interop.SingleByte
 {
-    public abstract class SingleByteWrapper<TSingleByte, TSingleByteString, TMouseEvent> //handles chtype and attr_t
-        where TSingleByte : unmanaged, ISingleByteChar, IEquatable<TSingleByte>
-        where TSingleByteString : unmanaged
-        where TMouseEvent : unmanaged, IMEVENT
+    internal abstract class SingleByteWrapper<TSingleByte, TChar, TMouseEvent> //handles chtype and attr_t
+        : INativeCharWrapper<ISingleByteChar, TSingleByte, ISingleByteCharString, SingleByteCharString<TSingleByte>>
+            where TSingleByte : unmanaged, ISingleByteChar, IEquatable<TSingleByte>
+            where TChar : unmanaged, IChar, IEquatable<TChar>
+            where TMouseEvent : unmanaged, IMEVENT
     {
-        private ISingleByteWrapper<TSingleByte, TSingleByteString, TMouseEvent> wrapper;
-        internal ISingleByteWrapper<TSingleByte, TSingleByteString, TMouseEvent> Wrapper => 
-            wrapper ?? (wrapper = NativeNCurses.NCursesCustomTypeWrapper as ISingleByteWrapper<TSingleByte, TSingleByteString, TMouseEvent>);
+        internal ISingleByteWrapper<TSingleByte, TChar, TMouseEvent> Wrapper { get; }
 
-        internal static ref readonly TSingleByte MarshallArrayReadonly(in ISingleByteChar sChar)
+        internal SingleByteWrapper(ISingleByteWrapper<TSingleByte, TChar, TMouseEvent> wrapper)
         {
-            if (!(sChar is SingleByteChar<TSingleByte> sCasted))
-                throw new InvalidCastException("Small character is in incorrect format");
-
-            //Span<TSmall> chSpan;
-            //unsafe
-            //{
-            //    TSmall* arr = stackalloc TSmall[1];
-            //    chSpan = new Span<TSmall>(arr, 1);
-            //}
-
-            //chSpan[0] = sCasted.GetCharReference();
-            //ReadOnlySpan<TSmall> span = chSpan;
-            //return ref span.GetPinnableReference();
-            return ref sCasted.Char.Span.GetPinnableReference();
+            this.Wrapper = wrapper;
         }
 
-        internal static ref readonly TSingleByte MarshallArrayReadonly(in ISingleByteCharString sCharStr)
+        public SingleByteCharString<TSingleByte> CastString(in ISingleByteCharString wCharStr)
         {
-            if (!(sCharStr is SingleByteCharString<TSingleByte> sCasted))
-                throw new InvalidCastException("Small character is in incorrect format");
+            if (!(wCharStr is SingleByteCharString<TSingleByte> wCasted))
+            {
+                throw new InvalidCastException("Character is in incorrect format");
+            }
 
-            //ReadOnlySpan<TSmall> span = new ReadOnlySpan<TSmall>(sCasted.SCHAR);
-            ReadOnlySpan<TSingleByte> span = sCasted.CharString.Span;
-            return ref span.GetPinnableReference();
+            return wCasted;
         }
 
-        internal static ref TSingleByte MarshallArray(ref ISingleByteChar sChar)
+        public TSingleByte CastChar(in ISingleByteChar wChar)
         {
-            if (!(sChar is SingleByteChar<TSingleByte> sCasted))
-                throw new InvalidCastException("Small character is in incorrect format");
+            if (!(wChar is TSingleByte wCasted))
+            {
+                throw new InvalidCastException("Character is in incorrect format");
+            }
 
-            //Span<TSmall> span;
-            //unsafe
-            //{
-            //    TSmall* arr = stackalloc TSmall[1];
-            //    span = new Span<TSmall>(arr, 1);
-            //}
-
-            //span[0] = sCasted.GetCharReference();
-            //return ref span.GetPinnableReference();
-
-            return ref sCasted.Char.Span.GetPinnableReference();
+            return wCasted;
         }
 
-        internal static ref TSingleByte MarshallArray(ref ISingleByteCharString sCharStr)
+        public unsafe static T ToPrimitiveType<T>(in TSingleByte wch)
+            where T : unmanaged
         {
-            if (!(sCharStr is SingleByteCharString<TSingleByte> sCasted))
-                throw new InvalidCastException("Small character is in incorrect format");
+            TSingleByte* arr = stackalloc TSingleByte[1];
+            arr[0] = wch;
 
-            //Span<TSmall> span = new Span<TSmall>(sCasted.SCHAR);
-            Span<TSingleByte> span = sCasted.CharString.Span;
-            return ref span.GetPinnableReference();
+            return Unsafe.Read<T>(arr);
         }
     }
 }

@@ -30,7 +30,7 @@ namespace NCurses.Core.Interop.Dynamic.chtype
         public chtype(sbyte ch, ulong attr, short pair)
             : this(ch, attr)
         {
-            this.charWithAttr |= (UInt32)NativeNCurses.COLOR_PAIR(pair);
+            this.charWithAttr |= (UInt32)NativeNCurses.NCurses.COLOR_PAIR(pair);
             //this.charWithAttr |= (UInt64)((UInt32)NativeNCurses.COLOR_PAIR(pair));
         }
 
@@ -65,7 +65,9 @@ namespace NCurses.Core.Interop.Dynamic.chtype
         public static explicit operator chtype(char ch)
         {
             if (ch > sbyte.MaxValue)
+            {
                 throw new InvalidOperationException("This character can not be expressed in 1 byte");
+            }
             return new chtype((sbyte)ch);
         }
 
@@ -94,30 +96,45 @@ namespace NCurses.Core.Interop.Dynamic.chtype
             return chLeft.charWithAttr != chRight.charWithAttr;
         }
 
-        public bool Equals(ISingleByteChar obj)
+        public override bool Equals(object obj)
         {
-            if (obj is chtype other) //boxing?
+            if (obj is chtype other)
+            {
                 return this == other;
+            }
+            return false;
+        }
+
+        public bool Equals(IChar obj)
+        {
+            if (obj is chtype other)
+            {
+                return this == other;
+            }
             return false;
         }
 
         public bool Equals(INCursesChar obj)
         {
-            if (obj is ISingleByteChar other) //boxing?
+            if (obj is ISingleByteChar other)
+            {
                 return this.Equals(other);
+            }
+            return false;
+        }
+
+        public bool Equals(ISingleByteChar obj)
+        {
+            if (obj is chtype other)
+            {
+                return this == other;
+            }
             return false;
         }
 
         public bool Equals(chtype other)
         {
             return this == other;
-        }
-
-        public override bool Equals(object obj)
-        {
-            if (obj is chtype other) //boxing?
-                return this == other;
-            return false;
         }
 
         public override int GetHashCode()

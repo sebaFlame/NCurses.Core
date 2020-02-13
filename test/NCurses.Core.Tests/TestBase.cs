@@ -20,8 +20,6 @@ namespace NCurses.Core.Tests
         {
             this.StdScrState = stdScrState;
             this.TestOutputHelper = testOutputHelper;
-
-            this.Window.Refresh();
         }
 
         public void Dispose()

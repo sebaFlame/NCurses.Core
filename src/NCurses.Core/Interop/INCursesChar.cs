@@ -4,9 +4,8 @@ using System.Text;
 
 namespace NCurses.Core.Interop
 {
-    public interface INCursesChar : IEquatable<INCursesChar>
+    public interface INCursesChar : IChar, IEquatable<INCursesChar>
     {
-        char Char { get; }
         ulong Attributes { get; }
         short Color { get; }
     }

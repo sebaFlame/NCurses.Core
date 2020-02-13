@@ -1,0 +1,130 @@
+﻿using System;
+using System.Collections.Generic;
+using System.Text;
+
+using NCurses.Core.Interop.MultiByte;
+using NCurses.Core.Interop.SingleByte;
+using NCurses.Core.Interop.WideChar;
+using NCurses.Core.Interop.Char;
+using NCurses.Core.Interop.Mouse;
+using NCurses.Core.Interop.SafeHandles;
+
+namespace NCurses.Core.Interop.Wrappers
+{
+    public interface INativeNCursesWrapper<TMultiByte, TMultiByteString, TWideChar, TWideCharString, TSingleByte, TSingleByteString, TChar, TCharString, TMouseEvent>
+            : INativeNCursesMultiByte<TMultiByte, TMultiByteString>,
+            INativeNCursesWideChar<TWideChar, TWideCharString>,
+            INativeNCursesSingleByte<TSingleByte, TSingleByteString>,
+            INativeNCursesChar<TChar, TCharString>
+        where TMultiByte : IMultiByteChar
+        where TMultiByteString : IMultiByteCharString
+        where TWideChar : IChar
+        where TWideCharString : ICharString
+        where TSingleByte : ISingleByteChar
+        where TSingleByteString : ISingleByteCharString
+        where TChar : IChar
+        where TCharString : ICharString
+        where TMouseEvent : IMEVENT
+    {
+        IACSMap ACSMap { get; }
+        IACSMap WACSMap { get; }
+
+        void assume_default_colors(int fg, int bg);
+        int baudrate();
+        void beep();
+        bool can_change_color();
+        void cbreak();
+        int COLORS();
+        void color_content(short color, ref short red, ref short green, ref short blue);
+        int COLOR_PAIR(int pair);
+        int COLOR_PAIRS();
+        int COLS();
+        void copywin(IntPtr srcwin, IntPtr dstwin, int sminrow, int smincol, int dminrow, int dmincol, int dmaxrow, int dmaxcol, int overlay);
+        IntPtr curscr();
+        void curs_set(int visibility);
+        int def_prog_mode();
+        int def_shell_mode();
+        void delay_output(int ms);
+        void delscreen_sp(IntPtr screen);
+        void delwin(IntPtr window);
+        WindowBaseSafeHandle derwin(WindowBaseSafeHandle window, int nlines, int ncols, int begin_y, int begin_x);
+        void doupdate();
+        WindowBaseSafeHandle dupwin(WindowBaseSafeHandle window);
+        void echo();
+        void endwin();
+        int ESCDELAY();
+        void filter();
+        void flash();
+        void flushinp();
+        int get_escdelay();
+        void halfdelay(int tenths);
+        bool has_colors();
+        bool has_ic();
+        bool has_il();
+        bool has_key(int ch, out Key key);
+        bool has_mouse();
+        StdScrSafeHandle initscr();
+        void init_color(short color, short r, short g, short b);
+        void init_pair(short pair, short f, short b);
+        void intrflush(bool bf);
+        bool isendwin();
+        bool is_term_resized(int lines, int columns);
+        void keyok(int keycode, bool enable);
+        int LINES();
+        void meta(WindowBaseSafeHandle win, bool bf);
+        int mouseinterval(int erval);
+        bool mouse_trafo(ref int pY, ref int pX, bool to_screen);
+        void mvcur(int oldrow, int oldcol, int newrow, int newcol);
+        void mvderwin(WindowBaseSafeHandle window, int par_y, int par_x);
+        void mvwin(WindowBaseSafeHandle win, int y, int x);
+        void napms(int ms);
+        WindowBaseSafeHandle newpad(int nlines, int ncols);
+        IntPtr newscr();
+        WindowBaseSafeHandle newwin(int nlines, int ncols, int begin_y, int begin_x);
+        void nl();
+        void nocbreak();
+        void noecho();
+        void nofilter();
+        void nonl();
+        void noqiflush();
+        void noraw();
+        void overlay(IntPtr srcWin, IntPtr destWin);
+        void overwrite(IntPtr srcWin, IntPtr destWin);
+        void pair_content(short pair, out short fg, out short bg);
+        int PAIR_NUMBER(uint attrs);
+        void qiflush();
+        void raw();
+        void resetty();
+        void reset_prog_mode();
+        void reset_shell_mode();
+        void resizeterm(int lines, int columns);
+        void resize_term(int lines, int columns);
+        void ripoffline(int line, Func<WindowBaseSafeHandle, int, IntPtr, int> init);
+        void savetty();
+        void set_escdelay(int size);
+        void set_tabsize(int size);
+        IntPtr set_term(IntPtr newScr);
+        void slk_clear();
+        void slk_color(short color_pair);
+        void slk_init(int fmt);
+        void slk_noutrefresh();
+        void slk_refresh();
+        void slk_restore();
+        void slk_touch();
+        void start_color();
+        IntPtr stdscr();
+        WindowBaseSafeHandle subpad(WindowBaseSafeHandle orig, int nlines, int ncols, int begin_y, int begin_x);
+        WindowBaseSafeHandle subwin(WindowBaseSafeHandle orig, int nlines, int ncols, int begin_y, int begin_x);
+        int TABSIZE();
+        string ttytype();
+        void typeahead(int fd);
+        void ungetch(int ch);
+        void use_default_colors();
+        void use_env(bool f);
+        int use_extended_names(bool enable);
+        int use_legacy_coding(int level);
+        void use_tioctl(bool f);
+        IntPtr _nc_screen_of(WindowBaseSafeHandle window);
+        bool _nc_unicode_locale();
+    }
+}

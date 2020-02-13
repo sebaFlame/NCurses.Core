@@ -13,7 +13,7 @@ namespace NCurses.Core.Interop.Dynamic.wchar_t
         //TODO: remove
         private static Type wchar_t;// = typeof(wchar_t);
 
-        internal static Type CreateType()
+        internal static Type CreateType(ModuleBuilder moduleBuilder)
         {
             if (wchar_t != null)
                 return wchar_t;
@@ -32,7 +32,7 @@ namespace NCurses.Core.Interop.Dynamic.wchar_t
             //default values
             int wcharLength = Constants.SIZEOF_WCHAR_T;
 
-            TypeBuilder typeBuilder = DynamicTypeBuilder.ModuleBuilder.DefineType(
+            TypeBuilder typeBuilder = moduleBuilder.DefineType(
                 "wchar_t",
                 TypeAttributes.NotPublic | TypeAttributes.SequentialLayout | TypeAttributes.Sealed | TypeAttributes.BeforeFieldInit,
                 typeof(ValueType));

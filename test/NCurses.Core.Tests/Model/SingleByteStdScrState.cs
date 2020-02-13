@@ -11,7 +11,7 @@ namespace NCurses.Core.Tests.Model
         public SingleByteStdScrState()
             : base()
         {
-            this.CurrentStandardScreen = NCurses.SingleByteStdScr;
+            this.CurrentStandardScreen = this.StdScr.ToSingleByteWindow();
         }
     }
 }

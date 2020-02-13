@@ -8,7 +8,7 @@ using NCurses.Core.Interop.Dynamic;
 
 namespace NCurses.Core.Interop.Mouse
 {
-    internal class MouseEventFactory
+    public class MouseEventFactory
     {
         private static Type MouseEventType;
 
@@ -25,10 +25,6 @@ namespace NCurses.Core.Interop.Mouse
 
             ConstructorInfo ctor;
             ParameterExpression par1, par2, par3, par4, par5;
-            ConstantExpression factoryInstance;
-
-            MethodInfo createChtype = typeof(SingleByteCharFactory).GetMethod("GetAttribute", BindingFlags.NonPublic | BindingFlags.Instance);
-            factoryInstance = Expression.Constant(SingleByteCharFactory.Instance);
 
             par1 = Expression.Parameter(typeof(short));
             par2 = Expression.Parameter(typeof(int));

@@ -20,6 +20,16 @@ namespace NCurses.Core.Tests.SingleByte
         }
 
         [Fact]
+        public void WriteACSTest()
+        {
+            this.Window.Write(Acs.ULCORNER);
+            char resultChar = this.Window.ExtractChar(0, 0);
+
+            //does not equal what's rendered
+            Assert.Equal('l', resultChar);
+        }
+
+        [Fact]
         public void TestEnumerateACS()
         {
             List<char> lstChar = new List<char>();

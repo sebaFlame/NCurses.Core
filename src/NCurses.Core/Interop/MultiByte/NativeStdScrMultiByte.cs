@@ -7,173 +7,142 @@ using NCurses.Core.Interop.Mouse;
 
 namespace NCurses.Core.Interop.MultiByte
 {
-    public interface INativeStdScrMultiByte
-    {
-        void add_wch(in IMultiByteChar wch);
-        void add_wchnstr(in IMultiByteCharString wchStr, int n);
-        void add_wchstr(in IMultiByteCharString wchStr);
-        void bkgrnd(in IMultiByteChar wch);
-        void bkgrndset(in IMultiByteChar wch);
-        void border_set(in IMultiByteChar ls, in IMultiByteChar rs, in IMultiByteChar ts, in IMultiByteChar bs, in IMultiByteChar tl, in IMultiByteChar tr, in IMultiByteChar bl, in IMultiByteChar br);
-        void echo_wchar(in IMultiByteChar wch);
-        void getbkgrnd(out IMultiByteChar wch);
-        void hline_set(in IMultiByteChar wch, int n);
-        void in_wch(out IMultiByteChar wch);
-        void in_wchnstr(out IMultiByteCharString wchStr, int n);
-        void in_wchstr(out IMultiByteCharString wch);
-        void ins_wch(in IMultiByteChar wch);
-        void mvadd_wch(int y, int x, in IMultiByteChar wch);
-        void mvadd_wchnstr(int y, int x, in IMultiByteCharString wchStr, int n);
-        void mvadd_wchstr(int y, int x, in IMultiByteCharString wchStr);
-        void mvhline_set(int y, int x, in IMultiByteChar wch, int n);
-        void mvin_wch(int y, int x, out IMultiByteChar wch);
-        void mvin_wchnstr(int y, int x, out IMultiByteCharString wchStr, int n);
-        void mvin_wchstr(int y, int x, out IMultiByteCharString wchStr);
-        void mvins_wch(int y, int x, in IMultiByteChar wch);
-        void mvvline_set(int y, int x, in IMultiByteChar wch, int n);
-        void vline_set(in IMultiByteChar wch, int n);
-    }
-
-    public class NativeStdScrMultiByte<TMultiByte, TMultiByteString, TSingleByte, TSingleByteString, TMouseEvent> : MultiByteWrapper<TMultiByte, TMultiByteString, TSingleByte, TSingleByteString, TMouseEvent>, INativeStdScrMultiByte
+    internal class NativeStdScrMultiByte<TMultiByte, TWideChar, TSingleByte, TChar, TMouseEvent>
+            : MultiByteWrapper<TMultiByte, TWideChar, TSingleByte, TChar, TMouseEvent>, 
+            INativeStdScrMultiByte<TMultiByte, MultiByteCharString<TMultiByte>>
         where TMultiByte : unmanaged, IMultiByteChar, IEquatable<TMultiByte>
-        where TMultiByteString : unmanaged
+        where TWideChar : unmanaged, IChar, IEquatable<TWideChar>
         where TSingleByte : unmanaged, ISingleByteChar, IEquatable<TSingleByte>
-        where TSingleByteString : unmanaged
+        where TChar : unmanaged, IChar, IEquatable<TChar>
         where TMouseEvent : unmanaged, IMEVENT
     {
-        public NativeStdScrMultiByte()
-        { }
+        internal NativeStdScrMultiByte(IMultiByteWrapper<TMultiByte, TWideChar, TSingleByte, TChar> wrapper)
+            : base(wrapper) { }
 
-        public void add_wch(in IMultiByteChar wch)
+        public void add_wch(in TMultiByte wch)
         {
-            NCursesException.Verify(Wrapper.add_wch(MarshallArrayReadonly(wch)), "add_wch");
+            NCursesException.Verify(Wrapper.add_wch(in wch), "add_wch");
         }
 
-        public void add_wchnstr(in IMultiByteCharString wchStr, int n)
+        public void add_wchnstr(in MultiByteCharString<TMultiByte> wchStr, int n)
         {
-            NCursesException.Verify(Wrapper.add_wchnstr(MarshallArrayReadonly(wchStr), n), "add_wchnstr");
+            NCursesException.Verify(Wrapper.add_wchnstr(in wchStr.GetPinnableReference(), n), "add_wchnstr");
         }
 
-        public void add_wchstr(in IMultiByteCharString wchStr)
+        public void add_wchstr(in MultiByteCharString<TMultiByte> wchStr)
         {
-            NCursesException.Verify(Wrapper.add_wchstr(MarshallArrayReadonly(wchStr)), "add_wchstr");
+            NCursesException.Verify(Wrapper.add_wchstr(in wchStr.GetPinnableReference()), "add_wchstr");
         }
 
-        public void bkgrnd(in IMultiByteChar wch)
+        public void bkgrnd(in TMultiByte wch)
         {
-            NCursesException.Verify(Wrapper.bkgrnd(MarshallArrayReadonly(wch)), "bkgrnd");
+            NCursesException.Verify(Wrapper.bkgrnd(in wch), "bkgrnd");
         }
 
-        public void bkgrndset(in IMultiByteChar wch)
+        public void bkgrndset(in TMultiByte wch)
         {
-            Wrapper.bkgrndset(MarshallArrayReadonly(wch));
+            Wrapper.bkgrndset(in wch);
         }
 
-        public void border_set(in IMultiByteChar ls, in IMultiByteChar rs, in IMultiByteChar ts, in IMultiByteChar bs, in IMultiByteChar tl, in IMultiByteChar tr, in IMultiByteChar bl, in IMultiByteChar br)
+        public void border_set(in TMultiByte ls, in TMultiByte rs, in TMultiByte ts, in TMultiByte bs, in TMultiByte tl, in TMultiByte tr, in TMultiByte bl, in TMultiByte br)
         {
             NCursesException.Verify(this.Wrapper.border_set(
-                MarshallArrayReadonly(ls),
-                MarshallArrayReadonly(rs),
-                MarshallArrayReadonly(ts),
-                MarshallArrayReadonly(bs),
-                MarshallArrayReadonly(tl),
-                MarshallArrayReadonly(tr),
-                MarshallArrayReadonly(bl),
-                MarshallArrayReadonly(br)), "border_set");
+                in ls,
+                in rs,
+                in ts,
+                in bs,
+                in tl,
+                in tr,
+                in bl,
+                in br), "border_set");
         }
 
-        public void echo_wchar(in IMultiByteChar wch)
+        public void echo_wchar(in TMultiByte wch)
         {
-            NCursesException.Verify(Wrapper.echo_wchar(MarshallArrayReadonly(wch)), "echo_wchar");
+            NCursesException.Verify(Wrapper.echo_wchar(in wch), "echo_wchar");
         }
 
-        public void getbkgrnd(out IMultiByteChar wch)
+        public void getbkgrnd(out TMultiByte wch)
         {
-            wch = new MultiByteChar<TMultiByte>('\0');
-            NCursesException.Verify(Wrapper.getbkgrnd(ref MarshallArray(ref wch)), "getbkgrnd");
+            wch = MultiByteCharFactoryInternal<TMultiByte>.Instance.GetNativeEmptyCharInternal();
+            NCursesException.Verify(Wrapper.getbkgrnd(ref wch), "getbkgrnd");
         }
 
-        public void hline_set(in IMultiByteChar wch, int n)
+        public void hline_set(in TMultiByte wch, int n)
         {
-            NCursesException.Verify(Wrapper.hline_set(MarshallArrayReadonly(wch), n), "hline_set");
+            NCursesException.Verify(Wrapper.hline_set(in wch, n), "hline_set");
         }
 
-        public void in_wch(out IMultiByteChar wch)
+        public void in_wch(out TMultiByte wch)
         {
-            wch = new MultiByteChar<TMultiByte>('\0');
-            NCursesException.Verify(Wrapper.in_wch(ref MarshallArray(ref wch)), "in_wch");
+            wch = MultiByteCharFactoryInternal<TMultiByte>.Instance.GetNativeEmptyCharInternal();
+            NCursesException.Verify(Wrapper.in_wch(ref wch), "in_wch");
         }
 
-        public void in_wchnstr(out IMultiByteCharString wchStr, int n)
+        public void in_wchnstr(ref MultiByteCharString<TMultiByte> wchStr, int n)
         {
-            wchStr = new MultiByteCharString<TMultiByte>(n);
-            NCursesException.Verify(Wrapper.in_wchnstr(ref MarshallArray(ref wchStr), n), "in_wchnstr");
+            NCursesException.Verify(Wrapper.in_wchnstr(ref wchStr.GetPinnableReference(), n), "in_wchnstr");
         }
 
-        public void in_wchstr(out IMultiByteCharString wchStr)
+        public void in_wchstr(ref MultiByteCharString<TMultiByte> wchStr)
         {
-            //TODO: can overflow
-            wchStr = new MultiByteCharString<TMultiByte>(Constants.MAX_STRING_LENGTH);
-            NCursesException.Verify(Wrapper.in_wchstr(ref MarshallArray(ref wchStr)), "in_wchstr");
+            NCursesException.Verify(Wrapper.in_wchstr(ref wchStr.GetPinnableReference()), "in_wchstr");
         }
 
-        public void ins_wch(in IMultiByteChar wch)
+        public void ins_wch(in TMultiByte wch)
         {
-            NCursesException.Verify(Wrapper.ins_wch(MarshallArrayReadonly(wch)), "ins_wch");
+            NCursesException.Verify(Wrapper.ins_wch(in wch), "ins_wch");
         }
 
-        public void mvadd_wch(int y, int x, in IMultiByteChar wch)
+        public void mvadd_wch(int y, int x, in TMultiByte wch)
         {
-            NCursesException.Verify(Wrapper.mvadd_wch(y, x, MarshallArrayReadonly(wch)), "mvadd_wch");
+            NCursesException.Verify(Wrapper.mvadd_wch(y, x, in wch), "mvadd_wch");
         }
 
-        public void mvadd_wchnstr(int y, int x, in IMultiByteCharString wchStr, int n)
+        public void mvadd_wchnstr(int y, int x, in MultiByteCharString<TMultiByte> wchStr, int n)
         {
-            NCursesException.Verify(Wrapper.mvadd_wchnstr(y, x, MarshallArrayReadonly(wchStr), n), "mvadd_wchnstr");
+            NCursesException.Verify(Wrapper.mvadd_wchnstr(y, x, in wchStr.GetPinnableReference(), n), "mvadd_wchnstr");
         }
 
-        public void mvadd_wchstr(int y, int x, in IMultiByteCharString wchStr)
+        public void mvadd_wchstr(int y, int x, in MultiByteCharString<TMultiByte> wchStr)
         {
-            NCursesException.Verify(Wrapper.mvadd_wchstr(y, x, MarshallArrayReadonly(wchStr)), "mvadd_wchstr");
+            NCursesException.Verify(Wrapper.mvadd_wchstr(y, x, in wchStr.GetPinnableReference()), "mvadd_wchstr");
         }
 
-        public void mvhline_set(int y, int x, in IMultiByteChar wch, int n)
+        public void mvhline_set(int y, int x, in TMultiByte wch, int n)
         {
-            NCursesException.Verify(this.Wrapper.mvhline_set(y, x, MarshallArrayReadonly(wch), n), "mvhline_set");
+            NCursesException.Verify(this.Wrapper.mvhline_set(y, x, in wch, n), "mvhline_set");
         }
 
-        public void mvin_wch(int y, int x, out IMultiByteChar wch)
+        public void mvin_wch(int y, int x, out TMultiByte wch)
         {
-            wch = new MultiByteChar<TMultiByte>('\0');
-            NCursesException.Verify(this.Wrapper.mvin_wch(y, x, ref MarshallArray(ref wch)), "mvin_wch");
+            wch = MultiByteCharFactoryInternal<TMultiByte>.Instance.GetNativeEmptyCharInternal();
+            NCursesException.Verify(this.Wrapper.mvin_wch(y, x, ref wch), "mvin_wch");
         }
 
-        public void mvin_wchstr(int y, int x, out IMultiByteCharString wchStr)
+        public void mvin_wchstr(int y, int x, ref MultiByteCharString<TMultiByte> wchStr)
         {
-            //TODO: can overflow
-            wchStr = new MultiByteCharString<TMultiByte>(Constants.MAX_STRING_LENGTH);
-            NCursesException.Verify(this.Wrapper.mvin_wchstr(y, x, ref MarshallArray(ref wchStr)), "mvin_wchnstr");
+            NCursesException.Verify(this.Wrapper.mvin_wchstr(y, x, ref wchStr.GetPinnableReference()), "mvin_wchnstr");
         }
 
-        public void mvin_wchnstr(int y, int x, out IMultiByteCharString wchStr, int n)
+        public void mvin_wchnstr(int y, int x, ref MultiByteCharString<TMultiByte> wchStr, int n)
         {
-            wchStr = new MultiByteCharString<TMultiByte>(n);
-            NCursesException.Verify(this.Wrapper.mvin_wchnstr(y, x, ref MarshallArray(ref wchStr), n), "mvin_wchnstr");
+            NCursesException.Verify(this.Wrapper.mvin_wchnstr(y, x, ref wchStr.GetPinnableReference(), n), "mvin_wchnstr");
         }
 
-        public void mvins_wch(int y, int x, in IMultiByteChar wch)
+        public void mvins_wch(int y, int x, in TMultiByte wch)
         {
-            NCursesException.Verify(this.Wrapper.mvins_wch(y, x, MarshallArrayReadonly(wch)), "mvins_wch");
+            NCursesException.Verify(this.Wrapper.mvins_wch(y, x, in wch), "mvins_wch");
         }
 
-        public void mvvline_set(int y, int x, in IMultiByteChar wch, int n)
+        public void mvvline_set(int y, int x, in TMultiByte wch, int n)
         {
-            NCursesException.Verify(this.Wrapper.mvvline_set(y, x, MarshallArrayReadonly(wch), n), "mvvline_set");
+            NCursesException.Verify(this.Wrapper.mvvline_set(y, x, in wch, n), "mvvline_set");
         }
 
-        public void vline_set(in IMultiByteChar wch, int n)
+        public void vline_set(in TMultiByte wch, int n)
         {
-            NCursesException.Verify(this.Wrapper.vline_set(MarshallArrayReadonly(wch), n), "vline_set");
+            NCursesException.Verify(this.Wrapper.vline_set(in wch, n), "vline_set");
         }
     }
 }

@@ -1,61 +1,78 @@
 ﻿using System;
+
 using NCurses.Core.Interop;
+using NCurses.Core.Interop.MultiByte;
+using NCurses.Core.Interop.SingleByte;
+using NCurses.Core.Interop.WideChar;
+using NCurses.Core.Interop.Char;
+using NCurses.Core.Interop.Mouse;
+using NCurses.Core.Interop.SafeHandles;
+using NCurses.Core.Interop.Wrappers;
 
 namespace NCurses.Core.StdScr
 {
-    public abstract class StdScrBase : WindowBase
+    public abstract class StdScrBase<TMultiByte, TWideChar, TSingleByte, TChar, TMouseEvent> : WindowInternal<TMultiByte, TWideChar, TSingleByte, TChar, TMouseEvent>
+        where TMultiByte : unmanaged, IMultiByteChar, IEquatable<TMultiByte>
+        where TWideChar : unmanaged, IChar, IEquatable<TWideChar>
+        where TSingleByte : unmanaged, ISingleByteChar, IEquatable<TSingleByte>
+        where TChar : unmanaged, IChar, IEquatable<TChar>
+        where TMouseEvent : unmanaged, IMEVENT
     {
-        internal StdScrBase(IntPtr stdScr)
-            : base(stdScr, false, false) { }
+        internal StdScrBase(WindowBaseSafeHandle stdScr)
+            : base(stdScr) { }
+
+        internal StdScrBase(StdScrBase<TMultiByte, TWideChar, TSingleByte, TChar, TMouseEvent> stdScr)
+            : base(stdScr) 
+        {  }
 
         public override void AttributesOn(ulong attrs)
         {
-            NativeStdScr.attr_on(attrs);
+            StdScr.attr_on(attrs);
         }
 
         public override void AttributesOff(ulong attrs)
         {
-            NativeStdScr.attr_off(attrs);
+            StdScr.attr_off(attrs);
         }
 
         public override void Clear()
         {
-            NativeStdScr.clear();
+            StdScr.clear();
         }
 
         public override void ClearToBottom()
         {
-            NativeStdScr.clrtobot();
+            StdScr.clrtobot();
         }
 
         public override void ClearToEol()
         {
-            NativeStdScr.clrtoeol();
+            StdScr.clrtoeol();
         }
 
         public override void CurrentAttributesAndColor(out ulong attrs, out short colorPair)
         {
-            NativeStdScr.attr_get(out attrs, out colorPair);
+            StdScr.attr_get(out attrs, out colorPair);
         }
 
         public override void EnableAttributesAndColor(ulong attrs, short colorPair)
         {
-            NativeStdScr.attr_set(attrs, colorPair);
+            StdScr.attr_set(attrs, colorPair);
         }
 
         public override void EnableColor(short colorPair)
         {
-            NativeStdScr.color_set(colorPair);
+            StdScr.color_set(colorPair);
         }
 
         public override void Erase()
         {
-            NativeStdScr.erase();
+            StdScr.erase();
         }
 
         public override void MoveCursor(int lineNumber, int columnNumber)
         {
-            NativeStdScr.move(lineNumber, columnNumber);
+            StdScr.move(lineNumber, columnNumber);
         }
 
         /// <summary>
@@ -63,17 +80,34 @@ namespace NCurses.Core.StdScr
         /// </summary>
         public override void NoOutRefresh()
         {
-            NativeWindow.wnoutrefresh(this.WindowPtr);
+            Window.wnoutrefresh(this.WindowBaseSafeHandle);
         }
 
         public override void Refresh()
         {
-            NativeStdScr.refresh();
+            StdScr.refresh();
         }
 
         public override void ScrollWindow(int lines)
         {
-            NativeStdScr.scrl(lines);
+            StdScr.scrl(lines);
+        }
+
+        internal override WindowInternal<TMultiByte, TWideChar, TSingleByte, TChar, TMouseEvent> ToSingleByteWindowInternal()
+        {
+            return new SingleByteStdScr<TMultiByte, TWideChar, TSingleByte, TChar, TMouseEvent>(this);
+        }
+
+        internal override WindowInternal<TMultiByte, TWideChar, TSingleByte, TChar, TMouseEvent> ToMultiByteWindowInternal()
+        {
+            if (NativeNCurses.HasUnicodeSupport)
+            {
+                return new MultiByteStdScr<TMultiByte, TWideChar, TSingleByte, TChar, TMouseEvent>(this);
+            }
+            else
+            {
+                throw new InvalidOperationException("Unicode not supported");
+            }
         }
     }
 }

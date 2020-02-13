@@ -33,10 +33,12 @@ namespace NCurses.Core.Interop.Dynamic.cchar_t
             }
         }
 
-        internal static Type CreateType()
+        internal static Type CreateType(ModuleBuilder moduleBuilder, Type chtype)
         {
             if (cchar_t != null)
+            {
                 return cchar_t;
+            }
 
             FieldBuilder attrField, extField, charField, fixedElementField;
             PropertyBuilder propBuilder;
@@ -54,9 +56,9 @@ namespace NCurses.Core.Interop.Dynamic.cchar_t
             //default values
             int wcharLength = Constants.CCHARW_MAX * Constants.SIZEOF_WCHAR_T;
             //TODO: is built into netcoreapp/.NET framework
-            Type readOnlyAttribute = typeof(DynamicTypeBuilder).Assembly.GetType("System.Runtime.CompilerServices.IsReadOnlyAttribute");
+            Type readOnlyAttribute = typeof(cchar_tBuilder).Assembly.GetType("System.Runtime.CompilerServices.IsReadOnlyAttribute");
 
-            TypeBuilder typeBuilder = DynamicTypeBuilder.ModuleBuilder.DefineType(
+            TypeBuilder typeBuilder = moduleBuilder.DefineType(
                 "cchar_t",
                 TypeAttributes.NotPublic | TypeAttributes.SequentialLayout | TypeAttributes.Sealed | TypeAttributes.BeforeFieldInit,
                 typeof(ValueType));
@@ -96,7 +98,7 @@ namespace NCurses.Core.Interop.Dynamic.cchar_t
             fixedElementField = nestedTypeBuilder.DefineField("FixedElementField", typeof(byte), FieldAttributes.Public);
 
             /* fields */
-            attrField = typeBuilder.DefineField("attr", DynamicTypeBuilder.chtype, FieldAttributes.Public);
+            attrField = typeBuilder.DefineField("attr", chtype, FieldAttributes.Public);
 
             charField = typeBuilder.DefineField("chars", nestedTypeBuilder.AsType(), FieldAttributes.Public);
             attrType = typeof(FixedBufferAttribute);
@@ -130,7 +132,7 @@ namespace NCurses.Core.Interop.Dynamic.cchar_t
             ctorIl.Emit(OpCodes.Ldarg_0);
             ctorIl.Emit(OpCodes.Ldc_I4_0);
             ctorIl.Emit(OpCodes.Conv_I8);
-            ctorIl.Emit(OpCodes.Call, DynamicTypeBuilder.chtype.GetMethod("op_Implicit", new Type[] { typeof(ulong) }));
+            ctorIl.Emit(OpCodes.Call, chtype.GetMethod("op_Implicit", new Type[] { typeof(ulong) }));
             ctorIl.Emit(OpCodes.Stfld, attrField);
             //this.ext_color = 0;
             ctorIl.Emit(OpCodes.Ldarg_0);
@@ -193,7 +195,7 @@ namespace NCurses.Core.Interop.Dynamic.cchar_t
             //this.attr = attrs;
             ctorIl.Emit(OpCodes.Ldarg_0);
             ctorIl.Emit(OpCodes.Ldarg_2);
-            ctorIl.Emit(OpCodes.Call, DynamicTypeBuilder.chtype.GetMethod("op_Implicit", new Type[] { typeof(ulong) }));
+            ctorIl.Emit(OpCodes.Call, chtype.GetMethod("op_Implicit", new Type[] { typeof(ulong) }));
             ctorIl.Emit(OpCodes.Stfld, attrField);
             ctorIl.Emit(OpCodes.Ret);
             #endregion
@@ -232,7 +234,7 @@ namespace NCurses.Core.Interop.Dynamic.cchar_t
             ctorIl.Emit(OpCodes.Ldarg_3);
             ctorIl.Emit(OpCodes.Call, typeof(NativeNCurses).GetMethod("COLOR_PAIR"));
             ctorIl.Emit(OpCodes.Conv_I8);
-            ctorIl.Emit(OpCodes.Call, DynamicTypeBuilder.chtype.GetMethod("op_BitwiseOr"));
+            ctorIl.Emit(OpCodes.Call, chtype.GetMethod("op_BitwiseOr"));
             ctorIl.Emit(OpCodes.Stfld, attrField);
             ctorIl.Emit(OpCodes.Ret);
             #endregion
@@ -290,7 +292,7 @@ namespace NCurses.Core.Interop.Dynamic.cchar_t
             ctorIl.Emit(OpCodes.Ldarg_0);
             ctorIl.Emit(OpCodes.Ldc_I4_0);
             ctorIl.Emit(OpCodes.Conv_I8);
-            ctorIl.Emit(OpCodes.Call, DynamicTypeBuilder.chtype.GetMethod("op_Implicit", new Type[] { typeof(ulong) }));
+            ctorIl.Emit(OpCodes.Call, chtype.GetMethod("op_Implicit", new Type[] { typeof(ulong) }));
             ctorIl.Emit(OpCodes.Stfld, attrField);
             //this.ext_color = 0;
             ctorIl.Emit(OpCodes.Ldarg_0);
@@ -314,7 +316,7 @@ namespace NCurses.Core.Interop.Dynamic.cchar_t
             //this.attr = attrs;
             ctorIl.Emit(OpCodes.Ldarg_0);
             ctorIl.Emit(OpCodes.Ldarg_2);
-            ctorIl.Emit(OpCodes.Call, DynamicTypeBuilder.chtype.GetMethod("op_Implicit", new Type[] { typeof(ulong) }));
+            ctorIl.Emit(OpCodes.Call, chtype.GetMethod("op_Implicit", new Type[] { typeof(ulong) }));
             ctorIl.Emit(OpCodes.Stfld, attrField);
             ctorIl.Emit(OpCodes.Ret);
             #endregion
@@ -353,7 +355,123 @@ namespace NCurses.Core.Interop.Dynamic.cchar_t
             ctorIl.Emit(OpCodes.Ldarg_3);
             ctorIl.Emit(OpCodes.Call, typeof(NativeNCurses).GetMethod("COLOR_PAIR"));
             ctorIl.Emit(OpCodes.Conv_I8);
-            ctorIl.Emit(OpCodes.Call, DynamicTypeBuilder.chtype.GetMethod("op_BitwiseOr"));
+            ctorIl.Emit(OpCodes.Call, chtype.GetMethod("op_BitwiseOr"));
+            ctorIl.Emit(OpCodes.Stfld, attrField);
+            ctorIl.Emit(OpCodes.Ret);
+            #endregion
+
+            #region cchar_t(Span<byte> encodedBytesChar)
+            arrCtorBuilder = typeBuilder.DefineConstructor(
+                MethodAttributes.Public | MethodAttributes.HideBySig | MethodAttributes.SpecialName | MethodAttributes.RTSpecialName,
+                CallingConventions.Standard,
+                new Type[] { typeof(Span<byte>) });
+            ctorIl = arrCtorBuilder.GetILGenerator();
+
+            lcl0 = ctorIl.DeclareLocal(typeof(int));
+            lcl1 = ctorIl.DeclareLocal(typeof(bool));
+            lbl1 = ctorIl.DefineLabel();
+            lbl2 = ctorIl.DefineLabel();
+
+            ctorIl.Emit(OpCodes.Nop);
+            //int i = 0
+            ctorIl.Emit(OpCodes.Ldc_I4_0);
+            ctorIl.Emit(OpCodes.Stloc_0);
+            ctorIl.Emit(OpCodes.Br_S, lbl1);
+            //unsafe
+            ctorIl.MarkLabel(lbl2);
+            // this.chars[i]
+            ctorIl.Emit(OpCodes.Ldarg_0);
+            ctorIl.Emit(OpCodes.Ldflda, charField);
+            ctorIl.Emit(OpCodes.Ldflda, fixedElementField);
+            ctorIl.Emit(OpCodes.Ldloc_0);
+            //encodedBytesChar[i];
+            ctorIl.Emit(OpCodes.Ldarg_1);
+            ctorIl.Emit(OpCodes.Ldloc_0);
+            ctorIl.Emit(OpCodes.Ldelem_U1);
+            ctorIl.Emit(OpCodes.Stind_I1);
+            //i++
+            ctorIl.Emit(OpCodes.Ldloc_0);
+            ctorIl.Emit(OpCodes.Ldc_I4_1);
+            ctorIl.Emit(OpCodes.Add);
+            ctorIl.Emit(OpCodes.Stloc_0);
+            ctorIl.MarkLabel(lbl1);
+            //i < encodedBytesChar.Count
+            ctorIl.Emit(OpCodes.Ldloc_0);
+            ctorIl.Emit(OpCodes.Ldarga_S, (byte)1);
+            ctorIl.Emit(OpCodes.Call, typeof(Span<byte>).GetProperty("Length").GetMethod);
+            ctorIl.Emit(OpCodes.Clt);
+            ctorIl.Emit(OpCodes.Stloc_1);
+            ctorIl.Emit(OpCodes.Ldloc_1);
+            ctorIl.Emit(OpCodes.Brtrue_S, lbl2);
+            ctorIl.Emit(OpCodes.Nop);
+            //this.attr = 0;
+            ctorIl.Emit(OpCodes.Ldarg_0);
+            ctorIl.Emit(OpCodes.Ldc_I4_0);
+            ctorIl.Emit(OpCodes.Conv_I8);
+            ctorIl.Emit(OpCodes.Call, chtype.GetMethod("op_Implicit", new Type[] { typeof(ulong) }));
+            ctorIl.Emit(OpCodes.Stfld, attrField);
+            //this.ext_color = 0;
+            ctorIl.Emit(OpCodes.Ldarg_0);
+            ctorIl.Emit(OpCodes.Ldc_I4_0);
+            ctorIl.Emit(OpCodes.Stfld, extField);
+            ctorIl.Emit(OpCodes.Ret);
+            #endregion
+
+            #region cchar_t(Span<byte> encodedBytesChar, ulong attrs)
+            arrAttrCtorBuilder = typeBuilder.DefineConstructor(
+                MethodAttributes.Public | MethodAttributes.HideBySig | MethodAttributes.SpecialName | MethodAttributes.RTSpecialName,
+                CallingConventions.Standard,
+                new Type[] { typeof(Span<byte>), typeof(ulong) });
+            ctorIl = arrAttrCtorBuilder.GetILGenerator();
+
+            //: this(encodedBytesChar)
+            ctorIl.Emit(OpCodes.Ldarg_0);
+            ctorIl.Emit(OpCodes.Ldarg_1);
+            ctorIl.Emit(OpCodes.Call, arrCtorBuilder);
+            ctorIl.Emit(OpCodes.Nop);
+            //this.attr = attrs;
+            ctorIl.Emit(OpCodes.Ldarg_0);
+            ctorIl.Emit(OpCodes.Ldarg_2);
+            ctorIl.Emit(OpCodes.Call, chtype.GetMethod("op_Implicit", new Type[] { typeof(ulong) }));
+            ctorIl.Emit(OpCodes.Stfld, attrField);
+            ctorIl.Emit(OpCodes.Ret);
+            #endregion
+
+            #region cchar_t(Span<byte> encodedBytesChar, ulong attrs, short pair)
+            ctorBuilder = typeBuilder.DefineConstructor(
+                MethodAttributes.Public | MethodAttributes.HideBySig | MethodAttributes.SpecialName | MethodAttributes.RTSpecialName,
+                CallingConventions.Standard,
+                new Type[] { typeof(Span<byte>), typeof(ulong), typeof(short) });
+            ctorIl = ctorBuilder.GetILGenerator();
+
+            lcl0 = ctorIl.DeclareLocal(typeof(bool));
+            lbl1 = ctorIl.DefineLabel();
+
+            //: this(encodedBytesChar, attrs)
+            ctorIl.Emit(OpCodes.Ldarg_0);
+            ctorIl.Emit(OpCodes.Ldarg_1);
+            ctorIl.Emit(OpCodes.Ldarg_2);
+            ctorIl.Emit(OpCodes.Call, arrAttrCtorBuilder);
+            ctorIl.Emit(OpCodes.Nop);
+            //if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
+            ctorIl.Emit(OpCodes.Call, typeof(OSPlatform).GetTypeInfo().GetProperty("Windows").GetMethod);
+            ctorIl.Emit(OpCodes.Call, typeof(RuntimeInformation).GetTypeInfo().GetMethod("IsOSPlatform"));
+            ctorIl.Emit(OpCodes.Stloc_0);
+            ctorIl.Emit(OpCodes.Ldloc_0);
+            ctorIl.Emit(OpCodes.Brfalse_S, lbl1);
+            //this.ext_color = pair;
+            ctorIl.Emit(OpCodes.Ldarg_0);
+            ctorIl.Emit(OpCodes.Ldarg_3);
+            ctorIl.Emit(OpCodes.Stfld, extField);
+            ctorIl.MarkLabel(lbl1);
+            //this.attr |= (ulong)NativeNCurses.COLOR_PAIR(pair);
+            ctorIl.Emit(OpCodes.Ldarg_0);
+            ctorIl.Emit(OpCodes.Ldarg_0);
+            ctorIl.Emit(OpCodes.Ldfld, attrField);
+            ctorIl.Emit(OpCodes.Ldarg_3);
+            ctorIl.Emit(OpCodes.Call, typeof(NativeNCurses).GetMethod("COLOR_PAIR"));
+            ctorIl.Emit(OpCodes.Conv_I8);
+            ctorIl.Emit(OpCodes.Call, chtype.GetMethod("op_BitwiseOr"));
             ctorIl.Emit(OpCodes.Stfld, attrField);
             ctorIl.Emit(OpCodes.Ret);
             #endregion
@@ -500,7 +618,7 @@ namespace NCurses.Core.Interop.Dynamic.cchar_t
             methodIl.Emit(OpCodes.Ldflda, attrField);
             methodIl.Emit(OpCodes.Ldarg_1);
             methodIl.Emit(OpCodes.Ldflda, attrField);
-            methodIl.Emit(OpCodes.Call, DynamicTypeBuilder.chtype.GetMethod("op_Equality"));
+            methodIl.Emit(OpCodes.Call, chtype.GetMethod("op_Equality"));
             methodIl.Emit(OpCodes.Brfalse_S, lbl1);
             //wchLeft.ext_color == wchRight.ext_color
             methodIl.Emit(OpCodes.Ldarg_0);
@@ -590,7 +708,7 @@ namespace NCurses.Core.Interop.Dynamic.cchar_t
             methodIl.Emit(OpCodes.Ldflda, attrField);
             methodIl.Emit(OpCodes.Ldarg_1);
             methodIl.Emit(OpCodes.Ldflda, attrField);
-            methodIl.Emit(OpCodes.Call, DynamicTypeBuilder.chtype.GetMethod("op_Equality"));
+            methodIl.Emit(OpCodes.Call, chtype.GetMethod("op_Equality"));
             methodIl.Emit(OpCodes.Brfalse_S, lbl1);
             //wchLeft.ext_color == wchRight.ext_color
             methodIl.Emit(OpCodes.Ldarg_0);
@@ -795,10 +913,10 @@ namespace NCurses.Core.Interop.Dynamic.cchar_t
             methodIl.Emit(OpCodes.Ldloc_0);
             methodIl.Emit(OpCodes.Ldc_I4, -1521134295);
             methodIl.Emit(OpCodes.Mul);
-            methodIl.Emit(OpCodes.Call, typeof(EqualityComparer<>).MakeGenericType(DynamicTypeBuilder.chtype).GetProperty("Default").GetMethod);
+            methodIl.Emit(OpCodes.Call, typeof(EqualityComparer<>).MakeGenericType(chtype).GetProperty("Default").GetMethod);
             methodIl.Emit(OpCodes.Ldarg_0);
             methodIl.Emit(OpCodes.Ldfld, attrField);
-            methodIl.Emit(OpCodes.Callvirt, typeof(EqualityComparer<>).MakeGenericType(DynamicTypeBuilder.chtype).GetMethod("GetHashCode", new Type[] { DynamicTypeBuilder.chtype }));
+            methodIl.Emit(OpCodes.Callvirt, typeof(EqualityComparer<>).MakeGenericType(chtype).GetMethod("GetHashCode", new Type[] { chtype }));
             methodIl.Emit(OpCodes.Add);
             methodIl.Emit(OpCodes.Stloc_0);
             //fixed(byte* b = this.chars)
@@ -851,12 +969,12 @@ namespace NCurses.Core.Interop.Dynamic.cchar_t
             //(ulong)(this.attr ^ (this.attr & Attrs.COLOR));
             methodIl.Emit(OpCodes.Ldarg_0);
             methodIl.Emit(OpCodes.Ldfld, attrField);
-            methodIl.Emit(OpCodes.Call, DynamicTypeBuilder.chtype.GetMethod("op_Implicit", new Type[] { DynamicTypeBuilder.chtype }));
+            methodIl.Emit(OpCodes.Call, chtype.GetMethod("op_Implicit", new Type[] { chtype }));
             methodIl.Emit(OpCodes.Ldarg_0);
             methodIl.Emit(OpCodes.Ldfld, attrField);
             methodIl.Emit(OpCodes.Ldsfld, typeof(Attrs).GetField("COLOR"));
-            methodIl.Emit(OpCodes.Call, DynamicTypeBuilder.chtype.GetMethod("op_BitwiseAnd", new Type[] { DynamicTypeBuilder.chtype, typeof(ulong) }));
-            methodIl.Emit(OpCodes.Call, DynamicTypeBuilder.chtype.GetMethod("op_Implicit", new Type[] { DynamicTypeBuilder.chtype }));
+            methodIl.Emit(OpCodes.Call, chtype.GetMethod("op_BitwiseAnd", new Type[] { chtype, typeof(ulong) }));
+            methodIl.Emit(OpCodes.Call, chtype.GetMethod("op_Implicit", new Type[] { chtype }));
             methodIl.Emit(OpCodes.Xor);
             methodIl.Emit(OpCodes.Ret);
 
@@ -902,7 +1020,7 @@ namespace NCurses.Core.Interop.Dynamic.cchar_t
             methodIl.Emit(OpCodes.Bgt_S, lbl1);
             methodIl.Emit(OpCodes.Ldarg_0);
             methodIl.Emit(OpCodes.Ldfld, attrField);
-            methodIl.Emit(OpCodes.Call, DynamicTypeBuilder.chtype.GetMethod("op_Implicit", new Type[] { DynamicTypeBuilder.chtype }));
+            methodIl.Emit(OpCodes.Call, chtype.GetMethod("op_Implicit", new Type[] { chtype }));
             methodIl.Emit(OpCodes.Call, typeof(Constants).GetMethod("PAIR_NUMBER"));
             methodIl.Emit(OpCodes.Conv_I2);
             methodIl.Emit(OpCodes.Br_S, lbl2);

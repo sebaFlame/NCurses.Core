@@ -30,7 +30,7 @@ namespace NCurses.Core.Tests
             //Assert.NotEqual(oldMouseState, newMouseState);
 
             MouseEventFactory.Instance.GetMouseEvent(1, 1, 1, 1, MouseState.BUTTON1_CLICKED, out IMEVENT mouseEvent);
-            NativeNCurses.ungetmouse(mouseEvent);
+            NativeNCurses.NCurses.ungetmouse(mouseEvent);
 
             Assert.True(this.Window.ReadKey(out char resultChar, out Key resultKey));
             Assert.Equal(Key.MOUSE, resultKey);

@@ -676,105 +676,105 @@ namespace NCurses.Core.Interop
         /// <summary>
         /// upper left corner
         /// </summary>
-        public static INCursesChar ULCORNER => NativeNCurses.Acs_Map['l'];     /* NCURSES_ACS('l') */
+        public static INCursesChar ULCORNER => NativeNCurses.NCurses.ACSMap['l'];     /* NCURSES_ACS('l') */
         /// <summary>
         /// lower left corner
         /// </summary>
-        public static INCursesChar LLCORNER => NativeNCurses.Acs_Map['m'];     /* NCURSES_ACS('m') */
+        public static INCursesChar LLCORNER => NativeNCurses.NCurses.ACSMap['m'];     /* NCURSES_ACS('m') */
         /// <summary>
         /// upper right corner
         /// </summary>
-        public static INCursesChar URCORNER => NativeNCurses.Acs_Map['k'];     /* NCURSES_ACS('k') */
+        public static INCursesChar URCORNER => NativeNCurses.NCurses.ACSMap['k'];     /* NCURSES_ACS('k') */
         /// <summary>
         /// lower right corner
         /// </summary>
-        public static INCursesChar LRCORNER => NativeNCurses.Acs_Map['j'];     /* NCURSES_ACS('j') */
+        public static INCursesChar LRCORNER => NativeNCurses.NCurses.ACSMap['j'];     /* NCURSES_ACS('j') */
         /// <summary>
         /// tee pointing right
         /// </summary>
-        public static INCursesChar LTEE => NativeNCurses.Acs_Map['t'];     /* NCURSES_ACS('t') */
+        public static INCursesChar LTEE => NativeNCurses.NCurses.ACSMap['t'];     /* NCURSES_ACS('t') */
         /// <summary>
         /// tee pointing left
         /// </summary>
-        public static INCursesChar RTEE => NativeNCurses.Acs_Map['u'];     /* NCURSES_ACS('u') */
+        public static INCursesChar RTEE => NativeNCurses.NCurses.ACSMap['u'];     /* NCURSES_ACS('u') */
         /// <summary>
         /// tee pointing up
         /// </summary>
-        public static INCursesChar BTEE => NativeNCurses.Acs_Map['v'];     /* NCURSES_ACS('v') */
+        public static INCursesChar BTEE => NativeNCurses.NCurses.ACSMap['v'];     /* NCURSES_ACS('v') */
         /// <summary>
         /// tee pointing down
         /// </summary>
-        public static INCursesChar TTEE => NativeNCurses.Acs_Map['w'];     /* NCURSES_ACS('w') */
+        public static INCursesChar TTEE => NativeNCurses.NCurses.ACSMap['w'];     /* NCURSES_ACS('w') */
         /// <summary>
         /// horizontal line
         /// </summary>
-        public static INCursesChar HLINE => NativeNCurses.Acs_Map['q'];    /* NCURSES_ACS('q') */
+        public static INCursesChar HLINE => NativeNCurses.NCurses.ACSMap['q'];    /* NCURSES_ACS('q') */
         /// <summary>
         /// vertical line
         /// </summary>
-        public static INCursesChar VLINE => NativeNCurses.Acs_Map['x'];    /* NCURSES_ACS('x') */
+        public static INCursesChar VLINE => NativeNCurses.NCurses.ACSMap['x'];    /* NCURSES_ACS('x') */
         /// <summary>
         /// large plus or crossover
         /// </summary>
-        public static INCursesChar PLUS => NativeNCurses.Acs_Map['n'];     /* NCURSES_ACS('n') */
+        public static INCursesChar PLUS => NativeNCurses.NCurses.ACSMap['n'];     /* NCURSES_ACS('n') */
         /// <summary>
         /// scan line 1
         /// </summary>
-        public static INCursesChar S1 => NativeNCurses.Acs_Map['o'];       /* NCURSES_ACS('o') */
+        public static INCursesChar S1 => NativeNCurses.NCurses.ACSMap['o'];       /* NCURSES_ACS('o') */
         /// <summary>
         /// scan line 9
         /// </summary>
-        public static INCursesChar S9 => NativeNCurses.Acs_Map['s'];       /* NCURSES_ACS('s') */
+        public static INCursesChar S9 => NativeNCurses.NCurses.ACSMap['s'];       /* NCURSES_ACS('s') */
         /// <summary>
         /// diamond
         /// </summary>
-        public static INCursesChar DIAMOND => NativeNCurses.Acs_Map['`'];  /* NCURSES_ACS('`') */
+        public static INCursesChar DIAMOND => NativeNCurses.NCurses.ACSMap['`'];  /* NCURSES_ACS('`') */
         /// <summary>
         /// checker board (stipple)
         /// </summary>
-        public static INCursesChar CKBOARD => NativeNCurses.Acs_Map['a'];  /* NCURSES_ACS('a') */
+        public static INCursesChar CKBOARD => NativeNCurses.NCurses.ACSMap['a'];  /* NCURSES_ACS('a') */
         /// <summary>
         /// degree symbol
         /// </summary>
-        public static INCursesChar DEGREE => NativeNCurses.Acs_Map['f'];   /* NCURSES_ACS('f') */
+        public static INCursesChar DEGREE => NativeNCurses.NCurses.ACSMap['f'];   /* NCURSES_ACS('f') */
         /// <summary>
         /// plus/minus
         /// </summary>
-        public static INCursesChar PLMINUS => NativeNCurses.Acs_Map['g'];  /* NCURSES_ACS('g') */
+        public static INCursesChar PLMINUS => NativeNCurses.NCurses.ACSMap['g'];  /* NCURSES_ACS('g') */
         /// <summary>
         /// bullet
         /// </summary>
-        public static INCursesChar BULLET => NativeNCurses.Acs_Map['~'];   /* NCURSES_ACS('~') */
+        public static INCursesChar BULLET => NativeNCurses.NCurses.ACSMap['~'];   /* NCURSES_ACS('~') */
 
 #region Teletype 5410v1
         /// <summary>
         /// arrow pointing left
         /// </summary>
-        public static INCursesChar LARROW => NativeNCurses.Acs_Map[','];   /* NCURSES_ACS(',') */
+        public static INCursesChar LARROW => NativeNCurses.NCurses.ACSMap[','];   /* NCURSES_ACS(',') */
         /// <summary>
         /// arrow pointing right
         /// </summary>
-        public static INCursesChar RARROW => NativeNCurses.Acs_Map['+'];   /* NCURSES_ACS('+') */
+        public static INCursesChar RARROW => NativeNCurses.NCurses.ACSMap['+'];   /* NCURSES_ACS('+') */
         /// <summary>
         /// arrow pointing down
         /// </summary>
-        public static INCursesChar DARROW => NativeNCurses.Acs_Map['.'];  /* NCURSES_ACS('.')  */
+        public static INCursesChar DARROW => NativeNCurses.NCurses.ACSMap['.'];  /* NCURSES_ACS('.')  */
         /// <summary>
         /// arrow pointing up
         /// </summary>
-        public static INCursesChar UARROW => NativeNCurses.Acs_Map['-'];   /* NCURSES_ACS('-') */
+        public static INCursesChar UARROW => NativeNCurses.NCurses.ACSMap['-'];   /* NCURSES_ACS('-') */
         /// <summary>
         /// board of squares
         /// </summary>
-        public static INCursesChar BOARD => NativeNCurses.Acs_Map['h'];    /* NCURSES_ACS('h') */
+        public static INCursesChar BOARD => NativeNCurses.NCurses.ACSMap['h'];    /* NCURSES_ACS('h') */
         /// <summary>
         /// lantern symbol
         /// </summary>
-        public static INCursesChar LANTERN => NativeNCurses.Acs_Map['i'];  /* NCURSES_ACS('i') */
+        public static INCursesChar LANTERN => NativeNCurses.NCurses.ACSMap['i'];  /* NCURSES_ACS('i') */
         /// <summary>
         /// solid square block
         /// </summary>
-        public static INCursesChar BLOCK => NativeNCurses.Acs_Map['0'];    /* NCURSES_ACS('0') */
+        public static INCursesChar BLOCK => NativeNCurses.NCurses.ACSMap['0'];    /* NCURSES_ACS('0') */
 #endregion
 
         /*
@@ -786,31 +786,31 @@ namespace NCurses.Core.Interop
         /// <summary>
         /// scan line 3
         /// </summary>
-        public static INCursesChar S3 => NativeNCurses.Acs_Map['p'];       /* NCURSES_ACS('p') */
+        public static INCursesChar S3 => NativeNCurses.NCurses.ACSMap['p'];       /* NCURSES_ACS('p') */
         /// <summary>
         /// scan line 7
         /// </summary>
-        public static INCursesChar S7 => NativeNCurses.Acs_Map['r'];       /* NCURSES_ACS('r') */
+        public static INCursesChar S7 => NativeNCurses.NCurses.ACSMap['r'];       /* NCURSES_ACS('r') */
         /// <summary>
         /// less/equal
         /// </summary>
-        public static INCursesChar LEQUAL => NativeNCurses.Acs_Map['y'];   /* NCURSES_ACS('y') */
+        public static INCursesChar LEQUAL => NativeNCurses.NCurses.ACSMap['y'];   /* NCURSES_ACS('y') */
         /// <summary>
         /// greater/equal
         /// </summary>
-        public static INCursesChar GEQUAL => NativeNCurses.Acs_Map['z'];   /* NCURSES_ACS('z') */
+        public static INCursesChar GEQUAL => NativeNCurses.NCurses.ACSMap['z'];   /* NCURSES_ACS('z') */
         /// <summary>
         /// Pi
         /// </summary>
-        public static INCursesChar PI => NativeNCurses.Acs_Map['{'];       /* NCURSES_ACS('{') */
+        public static INCursesChar PI => NativeNCurses.NCurses.ACSMap['{'];       /* NCURSES_ACS('{') */
         /// <summary>
         /// not equal
         /// </summary>
-        public static INCursesChar NEQUAL => NativeNCurses.Acs_Map['|'];   /* NCURSES_ACS('|') */
+        public static INCursesChar NEQUAL => NativeNCurses.NCurses.ACSMap['|'];   /* NCURSES_ACS('|') */
         /// <summary>
         /// UK pound sign
         /// </summary>
-        public static INCursesChar STERLING => NativeNCurses.Acs_Map['}'];     /* NCURSES_ACS('}') */
+        public static INCursesChar STERLING => NativeNCurses.NCurses.ACSMap['}'];     /* NCURSES_ACS('}') */
 #endregion
     }
 
@@ -822,164 +822,164 @@ namespace NCurses.Core.Interop
         /// <summary>
         /// upper left corner
         /// </summary>
-        public static INCursesChar ULCORNER => NativeNCurses.Wacs_Map['l'];     /* NCURSES_WACS('l') */
+        public static INCursesChar ULCORNER => NativeNCurses.NCurses.WACSMap['l'];     /* NCURSES_WACS('l') */
         /// <summary>
         /// lower left corner
         /// </summary>
-        public static INCursesChar LLCORNER => NativeNCurses.Wacs_Map['m'];     /* NCURSES_WACS('m') */
+        public static INCursesChar LLCORNER => NativeNCurses.NCurses.WACSMap['m'];     /* NCURSES_WACS('m') */
         /// <summary>
         /// upper right corner
         /// </summary>
-        public static INCursesChar URCORNER => NativeNCurses.Wacs_Map['k'];     /* NCURSES_WACS('k') */
+        public static INCursesChar URCORNER => NativeNCurses.NCurses.WACSMap['k'];     /* NCURSES_WACS('k') */
         /// <summary>
         /// lower right corner
         /// </summary>
-        public static INCursesChar LRCORNER => NativeNCurses.Wacs_Map['j'];     /* NCURSES_WACS('j') */
+        public static INCursesChar LRCORNER => NativeNCurses.NCurses.WACSMap['j'];     /* NCURSES_WACS('j') */
         /// <summary>
         /// tee pointing right
         /// </summary>
-        public static INCursesChar LTEE => NativeNCurses.Wacs_Map['t'];     /* NCURSES_WACS('t') */
+        public static INCursesChar LTEE => NativeNCurses.NCurses.WACSMap['t'];     /* NCURSES_WACS('t') */
         /// <summary>
         /// tee pointing left
         /// </summary>
-        public static INCursesChar RTEE => NativeNCurses.Wacs_Map['u'];     /* NCURSES_WACS('u') */
+        public static INCursesChar RTEE => NativeNCurses.NCurses.WACSMap['u'];     /* NCURSES_WACS('u') */
         /// <summary>
         /// tee pointing up
         /// </summary>
-        public static INCursesChar BTEE => NativeNCurses.Wacs_Map['v'];     /* NCURSES_WACS('v') */
+        public static INCursesChar BTEE => NativeNCurses.NCurses.WACSMap['v'];     /* NCURSES_WACS('v') */
         /// <summary>
         /// tee pointing down
         /// </summary>
-        public static INCursesChar TTEE => NativeNCurses.Wacs_Map['w'];     /* NCURSES_WACS('w') */
+        public static INCursesChar TTEE => NativeNCurses.NCurses.WACSMap['w'];     /* NCURSES_WACS('w') */
         /// <summary>
         /// horizontal line
         /// </summary>
-        public static INCursesChar HLINE => NativeNCurses.Wacs_Map['q'];    /* NCURSES_WACS('q') */
+        public static INCursesChar HLINE => NativeNCurses.NCurses.WACSMap['q'];    /* NCURSES_WACS('q') */
         /// <summary>
         /// vertical line
         /// </summary>
-        public static INCursesChar VLINE => NativeNCurses.Wacs_Map['x'];    /* NCURSES_WACS('x') */
+        public static INCursesChar VLINE => NativeNCurses.NCurses.WACSMap['x'];    /* NCURSES_WACS('x') */
         /// <summary>
         /// large plus or crossover
         /// </summary>
-        public static INCursesChar PLUS => NativeNCurses.Wacs_Map['n'];     /* NCURSES_WACS('n') */
+        public static INCursesChar PLUS => NativeNCurses.NCurses.WACSMap['n'];     /* NCURSES_WACS('n') */
         /// <summary>
         /// scan line 1
         /// </summary>
-        public static INCursesChar S1 => NativeNCurses.Wacs_Map['o'];       /* NCURSES_WACS('o') */
+        public static INCursesChar S1 => NativeNCurses.NCurses.WACSMap['o'];       /* NCURSES_WACS('o') */
         /// <summary>
         /// scan line 9
         /// </summary>
-        public static INCursesChar S9 => NativeNCurses.Wacs_Map['s'];   /* NCURSES_WACS('s') */
+        public static INCursesChar S9 => NativeNCurses.NCurses.WACSMap['s'];   /* NCURSES_WACS('s') */
         /// <summary>
         /// diamond
         /// </summary>
-        public static INCursesChar DIAMOND => NativeNCurses.Wacs_Map['`'];  /* NCURSES_WACS('`') */
+        public static INCursesChar DIAMOND => NativeNCurses.NCurses.WACSMap['`'];  /* NCURSES_WACS('`') */
         /// <summary>
         /// checker board
         /// </summary>
-        public static INCursesChar CKBOARD => NativeNCurses.Wacs_Map['a'];  /* NCURSES_WACS('a') */
+        public static INCursesChar CKBOARD => NativeNCurses.NCurses.WACSMap['a'];  /* NCURSES_WACS('a') */
         /// <summary>
         /// degree symbol
         /// </summary>
-        public static INCursesChar DEGREE => NativeNCurses.Wacs_Map['f'];   /* NCURSES_WACS('f') */
+        public static INCursesChar DEGREE => NativeNCurses.NCurses.WACSMap['f'];   /* NCURSES_WACS('f') */
         /// <summary>
         /// plus/minus
         /// </summary>
-        public static INCursesChar PLMINUS => NativeNCurses.Wacs_Map['g'];  /* NCURSES_WACS('g') */
+        public static INCursesChar PLMINUS => NativeNCurses.NCurses.WACSMap['g'];  /* NCURSES_WACS('g') */
         /// <summary>
         /// bullet
         /// </summary>
-        public static INCursesChar BULLET => NativeNCurses.Wacs_Map['~'];   /* NCURSES_WACS('~') */
+        public static INCursesChar BULLET => NativeNCurses.NCurses.WACSMap['~'];   /* NCURSES_WACS('~') */
 
 #region Teletype 5410v1 symbols
         /// <summary>
         /// arrow left
         /// </summary>
-        public static INCursesChar LARROW => NativeNCurses.Wacs_Map[','];   /* NCURSES_WACS(',') */
+        public static INCursesChar LARROW => NativeNCurses.NCurses.WACSMap[','];   /* NCURSES_WACS(',') */
         /// <summary>
         /// arrow right
         /// </summary>
-        public static INCursesChar RARROW => NativeNCurses.Wacs_Map['+'];   /* NCURSES_WACS('+') */
+        public static INCursesChar RARROW => NativeNCurses.NCurses.WACSMap['+'];   /* NCURSES_WACS('+') */
         /// <summary>
         /// arrow down
         /// </summary>
-        public static INCursesChar DARROW => NativeNCurses.Wacs_Map['.'];   /* NCURSES_WACS('.') */
+        public static INCursesChar DARROW => NativeNCurses.NCurses.WACSMap['.'];   /* NCURSES_WACS('.') */
         /// <summary>
         /// arrow up
         /// </summary>
-        public static INCursesChar UARROW => NativeNCurses.Wacs_Map['-'];   /* NCURSES_WACS('-') */
+        public static INCursesChar UARROW => NativeNCurses.NCurses.WACSMap['-'];   /* NCURSES_WACS('-') */
         /// <summary>
         /// board of squares
         /// </summary>
-        public static INCursesChar BOARD => NativeNCurses.Wacs_Map['h'];    /* NCURSES_WACS('h') */
+        public static INCursesChar BOARD => NativeNCurses.NCurses.WACSMap['h'];    /* NCURSES_WACS('h') */
         /// <summary>
         /// lantern symbol
         /// </summary>
-        public static INCursesChar LANTERN => NativeNCurses.Wacs_Map['i'];  /* NCURSES_WACS('i') */
+        public static INCursesChar LANTERN => NativeNCurses.NCurses.WACSMap['i'];  /* NCURSES_WACS('i') */
         /// <summary>
         /// solid square block
         /// </summary>
-        public static INCursesChar BLOCK => NativeNCurses.Wacs_Map['0'];    /* NCURSES_WACS('0') */
+        public static INCursesChar BLOCK => NativeNCurses.NCurses.WACSMap['0'];    /* NCURSES_WACS('0') */
 #endregion
 
 #region ncurses extensions
         /// <summary>
         /// scan line 3
         /// </summary>
-        public static INCursesChar S3 => NativeNCurses.Wacs_Map['p'];       /* NCURSES_WACS('p') */
+        public static INCursesChar S3 => NativeNCurses.NCurses.WACSMap['p'];       /* NCURSES_WACS('p') */
         /// <summary>
         /// scan line 7
         /// </summary>
-        public static INCursesChar S7 => NativeNCurses.Wacs_Map['r'];       /* NCURSES_WACS('r') */
+        public static INCursesChar S7 => NativeNCurses.NCurses.WACSMap['r'];       /* NCURSES_WACS('r') */
         /// <summary>
         /// less/equal
         /// </summary>
-        public static INCursesChar LEQUAL => NativeNCurses.Wacs_Map['y'];   /* NCURSES_WACS('y') */
+        public static INCursesChar LEQUAL => NativeNCurses.NCurses.WACSMap['y'];   /* NCURSES_WACS('y') */
         /// <summary>
         /// greater/equal
         /// </summary>
-        public static INCursesChar GEQUAL => NativeNCurses.Wacs_Map['z'];   /* NCURSES_WACS('z') */
+        public static INCursesChar GEQUAL => NativeNCurses.NCurses.WACSMap['z'];   /* NCURSES_WACS('z') */
         /// <summary>
         /// Pi
         /// </summary>
-        public static INCursesChar PI => NativeNCurses.Wacs_Map['{'];       /* NCURSES_WACS('{') */
+        public static INCursesChar PI => NativeNCurses.NCurses.WACSMap['{'];       /* NCURSES_WACS('{') */
         /// <summary>
         /// not equal
         /// </summary>
-        public static INCursesChar NEQUAL => NativeNCurses.Wacs_Map['|'];   /* NCURSES_WACS('|') */
+        public static INCursesChar NEQUAL => NativeNCurses.NCurses.WACSMap['|'];   /* NCURSES_WACS('|') */
         /// <summary>
         /// UK pound sign
         /// </summary>
-        public static INCursesChar STERLING => NativeNCurses.Wacs_Map['}'];     /* NCURSES_WACS('}') */
+        public static INCursesChar STERLING => NativeNCurses.NCurses.WACSMap['}'];     /* NCURSES_WACS('}') */
 #endregion
 
 #region double lines
-        public static INCursesChar D_ULCORNER => NativeNCurses.Wacs_Map['C'];  /* NCURSES_WACS('C') */
-        public static INCursesChar D_LLCORNER => NativeNCurses.Wacs_Map['D'];  /* NCURSES_WACS('D') */
-        public static INCursesChar D_URCORNER => NativeNCurses.Wacs_Map['B'];  /* NCURSES_WACS('B') */
-        public static INCursesChar D_LRCORNER => NativeNCurses.Wacs_Map['A'];  /* NCURSES_WACS('A') */
-        public static INCursesChar D_RTEE => NativeNCurses.Wacs_Map['G'];  /* NCURSES_WACS('G') */
-        public static INCursesChar D_LTEE => NativeNCurses.Wacs_Map['F'];  /* NCURSES_WACS('F') */
-        public static INCursesChar D_BTEE => NativeNCurses.Wacs_Map['H'];  /* NCURSES_WACS('H') */
-        public static INCursesChar D_TTEE => NativeNCurses.Wacs_Map['I'];  /* NCURSES_WACS('I') */
-        public static INCursesChar D_HLINE => NativeNCurses.Wacs_Map['R']; /* NCURSES_WACS('R') */
-        public static INCursesChar D_VLINE => NativeNCurses.Wacs_Map['Y']; /* NCURSES_WACS('Y') */
-        public static INCursesChar D_PLUS => NativeNCurses.Wacs_Map['E'];  /* NCURSES_WACS('E') */
+        public static INCursesChar D_ULCORNER => NativeNCurses.NCurses.WACSMap['C'];  /* NCURSES_WACS('C') */
+        public static INCursesChar D_LLCORNER => NativeNCurses.NCurses.WACSMap['D'];  /* NCURSES_WACS('D') */
+        public static INCursesChar D_URCORNER => NativeNCurses.NCurses.WACSMap['B'];  /* NCURSES_WACS('B') */
+        public static INCursesChar D_LRCORNER => NativeNCurses.NCurses.WACSMap['A'];  /* NCURSES_WACS('A') */
+        public static INCursesChar D_RTEE => NativeNCurses.NCurses.WACSMap['G'];  /* NCURSES_WACS('G') */
+        public static INCursesChar D_LTEE => NativeNCurses.NCurses.WACSMap['F'];  /* NCURSES_WACS('F') */
+        public static INCursesChar D_BTEE => NativeNCurses.NCurses.WACSMap['H'];  /* NCURSES_WACS('H') */
+        public static INCursesChar D_TTEE => NativeNCurses.NCurses.WACSMap['I'];  /* NCURSES_WACS('I') */
+        public static INCursesChar D_HLINE => NativeNCurses.NCurses.WACSMap['R']; /* NCURSES_WACS('R') */
+        public static INCursesChar D_VLINE => NativeNCurses.NCurses.WACSMap['Y']; /* NCURSES_WACS('Y') */
+        public static INCursesChar D_PLUS => NativeNCurses.NCurses.WACSMap['E'];  /* NCURSES_WACS('E') */
 #endregion
 
 #region thick lines
-        public static INCursesChar T_ULCORNER => NativeNCurses.Wacs_Map['L'];  /* NCURSES_WACS('L') */
-        public static INCursesChar T_LLCORNER => NativeNCurses.Wacs_Map['M'];  /* NCURSES_WACS('M') */
-        public static INCursesChar T_URCORNER => NativeNCurses.Wacs_Map['K'];  /* NCURSES_WACS('K') */
-        public static INCursesChar T_LRCORNER => NativeNCurses.Wacs_Map['J'];  /* NCURSES_WACS('J') */
-        public static INCursesChar T_RTEE => NativeNCurses.Wacs_Map['U'];  /* NCURSES_WACS('U') */
-        public static INCursesChar T_LTEE => NativeNCurses.Wacs_Map['T'];  /* NCURSES_WACS('T') */
-        public static INCursesChar T_BTEE => NativeNCurses.Wacs_Map['V'];  /* NCURSES_WACS('V') */
-        public static INCursesChar T_TTEE => NativeNCurses.Wacs_Map['W'];  /* NCURSES_WACS('W') */
-        public static INCursesChar T_HLINE => NativeNCurses.Wacs_Map['Q']; /* NCURSES_WACS('Q') */
-        public static INCursesChar T_VLINE => NativeNCurses.Wacs_Map['X']; /* NCURSES_WACS('X') */
-        public static INCursesChar T_PLUS => NativeNCurses.Wacs_Map['N'];	/* NCURSES_WACS('N') */
+        public static INCursesChar T_ULCORNER => NativeNCurses.NCurses.WACSMap['L'];  /* NCURSES_WACS('L') */
+        public static INCursesChar T_LLCORNER => NativeNCurses.NCurses.WACSMap['M'];  /* NCURSES_WACS('M') */
+        public static INCursesChar T_URCORNER => NativeNCurses.NCurses.WACSMap['K'];  /* NCURSES_WACS('K') */
+        public static INCursesChar T_LRCORNER => NativeNCurses.NCurses.WACSMap['J'];  /* NCURSES_WACS('J') */
+        public static INCursesChar T_RTEE => NativeNCurses.NCurses.WACSMap['U'];  /* NCURSES_WACS('U') */
+        public static INCursesChar T_LTEE => NativeNCurses.NCurses.WACSMap['T'];  /* NCURSES_WACS('T') */
+        public static INCursesChar T_BTEE => NativeNCurses.NCurses.WACSMap['V'];  /* NCURSES_WACS('V') */
+        public static INCursesChar T_TTEE => NativeNCurses.NCurses.WACSMap['W'];  /* NCURSES_WACS('W') */
+        public static INCursesChar T_HLINE => NativeNCurses.NCurses.WACSMap['Q']; /* NCURSES_WACS('Q') */
+        public static INCursesChar T_VLINE => NativeNCurses.NCurses.WACSMap['X']; /* NCURSES_WACS('X') */
+        public static INCursesChar T_PLUS => NativeNCurses.NCurses.WACSMap['N'];	/* NCURSES_WACS('N') */
 #endregion
     }
 }

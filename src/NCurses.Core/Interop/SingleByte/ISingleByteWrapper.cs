@@ -1,13 +1,15 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Text;
+
+using NCurses.Core.Interop.SafeHandles;
 using NCurses.Core.Interop.Mouse;
 
 namespace NCurses.Core.Interop.SingleByte
 {
-    internal interface ISingleByteWrapper<TSingleByte, TSingleByteString, TMouseEvent> : INativeWrapper
+    internal interface ISingleByteWrapper<TSingleByte, TChar, TMouseEvent>
         where TSingleByte : unmanaged, ISingleByteChar
-        where TSingleByteString : unmanaged
+        where TChar : unmanaged, IChar
         where TMouseEvent : unmanaged, IMEVENT
     {
         //int addch(const chtype ch);
@@ -31,13 +33,13 @@ namespace NCurses.Core.Interop.SingleByte
         //int border(chtype ls, chtype rs, chtype ts, chtype bs, chtype tl, chtype tr, chtype bl, chtype br);
         int border(TSingleByte ls, TSingleByte rs, TSingleByte ts, TSingleByte bs, TSingleByte tl, TSingleByte tr, TSingleByte bl, TSingleByte br);
         //int box(WINDOW *win, chtype verch, chtype horch);
-        int box(IntPtr window, TSingleByte verch, TSingleByte horch);
+        int box(WindowBaseSafeHandle win, TSingleByte verch, TSingleByte horch);
         //int chgat(int n, attr_t attr, short pair, const void *opts);
         int chgat(int number, TSingleByte attrs, short pair, IntPtr opts);
         //int echochar(const chtype ch);
         int echochar(TSingleByte ch);
         // chtype getbkgd(WINDOW *win);
-        TSingleByte getbkgd(IntPtr window);
+        TSingleByte getbkgd(WindowBaseSafeHandle win);
         //int getmouse(MEVENT *event);
         int getmouse(ref TMouseEvent ev);
         //int getmouse_sp(SCREEN* sp, MEVENT *event);
@@ -77,27 +79,27 @@ namespace NCurses.Core.Interop.SingleByte
         //int mvvline(int y, int x, chtype ch, int n);
         int mvvline(int y, int x, TSingleByte ch, int n);
         //int mvwaddch(WINDOW *win, int y, int x, const chtype ch);
-        int mvwaddch(IntPtr window, int y, int x, TSingleByte ch);
+        int mvwaddch(WindowBaseSafeHandle win, int y, int x, TSingleByte ch);
         //int mvwaddchnstr(WINDOW *win, int y, int x, const chtype *chstr, int n);
-        int mvwaddchnstr(IntPtr window, int y, int x, in TSingleByte chstr, int n);
+        int mvwaddchnstr(WindowBaseSafeHandle win, int y, int x, in TSingleByte chstr, int n);
         //int mvwaddchstr(WINDOW *win, int y, int x, const chtype *chstr);
-        int mvwaddchstr(IntPtr window, int y, int x, in TSingleByte chstr);
+        int mvwaddchstr(WindowBaseSafeHandle win, int y, int x, in TSingleByte chstr);
         //int mvwchgat(WINDOW *win, int y, int x, int n, attr_t attr, short pair, const void* opts);
-        int mvwchgat(IntPtr window, int y, int x, int number, TSingleByte attrs, short pair, IntPtr opts);
+        int mvwchgat(WindowBaseSafeHandle win, int y, int x, int number, TSingleByte attrs, short pair, IntPtr opts);
         //int mvwhline(WINDOW *, int y, int x, chtype ch, int n);
-        int mvwhline(IntPtr window, int y, int x, TSingleByte ch, int count);
+        int mvwhline(WindowBaseSafeHandle win, int y, int x, TSingleByte ch, int count);
         //chtype mvwinch(WINDOW *win, int y, int x);
-        TSingleByte mvwinch(IntPtr window, int y, int x);
+        TSingleByte mvwinch(WindowBaseSafeHandle win, int y, int x);
         //int mvwinchnstr(WINDOW *win, int y, int x, chtype *chstr, int n);
-        int mvwinchnstr(IntPtr window, int y, int x, ref TSingleByte chStr, int count);
+        int mvwinchnstr(WindowBaseSafeHandle win, int y, int x, ref TSingleByte chStr, int count);
         //int mvwinchstr(WINDOW *win, int y, int x, chtype *chstr);
-        int mvwinchstr(IntPtr window, int y, int x, ref TSingleByte chStr);
+        int mvwinchstr(WindowBaseSafeHandle win, int y, int x, ref TSingleByte chStr);
         //int mvwinsch(WINDOW *win, int y, int x, chtype ch);
-        int mvwinsch(IntPtr window, int y, int x, TSingleByte ch);
+        int mvwinsch(WindowBaseSafeHandle win, int y, int x, TSingleByte ch);
         //int mvwvline(WINDOW *, int y, int x, chtype ch, int n);
-        int mvwvline(IntPtr window, int y, int x, TSingleByte ch, int n);
+        int mvwvline(WindowBaseSafeHandle win, int y, int x, TSingleByte ch, int n);
         //int pechochar(WINDOW *pad, chtype ch);
-        int pechochar(IntPtr pad, TSingleByte ch);
+        int pechochar(WindowBaseSafeHandle pad, TSingleByte ch);
         //attr_t slk_attr(void);
         TSingleByte slk_attr();
         //attr_t slk_attr(SCREEN* sp);
@@ -131,7 +133,7 @@ namespace NCurses.Core.Interop.SingleByte
         //chtype termattrs_sp(SCREEN* sp);
         TSingleByte termattrs_sp(IntPtr screen);
         //char *unctrl(chtype c);
-        ref TSingleByteString unctrl(TSingleByte ch);
+        ref TChar unctrl(TSingleByte ch);
         //int ungetmouse(MEVENT *event);
         int ungetmouse(in TMouseEvent ev);
         //int ungetmouse_sp(SCREEN* sp, MEVENT *event);
@@ -155,40 +157,40 @@ namespace NCurses.Core.Interop.SingleByte
         //int vline(chtype ch, int n);
         int vline(TSingleByte ch, int n);
         //int waddch(WINDOW *win, const chtype ch);
-        int waddch(IntPtr window, TSingleByte ch);
+        int waddch(WindowBaseSafeHandle win, TSingleByte ch);
         //int waddchnstr(WINDOW *win, const chtype *chstr, int n);
-        int waddchnstr(IntPtr window, in TSingleByte chstr, int number);
+        int waddchnstr(WindowBaseSafeHandle win, in TSingleByte chstr, int number);
         //int mvaddchstr(int y, int x, const chtype *chstr);
-        int waddchstr(IntPtr window, in TSingleByte chstr);
+        int waddchstr(WindowBaseSafeHandle win, in TSingleByte chstr);
         //int wattr_get(WINDOW *win, attr_t *attrs, short *pair, void *opts);
-        int wattr_get(IntPtr window, ref TSingleByte attrs, ref short pair, IntPtr opts);
+        int wattr_get(WindowBaseSafeHandle win, ref TSingleByte attrs, ref short pair, IntPtr opts);
         //int wattr_off(WINDOW *win, attr_t attrs, void *opts);
-        int wattr_off(IntPtr window, TSingleByte attrs, IntPtr opts);
+        int wattr_off(WindowBaseSafeHandle win, TSingleByte attrs, IntPtr opts);
         //int wattr_on(WINDOW *win, attr_t attrs, void *opts);
-        int wattr_on(IntPtr window, TSingleByte attrs, IntPtr opts);
+        int wattr_on(WindowBaseSafeHandle win, TSingleByte attrs, IntPtr opts);
         //int wattr_set(WINDOW *win, attr_t attrs, short pair, void *opts);
-        int wattr_set(IntPtr window, TSingleByte attrs, short pair, IntPtr opts);
+        int wattr_set(WindowBaseSafeHandle win, TSingleByte attrs, short pair, IntPtr opts);
         //int wbkgd(WINDOW *win, chtype ch);
-        int wbkgd(IntPtr window, TSingleByte bkgd);
+        int wbkgd(WindowBaseSafeHandle win, TSingleByte bkgd);
         //void wbkgdset(WINDOW *win, chtype ch);
-        void wbkgdset(IntPtr window, TSingleByte bkgd);
+        void wbkgdset(WindowBaseSafeHandle win, TSingleByte bkgd);
         //int wborder(WINDOW *win, chtype ls, chtype rs, chtype ts, chtype bs, chtype tl, chtype tr, chtype bl, chtype br);
-        int wborder(IntPtr window, TSingleByte ls, TSingleByte rs, TSingleByte ts, TSingleByte bs, TSingleByte tl, TSingleByte tr, TSingleByte bl, TSingleByte br);
+        int wborder(WindowBaseSafeHandle win, TSingleByte ls, TSingleByte rs, TSingleByte ts, TSingleByte bs, TSingleByte tl, TSingleByte tr, TSingleByte bl, TSingleByte br);
         //int wchgat(WINDOW *win, int n, attr_t attr, short pair, const void* opts);
-        int wchgat(IntPtr window, int number, TSingleByte attrs, short pair, IntPtr opts);
+        int wchgat(WindowBaseSafeHandle win, int number, TSingleByte attrs, short pair, IntPtr opts);
         //int wechochar(WINDOW *win, const chtype ch);
-        int wechochar(IntPtr window, TSingleByte ch);
+        int wechochar(WindowBaseSafeHandle win, TSingleByte ch);
         //int whline(WINDOW *win, chtype ch, int n);
-        int whline(IntPtr window, TSingleByte ch, int count);
+        int whline(WindowBaseSafeHandle win, TSingleByte ch, int count);
         //chtype winch(WINDOW *win);
-        TSingleByte winch(IntPtr window);
+        TSingleByte winch(WindowBaseSafeHandle win);
         //int winchnstr(WINDOW *win, chtype *chstr, int n);
-        int winchnstr(IntPtr window, ref TSingleByte chstr, int count);
+        int winchnstr(WindowBaseSafeHandle win, ref TSingleByte chstr, int count);
         //int winchstr(WINDOW *win, chtype *chstr);
-        int winchstr(IntPtr window, ref TSingleByte chstr);
+        int winchstr(WindowBaseSafeHandle win, ref TSingleByte chstr);
         //int winsch(WINDOW *win, chtype ch);
-        int winsch(IntPtr window, TSingleByte ch);
+        int winsch(WindowBaseSafeHandle win, TSingleByte ch);
         //int wvline(WINDOW *win, chtype ch, int n);
-        int wvline(IntPtr window, TSingleByte ch, int n);
+        int wvline(WindowBaseSafeHandle win, TSingleByte ch, int n);
     }
 }

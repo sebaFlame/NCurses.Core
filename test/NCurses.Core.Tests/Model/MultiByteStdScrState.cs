@@ -15,7 +15,7 @@ namespace NCurses.Core.Tests.Model
         {
             Assert.True(this.SupportsUnicode);
 
-            this.CurrentStandardScreen = NCurses.MultiByteStdScr;
+            this.CurrentStandardScreen = this.StdScr.ToMultiByteWindow();
         }
     }
 }

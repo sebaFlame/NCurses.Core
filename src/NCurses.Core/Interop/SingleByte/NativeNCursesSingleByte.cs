@@ -3,38 +3,19 @@ using System.Collections.Generic;
 using System.Text;
 using System.Runtime.InteropServices;
 using NCurses.Core.Interop.Mouse;
-using NCurses.Core.Interop.SingleByteString;
+using NCurses.Core.Interop.Char;
 
 namespace NCurses.Core.Interop.SingleByte
 {
-    internal interface INativeNCursesSingleByte
-    {
-        void getmouse(out IMEVENT ev);
-        ulong mousemask(ulong newmask, out ulong oldmask);
-        ulong slk_attr();
-        void slk_attr_off(ulong attrs);
-        void slk_attr_on(ulong attrs);
-        void slk_attr_set(ulong attrs, short color_pair);
-        void slk_attroff(ulong attrs);
-        void slk_attron(ulong attrs);
-        void slk_attrset(ulong attrs);
-        ulong term_attrs();
-        ulong termattrs();
-        void unctrl(in ISingleByteChar ch, out string str);
-        void ungetmouse(in IMEVENT ev);
-        void vid_attr(ulong attrs, short pair);
-        void vid_puts(ulong attrs, short pair, Func<int, int> putc);
-        void vidattr(ulong attrs);
-        void vidputs(ulong attrs, Func<int, int> putc);
-    }
-
-    internal class NativeNCursesSingleByte<TSingleByte, TSingleByteString, TMouseEvent> : SingleByteWrapper<TSingleByte, TSingleByteString, TMouseEvent>, INativeNCursesSingleByte
+    internal class NativeNCursesSingleByte<TSingleByte, TChar, TMouseEvent> 
+            : SingleByteWrapper<TSingleByte, TChar, TMouseEvent>, 
+            INativeNCursesSingleByte<TSingleByte, SingleByteCharString<TSingleByte>>
         where TSingleByte : unmanaged, ISingleByteChar, IEquatable<TSingleByte>
-        where TSingleByteString : unmanaged
+        where TChar : unmanaged, IChar, IEquatable<TChar>
         where TMouseEvent : unmanaged, IMEVENT
     {
-        public NativeNCursesSingleByte()
-        { }
+        internal NativeNCursesSingleByte(ISingleByteWrapper<TSingleByte, TChar, TMouseEvent> wrapper)
+            : base(wrapper) { }
 
         public void getmouse(out IMEVENT ev)
         {
@@ -56,77 +37,72 @@ namespace NCurses.Core.Interop.SingleByte
 
         public ulong mousemask(ulong newmask, out ulong oldmask)
         {
-            ISingleByteChar newMouseMask = new SingleByteChar<TSingleByte>(newmask);
-            ISingleByteChar oldMouseMask = new SingleByteChar<TSingleByte>(0);
+            TSingleByte newMouseMask = SingleByteCharFactoryInternal<TSingleByte>.Instance.GetAttributeInternal(newmask);
+            TSingleByte oldMouseMask = SingleByteCharFactoryInternal<TSingleByte>.Instance.GetNativeEmptyCharInternal();
 
-            TSingleByte res = this.Wrapper.mousemask(MarshallArrayReadonly(newMouseMask), ref MarshallArray(ref oldMouseMask));
+            TSingleByte res = this.Wrapper.mousemask(newMouseMask, ref oldMouseMask);
 
-            ISingleByteChar resMouseMask = new SingleByteChar<TSingleByte>(ref res);
-
-            oldmask = (ulong)((SingleByteChar<TSingleByte>)oldMouseMask);
-            return (ulong)((SingleByteChar<TSingleByte>)resMouseMask);
+            oldmask = ToPrimitiveType<ulong>(in oldMouseMask);
+            return ToPrimitiveType<ulong>(in res);
         }
 
         public ulong slk_attr()
         {
-            TSingleByte val = this.Wrapper.slk_attr();
-            ISingleByteChar schar = new SingleByteChar<TSingleByte>(ref val);
-            return schar.Attributes;
+            TSingleByte res = this.Wrapper.slk_attr();
+            return res.Attributes;
         }
 
         public void slk_attr_off(ulong attrs)
         {
-            ISingleByteChar ch = new SingleByteChar<TSingleByte>(attrs);
-            NCursesException.Verify(this.Wrapper.slk_attr_off(MarshallArrayReadonly(ch), IntPtr.Zero), "slk_attr_off");
+            TSingleByte ch = SingleByteCharFactoryInternal<TSingleByte>.Instance.GetAttributeInternal(attrs);
+            NCursesException.Verify(this.Wrapper.slk_attr_off(ch, IntPtr.Zero), "slk_attr_off");
         }
 
         public void slk_attr_on(ulong attrs)
         {
-            ISingleByteChar ch = new SingleByteChar<TSingleByte>(attrs);
-            NCursesException.Verify(this.Wrapper.slk_attr_on(MarshallArrayReadonly(ch), IntPtr.Zero), "slk_attr_on");
+            TSingleByte ch = SingleByteCharFactoryInternal<TSingleByte>.Instance.GetAttributeInternal(attrs);
+            NCursesException.Verify(this.Wrapper.slk_attr_on(ch, IntPtr.Zero), "slk_attr_on");
         }
 
         public void slk_attr_set(ulong attrs, short color_pair)
         {
-            ISingleByteChar ch = new SingleByteChar<TSingleByte>(attrs);
-            NCursesException.Verify(this.Wrapper.slk_attr_set(MarshallArrayReadonly(ch), color_pair, IntPtr.Zero), "slk_attr_set");
+            TSingleByte ch = SingleByteCharFactoryInternal<TSingleByte>.Instance.GetAttributeInternal(attrs);
+            NCursesException.Verify(this.Wrapper.slk_attr_set(ch, color_pair, IntPtr.Zero), "slk_attr_set");
         }
 
         public void slk_attroff(ulong attrs)
         {
-            ISingleByteChar ch = new SingleByteChar<TSingleByte>(attrs);
-            NCursesException.Verify(this.Wrapper.slk_attroff(MarshallArrayReadonly(ch)), "slk_attroff");
+            TSingleByte ch = SingleByteCharFactoryInternal<TSingleByte>.Instance.GetAttributeInternal(attrs);
+            NCursesException.Verify(this.Wrapper.slk_attroff(ch), "slk_attroff");
         }
 
         public void slk_attron(ulong attrs)
         {
-            ISingleByteChar ch = new SingleByteChar<TSingleByte>(attrs);
-            NCursesException.Verify(this.Wrapper.slk_attron(MarshallArrayReadonly(ch)), "slk_attron");
+            TSingleByte ch = SingleByteCharFactoryInternal<TSingleByte>.Instance.GetAttributeInternal(attrs);
+            NCursesException.Verify(this.Wrapper.slk_attron(ch), "slk_attron");
         }
 
         public void slk_attrset(ulong attrs)
         {
-            ISingleByteChar ch = new SingleByteChar<TSingleByte>(attrs);
-            NCursesException.Verify(this.Wrapper.slk_attrset(MarshallArrayReadonly(ch)), "slk_attrset");
+            TSingleByte ch = SingleByteCharFactoryInternal<TSingleByte>.Instance.GetAttributeInternal(attrs);
+            NCursesException.Verify(this.Wrapper.slk_attrset(ch), "slk_attrset");
         }
 
         public ulong term_attrs()
         {
             TSingleByte val = this.Wrapper.term_attrs();
-            ISingleByteChar schar = new SingleByteChar<TSingleByte>(ref val);
-            return schar.Attributes;
+            return val.Attributes;
         }
 
         public ulong termattrs()
         {
             TSingleByte val = this.Wrapper.termattrs();
-            ISingleByteChar schar = new SingleByteChar<TSingleByte>(ref val);
-            return schar.Attributes;
+            return val.Attributes;
         }
 
-        public void unctrl(in ISingleByteChar sch, out string str)
+        public string unctrl(in TSingleByte sch)
         {
-            str = SingleByteStringWrapper<TSingleByteString>.ReadString(ref this.Wrapper.unctrl(MarshallArrayReadonly(sch)));
+            return CharFactoryInternal<TChar>.Instance.CreateNativeString(ref this.Wrapper.unctrl(sch)).ToString();
         }
 
         public void ungetmouse(in IMEVENT ev)
@@ -146,17 +122,17 @@ namespace NCurses.Core.Interop.SingleByte
 
         public void vid_attr(ulong attrs, short pair)
         {
-            ISingleByteChar ch = new SingleByteChar<TSingleByte>(attrs);
-            NCursesException.Verify(this.Wrapper.vid_attr(MarshallArrayReadonly(ch), pair, IntPtr.Zero), "vid_attr");
+            TSingleByte ch = SingleByteCharFactoryInternal<TSingleByte>.Instance.GetAttributeInternal(attrs);
+            NCursesException.Verify(this.Wrapper.vid_attr(ch, pair, IntPtr.Zero), "vid_attr");
         }
 
         public void vid_puts(ulong attrs, short pair, Func<int, int> putc)
         {
-            ISingleByteChar ch = new SingleByteChar<TSingleByte>(attrs);
+            TSingleByte ch = SingleByteCharFactoryInternal<TSingleByte>.Instance.GetAttributeInternal(attrs);
             IntPtr func = Marshal.GetFunctionPointerForDelegate(putc);
             try
             {
-                NCursesException.Verify(this.Wrapper.vid_puts(MarshallArrayReadonly(ch), pair, IntPtr.Zero, func), "vid_puts");
+                NCursesException.Verify(this.Wrapper.vid_puts(ch, pair, IntPtr.Zero, func), "vid_puts");
             }
             finally
             {
@@ -166,17 +142,17 @@ namespace NCurses.Core.Interop.SingleByte
 
         public void vidattr(ulong attrs)
         {
-            ISingleByteChar ch = new SingleByteChar<TSingleByte>(attrs);
-            NCursesException.Verify(this.Wrapper.vidattr(MarshallArrayReadonly(ch)), "vidattr");
+            TSingleByte ch = SingleByteCharFactoryInternal<TSingleByte>.Instance.GetAttributeInternal(attrs);
+            NCursesException.Verify(this.Wrapper.vidattr(ch), "vidattr");
         }
 
         public void vidputs(ulong attrs, Func<int, int> putc)
         {
-            ISingleByteChar ch = new SingleByteChar<TSingleByte>(attrs);
+            TSingleByte ch = SingleByteCharFactoryInternal<TSingleByte>.Instance.GetAttributeInternal(attrs);
             IntPtr func = Marshal.GetFunctionPointerForDelegate(putc);
             try
             {
-                NCursesException.Verify(this.Wrapper.vidputs(MarshallArrayReadonly(ch), func), "vidputs");
+                NCursesException.Verify(this.Wrapper.vidputs(ch, func), "vidputs");
             }
             finally
             {

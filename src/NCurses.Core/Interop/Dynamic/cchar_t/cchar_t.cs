@@ -21,7 +21,6 @@ namespace NCurses.Core.Interop.Dynamic.cchar_t
         public char Char => (char)this;
         public short Color => (short)(this.ext_color > 0 ? this.ext_color : (short)Constants.PAIR_NUMBER(this.attr));
         public ulong Attributes => (ulong)(this.attr ^ (this.attr & Attrs.COLOR));
-        //public unsafe ReadOnlySpan<byte> GetBytes { get { fixed (byte* b = this.chars) return new ReadOnlySpan<byte>(b, charGlobalLength); } }
 
         public cchar_t(char c)
         {
@@ -51,7 +50,7 @@ namespace NCurses.Core.Interop.Dynamic.cchar_t
         {
             if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
                 this.ext_color = pair;
-            this.attr |= (ulong)NativeNCurses.COLOR_PAIR(pair);
+            this.attr |= (ulong)NativeNCurses.NCurses.COLOR_PAIR(pair);
         }
 
         public cchar_t(ArraySegment<byte> encodedBytesChar)
@@ -59,7 +58,9 @@ namespace NCurses.Core.Interop.Dynamic.cchar_t
             unsafe
             {
                 for (int i = 0; i < encodedBytesChar.Count; i++)
+                {
                     this.chars[i] = encodedBytesChar.Array[encodedBytesChar.Offset + i];
+                }
             }
 
             this.attr = 0;
@@ -76,8 +77,40 @@ namespace NCurses.Core.Interop.Dynamic.cchar_t
             : this(encodedBytesChar, attrs)
         {
             if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
+            {
                 this.ext_color = pair;
-            this.attr |= (ulong)NativeNCurses.COLOR_PAIR(pair);
+            }
+            this.attr |= (ulong)NativeNCurses.NCurses.COLOR_PAIR(pair);
+        }
+
+        public cchar_t(Span<byte> encodedBytesChar)
+        {
+            unsafe
+            {
+                for (int i = 0; i < encodedBytesChar.Length; i++)
+                {
+                    this.chars[i] = encodedBytesChar[i];
+                }
+            }
+
+            this.attr = 0;
+            this.ext_color = 0;
+        }
+
+        public cchar_t(Span<byte> encodedBytesChar, ulong attrs)
+            : this(encodedBytesChar)
+        {
+            this.attr = attrs;
+        }
+
+        public cchar_t(Span<byte> encodedBytesChar, ulong attrs, short pair)
+            : this(encodedBytesChar, attrs)
+        {
+            if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
+            {
+                this.ext_color = pair;
+            }
+            this.attr |= (ulong)NativeNCurses.NCurses.COLOR_PAIR(pair);
         }
 
         public static explicit operator cchar_t(char ch)
@@ -125,17 +158,39 @@ namespace NCurses.Core.Interop.Dynamic.cchar_t
             }
         }
 
-        public bool Equals(IMultiByteChar obj)
+        public override bool Equals(object obj)
         {
-            if (obj is cchar_t other) //boxing?
+            if (obj is cchar_t other)
+            {
                 return this == other;
+            }
+            return false;
+        }
+
+        public bool Equals(IChar obj)
+        {
+            if (obj is cchar_t other)
+            {
+                return this == other;
+            }
             return false;
         }
 
         public bool Equals(INCursesChar obj)
         {
-            if (obj is IMultiByteChar other) //boxing?
+            if (obj is IMultiByteChar other)
+            {
                 return this.Equals(other);
+            }
+            return false;
+        }
+
+        public bool Equals(IMultiByteChar obj)
+        {
+            if (obj is cchar_t other)
+            {
+                return this == other;
+            }
             return false;
         }
 
@@ -144,16 +199,9 @@ namespace NCurses.Core.Interop.Dynamic.cchar_t
             return this == other;
         }
 
-        public override bool Equals(object obj)
-        {
-            if (obj is cchar_t other) //boxing?
-                return this == other;
-            return false;
-        }
-
         public override int GetHashCode()
         {
-            var hashCode = -946517152;
+            int hashCode = -946517152;
             hashCode = hashCode * -1521134295 + EqualityComparer<chtype.chtype>.Default.GetHashCode(this.attr);
             unsafe
             {

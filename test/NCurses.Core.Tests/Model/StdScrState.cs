@@ -39,6 +39,10 @@ namespace NCurses.Core.Tests.Model
 
         public void Dispose()
         {
+            this.CurrentStandardScreen.Dispose();
+
+            this.StdScr.Dispose();
+
             NCurses.End();
         }
     }

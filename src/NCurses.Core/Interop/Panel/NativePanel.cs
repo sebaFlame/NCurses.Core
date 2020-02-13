@@ -1,21 +1,22 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Text;
+
 using NCurses.Core.Interop.Dynamic;
+using NCurses.Core.Interop.SafeHandles;
 
 namespace NCurses.Core.Interop.Panel
 {
-    internal static class NativePanel
+    public static class NativePanel
     {
-        private static INCursesPanelWrapper wrapper;
-        public static INCursesPanelWrapper NCursesWrapper
+        public static INCursesPanelWrapper NCursesWrapper { get; }
+
+        static NativePanel()
         {
-            get
-            {
-                if (wrapper is null)
-                    wrapper = (INCursesPanelWrapper)Activator.CreateInstance(DynamicTypeBuilder.CreateDefaultWrapper<INCursesPanelWrapper>(Constants.DLLPANELNAME));
-                return wrapper;
-            }
+            //guarantee INCursesWrapper gets created first
+            bool hasUnicode = NativeNCurses.HasUnicodeSupport;
+
+            NCursesWrapper = (INCursesPanelWrapper)Activator.CreateInstance(DynamicTypeBuilder.CreateDefaultWrapper<INCursesPanelWrapper>(Constants.DLLPANELNAME));
         }
 
         /// <summary>
@@ -25,7 +26,7 @@ namespace NCurses.Core.Interop.Panel
         /// </summary>
         /// <param name="window">The window to create a panel for</param>
         /// <returns>A pointer to the newly created panel</returns>
-        public static IntPtr new_panel(IntPtr window)
+        public static PanelBaseSafeHandle new_panel(WindowBaseSafeHandle window)
         {
             return NCursesException.Verify(NCursesWrapper.new_panel(window), "new_panel");
         }
@@ -34,7 +35,7 @@ namespace NCurses.Core.Interop.Panel
         /// puts panel at the bottom of all panels.
         /// </summary>
         /// <param name="panel"></param>
-        public static void bottom_panel(IntPtr panel)
+        public static void bottom_panel(PanelBaseSafeHandle panel)
         {
             NCursesException.Verify(NCursesWrapper.bottom_panel(panel), "bottom_panel");
         }
@@ -43,7 +44,7 @@ namespace NCurses.Core.Interop.Panel
         /// puts  the given visible panel on top of all panels in the stack.
         /// </summary>
         /// <param name="panel"></param>
-        public static void top_panel(IntPtr panel)
+        public static void top_panel(PanelBaseSafeHandle panel)
         {
             NCursesException.Verify(NCursesWrapper.top_panel(panel), "top_panel");
         }
@@ -53,7 +54,7 @@ namespace NCurses.Core.Interop.Panel
         /// in the panel stack.
         /// </summary>
         /// <param name="panel"></param>
-        public static void show_panel(IntPtr panel)
+        public static void show_panel(PanelBaseSafeHandle panel)
         {
             NCursesException.Verify(NCursesWrapper.show_panel(panel), "show_panel");
         }
@@ -77,7 +78,7 @@ namespace NCurses.Core.Interop.Panel
         /// the stack.
         /// </summary>
         /// <param name="panel">The panel to hide</param>
-        public static void hide_panel(IntPtr panel)
+        public static void hide_panel(PanelBaseSafeHandle panel)
         {
             NCursesException.Verify(NCursesWrapper.hide_panel(panel), "hide_panel");
         }
@@ -87,7 +88,7 @@ namespace NCurses.Core.Interop.Panel
         /// </summary>
         /// <param name="panel">The panel to get the window for</param>
         /// <returns>A pointer to the window of the given panel</returns>
-        public static IntPtr panel_window(IntPtr panel)
+        public static WindowBaseSafeHandle panel_window(PanelBaseSafeHandle panel)
         {
             return NCursesException.Verify(NCursesWrapper.panel_window(panel), "panel_window");
         }
@@ -95,12 +96,12 @@ namespace NCurses.Core.Interop.Panel
         /// <summary>
         /// replaces  the  current  window of panel with window (useful, for
         /// example if you want to resize a panel; if you're using  ncurses,
-        /// you can  call replace_panel on the output of <see cref="NativeWindow.wresize(IntPtr, int, int)"/>).  It
+        /// you can  call replace_panel on the output of <see cref="NativeWindowInternal.wresize(IntPtr, int, int)"/>).  It
         /// does not change the position of the panel in the stack.
         /// </summary>
         /// <param name="panel">The panel for which you want to replace the window</param>
         /// <param name="window">The window to add to the panel</param>
-        public static void replace_panel(IntPtr panel, IntPtr window)
+        public static void replace_panel(PanelBaseSafeHandle panel, WindowBaseSafeHandle window)
         {
             NCursesException.Verify(NCursesWrapper.replace_panel(panel, window), "replace_panel");
         }
@@ -114,7 +115,7 @@ namespace NCurses.Core.Interop.Panel
         /// <param name="panel">The panel to move</param>
         /// <param name="starty">the line number to move the panel to</param>
         /// <param name="startx">The column number to move the panel to</param>
-        public static void move_panel(IntPtr panel, int starty, int startx)
+        public static void move_panel(PanelBaseSafeHandle panel, int starty, int startx)
         {
             NCursesException.Verify(NCursesWrapper.move_panel(panel, starty, startx), "move_panel");
         }
@@ -125,7 +126,7 @@ namespace NCurses.Core.Interop.Panel
         /// </summary>
         /// <param name="panel">The panel to check</param>
         /// <returns>TRUE if hidden</returns>
-        public static bool panel_hidden(IntPtr panel)
+        public static bool panel_hidden(PanelBaseSafeHandle panel)
         {
             return NCursesException.Verify(NCursesWrapper.panel_hidden(panel), "panel_hidden") == 1;
         }
@@ -137,7 +138,7 @@ namespace NCurses.Core.Interop.Panel
         /// </summary>
         /// <param name="panel">The panel to check</param>
         /// <returns>A pointer to the panel above the checked panel</returns>
-        public static IntPtr panel_above(IntPtr panel)
+        public static PanelBaseSafeHandle panel_above(PanelBaseSafeHandle panel)
         {
             return NCursesException.Verify(NCursesWrapper.panel_above(panel), "panel_above");
         }
@@ -149,7 +150,7 @@ namespace NCurses.Core.Interop.Panel
         /// </summary>
         /// <param name="panel">The panel to check</param>
         /// <returns>A pointer to the panel below the checked panel</returns>
-        public static IntPtr panel_below(IntPtr panel)
+        public static PanelBaseSafeHandle panel_below(PanelBaseSafeHandle panel)
         {
             return NCursesException.Verify(NCursesWrapper.panel_below(panel), "panel_below");
         }
@@ -159,7 +160,7 @@ namespace NCurses.Core.Interop.Panel
         /// </summary>
         /// <param name="panel">The panel to set the user pointer for</param>
         /// <param name="userPtr">The user pointer to set</param>
-        public static void set_panel_userptr(IntPtr panel, IntPtr userPtr)
+        public static void set_panel_userptr(PanelBaseSafeHandle panel, IntPtr userPtr)
         {
             NCursesException.Verify(NCursesWrapper.set_panel_userptr(panel, userPtr), "set_panel_userptr");
         }
@@ -167,7 +168,7 @@ namespace NCurses.Core.Interop.Panel
         /// <summary>
         /// returns the user pointer for a given panel.
         /// </summary>
-        public static IntPtr panel_userptr(IntPtr panel)
+        public static IntPtr panel_userptr(PanelBaseSafeHandle panel)
         {
             return NCursesException.Verify(NCursesWrapper.panel_userptr(panel), "panel_userptr");
         }

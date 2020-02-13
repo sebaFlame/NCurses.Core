@@ -1,26 +1,28 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Text;
+
+using NCurses.Core.Interop.SafeHandles;
 using NCurses.Core.Interop.Mouse;
 using NCurses.Core.Interop.SingleByte;
 
 namespace NCurses.Core.Interop.MultiByte
 {
-    public interface INativePadMultiByte
-    {
-        void pecho_wchar(IntPtr pad, in IMultiByteChar wch);
-    }
-    
-    public class NativePadMultiByte<TMultiByte, TMultiByteString, TSingleByte, TSingleByteString, TMouseEvent> : MultiByteWrapper<TMultiByte, TMultiByteString, TSingleByte, TSingleByteString, TMouseEvent>, INativePadMultiByte
+    internal class NativePadMultiByte<TMultiByte, TWideChar, TSingleByte, TChar, TMouseEvent> 
+            : MultiByteWrapper<TMultiByte, TWideChar, TSingleByte, TChar, TMouseEvent>, 
+            INativePadMultiByte<TMultiByte, MultiByteCharString<TMultiByte>>
         where TMultiByte : unmanaged, IMultiByteChar, IEquatable<TMultiByte>
-        where TMultiByteString : unmanaged
+        where TWideChar : unmanaged, IChar, IEquatable<TWideChar>
         where TSingleByte : unmanaged, ISingleByteChar, IEquatable<TSingleByte>
-        where TSingleByteString : unmanaged
+        where TChar : unmanaged, IChar, IEquatable<TChar>
         where TMouseEvent : unmanaged, IMEVENT
     {
-        public void pecho_wchar(IntPtr pad, in IMultiByteChar wch)
+        internal NativePadMultiByte(IMultiByteWrapper<TMultiByte, TWideChar, TSingleByte, TChar> wrapper)
+            : base(wrapper) { }
+
+        public void pecho_wchar(WindowBaseSafeHandle pad, in TMultiByte wch)
         {
-            NCursesException.Verify(Wrapper.pecho_wchar(pad, MarshallArrayReadonly(wch)), "pecho_wchar");
+            NCursesException.Verify(Wrapper.pecho_wchar(pad, in wch), "pecho_wchar");
         }
     }
 }
