@@ -10,11 +10,11 @@ namespace NCurses.Core.Interop.Wrappers
 {
     internal interface ICustomTypeWrapper
     {
-        INativeNCursesWrapper<IMultiByteChar, IMultiByteCharString, IChar, ICharString, ISingleByteChar, ISingleByteCharString, IChar, ICharString, IMEVENT> NCurses { get; }
-        INativeWindowWrapper<IMultiByteChar, IMultiByteCharString, IChar, ICharString, ISingleByteChar, ISingleByteCharString, IChar, ICharString, IMEVENT> Window { get; }
-        INativeStdScrWrapper<IMultiByteChar, IMultiByteCharString, IChar, ICharString, ISingleByteChar, ISingleByteCharString, IChar, ICharString, IMEVENT> StdScr { get; }
-        INativeScreenWrapper<IMultiByteChar, IMultiByteCharString, IChar, ICharString, ISingleByteChar, ISingleByteCharString, IChar, ICharString, IMEVENT> Screen { get; }
-        INativePadWrapper<IMultiByteChar, IMultiByteCharString, IChar, ICharString, ISingleByteChar, ISingleByteCharString, IChar, ICharString, IMEVENT> Pad { get; }
+        INativeNCursesWrapper<IMultiByteNCursesChar, IMultiByteNCursesCharString, IMultiByteChar, IMultiByteCharString, ISingleByteNCursesChar, ISingleByteNCursesCharString, ISingleByteChar, ISingleByteCharString, IMEVENT> NCurses { get; }
+        INativeWindowWrapper<IMultiByteNCursesChar, IMultiByteNCursesCharString, IMultiByteChar, IMultiByteCharString, ISingleByteNCursesChar, ISingleByteNCursesCharString, ISingleByteChar, ISingleByteCharString, IMEVENT> Window { get; }
+        INativeStdScrWrapper<IMultiByteNCursesChar, IMultiByteNCursesCharString, IMultiByteChar, IMultiByteCharString, ISingleByteNCursesChar, ISingleByteNCursesCharString, ISingleByteChar, ISingleByteCharString, IMEVENT> StdScr { get; }
+        INativeScreenWrapper<IMultiByteNCursesChar, IMultiByteNCursesCharString, IMultiByteChar, IMultiByteCharString, ISingleByteNCursesChar, ISingleByteNCursesCharString, ISingleByteChar, ISingleByteCharString, IMEVENT> Screen { get; }
+        INativePadWrapper<IMultiByteNCursesChar, IMultiByteNCursesCharString, IMultiByteChar, IMultiByteCharString, ISingleByteNCursesChar, ISingleByteNCursesCharString, ISingleByteChar, ISingleByteCharString, IMEVENT> Pad { get; }
         IWindowFactory WindowFactory { get; }
     }
 }

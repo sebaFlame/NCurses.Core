@@ -18,11 +18,12 @@ namespace NCurses.Core
     /* TODO
      * methods using INCursesChar should allow other types than their own implementation
     */
-    public abstract class WindowBase<TMultiByte, TWideChar, TSingleByte, TChar, TMouseEvent> : IWindow, IEquatable<WindowBase<TMultiByte, TWideChar, TSingleByte, TChar, TMouseEvent>>, IDisposable
-        where TMultiByte : unmanaged, IMultiByteChar, IEquatable<TMultiByte>
-        where TWideChar : unmanaged, IChar, IEquatable<TWideChar>
-        where TSingleByte : unmanaged, ISingleByteChar, IEquatable<TSingleByte>
-        where TChar : unmanaged, IChar, IEquatable<TChar>
+    public abstract class WindowBase<TMultiByte, TWideChar, TSingleByte, TChar, TMouseEvent> 
+        : IWindow, IEquatable<WindowBase<TMultiByte, TWideChar, TSingleByte, TChar, TMouseEvent>>, IDisposable
+        where TMultiByte : unmanaged, IMultiByteNCursesChar, IEquatable<TMultiByte>
+        where TWideChar : unmanaged, IMultiByteChar, IEquatable<TWideChar>
+        where TSingleByte : unmanaged, ISingleByteNCursesChar, IEquatable<TSingleByte>
+        where TChar : unmanaged, ISingleByteChar, IEquatable<TChar>
         where TMouseEvent : unmanaged, IMEVENT
     {
         internal static HashSet<WindowBase<TMultiByte, TWideChar, TSingleByte, TChar, TMouseEvent>> Windows;

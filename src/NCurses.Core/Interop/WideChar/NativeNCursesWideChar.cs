@@ -12,8 +12,8 @@ namespace NCurses.Core.Interop.WideChar
     internal class NativeNCursesWideChar<TWideChar, TChar> 
             : WideCharWrapper<TWideChar, TChar>, 
             INativeNCursesWideChar<TWideChar, WideCharString<TWideChar>>
-        where TWideChar : unmanaged, IChar, IEquatable<TWideChar>
-        where TChar : unmanaged, IChar, IEquatable<TChar>
+        where TWideChar : unmanaged, IMultiByteChar, IEquatable<TWideChar>
+        where TChar : unmanaged, ISingleByteChar, IEquatable<TChar>
     {
         internal NativeNCursesWideChar(IWideCharWrapper<TWideChar, TChar> wrapper)
             : base(wrapper) { }

@@ -8,13 +8,15 @@ namespace NCurses.Core.Interop.Dynamic.chtype
 {
     //TODO: temporary test class -> REMOVE
     [StructLayout(LayoutKind.Sequential)]
-    internal struct chtype : ISingleByteChar, IEquatable<chtype> //chtype & attr_t
+    internal struct chtype : ISingleByteNCursesChar, IEquatable<chtype> //chtype & attr_t
     {
         public UInt32 charWithAttr;
 
         public char Char => (char)(this.charWithAttr & Attrs.CHARTEXT);
         public ulong Attributes => (ulong)((this.charWithAttr ^ (this.charWithAttr & Attrs.COLOR)) & Attrs.ATTRIBUTES);
         public short Color => (short)Constants.PAIR_NUMBER(this.charWithAttr);
+
+        public byte EncodedChar => (byte)(this.charWithAttr & Attrs.CHARTEXT);
 
         public chtype(sbyte ch)
         {
@@ -100,7 +102,7 @@ namespace NCurses.Core.Interop.Dynamic.chtype
         {
             if (obj is chtype other)
             {
-                return this == other;
+                return this.Equals(other);
             }
             return false;
         }
@@ -108,15 +110,6 @@ namespace NCurses.Core.Interop.Dynamic.chtype
         public bool Equals(IChar obj)
         {
             if (obj is chtype other)
-            {
-                return this == other;
-            }
-            return false;
-        }
-
-        public bool Equals(INCursesChar obj)
-        {
-            if (obj is ISingleByteChar other)
             {
                 return this.Equals(other);
             }
@@ -127,7 +120,25 @@ namespace NCurses.Core.Interop.Dynamic.chtype
         {
             if (obj is chtype other)
             {
-                return this == other;
+                return this.Equals(other);
+            }
+            return false;
+        }
+
+        public bool Equals(INCursesChar obj)
+        {
+            if (obj is chtype other)
+            {
+                return this.Equals(other);
+            }
+            return false;
+        }
+
+        public bool Equals(ISingleByteNCursesChar obj)
+        {
+            if (obj is chtype other)
+            {
+                return this.Equals(other);
             }
             return false;
         }

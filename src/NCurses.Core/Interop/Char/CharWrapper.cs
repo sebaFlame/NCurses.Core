@@ -7,8 +7,8 @@ using System.Runtime.CompilerServices;
 namespace NCurses.Core.Interop.Char
 {
     internal class CharWrapper<TChar> //handles char
-        : INativeCharWrapper<IChar, TChar, ICharString, CharString<TChar>>
-        where TChar : unmanaged, IChar, IEquatable<TChar>
+        : INativeCharWrapper<ISingleByteChar, TChar, ISingleByteCharString, CharString<TChar>>
+        where TChar : unmanaged, ISingleByteChar, IEquatable<TChar>
     {
         internal ICharWrapper<TChar> Wrapper { get; }
 
@@ -17,9 +17,9 @@ namespace NCurses.Core.Interop.Char
             this.Wrapper = wrapper;
         }
 
-        public CharString<TChar> CastString(in ICharString wCharStr)
+        public CharString<TChar> CastString(in ISingleByteCharString charStr)
         {
-            if (!(wCharStr is CharString<TChar> wCasted))
+            if (!(charStr is CharString<TChar> wCasted))
             {
                 throw new InvalidCastException("Character is in incorrect format");
             }
@@ -27,7 +27,7 @@ namespace NCurses.Core.Interop.Char
             return wCasted;
         }
 
-        public TChar CastChar(in IChar wChar)
+        public TChar CastChar(in ISingleByteChar wChar)
         {
             if (!(wChar is TChar wCasted))
             {

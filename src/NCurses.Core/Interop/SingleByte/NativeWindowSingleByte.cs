@@ -10,8 +10,8 @@ namespace NCurses.Core.Interop.SingleByte
     internal class NativeWindowSingleByte<TSingleByte, TChar, TMouseEvent> 
         : SingleByteWrapper<TSingleByte, TChar, TMouseEvent>, 
         INativeWindowSingleByte<TSingleByte, SingleByteCharString<TSingleByte>>
-        where TSingleByte : unmanaged, ISingleByteChar, IEquatable<TSingleByte>
-        where TChar : unmanaged, IChar, IEquatable<TChar>
+        where TSingleByte : unmanaged, ISingleByteNCursesChar, IEquatable<TSingleByte>
+        where TChar : unmanaged, ISingleByteChar, IEquatable<TChar>
         where TMouseEvent : unmanaged, IMEVENT
     {
         internal NativeWindowSingleByte(ISingleByteWrapper<TSingleByte, TChar, TMouseEvent> wrapper)

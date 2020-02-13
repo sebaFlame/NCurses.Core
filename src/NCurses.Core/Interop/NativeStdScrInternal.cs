@@ -26,19 +26,19 @@ namespace NCurses.Core.Interop
                 CharString<TChar>,
                 TMouseEvent>,
             INativeStdScrWrapper<
+                IMultiByteNCursesChar,
+                IMultiByteNCursesCharString,
                 IMultiByteChar,
                 IMultiByteCharString,
-                IChar,
-                ICharString,
+                ISingleByteNCursesChar,
+                ISingleByteNCursesCharString,
                 ISingleByteChar,
                 ISingleByteCharString,
-                IChar,
-                ICharString,
                 IMEVENT>
-        where TMultiByte : unmanaged, IMultiByteChar, IEquatable<TMultiByte>
-        where TWideChar : unmanaged, IChar, IEquatable<TWideChar>
-        where TSingleByte : unmanaged, ISingleByteChar, IEquatable<TSingleByte>
-        where TChar : unmanaged, IChar, IEquatable<TChar>
+        where TMultiByte : unmanaged, IMultiByteNCursesChar, IEquatable<TMultiByte>
+        where TWideChar : unmanaged, IMultiByteChar, IEquatable<TWideChar>
+        where TSingleByte : unmanaged, ISingleByteNCursesChar, IEquatable<TSingleByte>
+        where TChar : unmanaged, ISingleByteChar, IEquatable<TChar>
         where TMouseEvent : unmanaged, IMEVENT
     {
         internal NativeStdScrMultiByte<TMultiByte, TWideChar, TSingleByte, TChar, TMouseEvent> MultiByteNCursesWrapper { get; }
@@ -46,8 +46,6 @@ namespace NCurses.Core.Interop
 
         internal NativeStdScrWideChar<TMultiByte, TWideChar, TSingleByte, TChar, TMouseEvent> WideCharNCursesWrapper { get; }
         internal NativeStdScrChar<TChar> CharNCursesWrapper { get; }
-
-        internal INativeStdScrWrapper<IMultiByteChar, IMultiByteCharString, IChar, ICharString, ISingleByteChar, ISingleByteCharString, IChar, ICharString, IMEVENT> Instance => this;
 
         public NativeStdScrInternal(
             IMultiByteWrapper<TMultiByte, TWideChar, TSingleByte, TChar> multiByteWrapper,
@@ -1708,37 +1706,37 @@ namespace NCurses.Core.Interop
         #endregion
 
         #region Interface implementations
-        public void add_wch(in IMultiByteChar wch)
+        public void add_wch(in IMultiByteNCursesChar wch)
         {
             TMultiByte casted = this.MultiByteNCursesWrapper.CastChar(wch);
             this.add_wch(in casted);
         }
 
-        public void add_wchnstr(in IMultiByteCharString wchStr, int n)
+        public void add_wchnstr(in IMultiByteNCursesCharString wchStr, int n)
         {
             MultiByteCharString<TMultiByte> casted = this.MultiByteNCursesWrapper.CastString(wchStr);
             this.add_wchnstr(in casted, n);
         }
 
-        public void add_wchstr(in IMultiByteCharString wchStr)
+        public void add_wchstr(in IMultiByteNCursesCharString wchStr)
         {
             MultiByteCharString<TMultiByte> casted = this.MultiByteNCursesWrapper.CastString(wchStr);
             this.add_wchstr(in casted);
         }
 
-        public void bkgrnd(in IMultiByteChar wch)
+        public void bkgrnd(in IMultiByteNCursesChar wch)
         {
             TMultiByte casted = this.MultiByteNCursesWrapper.CastChar(wch);
             this.bkgrnd(in casted);
         }
 
-        public void bkgrndset(in IMultiByteChar wch)
+        public void bkgrndset(in IMultiByteNCursesChar wch)
         {
             TMultiByte casted = this.MultiByteNCursesWrapper.CastChar(wch);
             this.bkgrndset(in casted);
         }
 
-        public void border_set(in IMultiByteChar ls, in IMultiByteChar rs, in IMultiByteChar ts, in IMultiByteChar bs, in IMultiByteChar tl, in IMultiByteChar tr, in IMultiByteChar bl, in IMultiByteChar br)
+        public void border_set(in IMultiByteNCursesChar ls, in IMultiByteNCursesChar rs, in IMultiByteNCursesChar ts, in IMultiByteNCursesChar bs, in IMultiByteNCursesChar tl, in IMultiByteNCursesChar tr, in IMultiByteNCursesChar bl, in IMultiByteNCursesChar br)
         {
             TMultiByte cls = this.MultiByteNCursesWrapper.CastChar(ls);
             TMultiByte crs = this.MultiByteNCursesWrapper.CastChar(rs);
@@ -1751,249 +1749,249 @@ namespace NCurses.Core.Interop
             this.border_set(in cls, in crs, in cts, in cbs, in ctl, in ctr, in cbl, in cbr);
         }
 
-        public void echo_wchar(in IMultiByteChar wch)
+        public void echo_wchar(in IMultiByteNCursesChar wch)
         {
             TMultiByte casted = this.MultiByteNCursesWrapper.CastChar(wch);
             this.echo_wchar(in casted);
         }
 
-        public void getbkgrnd(out IMultiByteChar wch)
+        public void getbkgrnd(out IMultiByteNCursesChar wch)
         {
             this.getbkgrnd(out TMultiByte wcVal);
             wch = wcVal;
         }
 
-        public void hline_set(in IMultiByteChar wch, int n)
+        public void hline_set(in IMultiByteNCursesChar wch, int n)
         {
             TMultiByte casted = this.MultiByteNCursesWrapper.CastChar(wch);
             this.hline_set(in casted, n);
         }
 
-        public void in_wch(out IMultiByteChar wch)
+        public void in_wch(out IMultiByteNCursesChar wch)
         {
             this.in_wch(out TMultiByte wcVal);
             wch = wcVal;
         }
 
-        public void in_wchnstr(ref IMultiByteCharString wchStr, int n)
+        public void in_wchnstr(ref IMultiByteNCursesCharString wchStr, int n)
         {
             MultiByteCharString<TMultiByte> casted = this.MultiByteNCursesWrapper.CastString(wchStr);
             this.in_wchnstr(ref casted, n);
         }
 
-        public void in_wchstr(ref IMultiByteCharString wch)
+        public void in_wchstr(ref IMultiByteNCursesCharString wch)
         {
             MultiByteCharString<TMultiByte> casted = this.MultiByteNCursesWrapper.CastString(wch);
             this.in_wchstr(ref casted);
         }
 
-        public void ins_wch(in IMultiByteChar wch)
+        public void ins_wch(in IMultiByteNCursesChar wch)
         {
             TMultiByte casted = this.MultiByteNCursesWrapper.CastChar(wch);
             this.ins_wch(in casted);
         }
 
-        public void mvadd_wch(int y, int x, in IMultiByteChar wch)
+        public void mvadd_wch(int y, int x, in IMultiByteNCursesChar wch)
         {
             TMultiByte casted = this.MultiByteNCursesWrapper.CastChar(wch);
             this.mvadd_wch(y, x, in casted);
         }
 
-        public void mvadd_wchnstr(int y, int x, in IMultiByteCharString wchStr, int n)
+        public void mvadd_wchnstr(int y, int x, in IMultiByteNCursesCharString wchStr, int n)
         {
             MultiByteCharString<TMultiByte> casted = this.MultiByteNCursesWrapper.CastString(wchStr);
             this.mvadd_wchnstr(y, x, in casted, n);
         }
 
-        public void mvadd_wchstr(int y, int x, in IMultiByteCharString wchStr)
+        public void mvadd_wchstr(int y, int x, in IMultiByteNCursesCharString wchStr)
         {
             MultiByteCharString<TMultiByte> casted = this.MultiByteNCursesWrapper.CastString(wchStr);
             this.mvadd_wchstr(y, x, in casted);
         }
 
-        public void mvhline_set(int y, int x, in IMultiByteChar wch, int n)
+        public void mvhline_set(int y, int x, in IMultiByteNCursesChar wch, int n)
         {
             TMultiByte casted = this.MultiByteNCursesWrapper.CastChar(wch);
             this.mvhline_set(y, x, in casted, n);
         }
 
-        public void mvin_wch(int y, int x, out IMultiByteChar wch)
+        public void mvin_wch(int y, int x, out IMultiByteNCursesChar wch)
         {
             this.mvin_wch(y, x, out TMultiByte wcVal);
             wch = wcVal;
         }
 
-        public void mvin_wchnstr(int y, int x, ref IMultiByteCharString wchStr, int n)
+        public void mvin_wchnstr(int y, int x, ref IMultiByteNCursesCharString wchStr, int n)
         {
             MultiByteCharString<TMultiByte> casted = this.MultiByteNCursesWrapper.CastString(wchStr);
             this.mvin_wchnstr(y, x, ref casted, n);
         }
 
-        public void mvin_wchstr(int y, int x, ref IMultiByteCharString wchStr)
+        public void mvin_wchstr(int y, int x, ref IMultiByteNCursesCharString wchStr)
         {
             MultiByteCharString<TMultiByte> casted = this.MultiByteNCursesWrapper.CastString(wchStr);
             this.mvin_wchstr(y, x, ref casted);
         }
 
-        public void mvins_wch(int y, int x, in IMultiByteChar wch)
+        public void mvins_wch(int y, int x, in IMultiByteNCursesChar wch)
         {
             TMultiByte casted = this.MultiByteNCursesWrapper.CastChar(wch);
             this.mvins_wch(y, x, in casted);
         }
 
-        public void mvvline_set(int y, int x, in IMultiByteChar wch, int n)
+        public void mvvline_set(int y, int x, in IMultiByteNCursesChar wch, int n)
         {
             TMultiByte casted = this.MultiByteNCursesWrapper.CastChar(wch);
             this.mvvline_set(y, x, in casted, n);
         }
 
-        public void vline_set(in IMultiByteChar wch, int n)
+        public void vline_set(in IMultiByteNCursesChar wch, int n)
         {
             TMultiByte casted = this.MultiByteNCursesWrapper.CastChar(wch);
             this.vline_set(in casted, n);
         }
 
-        public void addnwstr(in ICharString wstr, int n)
+        public void addnwstr(in IMultiByteCharString wstr, int n)
         {
             WideCharString<TWideChar> casted = this.WideCharNCursesWrapper.CastString(wstr);
             this.addnwstr(in casted, n);
         }
 
-        public void addwstr(in ICharString wstr)
+        public void addwstr(in IMultiByteCharString wstr)
         {
             WideCharString<TWideChar> casted = this.WideCharNCursesWrapper.CastString(wstr);
             this.addwstr(in casted);
         }
 
-        public bool get_wch(out IChar wch, out Key key)
+        public bool get_wch(out IMultiByteChar wch, out Key key)
         {
             bool ret = this.get_wch(out TWideChar wcVal, out key);
             wch = wcVal;
             return ret;
         }
 
-        public void get_wstr(ref ICharString wstr)
+        public void get_wstr(ref IMultiByteCharString wstr)
         {
             WideCharString<TWideChar> casted = this.WideCharNCursesWrapper.CastString(wstr);
             this.get_wstr(ref casted);
         }
 
-        public void getn_wstr(ref ICharString wstr, int n)
+        public void getn_wstr(ref IMultiByteCharString wstr, int n)
         {
             WideCharString<TWideChar> casted = this.WideCharNCursesWrapper.CastString(wstr);
             this.getn_wstr(ref casted, n);
         }
 
-        public void innwstr(ref ICharString wstr, int n, out int read)
+        public void innwstr(ref IMultiByteCharString wstr, int n, out int read)
         {
             WideCharString<TWideChar> casted = this.WideCharNCursesWrapper.CastString(wstr);
             this.innwstr(ref casted, n, out read);
         }
 
-        public void ins_nwstr(in ICharString wstr, int n)
+        public void ins_nwstr(in IMultiByteCharString wstr, int n)
         {
             WideCharString<TWideChar> casted = this.WideCharNCursesWrapper.CastString(wstr);
             this.ins_nwstr(in casted, n);
         }
 
-        public void ins_wstr(in ICharString wstr)
+        public void ins_wstr(in IMultiByteCharString wstr)
         {
             WideCharString<TWideChar> casted = this.WideCharNCursesWrapper.CastString(wstr);
             this.ins_wstr(in casted);
         }
 
-        public void inwstr(ref ICharString wstr)
+        public void inwstr(ref IMultiByteCharString wstr)
         {
             WideCharString<TWideChar> casted = this.WideCharNCursesWrapper.CastString(wstr);
             this.inwstr(ref casted);
         }
 
-        public void mvaddnwstr(int y, int x, in ICharString wstr, int n)
+        public void mvaddnwstr(int y, int x, in IMultiByteCharString wstr, int n)
         {
             WideCharString<TWideChar> casted = this.WideCharNCursesWrapper.CastString(wstr);
             this.mvaddnwstr(y, x, in casted, n);
         }
 
-        public void mvaddwstr(int y, int x, in ICharString wstr)
+        public void mvaddwstr(int y, int x, in IMultiByteCharString wstr)
         {
             WideCharString<TWideChar> casted = this.WideCharNCursesWrapper.CastString(wstr);
             this.mvaddwstr(y, x, in casted);
         }
 
-        public bool mvget_wch(int y, int x, out IChar wch, out Key key)
+        public bool mvget_wch(int y, int x, out IMultiByteChar wch, out Key key)
         {
             bool ret = mvget_wch(y, x, out TWideChar wcVal, out key);
             wch = wcVal;
             return ret;
         }
 
-        public void mvget_wstr(int y, int x, ref ICharString wstr)
+        public void mvget_wstr(int y, int x, ref IMultiByteCharString wstr)
         {
             WideCharString<TWideChar> casted = this.WideCharNCursesWrapper.CastString(wstr);
             this.mvget_wstr(y, x, ref casted);
         }
 
-        public void mvgetn_wstr(int y, int x, ref ICharString wstr, int n)
+        public void mvgetn_wstr(int y, int x, ref IMultiByteCharString wstr, int n)
         {
             WideCharString<TWideChar> casted = this.WideCharNCursesWrapper.CastString(wstr);
             this.mvgetn_wstr(y, x, ref casted, n);
         }
 
-        public void mvinnwstr(int y, int x, ref ICharString wstr, int n, out int read)
+        public void mvinnwstr(int y, int x, ref IMultiByteCharString wstr, int n, out int read)
         {
             WideCharString<TWideChar> casted = this.WideCharNCursesWrapper.CastString(wstr);
             this.mvinnwstr(y, x, ref casted, n, out read);
         }
 
-        public void mvins_nwstr(int y, int x, in ICharString wstr, int n)
+        public void mvins_nwstr(int y, int x, in IMultiByteCharString wstr, int n)
         {
             WideCharString<TWideChar> casted = this.WideCharNCursesWrapper.CastString(wstr);
             this.mvins_nwstr(y, x, in casted, n);
         }
 
-        public void mvins_wstr(int y, int x, in ICharString wstr)
+        public void mvins_wstr(int y, int x, in IMultiByteCharString wstr)
         {
             WideCharString<TWideChar> casted = this.WideCharNCursesWrapper.CastString(wstr);
             this.mvins_wstr(y, x, in casted);
         }
 
-        public void mvinwstr(int y, int x, ref ICharString wstr)
+        public void mvinwstr(int y, int x, ref IMultiByteCharString wstr)
         {
             WideCharString<TWideChar> casted = this.WideCharNCursesWrapper.CastString(wstr);
             this.mvinwstr(y, x, ref casted);
         }
 
-        public void addch(in ISingleByteChar ch)
+        public void addch(in ISingleByteNCursesChar ch)
         {
             TSingleByte casted = this.SingleByteNCursesWrapper.CastChar(ch);
             this.addch(in casted);
         }
 
-        public void addchnstr(in ISingleByteCharString txt, int number)
+        public void addchnstr(in ISingleByteNCursesCharString txt, int number)
         {
             SingleByteCharString<TSingleByte> casted = this.SingleByteNCursesWrapper.CastString(txt);
             this.addchnstr(in casted, number);
         }
 
-        public void addchstr(in ISingleByteCharString txt)
+        public void addchstr(in ISingleByteNCursesCharString txt)
         {
             SingleByteCharString<TSingleByte> casted = this.SingleByteNCursesWrapper.CastString(txt);
             this.addchstr(in casted);
         }
 
-        public void bkgd(in ISingleByteChar bkgd)
+        public void bkgd(in ISingleByteNCursesChar bkgd)
         {
             TSingleByte casted = this.SingleByteNCursesWrapper.CastChar(bkgd);
             this.bkgd(in casted);
         }
 
-        public void bkgdset(in ISingleByteChar bkgd)
+        public void bkgdset(in ISingleByteNCursesChar bkgd)
         {
             TSingleByte casted = this.SingleByteNCursesWrapper.CastChar(bkgd);
             this.bkgdset(in casted);
         }
 
-        public void border(in ISingleByteChar ls, in ISingleByteChar rs, in ISingleByteChar ts, in ISingleByteChar bs, in ISingleByteChar tl, in ISingleByteChar tr, in ISingleByteChar bl, in ISingleByteChar br)
+        public void border(in ISingleByteNCursesChar ls, in ISingleByteNCursesChar rs, in ISingleByteNCursesChar ts, in ISingleByteNCursesChar bs, in ISingleByteNCursesChar tl, in ISingleByteNCursesChar tr, in ISingleByteNCursesChar bl, in ISingleByteNCursesChar br)
         {
             TSingleByte cls = this.SingleByteNCursesWrapper.CastChar(ls);
             TSingleByte crs = this.SingleByteNCursesWrapper.CastChar(rs);
@@ -2006,199 +2004,199 @@ namespace NCurses.Core.Interop
             this.border(in cls, in crs, in cts, in cbs, in ctl, in ctr, in cbl, in cbr);
         }
 
-        public void echochar(in ISingleByteChar ch)
+        public void echochar(in ISingleByteNCursesChar ch)
         {
             TSingleByte casted = this.SingleByteNCursesWrapper.CastChar(ch);
             this.echochar(in casted);
         }
 
-        public void hline(in ISingleByteChar ch, int count)
+        public void hline(in ISingleByteNCursesChar ch, int count)
         {
             TSingleByte casted = this.SingleByteNCursesWrapper.CastChar(ch);
             this.hline(in casted, count);
         }
 
-        public void inch(out ISingleByteChar ch)
+        public void inch(out ISingleByteNCursesChar ch)
         {
             this.inch(out TSingleByte cVal);
             ch = cVal;
         }
 
-        public void inchnstr(ref ISingleByteCharString txt, int count, out int read)
+        public void inchnstr(ref ISingleByteNCursesCharString txt, int count, out int read)
         {
             SingleByteCharString<TSingleByte> casted = this.SingleByteNCursesWrapper.CastString(txt);
             this.inchnstr(ref casted, count, out read);
         }
 
-        public void inchstr(ref ISingleByteCharString txt, out int read)
+        public void inchstr(ref ISingleByteNCursesCharString txt, out int read)
         {
             SingleByteCharString<TSingleByte> casted = this.SingleByteNCursesWrapper.CastString(txt);
             this.inchstr(ref casted, out read);
         }
 
-        public void insch(in ISingleByteChar ch)
+        public void insch(in ISingleByteNCursesChar ch)
         {
             TSingleByte casted = this.SingleByteNCursesWrapper.CastChar(ch);
             this.insch(in casted);
         }
 
-        public void mvaddch(int y, int x, in ISingleByteChar ch)
+        public void mvaddch(int y, int x, in ISingleByteNCursesChar ch)
         {
             TSingleByte casted = this.SingleByteNCursesWrapper.CastChar(ch);
             this.mvaddch(y, x, in casted);
         }
 
-        public void mvaddchnstr(int y, int x, in ISingleByteCharString chstr, int n)
+        public void mvaddchnstr(int y, int x, in ISingleByteNCursesCharString chstr, int n)
         {
             SingleByteCharString<TSingleByte> casted = this.SingleByteNCursesWrapper.CastString(chstr);
             this.mvaddchnstr(y, x, in casted, n);
         }
 
-        public void mvaddchstr(int y, int x, in ISingleByteCharString chStr)
+        public void mvaddchstr(int y, int x, in ISingleByteNCursesCharString chStr)
         {
             SingleByteCharString<TSingleByte> casted = this.SingleByteNCursesWrapper.CastString(chStr);
             this.mvaddchstr(y, x, in casted);
         }
 
-        public void mvhline(int y, int x, in ISingleByteChar ch, int count)
+        public void mvhline(int y, int x, in ISingleByteNCursesChar ch, int count)
         {
             TSingleByte casted = this.SingleByteNCursesWrapper.CastChar(ch);
             this.mvhline(y, x, in casted, count);
         }
 
-        public void mvinch(int y, int x, out ISingleByteChar ch)
+        public void mvinch(int y, int x, out ISingleByteNCursesChar ch)
         {
             this.mvinch(y, x, out TSingleByte cVal);
             ch = cVal;
         }
 
-        public void mvinchnstr(int y, int x, ref ISingleByteCharString chstr, int count, out int read)
+        public void mvinchnstr(int y, int x, ref ISingleByteNCursesCharString chstr, int count, out int read)
         {
             SingleByteCharString<TSingleByte> casted = this.SingleByteNCursesWrapper.CastString(chstr);
             this.mvinchnstr(y, x, ref casted, count, out read);
         }
 
-        public void mvinchstr(int y, int x, ref ISingleByteCharString chstr, out int read)
+        public void mvinchstr(int y, int x, ref ISingleByteNCursesCharString chstr, out int read)
         {
             SingleByteCharString<TSingleByte> casted = this.SingleByteNCursesWrapper.CastString(chstr);
             this.mvinchstr(y, x, ref casted, out read);
         }
 
-        public void mvinsch(int y, int x, in ISingleByteChar ch)
+        public void mvinsch(int y, int x, in ISingleByteNCursesChar ch)
         {
             TSingleByte casted = this.SingleByteNCursesWrapper.CastChar(ch);
             this.mvinsch(y, x, in casted);
         }
 
-        public void mvvline(int y, int x, in ISingleByteChar ch, int n)
+        public void mvvline(int y, int x, in ISingleByteNCursesChar ch, int n)
         {
             TSingleByte casted = this.SingleByteNCursesWrapper.CastChar(ch);
             this.mvvline(y, x, in casted, n);
         }
 
-        public void vline(in ISingleByteChar ch, int n)
+        public void vline(in ISingleByteNCursesChar ch, int n)
         {
             TSingleByte casted = this.SingleByteNCursesWrapper.CastChar(ch);
             this.vline(in casted, n);
         }
 
-        public void addnstr(in ICharString txt, int number)
+        public void addnstr(in ISingleByteCharString txt, int number)
         {
             CharString<TChar> casted = this.CharNCursesWrapper.CastString(txt);
             this.addnstr(in casted, number);
         }
 
-        public void addstr(in ICharString txt)
+        public void addstr(in ISingleByteCharString txt)
         {
             CharString<TChar> casted = this.CharNCursesWrapper.CastString(txt);
             this.addstr(in casted);
         }
 
-        public void getnstr(ref ICharString str, int count)
+        public void getnstr(ref ISingleByteCharString str, int count)
         {
             CharString<TChar> casted = this.CharNCursesWrapper.CastString(str);
             this.getnstr(ref casted, count);
         }
 
-        public void getstr(ref ICharString txt)
+        public void getstr(ref ISingleByteCharString txt)
         {
             CharString<TChar> casted = this.CharNCursesWrapper.CastString(txt);
             this.getstr(ref casted);
         }
 
-        public void innstr(ref ICharString str, int n, out int read)
+        public void innstr(ref ISingleByteCharString str, int n, out int read)
         {
             CharString<TChar> casted = this.CharNCursesWrapper.CastString(str);
             this.innstr(ref casted, n, out read);
         }
 
-        public void insnstr(in ICharString str, int n)
+        public void insnstr(in ISingleByteCharString str, int n)
         {
             CharString<TChar> casted = this.CharNCursesWrapper.CastString(str);
             this.insnstr(in casted, n);
         }
 
-        public void insstr(in ICharString str)
+        public void insstr(in ISingleByteCharString str)
         {
             CharString<TChar> casted = this.CharNCursesWrapper.CastString(str);
             this.insstr(in casted);
         }
 
-        public void instr(ref ICharString str, out int read)
+        public void instr(ref ISingleByteCharString str, out int read)
         {
             CharString<TChar> casted = this.CharNCursesWrapper.CastString(str);
             this.instr(ref casted, out read);
         }
 
-        public void mvaddnstr(int y, int x, in ICharString txt, int n)
+        public void mvaddnstr(int y, int x, in ISingleByteCharString txt, int n)
         {
             CharString<TChar> casted = this.CharNCursesWrapper.CastString(txt);
             this.mvaddnstr(y, x, in casted, n);
         }
 
-        public void mvaddstr(int y, int x, in ICharString txt)
+        public void mvaddstr(int y, int x, in ISingleByteCharString txt)
         {
             CharString<TChar> casted = this.CharNCursesWrapper.CastString(txt);
             this.mvaddstr(y, x, in casted);
         }
 
-        public void mvgetnstr(int y, int x, ref ICharString str, int count)
+        public void mvgetnstr(int y, int x, ref ISingleByteCharString str, int count)
         {
             CharString<TChar> casted = this.CharNCursesWrapper.CastString(str);
             this.mvgetnstr(y, x, ref casted, count);
         }
 
-        public void mvgetstr(int y, int x, ref ICharString str)
+        public void mvgetstr(int y, int x, ref ISingleByteCharString str)
         {
             CharString<TChar> casted = this.CharNCursesWrapper.CastString(str);
             this.mvgetstr(y, x, ref casted);
         }
 
-        public void mvinnstr(int y, int x, ref ICharString str, int n, out int read)
+        public void mvinnstr(int y, int x, ref ISingleByteCharString str, int n, out int read)
         {
             CharString<TChar> casted = this.CharNCursesWrapper.CastString(str);
             this.mvinnstr(y, x, ref casted, n, out read);
         }
 
-        public void mvinsnstr(int y, int x, in ICharString str, int n)
+        public void mvinsnstr(int y, int x, in ISingleByteCharString str, int n)
         {
             CharString<TChar> casted = this.CharNCursesWrapper.CastString(str);
             this.mvinsnstr(y, x, in casted, n);
         }
 
-        public void mvinsstr(int y, int x, in ICharString str)
+        public void mvinsstr(int y, int x, in ISingleByteCharString str)
         {
             CharString<TChar> casted = this.CharNCursesWrapper.CastString(str);
             this.mvinsstr(y, x, in casted);
         }
 
-        public void mvinstr(int y, int x, ref ICharString str, out int read)
+        public void mvinstr(int y, int x, ref ISingleByteCharString str, out int read)
         {
             CharString<TChar> casted = this.CharNCursesWrapper.CastString(str);
             this.mvinstr(y, x, ref casted, out read);
         }
 
-        public void mvprintw(int y, int x, in ICharString str, params ICharString[] argList)
+        public void mvprintw(int y, int x, in ISingleByteCharString str, params ISingleByteCharString[] argList)
         {
             CharString<TChar> casted = this.CharNCursesWrapper.CastString(str);
 
@@ -2211,7 +2209,7 @@ namespace NCurses.Core.Interop
             this.mvprintw(y, x, in casted, argListCasted);
         }
 
-        public void mvscanw(int y, int x, ref ICharString str, params ICharString[] argList)
+        public void mvscanw(int y, int x, ref ISingleByteCharString str, params ISingleByteCharString[] argList)
         {
             CharString<TChar> casted = this.CharNCursesWrapper.CastString(str);
 
@@ -2224,7 +2222,7 @@ namespace NCurses.Core.Interop
             this.mvscanw(y, x, ref casted, argListCasted);
         }
 
-        public void printw(in ICharString format, params ICharString[] argList)
+        public void printw(in ISingleByteCharString format, params ISingleByteCharString[] argList)
         {
             CharString<TChar> casted = this.CharNCursesWrapper.CastString(format);
 
@@ -2237,7 +2235,7 @@ namespace NCurses.Core.Interop
             this.printw(in casted, argListCasted);
         }
 
-        public void scanw(ref ICharString str, params ICharString[] argList)
+        public void scanw(ref ISingleByteCharString str, params ISingleByteCharString[] argList)
         {
             CharString<TChar> casted = this.CharNCursesWrapper.CastString(str);
 

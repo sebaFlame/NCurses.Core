@@ -11,11 +11,11 @@ using NCurses.Core.Interop.Mouse;
 namespace NCurses.Core.Interop.MultiByte
 {
     internal abstract class MultiByteWrapper<TMultiByte, TWideChar, TSingleByte, TChar, TMouseEvent> // handles cchar_t
-        : INativeCharWrapper<IMultiByteChar, TMultiByte, IMultiByteCharString, MultiByteCharString<TMultiByte>>
-        where TMultiByte : unmanaged, IMultiByteChar, IEquatable<TMultiByte>
-        where TWideChar : unmanaged, IChar, IEquatable<TWideChar>
-        where TSingleByte : unmanaged, ISingleByteChar, IEquatable<TSingleByte>
-        where TChar : unmanaged, IChar, IEquatable<TChar>
+        : INativeCharWrapper<IMultiByteNCursesChar, TMultiByte, IMultiByteNCursesCharString, MultiByteCharString<TMultiByte>>
+        where TMultiByte : unmanaged, IMultiByteNCursesChar, IEquatable<TMultiByte>
+        where TWideChar : unmanaged, IMultiByteChar, IEquatable<TWideChar>
+        where TSingleByte : unmanaged, ISingleByteNCursesChar, IEquatable<TSingleByte>
+        where TChar : unmanaged, ISingleByteChar, IEquatable<TChar>
         where TMouseEvent : unmanaged, IMEVENT
     {
         internal IMultiByteWrapper<TMultiByte, TWideChar, TSingleByte, TChar> Wrapper { get; }
@@ -25,7 +25,7 @@ namespace NCurses.Core.Interop.MultiByte
             this.Wrapper = wrapper;
         }
 
-        public MultiByteCharString<TMultiByte> CastString(in IMultiByteCharString wCharStr)
+        public MultiByteCharString<TMultiByte> CastString(in IMultiByteNCursesCharString wCharStr)
         {
             if (!(wCharStr is MultiByteCharString<TMultiByte> wCasted))
             {
@@ -35,7 +35,7 @@ namespace NCurses.Core.Interop.MultiByte
             return wCasted;
         }
 
-        public TMultiByte CastChar(in IMultiByteChar wChar)
+        public TMultiByte CastChar(in IMultiByteNCursesChar wChar)
         {
             if (!(wChar is TMultiByte wCasted))
             {

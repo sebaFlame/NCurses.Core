@@ -5,13 +5,24 @@ using System.Runtime.CompilerServices;
 
 namespace NCurses.Core.Interop.Dynamic.wchar_t
 {
-    internal struct wchar_t : IChar, IEquatable<wchar_t> //wchar_t & wint_t
+    internal struct wchar_t : IMultiByteChar, IEquatable<wchar_t> //wchar_t & wint_t
     {
         private const int wchar_t_size = 2; //Constants.SIZEOF_WCHAR_T
 
         public unsafe fixed byte @char[wchar_t_size];
 
         public char Char => (char)this;
+
+        public unsafe Span<byte> EncodedChar
+        {
+            get
+            {
+                fixed (byte* bArr = @char)
+                {
+                    return new Span<byte>(bArr, Constants.SIZEOF_WCHAR_T);
+                }
+            }
+        }
 
         public wchar_t(char c)
         {
@@ -108,7 +119,25 @@ namespace NCurses.Core.Interop.Dynamic.wchar_t
             return new wchar_t(ch);
         }
 
+        public override bool Equals(object obj)
+        {
+            if (obj is wchar_t wch)
+            {
+                return this.Equals(wch);
+            }
+            return false;
+        }
+
         public bool Equals(IChar other)
+        {
+            if (other is wchar_t wch)
+            {
+                return this.Equals(wch);
+            }
+            return false;
+        }
+
+        public bool Equals(IMultiByteChar other)
         {
             if (other is wchar_t wch)
             {
@@ -120,15 +149,6 @@ namespace NCurses.Core.Interop.Dynamic.wchar_t
         public bool Equals(wchar_t other)
         {
             return this == other;
-        }
-
-        public override bool Equals(object obj)
-        {
-            if(obj is wchar_t wch)
-            {
-                return this.Equals(wch);
-            }
-            return false;
         }
 
         public override int GetHashCode()

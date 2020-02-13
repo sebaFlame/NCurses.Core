@@ -8,7 +8,7 @@ namespace NCurses.Core.Interop.Char
     internal class NativeStdScrChar<TChar>
             : CharWrapper<TChar>,
             INativeStdScrChar<TChar, CharString<TChar>>
-        where TChar : unmanaged, IChar, IEquatable<TChar>
+        where TChar : unmanaged, ISingleByteChar, IEquatable<TChar>
     {
         internal NativeStdScrChar(ICharWrapper<TChar> wrapper)
             : base(wrapper) { }

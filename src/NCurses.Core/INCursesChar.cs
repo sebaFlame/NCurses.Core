@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using System.Text;
 
-namespace NCurses.Core.Interop
+namespace NCurses.Core
 {
     public interface INCursesChar : IChar, IEquatable<INCursesChar>
     {

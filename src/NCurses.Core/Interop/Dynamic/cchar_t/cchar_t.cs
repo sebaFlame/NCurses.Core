@@ -10,7 +10,7 @@ namespace NCurses.Core.Interop.Dynamic.cchar_t
      * temporary test class -> REMOVE
     */
     [StructLayout(LayoutKind.Sequential)]
-    internal struct cchar_t : IMultiByteChar, IEquatable<cchar_t> //cchar_t
+    internal struct cchar_t : IMultiByteNCursesChar, IEquatable<cchar_t> //cchar_t
     {
         private const int charGlobalLength = 10; //Constants.SIZEOF_WCHAR_T * Constants.CCHARW_MAX
 
@@ -21,6 +21,17 @@ namespace NCurses.Core.Interop.Dynamic.cchar_t
         public char Char => (char)this;
         public short Color => (short)(this.ext_color > 0 ? this.ext_color : (short)Constants.PAIR_NUMBER(this.attr));
         public ulong Attributes => (ulong)(this.attr ^ (this.attr & Attrs.COLOR));
+
+        public unsafe Span<byte> EncodedChar
+        {
+            get
+            {
+                fixed (byte* bArr = chars)
+                {
+                    return new Span<byte>(bArr, Constants.SIZEOF_WCHAR_T);
+                }
+            }
+        }
 
         public cchar_t(char c)
         {
@@ -162,7 +173,7 @@ namespace NCurses.Core.Interop.Dynamic.cchar_t
         {
             if (obj is cchar_t other)
             {
-                return this == other;
+                return this.Equals(other);
             }
             return false;
         }
@@ -170,15 +181,6 @@ namespace NCurses.Core.Interop.Dynamic.cchar_t
         public bool Equals(IChar obj)
         {
             if (obj is cchar_t other)
-            {
-                return this == other;
-            }
-            return false;
-        }
-
-        public bool Equals(INCursesChar obj)
-        {
-            if (obj is IMultiByteChar other)
             {
                 return this.Equals(other);
             }
@@ -189,7 +191,25 @@ namespace NCurses.Core.Interop.Dynamic.cchar_t
         {
             if (obj is cchar_t other)
             {
-                return this == other;
+                return this.Equals(other);
+            }
+            return false;
+        }
+
+        public bool Equals(INCursesChar obj)
+        {
+            if (obj is cchar_t other)
+            {
+                return this.Equals(other);
+            }
+            return false;
+        }
+
+        public bool Equals(IMultiByteNCursesChar obj)
+        {
+            if (obj is cchar_t other)
+            {
+                return this.Equals(other);
             }
             return false;
         }

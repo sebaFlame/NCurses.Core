@@ -10,7 +10,7 @@ namespace NCurses.Core.Interop.Char
     internal class NativeWindowChar<TChar>
             : CharWrapper<TChar>,
             INativeWindowChar<TChar, CharString<TChar>>
-        where TChar : unmanaged, IChar, IEquatable<TChar>
+        where TChar : unmanaged, ISingleByteChar, IEquatable<TChar>
     {
         internal NativeWindowChar(ICharWrapper<TChar> wrapper)
             : base(wrapper) { }

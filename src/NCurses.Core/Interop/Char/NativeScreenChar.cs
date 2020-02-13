@@ -7,7 +7,7 @@ namespace NCurses.Core.Interop.Char
     internal class NativeScreenChar<TChar> 
             : CharWrapper<TChar>, 
             INativeScreenChar<TChar, CharString<TChar>>
-        where TChar : unmanaged, IChar, IEquatable<TChar>
+        where TChar : unmanaged, ISingleByteChar, IEquatable<TChar>
     {
         internal NativeScreenChar(ICharWrapper<TChar> wrapper)
             : base(wrapper) { }

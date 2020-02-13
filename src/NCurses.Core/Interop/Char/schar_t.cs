@@ -4,11 +4,13 @@ using System.Text;
 
 namespace NCurses.Core.Interop.Char
 {
-    public struct schar_t : IChar, IEquatable<schar_t>//char
+    public struct schar_t : ISingleByteChar, IEquatable<schar_t>//char
     {
         public sbyte @char;
 
         public char Char => (char)this;
+
+        public byte EncodedChar => (byte)@char;
 
         public schar_t(byte ch)
         {
@@ -44,6 +46,15 @@ namespace NCurses.Core.Interop.Char
             if(obj is schar_t ch)
             {
                 return this.Equals(obj);
+            }
+            return false;
+        }
+
+        public bool Equals(ISingleByteChar obj)
+        {
+            if (obj is schar_t ch)
+            {
+                return this.Equals(ch);
             }
             return false;
         }

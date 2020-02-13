@@ -11,10 +11,10 @@ namespace NCurses.Core.Interop.MultiByte
     internal class NativeWindowMultiByte<TMultiByte, TWideChar, TSingleByte, TChar, TMouseEvent> 
             : MultiByteWrapper<TMultiByte, TWideChar, TSingleByte, TChar, TMouseEvent>,
             INativeWindowMultiByte<TMultiByte, MultiByteCharString<TMultiByte>>
-        where TMultiByte : unmanaged, IMultiByteChar, IEquatable<TMultiByte>
-        where TWideChar : unmanaged, IChar, IEquatable<TWideChar>
-        where TSingleByte : unmanaged, ISingleByteChar, IEquatable<TSingleByte>
-        where TChar : unmanaged, IChar, IEquatable<TChar>
+        where TMultiByte : unmanaged, IMultiByteNCursesChar, IEquatable<TMultiByte>
+        where TWideChar : unmanaged, IMultiByteChar, IEquatable<TWideChar>
+        where TSingleByte : unmanaged, ISingleByteNCursesChar, IEquatable<TSingleByte>
+        where TChar : unmanaged, ISingleByteChar, IEquatable<TChar>
         where TMouseEvent : unmanaged, IMEVENT
     {
         internal NativeWindowMultiByte(IMultiByteWrapper<TMultiByte, TWideChar, TSingleByte, TChar> wrapper)

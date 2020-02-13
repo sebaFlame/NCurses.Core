@@ -7,8 +7,8 @@ using NCurses.Core.Interop.SafeHandles;
 namespace NCurses.Core.Interop.MultiByte
 {
     public interface INativePadMultiByte<TChar, TCharString>
-        where TChar : IMultiByteChar
-        where TCharString : IMultiByteCharString
+        where TChar : IMultiByteNCursesChar
+        where TCharString : IMultiByteNCursesCharString
     {
         void pecho_wchar(WindowBaseSafeHandle pad, in TChar wch);
     }

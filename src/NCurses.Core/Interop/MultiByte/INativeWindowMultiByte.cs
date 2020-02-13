@@ -7,8 +7,8 @@ using NCurses.Core.Interop.SafeHandles;
 namespace NCurses.Core.Interop.MultiByte
 {
     public interface INativeWindowMultiByte<TChar, TCharString> 
-        where TChar : IMultiByteChar
-        where TCharString : IMultiByteCharString
+        where TChar : IMultiByteNCursesChar
+        where TCharString : IMultiByteNCursesCharString
     {
         void box_set(WindowBaseSafeHandle win, in TChar verch, in TChar horch);
         void mvwadd_wch(WindowBaseSafeHandle win, int y, int x, in TChar wch);

@@ -5,8 +5,8 @@ using System.Text;
 namespace NCurses.Core.Interop.Char
 {
     public interface INativeNCursesChar<TChar, TCharString>
-        where TChar : IChar
-        where TCharString : ICharString
+        where TChar : ISingleByteChar
+        where TCharString : ISingleByteCharString
     {
         TCharString curses_version();
         void define_key(in TCharString definition, int keycode);

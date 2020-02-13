@@ -9,7 +9,7 @@ using NCurses.Core.Interop.Dynamic;
 namespace NCurses.Core.Interop.WideChar
 {
     internal delegate TWideChar CreateWideCharStringFromSpan<TWideChar>(Span<byte> byteSpan)
-        where TWideChar : unmanaged, IEquatable<TWideChar>;
+        where TWideChar : unmanaged, IMultiByteChar, IEquatable<TWideChar>;
 
     public class WideCharFactory : ICharFactory<IChar, ICharString>
     {
@@ -40,11 +40,11 @@ namespace NCurses.Core.Interop.WideChar
         public ICharString GetNativeEmptyString(int length)
             => Factory.GetNativeEmptyString(length);
 
-        public unsafe ICharString GetNativeEmptyString(byte* buffer, int length)
-            => Factory.GetNativeEmptyString(buffer, length);
+        public unsafe ICharString GetNativeEmptyString(byte* buffer, int bufferLength, int stringLength)
+            => Factory.GetNativeEmptyString(buffer, bufferLength, stringLength);
 
-        public ICharString GetNativeEmptyString(byte[] buffer)
-            => Factory.GetNativeEmptyString(buffer);
+        public ICharString GetNativeEmptyString(byte[] buffer, int stringLength)
+            => Factory.GetNativeEmptyString(buffer, stringLength);
 
         public ICharString GetNativeString(string str)
             => Factory.GetNativeString(str);
@@ -66,7 +66,7 @@ namespace NCurses.Core.Interop.WideChar
     }
 
     internal class WideCharFactoryInternal<TWideChar> : ICharFactoryInternal<TWideChar, WideCharString<TWideChar>>
-        where TWideChar : unmanaged, IChar, IEquatable<TWideChar>
+        where TWideChar : unmanaged, IMultiByteChar, IEquatable<TWideChar>
     {
         internal static Func<char, TWideChar> CreateCharFromChar;
         internal static Func<int, TWideChar> CreateCharFromInt;
@@ -116,11 +116,11 @@ namespace NCurses.Core.Interop.WideChar
         public TWideChar GetNativeCharInternal(int ch)
             => CreateCharFromInt(ch);
 
-        public unsafe WideCharString<TWideChar> GetNativeEmptyStringInternal(byte* buffer, int length)
-            => new WideCharString<TWideChar>(buffer, length);
+        public unsafe WideCharString<TWideChar> GetNativeEmptyStringInternal(byte* buffer, int bufferLength, int stringLength)
+            => new WideCharString<TWideChar>(buffer, bufferLength, stringLength);
 
-        public WideCharString<TWideChar> GetNativeEmptyStringInternal(byte[] buffer)
-            => new WideCharString<TWideChar>(buffer);
+        public WideCharString<TWideChar> GetNativeEmptyStringInternal(byte[] buffer, int stringLength)
+            => new WideCharString<TWideChar>(buffer, stringLength);
 
         public unsafe WideCharString<TWideChar> GetNativeStringInternal(byte* buffer, int length, string str)
             => new WideCharString<TWideChar>(buffer, length, str);

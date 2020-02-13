@@ -15,10 +15,10 @@ using NCurses.Core.Interop.Wrappers;
 namespace NCurses.Core
 {
     public abstract class WindowInternal<TMultiByte, TWideChar, TSingleByte, TChar, TMouseEvent> : WindowBase<TMultiByte, TWideChar, TSingleByte, TChar, TMouseEvent>
-        where TMultiByte : unmanaged, IMultiByteChar, IEquatable<TMultiByte>
-        where TWideChar : unmanaged, IChar, IEquatable<TWideChar>
-        where TSingleByte : unmanaged, ISingleByteChar, IEquatable<TSingleByte>
-        where TChar : unmanaged, IChar, IEquatable<TChar>
+        where TMultiByte : unmanaged, IMultiByteNCursesChar, IEquatable<TMultiByte>
+        where TWideChar : unmanaged, IMultiByteChar, IEquatable<TWideChar>
+        where TSingleByte : unmanaged, ISingleByteNCursesChar, IEquatable<TSingleByte>
+        where TChar : unmanaged, ISingleByteChar, IEquatable<TChar>
         where TMouseEvent : unmanaged, IMEVENT
     {
         private HashSet<WindowInternal<TMultiByte, TWideChar, TSingleByte, TChar, TMouseEvent>> SubWindows

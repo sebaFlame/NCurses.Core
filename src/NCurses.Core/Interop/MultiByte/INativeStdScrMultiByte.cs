@@ -5,8 +5,8 @@ using System.Text;
 namespace NCurses.Core.Interop.MultiByte
 {
     public interface INativeStdScrMultiByte<TChar, TCharString>
-        where TChar : IMultiByteChar
-        where TCharString : IMultiByteCharString
+        where TChar : IMultiByteNCursesChar
+        where TCharString : IMultiByteNCursesCharString
     {
         void add_wch(in TChar wch);
         void add_wchnstr(in TCharString wchStr, int n);

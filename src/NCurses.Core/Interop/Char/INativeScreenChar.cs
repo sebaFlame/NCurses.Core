@@ -5,8 +5,8 @@ using System.Text;
 namespace NCurses.Core.Interop.Char
 {
     public interface INativeScreenChar<TChar, TCharString>
-        where TChar : IChar
-        where TCharString : ICharString
+        where TChar : ISingleByteChar
+        where TCharString : ISingleByteCharString
     {
         void define_key_sp(IntPtr screen, in TCharString definition, int keycode);
         TChar erasechar_sp(IntPtr screen);

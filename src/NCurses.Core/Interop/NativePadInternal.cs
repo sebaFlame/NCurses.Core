@@ -24,25 +24,23 @@ namespace NCurses.Core.Interop
                 CharString<TChar>,
                 TMouseEvent>,
             INativePadWrapper<
+                IMultiByteNCursesChar,
+                IMultiByteNCursesCharString,
                 IMultiByteChar,
                 IMultiByteCharString,
-                IChar,
-                ICharString,
+                ISingleByteNCursesChar,
+                ISingleByteNCursesCharString,
                 ISingleByteChar,
                 ISingleByteCharString,
-                IChar,
-                ICharString,
                 IMEVENT>
-        where TMultiByte : unmanaged, IMultiByteChar, IEquatable<TMultiByte>
-        where TWideChar : unmanaged, IChar, IEquatable<TWideChar>
-        where TSingleByte : unmanaged, ISingleByteChar, IEquatable<TSingleByte>
-        where TChar : unmanaged, IChar, IEquatable<TChar>
+        where TMultiByte : unmanaged, IMultiByteNCursesChar, IEquatable<TMultiByte>
+        where TWideChar : unmanaged, IMultiByteChar, IEquatable<TWideChar>
+        where TSingleByte : unmanaged, ISingleByteNCursesChar, IEquatable<TSingleByte>
+        where TChar : unmanaged, ISingleByteChar, IEquatable<TChar>
         where TMouseEvent : unmanaged, IMEVENT
     {
         internal NativePadMultiByte<TMultiByte, TWideChar, TSingleByte, TChar, TMouseEvent> MultiByteNCursesWrapper { get; }
         internal NativePadSingleByte<TSingleByte, TChar, TMouseEvent> SingleByteNCursesWrapper { get; }
-
-        internal INativePadWrapper<IMultiByteChar, IMultiByteCharString, IChar, ICharString, ISingleByteChar, ISingleByteCharString, IChar, ICharString, IMEVENT> Instance => this;
 
         public NativePadInternal(
             IMultiByteWrapper<TMultiByte, TWideChar, TSingleByte, TChar> multiByteWrapper,
@@ -132,13 +130,13 @@ namespace NCurses.Core.Interop
         #endregion
 
         #region Interfece implementations
-        void INativePadMultiByte<IMultiByteChar, IMultiByteCharString>.pecho_wchar(WindowBaseSafeHandle pad, in IMultiByteChar wch)
+        void INativePadMultiByte<IMultiByteNCursesChar, IMultiByteNCursesCharString>.pecho_wchar(WindowBaseSafeHandle pad, in IMultiByteNCursesChar wch)
         {
             TMultiByte casted = this.MultiByteNCursesWrapper.CastChar(in wch);
             this.pecho_wchar(pad, in casted);
         }
 
-        void INativePadSingleByte<ISingleByteChar, ISingleByteCharString>.pechochar(WindowBaseSafeHandle pad, in ISingleByteChar ch)
+        void INativePadSingleByte<ISingleByteNCursesChar, ISingleByteNCursesCharString>.pechochar(WindowBaseSafeHandle pad, in ISingleByteNCursesChar ch)
         {
             TSingleByte casted = this.SingleByteNCursesWrapper.CastChar(in ch);
             this.pechochar(pad, in casted);

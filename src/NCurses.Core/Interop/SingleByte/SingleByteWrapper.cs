@@ -8,9 +8,9 @@ using NCurses.Core.Interop.Mouse;
 namespace NCurses.Core.Interop.SingleByte
 {
     internal abstract class SingleByteWrapper<TSingleByte, TChar, TMouseEvent> //handles chtype and attr_t
-        : INativeCharWrapper<ISingleByteChar, TSingleByte, ISingleByteCharString, SingleByteCharString<TSingleByte>>
-            where TSingleByte : unmanaged, ISingleByteChar, IEquatable<TSingleByte>
-            where TChar : unmanaged, IChar, IEquatable<TChar>
+        : INativeCharWrapper<ISingleByteNCursesChar, TSingleByte, ISingleByteNCursesCharString, SingleByteCharString<TSingleByte>>
+            where TSingleByte : unmanaged, ISingleByteNCursesChar, IEquatable<TSingleByte>
+            where TChar : unmanaged, ISingleByteChar, IEquatable<TChar>
             where TMouseEvent : unmanaged, IMEVENT
     {
         internal ISingleByteWrapper<TSingleByte, TChar, TMouseEvent> Wrapper { get; }
@@ -20,9 +20,9 @@ namespace NCurses.Core.Interop.SingleByte
             this.Wrapper = wrapper;
         }
 
-        public SingleByteCharString<TSingleByte> CastString(in ISingleByteCharString wCharStr)
+        public SingleByteCharString<TSingleByte> CastString(in ISingleByteNCursesCharString charStr)
         {
-            if (!(wCharStr is SingleByteCharString<TSingleByte> wCasted))
+            if (!(charStr is SingleByteCharString<TSingleByte> wCasted))
             {
                 throw new InvalidCastException("Character is in incorrect format");
             }
@@ -30,14 +30,14 @@ namespace NCurses.Core.Interop.SingleByte
             return wCasted;
         }
 
-        public TSingleByte CastChar(in ISingleByteChar wChar)
+        public TSingleByte CastChar(in ISingleByteNCursesChar ch)
         {
-            if (!(wChar is TSingleByte wCasted))
+            if (!(ch is TSingleByte chCasted))
             {
                 throw new InvalidCastException("Character is in incorrect format");
             }
 
-            return wCasted;
+            return chCasted;
         }
 
         public unsafe static T ToPrimitiveType<T>(in TSingleByte wch)

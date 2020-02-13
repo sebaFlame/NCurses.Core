@@ -7,8 +7,8 @@ using NCurses.Core.Interop.Mouse;
 namespace NCurses.Core.Interop.SingleByte
 {
     public interface INativeScreenSingleByte<TChar, TCharString>
-        where TChar : ISingleByteChar
-        where TCharString : ISingleByteCharString
+        where TChar : ISingleByteNCursesChar
+        where TCharString : ISingleByteNCursesCharString
     {
         void getmouse_sp(IntPtr screen, out IMEVENT ev);
         ulong mousemask_sp(IntPtr screen, ulong newmask, out ulong oldmask);

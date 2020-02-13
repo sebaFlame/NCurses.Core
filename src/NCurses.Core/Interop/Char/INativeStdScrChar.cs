@@ -5,8 +5,8 @@ using System.Text;
 namespace NCurses.Core.Interop.Char
 {
     public interface INativeStdScrChar<TChar, TCharString>
-        where TChar : IChar
-        where TCharString : ICharString
+        where TChar : ISingleByteChar
+        where TCharString : ISingleByteCharString
     {
         void addnstr(in TCharString txt, int number);
         void addstr(in TCharString txt);

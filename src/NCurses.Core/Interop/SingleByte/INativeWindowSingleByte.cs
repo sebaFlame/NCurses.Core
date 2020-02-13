@@ -7,8 +7,8 @@ using NCurses.Core.Interop.SafeHandles;
 namespace NCurses.Core.Interop.SingleByte
 {
     public interface INativeWindowSingleByte<TChar, TCharString>
-        where TChar : ISingleByteChar
-        where TCharString : ISingleByteCharString
+        where TChar : ISingleByteNCursesChar
+        where TCharString : ISingleByteNCursesCharString
     {
         void box(WindowBaseSafeHandle window, in TChar verch, in TChar horch);
         TChar getbkgd(WindowBaseSafeHandle window);

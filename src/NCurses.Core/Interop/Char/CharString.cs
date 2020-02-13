@@ -11,15 +11,15 @@ using System.Runtime.CompilerServices;
 
 namespace NCurses.Core.Interop.Char
 {
-    internal struct CharString<TChar> : ICharString, IEquatable<CharString<TChar>>
-        where TChar : unmanaged, IChar, IEquatable<TChar>
+    internal struct CharString<TChar> : ISingleByteCharString, IEquatable<CharString<TChar>>
+        where TChar : unmanaged, ISingleByteChar, IEquatable<TChar>
     {
         public unsafe Span<byte> ByteSpan =>
             this.BufferArray is null ? new Span<byte>(this.BufferPointer, this.BufferPointerLength) : new Span<byte>(this.BufferArray);
         public unsafe Span<TChar> CharSpan =>
             this.BufferArray is null ? new Span<TChar>(this.BufferPointer, this.BufferPointerLength / Marshal.SizeOf<TChar>()) : MemoryMarshal.Cast<byte, TChar>(this.ByteSpan);
 
-        public int Length => this.CharSpan.Length;
+        public int Length { get; }
 
         public ref TChar GetPinnableReference() => ref this.CharSpan.GetPinnableReference();
 
@@ -30,14 +30,15 @@ namespace NCurses.Core.Interop.Char
 
         public unsafe CharString(
             byte* buffer,
-            int length,
+            int bufferLength,
             string str)
         {
             this.BufferPointer = buffer;
-            this.BufferPointerLength = length;
+            this.BufferPointerLength = bufferLength;
             this.BufferArray = null;
+            this.Length = str.Length;
 
-            CreateCharString(new Span<byte>(buffer, length), str.AsSpan());
+            CreateCharString(new Span<byte>(buffer, bufferLength), str.AsSpan());
         }
 
         public unsafe CharString(
@@ -47,22 +48,30 @@ namespace NCurses.Core.Interop.Char
             this.BufferArray = buffer;
             this.BufferPointer = (byte*)0;
             this.BufferPointerLength = 0;
+            this.Length = str.Length;
 
             CreateCharString(new Span<byte>(buffer), str.AsSpan());
         }
 
-        public unsafe CharString(byte* buffer, int length)
+        public unsafe CharString(
+            byte* buffer, 
+            int bufferLength,
+            int stringLength)
         {
             this.BufferPointer = buffer;
-            this.BufferPointerLength = length;
+            this.BufferPointerLength = bufferLength;
             this.BufferArray = null;
+            this.Length = stringLength;
         }
 
-        public unsafe CharString(byte[] buffer)
+        public unsafe CharString(
+            byte[] buffer,
+            int stringLength)
         {
             this.BufferArray = buffer;
             this.BufferPointer = (byte*)0;
             this.BufferPointerLength = 0;
+            this.Length = stringLength;
         }
 
         public unsafe CharString(ref TChar strRef)
@@ -70,7 +79,7 @@ namespace NCurses.Core.Interop.Char
             TChar* wideArr = (TChar*)Unsafe.AsPointer<TChar>(ref strRef);
 
             this.BufferPointer = (byte*)wideArr;
-            this.BufferPointerLength = FindStringLength(wideArr);
+            this.Length = FindStringLength(wideArr, out this.BufferPointerLength);
             this.BufferArray = null;
         }
 
@@ -112,10 +121,11 @@ namespace NCurses.Core.Interop.Char
             }
         }
 
-        internal unsafe static int FindStringLength(TChar* strArr)
+        internal unsafe static int FindStringLength(TChar* strArr, out int byteLength)
         {
             TChar zero = CharFactoryInternal<TChar>.Instance.GetNativeEmptyCharInternal();
             TChar val;
+
             int length = 0;
 
             while (true)
@@ -126,14 +136,27 @@ namespace NCurses.Core.Interop.Char
                     break;
                 }
             }
+
+            byteLength = length * Marshal.SizeOf<TChar>();
             return --length;
         }
 
-        public IEnumerator<IChar> GetEnumerator() => new CharStringEnumerator(this);
-
         IEnumerator IEnumerable.GetEnumerator() => new CharStringEnumerator(this);
 
+        IEnumerator<IChar> IEnumerable<IChar>.GetEnumerator() => new CharStringEnumerator(this);
+
+        IEnumerator<ISingleByteChar> IEnumerable<ISingleByteChar>.GetEnumerator() => new CharStringEnumerator(this);
+
         public static explicit operator string(CharString<TChar> wStr) => wStr.ToString();
+
+        public override bool Equals(object obj)
+        {
+            if (obj is CharString<TChar> other)
+            {
+                return this.Equals(other);
+            }
+            return false;
+        }
 
         public bool Equals(ICharString obj)
         {
@@ -144,26 +167,37 @@ namespace NCurses.Core.Interop.Char
             return false;
         }
 
+        public bool Equals(ISingleByteCharString obj)
+        {
+            if (obj is CharString<TChar> other)
+            {
+                return this.Equals(other);
+            }
+            return false;
+        }
+
         public bool Equals(CharString<TChar> other)
         {
-            return this.ByteSpan.SequenceEqual(other.ByteSpan);
+            //remove null terminator
+            Span<byte> thisSpan = this.ByteSpan.Slice(0, this.Length * Marshal.SizeOf<TChar>());
+            Span<byte> otherSpan = other.ByteSpan.Slice(0, other.Length * Marshal.SizeOf<TChar>());
+
+            return thisSpan.SequenceEqual(otherSpan);
         }
 
         public override string ToString()
         {
             unsafe
             {
-                Span<TChar> mbSpan = this.CharSpan;
-                Span<byte> byteSpan = this.ByteSpan;
+                Span<byte> bSpan = this.ByteSpan.Slice(0, this.Length * Marshal.SizeOf<TChar>());
+                char* charArr = stackalloc char[this.Length];
 
-                char* charArr = stackalloc char[mbSpan.Length];
-
-                fixed (byte* b = byteSpan)
+                fixed (byte* b = bSpan)
                 {
-                    Encoding.ASCII.GetChars(b, byteSpan.Length, charArr, mbSpan.Length);
+                    Encoding.ASCII.GetChars(b, bSpan.Length, charArr, this.Length);
                 }
 
-                ReadOnlySpan<char> charSpan = new ReadOnlySpan<char>(charArr, mbSpan.Length);
+                ReadOnlySpan<char> charSpan = new ReadOnlySpan<char>(charArr, this.Length);
                 return charSpan.ToString();
             }
         }
@@ -173,9 +207,11 @@ namespace NCurses.Core.Interop.Char
             return this.CharSpan.GetHashCode();
         }
 
-        private class CharStringEnumerator : IEnumerator<IChar>
+        private class CharStringEnumerator : IEnumerator<ISingleByteChar>, IEnumerator<IChar>
         {
-            public IChar Current => this.CharString.CharSpan[this.Position];
+            ISingleByteChar IEnumerator<ISingleByteChar>.Current => this.CharString.CharSpan[this.Position];
+
+            IChar IEnumerator<IChar>.Current => this.CharString.CharSpan[this.Position];
 
             object IEnumerator.Current => this.CharString.CharSpan[this.Position];
 

@@ -22,14 +22,14 @@ namespace NCurses.Core
         public static IWindow StdScr { get; private set; }
 
         internal static INativeNCursesWrapper<
+            IMultiByteNCursesChar,
+            IMultiByteNCursesCharString,
             IMultiByteChar,
             IMultiByteCharString,
-            IChar,
-            ICharString,
+            ISingleByteNCursesChar,
+            ISingleByteNCursesCharString,
             ISingleByteChar,
             ISingleByteCharString,
-            IChar,
-            ICharString,
             IMEVENT> NCursesWrapper => NativeNCurses.NCurses;
 
         internal static IWindowFactory WindowFactory => NativeNCurses.WindowFactory;

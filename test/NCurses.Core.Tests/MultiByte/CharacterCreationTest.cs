@@ -26,16 +26,16 @@ namespace NCurses.Core.Tests.MultiByte
         [Fact]
         public void SetCharacterTest()
         {
-            NativeNCurses.NCurses.setcchar(out IMultiByteChar nativeWch, this.TestChar, 0, 0);
-            IMultiByteChar managedWch = MultiByteCharFactory.Instance.GetNativeChar(this.TestChar);
+            NativeNCurses.NCurses.setcchar(out IMultiByteNCursesChar nativeWch, this.TestChar, 0, 0);
+            IMultiByteNCursesChar managedWch = MultiByteCharFactory.Instance.GetNativeChar(this.TestChar);
             Assert.StrictEqual(nativeWch, managedWch);
         }
 
         [Fact]
         public void SetCharacterAttributeTest()
         {
-            NativeNCurses.NCurses.setcchar(out IMultiByteChar nativeWch, this.TestChar, Attrs.BOLD | Attrs.ITALIC, 0);
-            IMultiByteChar managedWch = MultiByteCharFactory.Instance.GetNativeChar(this.TestChar, Attrs.BOLD | Attrs.ITALIC);
+            NativeNCurses.NCurses.setcchar(out IMultiByteNCursesChar nativeWch, this.TestChar, Attrs.BOLD | Attrs.ITALIC, 0);
+            IMultiByteNCursesChar managedWch = MultiByteCharFactory.Instance.GetNativeChar(this.TestChar, Attrs.BOLD | Attrs.ITALIC);
             Assert.StrictEqual(nativeWch, managedWch);
         }
 
@@ -44,15 +44,15 @@ namespace NCurses.Core.Tests.MultiByte
         {
             Assert.True(this.StdScrState.SupportsColor);
 
-            NativeNCurses.NCurses.setcchar(out IMultiByteChar nativeWch, this.TestChar, Attrs.BOLD | Attrs.ITALIC, 4);
-            IMultiByteChar managedWch = MultiByteCharFactory.Instance.GetNativeChar(this.TestChar, Attrs.BOLD | Attrs.ITALIC, 4);
+            NativeNCurses.NCurses.setcchar(out IMultiByteNCursesChar nativeWch, this.TestChar, Attrs.BOLD | Attrs.ITALIC, 4);
+            IMultiByteNCursesChar managedWch = MultiByteCharFactory.Instance.GetNativeChar(this.TestChar, Attrs.BOLD | Attrs.ITALIC, 4);
             Assert.StrictEqual(nativeWch, managedWch);
         }
 
         [Fact]
         public void GetCharacterTest()
         {
-            IMultiByteChar managedWch = MultiByteCharFactory.Instance.GetNativeChar(this.TestChar);
+            IMultiByteNCursesChar managedWch = MultiByteCharFactory.Instance.GetNativeChar(this.TestChar);
             NativeNCurses.NCurses.getcchar(managedWch, out char resChar, out ulong resAttrs, out short resPair);
             Assert.Equal(this.TestChar, resChar);
             Assert.Equal((ulong)0, resAttrs);
@@ -63,7 +63,7 @@ namespace NCurses.Core.Tests.MultiByte
         public void GetCharacterAttributeTest()
         {
             ulong attrs = Attrs.BOLD | Attrs.ITALIC;
-            IMultiByteChar managedWch = MultiByteCharFactory.Instance.GetNativeChar(this.TestChar, attrs);
+            IMultiByteNCursesChar managedWch = MultiByteCharFactory.Instance.GetNativeChar(this.TestChar, attrs);
             NativeNCurses.NCurses.getcchar(managedWch, out char resChar, out ulong resAttrs, out short resPair);
             Assert.Equal(this.TestChar, resChar);
             Assert.Equal(attrs, resAttrs);
@@ -77,7 +77,7 @@ namespace NCurses.Core.Tests.MultiByte
 
             ulong attrs = Attrs.BOLD | Attrs.ITALIC;
             short pair = 4;
-            IMultiByteChar managedWch = MultiByteCharFactory.Instance.GetNativeChar(this.TestChar, attrs, pair);
+            IMultiByteNCursesChar managedWch = MultiByteCharFactory.Instance.GetNativeChar(this.TestChar, attrs, pair);
             NativeNCurses.NCurses.getcchar(managedWch, out char resChar, out ulong resAttrs, out short resPair);
             Assert.Equal(this.TestChar, resChar);
             Assert.Equal(attrs, resAttrs);

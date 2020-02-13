@@ -16,14 +16,14 @@ namespace NCurses.Core.Interop.Wrappers
             INativeScreenWideChar<TWideChar, TWideCharString>,
             INativeScreenSingleByte<TSingleByte, TSingleByteString>,
             INativeScreenChar<TChar, TCharString>
-        where TMultiByte : IMultiByteChar
-        where TMultiByteString : IMultiByteCharString
-        where TWideChar : IChar
-        where TWideCharString : ICharString
-        where TSingleByte : ISingleByteChar
-        where TSingleByteString : ISingleByteCharString
-        where TChar : IChar
-        where TCharString : ICharString
+        where TMultiByte : IMultiByteNCursesChar
+        where TMultiByteString : IMultiByteNCursesCharString
+        where TWideChar : IMultiByteChar
+        where TWideCharString : IMultiByteCharString
+        where TSingleByte : ISingleByteNCursesChar
+        where TSingleByteString : ISingleByteNCursesCharString
+        where TChar : ISingleByteChar
+        where TCharString : ISingleByteCharString
         where TMouseEvent : IMEVENT
     {
         void assume_default_colors_sp(IntPtr screen, int fg, int bg);

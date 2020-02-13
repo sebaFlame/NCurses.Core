@@ -8,7 +8,7 @@ using NCurses.Core.Interop.Mouse;
 namespace NCurses.Core.Interop.SingleByte
 {
     internal interface ISingleByteWrapper<TSingleByte, TChar, TMouseEvent>
-        where TSingleByte : unmanaged, ISingleByteChar
+        where TSingleByte : unmanaged, ISingleByteNCursesChar
         where TChar : unmanaged, IChar
         where TMouseEvent : unmanaged, IMEVENT
     {

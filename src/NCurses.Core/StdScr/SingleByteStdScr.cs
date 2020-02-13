@@ -16,10 +16,10 @@ using NCurses.Core.Interop.Wrappers;
 namespace NCurses.Core.StdScr
 {
     internal class SingleByteStdScr<TMultiByte, TWideChar, TSingleByte, TChar, TMouseEvent> : StdScrBase<TMultiByte, TWideChar, TSingleByte, TChar, TMouseEvent>
-        where TMultiByte : unmanaged, IMultiByteChar, IEquatable<TMultiByte>
-        where TWideChar : unmanaged, IChar, IEquatable<TWideChar>
-        where TSingleByte : unmanaged, ISingleByteChar, IEquatable<TSingleByte>
-        where TChar : unmanaged, IChar, IEquatable<TChar>
+        where TMultiByte : unmanaged, IMultiByteNCursesChar, IEquatable<TMultiByte>
+        where TWideChar : unmanaged, IMultiByteChar, IEquatable<TWideChar>
+        where TSingleByte : unmanaged, ISingleByteNCursesChar, IEquatable<TSingleByte>
+        where TChar : unmanaged, ISingleByteChar, IEquatable<TChar>
         where TMouseEvent : unmanaged, IMEVENT
     {
         public override INCursesChar BackGround
@@ -139,19 +139,19 @@ namespace NCurses.Core.StdScr
 
         public override INCursesCharString CreateString(string str)
         {
-            byte[] buffer = new byte[SingleByteCharFactoryInternal<TSingleByte>.Instance.GetByteCount(str, false)];
+            byte[] buffer = new byte[SingleByteCharFactoryInternal<TSingleByte>.Instance.GetByteCount(str)];
             return SingleByteCharFactoryInternal<TSingleByte>.Instance.GetNativeStringInternal(buffer, str);
         }
 
         public override INCursesCharString CreateString(string str, ulong attrs)
         {
-            byte[] buffer = new byte[SingleByteCharFactoryInternal<TSingleByte>.Instance.GetByteCount(str, false)];
+            byte[] buffer = new byte[SingleByteCharFactoryInternal<TSingleByte>.Instance.GetByteCount(str)];
             return SingleByteCharFactoryInternal<TSingleByte>.Instance.GetNativeStringInternal(buffer, str, attrs);
         }
 
         public override INCursesCharString CreateString(string str, ulong attrs, short pair)
         {
-            byte[] buffer = new byte[SingleByteCharFactoryInternal<TSingleByte>.Instance.GetByteCount(str, false)];
+            byte[] buffer = new byte[SingleByteCharFactoryInternal<TSingleByte>.Instance.GetByteCount(str)];
             return SingleByteCharFactoryInternal<TSingleByte>.Instance.GetNativeStringInternal(buffer, str, attrs, pair);
         }
 
@@ -206,7 +206,7 @@ namespace NCurses.Core.StdScr
             {
                 int bufferLength = Constants.MAX_STRING_LENGTH * CharFactoryInternal<TChar>.Instance.GetCharLength();
                 byte* buffer = stackalloc byte[bufferLength];
-                CharString<TChar> chStr = CharFactoryInternal<TChar>.Instance.GetNativeEmptyStringInternal(buffer, bufferLength);
+                CharString<TChar> chStr = CharFactoryInternal<TChar>.Instance.GetNativeEmptyStringInternal(buffer, bufferLength, Constants.MAX_STRING_LENGTH);
                 StdScr.instr(ref chStr, out int read);
                 return chStr.ToString();
             }
@@ -218,7 +218,7 @@ namespace NCurses.Core.StdScr
             {
                 int bufferLength = maxChars * CharFactoryInternal<TChar>.Instance.GetCharLength();
                 byte* buffer = stackalloc byte[bufferLength];
-                CharString<TChar> chStr = CharFactoryInternal<TChar>.Instance.GetNativeEmptyStringInternal(buffer, bufferLength);
+                CharString<TChar> chStr = CharFactoryInternal<TChar>.Instance.GetNativeEmptyStringInternal(buffer, bufferLength, maxChars);
                 StdScr.innstr(ref chStr, maxChars, out read);
                 return chStr.ToString();
             }
@@ -230,7 +230,7 @@ namespace NCurses.Core.StdScr
             {
                 int bufferLength = Constants.MAX_STRING_LENGTH * CharFactoryInternal<TChar>.Instance.GetCharLength();
                 byte* buffer = stackalloc byte[bufferLength];
-                CharString<TChar> chStr = CharFactoryInternal<TChar>.Instance.GetNativeEmptyStringInternal(buffer, bufferLength);
+                CharString<TChar> chStr = CharFactoryInternal<TChar>.Instance.GetNativeEmptyStringInternal(buffer, bufferLength, Constants.MAX_STRING_LENGTH);
                 StdScr.mvinstr(nline, ncol, ref chStr, out int read);
                 return chStr.ToString();
             }
@@ -242,7 +242,7 @@ namespace NCurses.Core.StdScr
             {
                 int bufferLength = maxChars * CharFactoryInternal<TChar>.Instance.GetCharLength();
                 byte* buffer = stackalloc byte[bufferLength];
-                CharString<TChar> chStr = CharFactoryInternal<TChar>.Instance.GetNativeEmptyStringInternal(buffer, bufferLength);
+                CharString<TChar> chStr = CharFactoryInternal<TChar>.Instance.GetNativeEmptyStringInternal(buffer, bufferLength, maxChars);
                 StdScr.mvinnstr(nline, ncol, ref chStr, maxChars, out read);
                 return chStr.ToString();
             }
@@ -252,7 +252,7 @@ namespace NCurses.Core.StdScr
         {
             int bufferLength = Constants.MAX_STRING_LENGTH * SingleByteCharFactoryInternal<TSingleByte>.Instance.GetCharLength();
             byte[] buffer = new byte[bufferLength];
-            SingleByteCharString<TSingleByte> chStr = SingleByteCharFactoryInternal<TSingleByte>.Instance.GetNativeEmptyStringInternal(buffer);
+            SingleByteCharString<TSingleByte> chStr = SingleByteCharFactoryInternal<TSingleByte>.Instance.GetNativeEmptyStringInternal(buffer, Constants.MAX_STRING_LENGTH);
             StdScr.inchstr(ref chStr, out int read);
             charsWithAttributes = chStr;
         }
@@ -261,7 +261,7 @@ namespace NCurses.Core.StdScr
         {
             int bufferLength = maxChars * SingleByteCharFactoryInternal<TSingleByte>.Instance.GetCharLength();
             byte[] buffer = new byte[bufferLength];
-            SingleByteCharString<TSingleByte> chStr = SingleByteCharFactoryInternal<TSingleByte>.Instance.GetNativeEmptyStringInternal(buffer);
+            SingleByteCharString<TSingleByte> chStr = SingleByteCharFactoryInternal<TSingleByte>.Instance.GetNativeEmptyStringInternal(buffer, maxChars);
             StdScr.inchnstr(ref chStr, maxChars, out int read);
             charsWithAttributes = chStr;
         }
@@ -270,7 +270,7 @@ namespace NCurses.Core.StdScr
         {
             int bufferLength = Constants.MAX_STRING_LENGTH * SingleByteCharFactoryInternal<TSingleByte>.Instance.GetCharLength();
             byte[] buffer = new byte[bufferLength];
-            SingleByteCharString<TSingleByte> chStr = SingleByteCharFactoryInternal<TSingleByte>.Instance.GetNativeEmptyStringInternal(buffer);
+            SingleByteCharString<TSingleByte> chStr = SingleByteCharFactoryInternal<TSingleByte>.Instance.GetNativeEmptyStringInternal(buffer, Constants.MAX_STRING_LENGTH);
             StdScr.mvinchstr(nline, ncol, ref chStr, out int read);
             charsWithAttributes = chStr;
         }
@@ -279,7 +279,7 @@ namespace NCurses.Core.StdScr
         {
             int bufferLength = maxChars * SingleByteCharFactoryInternal<TSingleByte>.Instance.GetCharLength();
             byte[] buffer = new byte[bufferLength];
-            SingleByteCharString<TSingleByte> chStr = SingleByteCharFactoryInternal<TSingleByte>.Instance.GetNativeEmptyStringInternal(buffer);
+            SingleByteCharString<TSingleByte> chStr = SingleByteCharFactoryInternal<TSingleByte>.Instance.GetNativeEmptyStringInternal(buffer, maxChars);
             StdScr.mvinchnstr(nline, ncol, ref chStr, maxChars, out int read);
             charsWithAttributes = chStr;
         }
@@ -358,8 +358,8 @@ namespace NCurses.Core.StdScr
                 byte* buffer = stackalloc byte[byteLength];
                 SingleByteCharString<TSingleByte> sStr = SingleByteCharFactoryInternal<TSingleByte>.Instance.GetNativeStringInternal(buffer, byteLength, str, attrs, pair);
 
-                IEnumerable<ISingleByteChar> wchars = sStr;
-                foreach (ISingleByteChar wch in wchars.Reverse())
+                IEnumerable<ISingleByteNCursesChar> wchars = sStr;
+                foreach (ISingleByteNCursesChar wch in wchars.Reverse())
                 {
                     StdScr.insch(VerifyChar(wch));
                 }
@@ -382,7 +382,7 @@ namespace NCurses.Core.StdScr
             {
                 int bufferLength = Constants.MAX_STRING_LENGTH * CharFactoryInternal<TChar>.Instance.GetCharLength();
                 byte* buffer = stackalloc byte[bufferLength];
-                CharString<TChar> chStr = CharFactoryInternal<TChar>.Instance.GetNativeEmptyStringInternal(buffer, bufferLength);
+                CharString<TChar> chStr = CharFactoryInternal<TChar>.Instance.GetNativeEmptyStringInternal(buffer, bufferLength, Constants.MAX_STRING_LENGTH);
                 StdScr.getstr(ref chStr);
                 return chStr.ToString();
             }
@@ -394,7 +394,7 @@ namespace NCurses.Core.StdScr
             {
                 int bufferLength = Constants.MAX_STRING_LENGTH * CharFactoryInternal<TChar>.Instance.GetCharLength();
                 byte* buffer = stackalloc byte[bufferLength];
-                CharString<TChar> chStr = CharFactoryInternal<TChar>.Instance.GetNativeEmptyStringInternal(buffer, bufferLength);
+                CharString<TChar> chStr = CharFactoryInternal<TChar>.Instance.GetNativeEmptyStringInternal(buffer, bufferLength, Constants.MAX_STRING_LENGTH);
                 StdScr.mvgetstr(nline, ncol, ref chStr);
                 return chStr.ToString();
             }
@@ -406,7 +406,7 @@ namespace NCurses.Core.StdScr
             {
                 int bufferLength = length * CharFactoryInternal<TChar>.Instance.GetCharLength();
                 byte* buffer = stackalloc byte[bufferLength];
-                CharString<TChar> chStr = CharFactoryInternal<TChar>.Instance.GetNativeEmptyStringInternal(buffer, bufferLength);
+                CharString<TChar> chStr = CharFactoryInternal<TChar>.Instance.GetNativeEmptyStringInternal(buffer, bufferLength, length);
                 StdScr.getnstr(ref chStr, length);
                 return chStr.ToString();
             }
@@ -418,7 +418,7 @@ namespace NCurses.Core.StdScr
             {
                 int bufferLength = length * CharFactoryInternal<TChar>.Instance.GetCharLength();
                 byte* buffer = stackalloc byte[bufferLength];
-                CharString<TChar> chStr = CharFactoryInternal<TChar>.Instance.GetNativeEmptyStringInternal(buffer, bufferLength);
+                CharString<TChar> chStr = CharFactoryInternal<TChar>.Instance.GetNativeEmptyStringInternal(buffer, bufferLength, length);
                 StdScr.mvgetnstr(nline, ncol, ref chStr, length);
                 return chStr.ToString();
             }

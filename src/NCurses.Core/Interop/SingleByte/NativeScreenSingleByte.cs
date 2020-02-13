@@ -9,8 +9,8 @@ namespace NCurses.Core.Interop.SingleByte
     internal class NativeScreenSingleByte<TSingleByte, TChar, TMouseEvent> 
             : SingleByteWrapper<TSingleByte, TChar, TMouseEvent>, 
             INativeScreenSingleByte<TSingleByte, SingleByteCharString<TSingleByte>>
-        where TSingleByte : unmanaged, ISingleByteChar, IEquatable<TSingleByte>
-        where TChar : unmanaged, IChar, IEquatable<TChar>
+        where TSingleByte : unmanaged, ISingleByteNCursesChar, IEquatable<TSingleByte>
+        where TChar : unmanaged, ISingleByteChar, IEquatable<TChar>
         where TMouseEvent : unmanaged, IMEVENT
     {
         internal NativeScreenSingleByte(ISingleByteWrapper<TSingleByte, TChar, TMouseEvent> wrapper)

@@ -5,8 +5,8 @@ using System.Text;
 namespace NCurses.Core.Interop.MultiByte
 {
     public interface INativeNCursesMultiByte<TChar, TCharString>
-        where TChar : IMultiByteChar
-        where TCharString : IMultiByteCharString
+        where TChar : IMultiByteNCursesChar
+        where TCharString : IMultiByteNCursesCharString
     {
         void getcchar(in TChar wcval, out char wch, out ulong attrs, out short color_pair);
         void setcchar(out TChar wcval, in char wch, ulong attrs, short color_pair);

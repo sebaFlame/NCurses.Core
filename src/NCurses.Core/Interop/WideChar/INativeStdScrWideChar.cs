@@ -5,8 +5,8 @@ using System.Text;
 namespace NCurses.Core.Interop.WideChar
 {
     public interface INativeStdScrWideChar<TChar, TCharString>
-        where TChar : IChar
-        where TCharString : ICharString
+        where TChar : IMultiByteChar
+        where TCharString : IMultiByteCharString
     {
         void addnwstr(in TCharString wstr, int n);
         void addwstr(in TCharString wstr);

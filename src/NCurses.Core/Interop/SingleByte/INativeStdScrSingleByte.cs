@@ -7,8 +7,8 @@ using NCurses.Core.Interop.SafeHandles;
 namespace NCurses.Core.Interop.SingleByte
 {
     public interface INativeStdScrSingleByte<TChar, TCharString>
-        where TChar : ISingleByteChar
-        where TCharString : ISingleByteCharString
+        where TChar : ISingleByteNCursesChar
+        where TCharString : ISingleByteNCursesCharString
     {
         void addch(in TChar ch);
         void addchnstr(in TCharString txt, int number);

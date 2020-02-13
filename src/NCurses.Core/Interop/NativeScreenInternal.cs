@@ -30,19 +30,19 @@ namespace NCurses.Core.Interop
                 CharString<TChar>,
                 TMouseEvent>,
             INativeScreenWrapper<
+                IMultiByteNCursesChar,
+                IMultiByteNCursesCharString,
                 IMultiByteChar,
                 IMultiByteCharString,
-                IChar,
-                ICharString,
+                ISingleByteNCursesChar,
+                ISingleByteNCursesCharString,
                 ISingleByteChar,
                 ISingleByteCharString,
-                IChar,
-                ICharString,
                 IMEVENT>
-        where TMultiByte : unmanaged, IMultiByteChar, IEquatable<TMultiByte>
-        where TWideChar : unmanaged, IChar, IEquatable<TWideChar>
-        where TSingleByte : unmanaged, ISingleByteChar, IEquatable<TSingleByte>
-        where TChar : unmanaged, IChar, IEquatable<TChar>
+        where TMultiByte : unmanaged, IMultiByteNCursesChar, IEquatable<TMultiByte>
+        where TWideChar : unmanaged, IMultiByteChar, IEquatable<TWideChar>
+        where TSingleByte : unmanaged, ISingleByteNCursesChar, IEquatable<TSingleByte>
+        where TChar : unmanaged, ISingleByteChar, IEquatable<TChar>
         where TMouseEvent : unmanaged, IMEVENT
     {
         internal NativeScreenMultiByte<TMultiByte, TWideChar, TSingleByte, TChar, TMouseEvent> MultiByteNCursesWrapper { get; }
@@ -50,8 +50,6 @@ namespace NCurses.Core.Interop
 
         internal NativeScreenWideChar<TWideChar, TChar> WideCharNCursesWrapper { get; }
         internal NativeScreenChar<TChar> CharNCursesWrapper { get; }
-
-        internal INativeScreenWrapper<IMultiByteChar, IMultiByteCharString, IChar, ICharString, ISingleByteChar, ISingleByteCharString, IChar, ICharString, IMEVENT> Instance => this;
 
         public NativeScreenInternal(
             IMultiByteWrapper<TMultiByte, TWideChar, TSingleByte, TChar> multiByteWrapper,
@@ -1223,114 +1221,114 @@ namespace NCurses.Core.Interop
         #endregion
 
         #region Interface implementations
-        public void wunctrl_sp(IntPtr screen, in IMultiByteChar wch, out string str)
+        public void wunctrl_sp(IntPtr screen, in IMultiByteNCursesChar wch, out string str)
         {
             TMultiByte casted = this.MultiByteNCursesWrapper.CastChar(wch);
             this.wunctrl_sp(screen, in casted, out str);
         }
 
-        public void unget_wch_sp(IntPtr screen, in IChar wch)
+        public void unget_wch_sp(IntPtr screen, in IMultiByteChar wch)
         {
             TWideChar casted = this.WideCharNCursesWrapper.CastChar(wch);
             this.unget_wch_sp(screen, in casted);
         }
 
-        public void define_key_sp(IntPtr screen, in ICharString definition, int keycode)
+        public void define_key_sp(IntPtr screen, in ISingleByteCharString definition, int keycode)
         {
             CharString<TChar> casted = this.CharNCursesWrapper.CastString(definition);
             this.define_key_sp(screen, in casted, keycode);
         }
 
-        IChar INativeScreenChar<IChar, ICharString>.erasechar_sp(IntPtr screen)
+        ISingleByteChar INativeScreenChar<ISingleByteChar, ISingleByteCharString>.erasechar_sp(IntPtr screen)
         {
             return this.erasechar_sp(screen);
         }
 
-        public int key_defined_sp(IntPtr screen, in ICharString definition)
+        public int key_defined_sp(IntPtr screen, in ISingleByteCharString definition)
         {
             CharString<TChar> casted = this.CharNCursesWrapper.CastString(definition);
             return this.key_defined_sp(screen, in casted);
         }
 
-        ICharString INativeScreenChar<IChar, ICharString>.keybound_sp(IntPtr screen, int keycode, int count)
+        ISingleByteCharString INativeScreenChar<ISingleByteChar, ISingleByteCharString>.keybound_sp(IntPtr screen, int keycode, int count)
         {
             return this.keybound_sp(screen, keycode, count);
         }
 
-        ICharString INativeScreenChar<IChar, ICharString>.keyname_sp(IntPtr screen, int c)
+        ISingleByteCharString INativeScreenChar<ISingleByteChar, ISingleByteCharString>.keyname_sp(IntPtr screen, int c)
         {
             return this.keyname_sp(screen, c);
         }
 
-        IChar INativeScreenChar<IChar, ICharString>.killchar_sp(IntPtr screen)
+        ISingleByteChar INativeScreenChar<ISingleByteChar, ISingleByteCharString>.killchar_sp(IntPtr screen)
         {
             return this.killchar_sp(screen);
         }
 
-        ICharString INativeScreenChar<IChar, ICharString>.longname_sp(IntPtr screen)
+        ISingleByteCharString INativeScreenChar<ISingleByteChar, ISingleByteCharString>.longname_sp(IntPtr screen)
         {
             return this.longname_sp(screen);
         }
 
-        public void putp_sp(IntPtr screen, in ICharString str)
+        public void putp_sp(IntPtr screen, in ISingleByteCharString str)
         {
             CharString<TChar> casted = this.CharNCursesWrapper.CastString(str);
             this.putp_sp(screen, in casted);
         }
 
-        public void scr_dump_sp(IntPtr screen, in ICharString filename)
+        public void scr_dump_sp(IntPtr screen, in ISingleByteCharString filename)
         {
             CharString<TChar> casted = this.CharNCursesWrapper.CastString(filename);
             this.scr_dump_sp(screen, in casted);
         }
 
-        public void scr_init_sp(IntPtr screen, in ICharString filename)
+        public void scr_init_sp(IntPtr screen, in ISingleByteCharString filename)
         {
             CharString<TChar> casted = this.CharNCursesWrapper.CastString(filename);
             this.scr_init_sp(screen, in casted);
         }
 
-        public void scr_restore_sp(IntPtr screen, in ICharString filename)
+        public void scr_restore_sp(IntPtr screen, in ISingleByteCharString filename)
         {
             CharString<TChar> casted = this.CharNCursesWrapper.CastString(filename);
             this.scr_restore_sp(screen, in casted);
         }
 
-        public void scr_set_sp(IntPtr screen, in ICharString filename)
+        public void scr_set_sp(IntPtr screen, in ISingleByteCharString filename)
         {
             CharString<TChar> casted = this.CharNCursesWrapper.CastString(filename);
             this.scr_set_sp(screen, in casted);
         }
 
-        ICharString INativeScreenChar<IChar, ICharString>.slk_label_sp(IntPtr screen, int labnum)
+        ISingleByteCharString INativeScreenChar<ISingleByteChar, ISingleByteCharString>.slk_label_sp(IntPtr screen, int labnum)
         {
             return this.slk_label_sp(screen, labnum);
         }
 
-        public void slk_set_sp(IntPtr screen, int labnum, in ICharString label, int fmt)
+        public void slk_set_sp(IntPtr screen, int labnum, in ISingleByteCharString label, int fmt)
         {
             CharString<TChar> casted = this.CharNCursesWrapper.CastString(label);
             this.slk_set_sp(screen, labnum, in casted, fmt);
         }
 
-        ICharString INativeScreenChar<IChar, ICharString>.termname_sp(IntPtr screen)
+        ISingleByteCharString INativeScreenChar<ISingleByteChar, ISingleByteCharString>.termname_sp(IntPtr screen)
         {
             return termname_sp(screen);
         }
 
-        public int tigetflag_sp(IntPtr screen, in ICharString capname)
+        public int tigetflag_sp(IntPtr screen, in ISingleByteCharString capname)
         {
             CharString<TChar> casted = this.CharNCursesWrapper.CastString(capname);
             return this.tigetflag_sp(screen, in casted);
         }
 
-        public int tigetnum_sp(IntPtr screen, in ICharString capname)
+        public int tigetnum_sp(IntPtr screen, in ISingleByteCharString capname)
         {
             CharString<TChar> casted = this.CharNCursesWrapper.CastString(capname);
             return this.tigetnum_sp(screen, in casted);
         }
 
-        public int tigetstr_sp(IntPtr screen, in ICharString capname)
+        public int tigetstr_sp(IntPtr screen, in ISingleByteCharString capname)
         {
             CharString<TChar> casted = this.CharNCursesWrapper.CastString(capname);
             return this.tigetstr_sp(screen, in casted);

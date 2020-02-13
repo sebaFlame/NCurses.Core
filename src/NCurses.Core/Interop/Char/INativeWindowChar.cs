@@ -7,8 +7,8 @@ using NCurses.Core.Interop.SafeHandles;
 namespace NCurses.Core.Interop.Char
 {
     public interface INativeWindowChar<TChar, TCharString>
-        where TChar : IChar
-        where TCharString : ICharString
+        where TChar : ISingleByteChar
+        where TCharString : ISingleByteCharString
     {
         void mvwaddnstr(WindowBaseSafeHandle window, int y, int x, in TCharString str, int n);
         void mvwaddstr(WindowBaseSafeHandle window, int y, int x, in TCharString str);

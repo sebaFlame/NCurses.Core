@@ -14,14 +14,14 @@ namespace NCurses.Core.Interop.Wrappers
     public interface INativePadWrapper<TMultiByte, TMultiByteString, TWideChar, TWideCharString, TSingleByte, TSingleByteString, TChar, TCharString, TMouseEvent>
             : INativePadMultiByte<TMultiByte, TMultiByteString>,
             INativePadSingleByte<TSingleByte, TSingleByteString>
-        where TMultiByte : IMultiByteChar
-        where TMultiByteString : IMultiByteCharString
-        where TWideChar : IChar
-        where TWideCharString : ICharString
-        where TSingleByte : ISingleByteChar
-        where TSingleByteString : ISingleByteCharString
-        where TChar : IChar
-        where TCharString : ICharString
+        where TMultiByte : IMultiByteNCursesChar
+        where TMultiByteString : IMultiByteNCursesCharString
+        where TWideChar : IMultiByteChar
+        where TWideCharString : IMultiByteCharString
+        where TSingleByte : ISingleByteNCursesChar
+        where TSingleByteString : ISingleByteNCursesCharString
+        where TChar : ISingleByteChar
+        where TCharString : ISingleByteCharString
         where TMouseEvent : IMEVENT
     {
         void pnoutrefresh(WindowBaseSafeHandle pad, int pminrow, int pmincol, int sminrow, int smincol, int smaxrow, int smaxcol);

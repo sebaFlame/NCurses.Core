@@ -14,10 +14,10 @@ namespace NCurses.Core.Interop
         TString GetNativeEmptyString(int length);
         TString GetNativeString(string str);
 
-        unsafe TString GetNativeEmptyString(byte* buffer, int length);
-        TString GetNativeEmptyString(byte[] buffer);
+        unsafe TString GetNativeEmptyString(byte* buffer, int bufferLength, int stringLength);
+        TString GetNativeEmptyString(byte[] buffer, int stringLength);
 
-        unsafe TString GetNativeString(byte* buffer, int length, string str);
+        unsafe TString GetNativeString(byte* buffer, int bufferLength, string str);
         TString GetNativeString(byte[] buffer, string str);
 
         int GetByteCount(string str);
@@ -35,9 +35,9 @@ namespace NCurses.Core.Interop
         TString GetNativeString(string str, ulong attrs);
         TString GetNativeString(string str, ulong attrs, short colorPair);
 
-        unsafe TString GetNativeString(byte* buffer, int length, string str, ulong attrs);
+        unsafe TString GetNativeString(byte* buffer, int bufferLength, string str, ulong attrs);
         TString GetNativeString(byte[] buffer, string str, ulong attrs);
-        unsafe TString GetNativeString(byte* buffer, int length, string str, ulong attrs, short colorPair);
+        unsafe TString GetNativeString(byte* buffer, int bufferLength, string str, ulong attrs, short colorPair);
         TString GetNativeString(byte[] buffer, string str, ulong attrs, short colorPair);
     }
 
@@ -48,9 +48,9 @@ namespace NCurses.Core.Interop
         TChar GetNativeEmptyCharInternal();
         TChar GetNativeCharInternal(char ch);
 
-        unsafe TString GetNativeEmptyStringInternal(byte* buffer, int length);
-        TString GetNativeEmptyStringInternal(byte[] buffer);
-        unsafe TString GetNativeStringInternal(byte* buffer, int length, string str);
+        unsafe TString GetNativeEmptyStringInternal(byte* buffer, int bufferLength, int stringLength);
+        TString GetNativeEmptyStringInternal(byte[] buffer, int stringLength);
+        unsafe TString GetNativeStringInternal(byte* buffer, int bufferLength, string str);
         TString GetNativeStringInternal(byte[] buffer, string str);
 
         TString CreateNativeString(ref TChar strRef);
@@ -70,9 +70,9 @@ namespace NCurses.Core.Interop
         TChar GetNativeCharInternal(char ch, ulong attrs);
         TChar GetNativeCharInternal(char ch, ulong attrs, short colorPair);
 
-        unsafe TString GetNativeStringInternal(byte* buffer, int length, string str, ulong attrs);
+        unsafe TString GetNativeStringInternal(byte* buffer, int bufferLength, string str, ulong attrs);
         TString GetNativeStringInternal(byte[] buffer, string str, ulong attrs);
-        unsafe TString GetNativeStringInternal(byte* buffer, int length, string str, ulong attrs, short colorPair);
+        unsafe TString GetNativeStringInternal(byte* buffer, int bufferLength, string str, ulong attrs, short colorPair);
         TString GetNativeStringInternal(byte[] buffer, string str, ulong attrs, short colorPair);
     }
 }

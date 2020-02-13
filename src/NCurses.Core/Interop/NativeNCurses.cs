@@ -29,58 +29,58 @@ namespace NCurses.Core.Interop
     {
         #region Native wrappers
         public static INativeNCursesWrapper<
+            IMultiByteNCursesChar,
+            IMultiByteNCursesCharString,
             IMultiByteChar,
             IMultiByteCharString,
-            IChar,
-            ICharString,
+            ISingleByteNCursesChar,
+            ISingleByteNCursesCharString,
             ISingleByteChar,
             ISingleByteCharString,
-            IChar,
-            ICharString,
             IMEVENT> NCurses => NCursesCustomTypeWrapper.NCurses;
 
         public static INativeWindowWrapper<
+            IMultiByteNCursesChar,
+            IMultiByteNCursesCharString,
             IMultiByteChar,
             IMultiByteCharString,
-            IChar,
-            ICharString,
+            ISingleByteNCursesChar,
+            ISingleByteNCursesCharString,
             ISingleByteChar,
             ISingleByteCharString,
-            IChar,
-            ICharString,
             IMEVENT> Window => NCursesCustomTypeWrapper.Window;
 
         public static INativeStdScrWrapper<
+            IMultiByteNCursesChar,
+            IMultiByteNCursesCharString,
             IMultiByteChar,
             IMultiByteCharString,
-            IChar,
-            ICharString,
+            ISingleByteNCursesChar,
+            ISingleByteNCursesCharString,
             ISingleByteChar,
             ISingleByteCharString,
-            IChar,
-            ICharString,
             IMEVENT> StdScr => NCursesCustomTypeWrapper.StdScr;
 
         public static INativeScreenWrapper<
+            IMultiByteNCursesChar,
+            IMultiByteNCursesCharString,
             IMultiByteChar,
             IMultiByteCharString,
-            IChar,
-            ICharString,
+            ISingleByteNCursesChar,
+            ISingleByteNCursesCharString,
             ISingleByteChar,
             ISingleByteCharString,
-            IChar,
-            ICharString,
             IMEVENT> Screen => NCursesCustomTypeWrapper.Screen;
 
         public static INativePadWrapper<
+            IMultiByteNCursesChar,
+            IMultiByteNCursesCharString,
             IMultiByteChar,
             IMultiByteCharString,
-            IChar,
-            ICharString,
+            ISingleByteNCursesChar,
+            ISingleByteNCursesCharString,
             ISingleByteChar,
             ISingleByteCharString,
-            IChar,
-            ICharString,
             IMEVENT> Pad => NCursesCustomTypeWrapper.Pad;
 
         internal static IWindowFactory WindowFactory => NCursesCustomTypeWrapper.WindowFactory;

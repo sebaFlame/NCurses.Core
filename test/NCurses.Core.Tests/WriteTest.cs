@@ -119,6 +119,7 @@ namespace NCurses.Core.Tests
             Assert.Equal(0, this.Window.CursorLine);
             Assert.Equal(0, this.Window.CursorColumn); //does not get advanced
 
+            //+1 because strict check has null terminator
             this.Window.ExtractString(0, 0, out INCursesCharString resultNCursesString, this.TestString.Length);
 
             Assert.StrictEqual(resultNCursesString, managedString);

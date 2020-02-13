@@ -9,7 +9,7 @@ namespace NCurses.Core.Interop.Char
     internal class NativeNCursesChar<TChar> 
             : CharWrapper<TChar>, 
             INativeNCursesChar<TChar, CharString<TChar>>
-        where TChar : unmanaged, IChar, IEquatable<TChar>
+        where TChar : unmanaged, ISingleByteChar, IEquatable<TChar>
     {
         internal NativeNCursesChar(ICharWrapper<TChar> wrapper)
             : base(wrapper) { }

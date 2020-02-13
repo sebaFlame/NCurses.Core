@@ -5,8 +5,8 @@ using System.Text;
 namespace NCurses.Core.Interop.WideChar
 {
     public interface INativeNCursesWideChar<TChar, TCharString>
-        where TChar : IChar
-        where TCharString : ICharString
+        where TChar : IMultiByteChar
+        where TCharString : IMultiByteCharString
     {
         void erasewchar(out TChar wch);
         string key_name(in TChar ch);

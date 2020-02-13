@@ -7,9 +7,9 @@ using System.Runtime.CompilerServices;
 namespace NCurses.Core.Interop.WideChar
 {
     internal class WideCharWrapper<TWideChar, TChar> //handles wchar_t and wint_t
-        : INativeCharWrapper<IChar, TWideChar, ICharString, WideCharString<TWideChar>>
-        where TWideChar : unmanaged, IChar, IEquatable<TWideChar>
-        where TChar : unmanaged, IChar, IEquatable<TChar>
+        : INativeCharWrapper<IMultiByteChar, TWideChar, IMultiByteCharString, WideCharString<TWideChar>>
+        where TWideChar : unmanaged, IMultiByteChar, IEquatable<TWideChar>
+        where TChar : unmanaged, ISingleByteChar, IEquatable<TChar>
     {
         internal IWideCharWrapper<TWideChar, TChar> Wrapper { get; }
 
@@ -18,7 +18,7 @@ namespace NCurses.Core.Interop.WideChar
             this.Wrapper = wrapper;
         }
 
-        public WideCharString<TWideChar> CastString(in ICharString wCharStr)
+        public WideCharString<TWideChar> CastString(in IMultiByteCharString wCharStr)
         {
             if (!(wCharStr is WideCharString<TWideChar> wCasted))
             {
@@ -28,7 +28,7 @@ namespace NCurses.Core.Interop.WideChar
             return wCasted;
         }
 
-        public TWideChar CastChar(in IChar wChar)
+        public TWideChar CastChar(in IMultiByteChar wChar)
         {
             if (!(wChar is TWideChar wCasted))
             {

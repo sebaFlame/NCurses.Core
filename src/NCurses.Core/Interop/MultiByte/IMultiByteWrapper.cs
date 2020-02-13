@@ -6,9 +6,9 @@ using NCurses.Core.Interop.SingleByte;
 namespace NCurses.Core.Interop.MultiByte
 {
     internal interface IMultiByteWrapper<TMultiByte, TWideChar, TSingleByte, TChar>
-        where TMultiByte : unmanaged, IMultiByteChar
+        where TMultiByte : unmanaged, IMultiByteNCursesChar
         where TWideChar : unmanaged
-        where TSingleByte: unmanaged, ISingleByteChar
+        where TSingleByte: unmanaged, ISingleByteNCursesChar
         where TChar : unmanaged
     {
         //int add_wch( const cchar_t *wch );

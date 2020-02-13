@@ -27,19 +27,19 @@ namespace NCurses.Core.Interop
                 CharString<TChar>,
                 TMouseEvent>,
             INativeNCursesWrapper<
+                IMultiByteNCursesChar,
+                IMultiByteNCursesCharString,
                 IMultiByteChar,
                 IMultiByteCharString,
-                IChar,
-                ICharString,
+                ISingleByteNCursesChar,
+                ISingleByteNCursesCharString,
                 ISingleByteChar,
                 ISingleByteCharString,
-                IChar,
-                ICharString,
                 IMEVENT>
-        where TMultiByte : unmanaged, IMultiByteChar, IEquatable<TMultiByte>
-        where TWideChar : unmanaged, IChar, IEquatable<TWideChar>
-        where TSingleByte : unmanaged, ISingleByteChar, IEquatable<TSingleByte>
-        where TChar : unmanaged, IChar, IEquatable<TChar>
+        where TMultiByte : unmanaged, IMultiByteNCursesChar, IEquatable<TMultiByte>
+        where TWideChar : unmanaged, IMultiByteChar, IEquatable<TWideChar>
+        where TSingleByte : unmanaged, ISingleByteNCursesChar, IEquatable<TSingleByte>
+        where TChar : unmanaged, ISingleByteChar, IEquatable<TChar>
         where TMouseEvent : unmanaged, IMEVENT
     {
         internal NativeNCursesMultiByte<TMultiByte, TWideChar, TSingleByte, TChar, TMouseEvent> MultiByteNCursesWrapper { get; }
@@ -47,8 +47,6 @@ namespace NCurses.Core.Interop
 
         internal NativeNCursesWideChar<TWideChar, TChar> WideCharNCursesWrapper { get; }
         internal NativeNCursesChar<TChar> CharNCursesWrapper { get; }
-
-        internal INativeNCursesWrapper<IMultiByteChar, IMultiByteCharString, IChar, ICharString, ISingleByteChar, ISingleByteCharString, IChar, ICharString, IMEVENT> Instance => this;
 
         /// <summary>
         /// These only return a number representation of the symbol, which NCurses can handle internally
@@ -2279,164 +2277,166 @@ namespace NCurses.Core.Interop
             return NativeNCurses.NCursesWrapper._nc_screen_of(window);
         }
 
-        public void getcchar(in IMultiByteChar wcval, out char wch, out ulong attrs, out short color_pair)
+        #region Interfaces implementation
+        public void getcchar(in IMultiByteNCursesChar wcval, out char wch, out ulong attrs, out short color_pair)
         {
             TMultiByte casted = this.MultiByteNCursesWrapper.CastChar(wcval);
             this.getcchar(in casted, out wch, out attrs, out color_pair);
         }
 
-        public void setcchar(out IMultiByteChar wcval, in char wch, ulong attrs, short color_pair)
+        public void setcchar(out IMultiByteNCursesChar wcval, in char wch, ulong attrs, short color_pair)
         {
             this.setcchar(out TMultiByte wc, in wch, attrs, color_pair);
             wcval = wc;
         }
 
-        public void wunctrl(in IMultiByteChar wch, out string str)
+        public void wunctrl(in IMultiByteNCursesChar wch, out string str)
         {
             TMultiByte casted = this.MultiByteNCursesWrapper.CastChar(wch);
             this.wunctrl(in casted, out str);
         }
 
-        public void erasewchar(out IChar wch)
+        public void erasewchar(out IMultiByteChar wch)
         {
             this.erasewchar(out TWideChar wc);
             wch = wc;
         }
 
-        public string key_name(in IChar wch)
+        public string key_name(in IMultiByteChar wch)
         {
             TWideChar casted = this.WideCharNCursesWrapper.CastChar(wch);
             return this.key_name(in casted);
         }
 
-        public void killwchar(out IChar wch)
+        public void killwchar(out IMultiByteChar wch)
         {
             this.killwchar(out TWideChar wc);
             wch = wc;
         }
 
-        public void slk_wset(int labnum, in ICharString label, int fmt)
+        public void slk_wset(int labnum, in IMultiByteCharString label, int fmt)
         {
             WideCharString<TWideChar> casted = this.WideCharNCursesWrapper.CastString(label);
             this.slk_wset(labnum, in casted, fmt);
         }
 
-        public void unget_wch(in IChar wch)
+        public void unget_wch(in IMultiByteChar wch)
         {
             TWideChar casted = this.WideCharNCursesWrapper.CastChar(wch);
             this.unget_wch(in casted);
         }
 
-        public string unctrl(in ISingleByteChar ch)
+        public string unctrl(in ISingleByteNCursesChar ch)
         {
             TSingleByte casted = this.SingleByteNCursesWrapper.CastChar(ch);
             return this.unctrl(in casted);
         }
 
-        ICharString INativeNCursesChar<IChar, ICharString>.curses_version()
+        ISingleByteCharString INativeNCursesChar<ISingleByteChar, ISingleByteCharString>.curses_version()
         {
             return this.curses_version();
         }
 
-        public void define_key(in ICharString definition, int keycode)
+        public void define_key(in ISingleByteCharString definition, int keycode)
         {
             CharString<TChar> casted = this.CharNCursesWrapper.CastString(definition);
             this.define_key(in casted, keycode);
         }
 
-        IChar INativeNCursesChar<IChar, ICharString>.erasechar()
+        ISingleByteChar INativeNCursesChar<ISingleByteChar, ISingleByteCharString>.erasechar()
         {
             return this.erasechar();
         }
 
-        public int key_defined(in ICharString definition)
+        public int key_defined(in ISingleByteCharString definition)
         {
             CharString<TChar> casted = this.CharNCursesWrapper.CastString(definition);
             return this.key_defined(in casted);
         }
 
-        ICharString INativeNCursesChar<IChar, ICharString>.keybound(int keycode, int count)
+        ISingleByteCharString INativeNCursesChar<ISingleByteChar, ISingleByteCharString>.keybound(int keycode, int count)
         {
             return this.keybound(keycode, count);
         }
 
-        ICharString INativeNCursesChar<IChar, ICharString>.keyname(int c)
+        ISingleByteCharString INativeNCursesChar<ISingleByteChar, ISingleByteCharString>.keyname(int c)
         {
             return this.keyname(c);
         }
 
-        IChar INativeNCursesChar<IChar, ICharString>.killchar()
+        ISingleByteChar INativeNCursesChar<ISingleByteChar, ISingleByteCharString>.killchar()
         {
             return this.killchar();
         }
 
-        ICharString INativeNCursesChar<IChar, ICharString>.longname()
+        ISingleByteCharString INativeNCursesChar<ISingleByteChar, ISingleByteCharString>.longname()
         {
             return this.longname();
         }
 
-        public void putp(in ICharString str)
+        public void putp(in ISingleByteCharString str)
         {
             CharString<TChar> casted = this.CharNCursesWrapper.CastString(str);
             this.putp(in casted);
         }
 
-        public void scr_dump(in ICharString filename)
+        public void scr_dump(in ISingleByteCharString filename)
         {
             CharString<TChar> casted = this.CharNCursesWrapper.CastString(filename);
             this.scr_dump(in casted);
         }
 
-        public void scr_init(in ICharString filename)
+        public void scr_init(in ISingleByteCharString filename)
         {
             CharString<TChar> casted = this.CharNCursesWrapper.CastString(filename);
             this.scr_init(in casted);
         }
 
-        public void scr_restore(in ICharString filename)
+        public void scr_restore(in ISingleByteCharString filename)
         {
             CharString<TChar> casted = this.CharNCursesWrapper.CastString(filename);
             this.scr_restore(in casted);
         }
 
-        public void scr_set(in ICharString filename)
+        public void scr_set(in ISingleByteCharString filename)
         {
             CharString<TChar> casted = this.CharNCursesWrapper.CastString(filename);
             this.scr_set(in casted);
         }
 
-        ICharString INativeNCursesChar<IChar, ICharString>.slk_label(int labnum)
+        ISingleByteCharString INativeNCursesChar<ISingleByteChar, ISingleByteCharString>.slk_label(int labnum)
         {
             return this.slk_label(labnum);
         }
 
-        public void slk_set(int labnum, in ICharString label, int fmt)
+        public void slk_set(int labnum, in ISingleByteCharString label, int fmt)
         {
             CharString<TChar> casted = this.CharNCursesWrapper.CastString(label);
             this.slk_set(labnum, in casted, fmt);
         }
 
-        ICharString INativeNCursesChar<IChar, ICharString>.termname()
+        ISingleByteCharString INativeNCursesChar<ISingleByteChar, ISingleByteCharString>.termname()
         {
             return this.termname();
         }
 
-        public int tigetflag(in ICharString capname)
+        public int tigetflag(in ISingleByteCharString capname)
         {
             CharString<TChar> casted = this.CharNCursesWrapper.CastString(capname);
             return this.tigetflag(in casted);
         }
 
-        public int tigetnum(in ICharString capname)
+        public int tigetnum(in ISingleByteCharString capname)
         {
             CharString<TChar> casted = this.CharNCursesWrapper.CastString(capname);
             return this.tigetnum(in casted);
         }
 
-        public int tigetstr(in ICharString capname)
+        public int tigetstr(in ISingleByteCharString capname)
         {
             CharString<TChar> casted = this.CharNCursesWrapper.CastString(capname);
             return this.tigetstr(in casted);
         }
+        #endregion
     }
 }

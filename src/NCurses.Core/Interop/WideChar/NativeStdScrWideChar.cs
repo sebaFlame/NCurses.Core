@@ -15,10 +15,10 @@ namespace NCurses.Core.Interop.WideChar
     internal class NativeStdScrWideChar<TMultiByte, TWideChar, TSingleByte, TChar, TMouseEvent>
             : WideCharWrapper<TWideChar, TChar>, 
             INativeStdScrWideChar<TWideChar, WideCharString<TWideChar>>
-        where TMultiByte : unmanaged, IMultiByteChar, IEquatable<TMultiByte>
-        where TWideChar : unmanaged, IChar, IEquatable<TWideChar>
-        where TSingleByte : unmanaged, ISingleByteChar, IEquatable<TSingleByte>
-        where TChar : unmanaged, IChar, IEquatable<TChar>
+        where TMultiByte : unmanaged, IMultiByteNCursesChar, IEquatable<TMultiByte>
+        where TWideChar : unmanaged, IMultiByteChar, IEquatable<TWideChar>
+        where TSingleByte : unmanaged, ISingleByteNCursesChar, IEquatable<TSingleByte>
+        where TChar : unmanaged, ISingleByteChar, IEquatable<TChar>
         where TMouseEvent : unmanaged, IMEVENT
     {
         internal NativeStdScrWideChar(IWideCharWrapper<TWideChar, TChar> wrapper)

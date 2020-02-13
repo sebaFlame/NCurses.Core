@@ -11,15 +11,15 @@ using System.Runtime.CompilerServices;
 
 namespace NCurses.Core.Interop.WideChar
 {
-    internal struct WideCharString<TWideChar> : ICharString, IEquatable<WideCharString<TWideChar>>
-        where TWideChar : unmanaged, IChar, IEquatable<TWideChar>
+    internal struct WideCharString<TWideChar> : IMultiByteCharString, IEquatable<WideCharString<TWideChar>>
+        where TWideChar : unmanaged, IMultiByteChar, IEquatable<TWideChar>
     {
         public unsafe Span<byte> ByteSpan =>
             this.BufferArray is null ? new Span<byte>(this.BufferPointer, this.BufferPointerLength) : new Span<byte>(this.BufferArray);
         public unsafe Span<TWideChar> CharSpan =>
             this.BufferArray is null ? new Span<TWideChar>(this.BufferPointer, this.BufferPointerLength / Marshal.SizeOf<TWideChar>()) : MemoryMarshal.Cast<byte, TWideChar>(this.ByteSpan);
 
-        public int Length => this.CharSpan.Length;
+        public int Length { get; }
 
         public ref TWideChar GetPinnableReference() => ref this.CharSpan.GetPinnableReference();
 
@@ -30,14 +30,15 @@ namespace NCurses.Core.Interop.WideChar
 
         public unsafe WideCharString(
             byte* buffer,
-            int length,
+            int bufferLength,
             string str)
         {
             this.BufferPointer = buffer;
-            this.BufferPointerLength = length;
+            this.BufferPointerLength = bufferLength;
             this.BufferArray = null;
+            this.Length = str.Length;
 
-            CreateCharString(new Span<byte>(buffer, length), str.AsSpan());
+            CreateCharString(new Span<byte>(buffer, bufferLength), str.AsSpan());
         }
 
         public unsafe WideCharString(
@@ -47,22 +48,30 @@ namespace NCurses.Core.Interop.WideChar
             this.BufferArray = buffer;
             this.BufferPointer = (byte*)0;
             this.BufferPointerLength = 0;
+            this.Length = str.Length;
 
             CreateCharString(new Span<byte>(buffer), str.AsSpan());
         }
 
-        public unsafe WideCharString(byte* buffer, int length)
+        public unsafe WideCharString(
+            byte* buffer, 
+            int bufferLength,
+            int stringLength)
         {
             this.BufferPointer = buffer;
-            this.BufferPointerLength = length;
+            this.BufferPointerLength = bufferLength;
             this.BufferArray = null;
+            this.Length = stringLength;
         }
 
-        public unsafe WideCharString(byte[] buffer)
+        public unsafe WideCharString(
+            byte[] buffer,
+            int stringLength)
         {
             this.BufferArray = buffer;
             this.BufferPointer = (byte*)0;
             this.BufferPointerLength = 0;
+            this.Length = stringLength;
         }
 
         public unsafe WideCharString(ref TWideChar strRef)
@@ -70,7 +79,7 @@ namespace NCurses.Core.Interop.WideChar
             TWideChar* wideArr = (TWideChar*)Unsafe.AsPointer<TWideChar>(ref strRef);
 
             this.BufferPointer = (byte*)wideArr;
-            this.BufferPointerLength = FindStringLength(wideArr);
+            this.Length = FindStringLength(wideArr, out this.BufferPointerLength);
             this.BufferArray = null;
         }
 
@@ -114,7 +123,7 @@ namespace NCurses.Core.Interop.WideChar
             }
         }
 
-        internal unsafe static int FindStringLength(TWideChar* strArr)
+        internal unsafe static int FindStringLength(TWideChar* strArr, out int byteLength)
         {
             TWideChar zero = WideCharFactoryInternal<TWideChar>.Instance.GetNativeEmptyCharInternal();
             TWideChar val;
@@ -128,6 +137,8 @@ namespace NCurses.Core.Interop.WideChar
                     break;
                 }
             }
+
+            byteLength = length * Marshal.SizeOf<TWideChar>();
             return --length;
         }
 
@@ -135,7 +146,18 @@ namespace NCurses.Core.Interop.WideChar
 
         IEnumerator<IChar> IEnumerable<IChar>.GetEnumerator() => new WideCharStringEnumerator(this);
 
+        IEnumerator<IMultiByteChar> IEnumerable<IMultiByteChar>.GetEnumerator() => new WideCharStringEnumerator(this);
+
         public static explicit operator string(WideCharString<TWideChar> wStr) => wStr.ToString();
+
+        public override bool Equals(object obj)
+        {
+            if (obj is WideCharString<TWideChar> other)
+            {
+                return this.Equals(other);
+            }
+            return false;
+        }
 
         public bool Equals(ICharString obj)
         {
@@ -146,26 +168,37 @@ namespace NCurses.Core.Interop.WideChar
             return false;
         }
 
+        public bool Equals(IMultiByteCharString obj)
+        {
+            if (obj is WideCharString<TWideChar> other)
+            {
+                return this.Equals(other);
+            }
+            return false;
+        }
+
         public bool Equals(WideCharString<TWideChar> other)
         {
-            return this.ByteSpan.SequenceEqual(other.ByteSpan);
+            //remove null terminator
+            Span<byte> thisSpan = this.ByteSpan.Slice(0, this.Length * Marshal.SizeOf<TWideChar>());
+            Span<byte> otherSpan = other.ByteSpan.Slice(0, other.Length * Marshal.SizeOf<TWideChar>());
+
+            return thisSpan.SequenceEqual(otherSpan);
         }
 
         public override string ToString()
         {
             unsafe
             {
-                Span<TWideChar> mbSpan = this.CharSpan;
-                Span<byte> byteSpan = this.ByteSpan;
+                Span<byte> bSpan = this.ByteSpan.Slice(0, this.Length * Marshal.SizeOf<TWideChar>());
+                char* charArr = stackalloc char[this.Length];
 
-                char* charArr = stackalloc char[mbSpan.Length];
-
-                fixed (byte* b = byteSpan)
+                fixed (byte* b = bSpan)
                 {
-                    NativeNCurses.Encoding.GetChars(b, byteSpan.Length, charArr, mbSpan.Length);
+                    NativeNCurses.Encoding.GetChars(b, bSpan.Length, charArr, this.Length);
                 }
 
-                ReadOnlySpan<char> charSpan = new ReadOnlySpan<char>(charArr, mbSpan.Length);
+                ReadOnlySpan<char> charSpan = new ReadOnlySpan<char>(charArr, this.Length);
                 return charSpan.ToString();
             }
         }
@@ -175,9 +208,11 @@ namespace NCurses.Core.Interop.WideChar
             return this.CharSpan.GetHashCode();
         }
 
-        private class WideCharStringEnumerator : IEnumerator<IChar>
+        private class WideCharStringEnumerator : IEnumerator<IMultiByteChar>, IEnumerator<IChar>
         {
-            public IChar Current => this.WideCharString.CharSpan[this.Position];
+            IMultiByteChar IEnumerator<IMultiByteChar>.Current => this.WideCharString.CharSpan[this.Position];
+
+            IChar IEnumerator<IChar>.Current => this.WideCharString.CharSpan[this.Position];
 
             object IEnumerator.Current => this.WideCharString.CharSpan[this.Position];
 

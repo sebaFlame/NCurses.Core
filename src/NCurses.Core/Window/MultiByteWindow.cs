@@ -15,10 +15,10 @@ using NCurses.Core.Interop.Wrappers;
 namespace NCurses.Core.Window
 {
     internal class MultiByteWindow<TMultiByte, TWideChar, TSingleByte, TChar, TMouseEvent> : WindowInternal<TMultiByte, TWideChar, TSingleByte, TChar, TMouseEvent>
-        where TMultiByte : unmanaged, IMultiByteChar, IEquatable<TMultiByte>
-        where TWideChar : unmanaged, IChar, IEquatable<TWideChar>
-        where TSingleByte : unmanaged, ISingleByteChar, IEquatable<TSingleByte>
-        where TChar : unmanaged, IChar, IEquatable<TChar>
+        where TMultiByte : unmanaged, IMultiByteNCursesChar, IEquatable<TMultiByte>
+        where TWideChar : unmanaged, IMultiByteChar, IEquatable<TWideChar>
+        where TSingleByte : unmanaged, ISingleByteNCursesChar, IEquatable<TSingleByte>
+        where TChar : unmanaged, ISingleByteChar, IEquatable<TChar>
         where TMouseEvent : unmanaged, IMEVENT
     {
         public override INCursesChar BackGround
@@ -169,19 +169,19 @@ namespace NCurses.Core.Window
 
         public override INCursesCharString CreateString(string str)
         {
-            byte[] buffer = new byte[MultiByteCharFactoryInternal<TMultiByte>.Instance.GetByteCount(str, false)];
+            byte[] buffer = new byte[MultiByteCharFactoryInternal<TMultiByte>.Instance.GetByteCount(str)];
             return MultiByteCharFactoryInternal<TMultiByte>.Instance.GetNativeStringInternal(buffer, str);
         }
 
         public override INCursesCharString CreateString(string str, ulong attrs)
         {
-            byte[] buffer = new byte[MultiByteCharFactoryInternal<TMultiByte>.Instance.GetByteCount(str, false)];
+            byte[] buffer = new byte[MultiByteCharFactoryInternal<TMultiByte>.Instance.GetByteCount(str)];
             return MultiByteCharFactoryInternal<TMultiByte>.Instance.GetNativeStringInternal(buffer, str, attrs);
         }
 
         public override INCursesCharString CreateString(string str, ulong attrs, short pair)
         {
-            byte[] buffer = new byte[MultiByteCharFactoryInternal<TMultiByte>.Instance.GetByteCount(str, false)];
+            byte[] buffer = new byte[MultiByteCharFactoryInternal<TMultiByte>.Instance.GetByteCount(str)];
             return MultiByteCharFactoryInternal<TMultiByte>.Instance.GetNativeStringInternal(buffer, str, attrs, pair);
         }
 
@@ -236,7 +236,7 @@ namespace NCurses.Core.Window
             {
                 int bufferLength = Constants.MAX_STRING_LENGTH * WideCharFactoryInternal<TWideChar>.Instance.GetCharLength();
                 byte* buffer = stackalloc byte[bufferLength];
-                WideCharString<TWideChar> wChStr = WideCharFactoryInternal<TWideChar>.Instance.GetNativeEmptyStringInternal(buffer, bufferLength);
+                WideCharString<TWideChar> wChStr = WideCharFactoryInternal<TWideChar>.Instance.GetNativeEmptyStringInternal(buffer, bufferLength, Constants.MAX_STRING_LENGTH);
                 Window.winwstr(this.WindowBaseSafeHandle, ref wChStr);
                 return wChStr.ToString();
             }
@@ -248,7 +248,7 @@ namespace NCurses.Core.Window
             {
                 int bufferLength = maxChars * WideCharFactoryInternal<TWideChar>.Instance.GetCharLength();
                 byte* buffer = stackalloc byte[bufferLength];
-                WideCharString<TWideChar> wChStr = WideCharFactoryInternal<TWideChar>.Instance.GetNativeEmptyStringInternal(buffer, bufferLength);
+                WideCharString<TWideChar> wChStr = WideCharFactoryInternal<TWideChar>.Instance.GetNativeEmptyStringInternal(buffer, bufferLength, maxChars);
                 Window.winnwstr(this.WindowBaseSafeHandle, ref wChStr, maxChars, out read);
                 return wChStr.ToString();
             }
@@ -260,7 +260,7 @@ namespace NCurses.Core.Window
             {
                 int bufferLength = Constants.MAX_STRING_LENGTH * WideCharFactoryInternal<TWideChar>.Instance.GetCharLength();
                 byte* buffer = stackalloc byte[bufferLength];
-                WideCharString<TWideChar> wChStr = WideCharFactoryInternal<TWideChar>.Instance.GetNativeEmptyStringInternal(buffer, bufferLength);
+                WideCharString<TWideChar> wChStr = WideCharFactoryInternal<TWideChar>.Instance.GetNativeEmptyStringInternal(buffer, bufferLength, Constants.MAX_STRING_LENGTH);
                 Window.mvwinwstr(this.WindowBaseSafeHandle, nline, ncol, ref wChStr);
                 return wChStr.ToString();
             }
@@ -272,7 +272,7 @@ namespace NCurses.Core.Window
             {
                 int bufferLength = maxChars * WideCharFactoryInternal<TWideChar>.Instance.GetCharLength();
                 byte* buffer = stackalloc byte[bufferLength];
-                WideCharString<TWideChar> wChStr = WideCharFactoryInternal<TWideChar>.Instance.GetNativeEmptyStringInternal(buffer, bufferLength);
+                WideCharString<TWideChar> wChStr = WideCharFactoryInternal<TWideChar>.Instance.GetNativeEmptyStringInternal(buffer, bufferLength, maxChars);
                 Window.mvwinnwstr(this.WindowBaseSafeHandle, nline, ncol, ref wChStr, maxChars, out read);
                 return wChStr.ToString();
             }
@@ -282,7 +282,7 @@ namespace NCurses.Core.Window
         {
             int bufferLength = Constants.MAX_STRING_LENGTH * MultiByteCharFactoryInternal<TMultiByte>.Instance.GetCharLength();
             byte[] buffer = new byte[bufferLength];
-            MultiByteCharString<TMultiByte> wChStr = MultiByteCharFactoryInternal<TMultiByte>.Instance.GetNativeEmptyStringInternal(buffer);
+            MultiByteCharString<TMultiByte> wChStr = MultiByteCharFactoryInternal<TMultiByte>.Instance.GetNativeEmptyStringInternal(buffer, Constants.MAX_STRING_LENGTH);
             Window.win_wchstr(this.WindowBaseSafeHandle, ref wChStr);
             charsWithAttributes = wChStr;
         }
@@ -291,7 +291,7 @@ namespace NCurses.Core.Window
         {
             int bufferLength = maxChars * MultiByteCharFactoryInternal<TMultiByte>.Instance.GetCharLength();
             byte[] buffer = new byte[bufferLength];
-            MultiByteCharString<TMultiByte> wChStr = MultiByteCharFactoryInternal<TMultiByte>.Instance.GetNativeEmptyStringInternal(buffer);
+            MultiByteCharString<TMultiByte> wChStr = MultiByteCharFactoryInternal<TMultiByte>.Instance.GetNativeEmptyStringInternal(buffer, maxChars);
             Window.win_wchnstr(this.WindowBaseSafeHandle, ref wChStr, maxChars);
             charsWithAttributes = wChStr;
         }
@@ -300,7 +300,7 @@ namespace NCurses.Core.Window
         {
             int bufferLength = Constants.MAX_STRING_LENGTH * MultiByteCharFactoryInternal<TMultiByte>.Instance.GetCharLength();
             byte[] buffer = new byte[bufferLength];
-            MultiByteCharString<TMultiByte> wChStr = MultiByteCharFactoryInternal<TMultiByte>.Instance.GetNativeEmptyStringInternal(buffer);
+            MultiByteCharString<TMultiByte> wChStr = MultiByteCharFactoryInternal<TMultiByte>.Instance.GetNativeEmptyStringInternal(buffer, Constants.MAX_STRING_LENGTH);
             Window.mvwin_wchstr(this.WindowBaseSafeHandle, nline, ncol, ref wChStr);
             charsWithAttributes = wChStr;
         }
@@ -309,7 +309,7 @@ namespace NCurses.Core.Window
         {
             int bufferLength = maxChars * MultiByteCharFactoryInternal<TMultiByte>.Instance.GetCharLength();
             byte[] buffer = new byte[bufferLength];
-            MultiByteCharString<TMultiByte> wChStr = MultiByteCharFactoryInternal<TMultiByte>.Instance.GetNativeEmptyStringInternal(buffer);
+            MultiByteCharString<TMultiByte> wChStr = MultiByteCharFactoryInternal<TMultiByte>.Instance.GetNativeEmptyStringInternal(buffer, maxChars);
             Window.mvwin_wchnstr(this.WindowBaseSafeHandle, nline, ncol, ref wChStr, maxChars);
             charsWithAttributes = wChStr;
         }
@@ -388,8 +388,8 @@ namespace NCurses.Core.Window
                 byte* buffer = stackalloc byte[byteLength];
                 MultiByteCharString<TMultiByte> mbStr = MultiByteCharFactoryInternal<TMultiByte>.Instance.GetNativeStringInternal(buffer, byteLength, str, attrs, pair);
 
-                IEnumerable<IMultiByteChar> wchars = mbStr;
-                foreach (IMultiByteChar wch in wchars.Reverse())
+                IEnumerable<IMultiByteNCursesChar> wchars = mbStr;
+                foreach (IMultiByteNCursesChar wch in wchars.Reverse())
                 {
                     Window.wins_wch(this.WindowBaseSafeHandle, VerifyChar(wch));
                 }
@@ -416,7 +416,7 @@ namespace NCurses.Core.Window
             {
                 int bufferLength = Constants.MAX_STRING_LENGTH * WideCharFactoryInternal<TWideChar>.Instance.GetCharLength();
                 byte* buffer = stackalloc byte[bufferLength];
-                WideCharString<TWideChar> wChStr = WideCharFactoryInternal<TWideChar>.Instance.GetNativeEmptyStringInternal(buffer, bufferLength);
+                WideCharString<TWideChar> wChStr = WideCharFactoryInternal<TWideChar>.Instance.GetNativeEmptyStringInternal(buffer, bufferLength, Constants.MAX_STRING_LENGTH);
                 Window.wget_wstr(this.WindowBaseSafeHandle, ref wChStr);
                 return wChStr.ToString();
             }
@@ -428,7 +428,7 @@ namespace NCurses.Core.Window
             {
                 int bufferLength = Constants.MAX_STRING_LENGTH * WideCharFactoryInternal<TWideChar>.Instance.GetCharLength();
                 byte* buffer = stackalloc byte[bufferLength];
-                WideCharString<TWideChar> wChStr = WideCharFactoryInternal<TWideChar>.Instance.GetNativeEmptyStringInternal(buffer, bufferLength);
+                WideCharString<TWideChar> wChStr = WideCharFactoryInternal<TWideChar>.Instance.GetNativeEmptyStringInternal(buffer, bufferLength, Constants.MAX_STRING_LENGTH);
                 Window.mvwget_wstr(this.WindowBaseSafeHandle, nline, ncol, ref wChStr);
                 return wChStr.ToString();
             }
@@ -440,7 +440,7 @@ namespace NCurses.Core.Window
             {
                 int bufferLength = length * WideCharFactoryInternal<TWideChar>.Instance.GetCharLength();
                 byte* buffer = stackalloc byte[bufferLength];
-                WideCharString<TWideChar> wChStr = WideCharFactoryInternal<TWideChar>.Instance.GetNativeEmptyStringInternal(buffer, bufferLength);
+                WideCharString<TWideChar> wChStr = WideCharFactoryInternal<TWideChar>.Instance.GetNativeEmptyStringInternal(buffer, bufferLength, length);
                 Window.wgetn_wstr(this.WindowBaseSafeHandle, ref wChStr, length);
                 return wChStr.ToString();
             }
@@ -452,7 +452,7 @@ namespace NCurses.Core.Window
             {
                 int bufferLength = length * WideCharFactoryInternal<TWideChar>.Instance.GetCharLength();
                 byte* buffer = stackalloc byte[bufferLength];
-                WideCharString<TWideChar> wChStr = WideCharFactoryInternal<TWideChar>.Instance.GetNativeEmptyStringInternal(buffer, bufferLength);
+                WideCharString<TWideChar> wChStr = WideCharFactoryInternal<TWideChar>.Instance.GetNativeEmptyStringInternal(buffer, bufferLength, length);
                 Window.mvwgetn_wstr(this.WindowBaseSafeHandle, nline, ncol, ref wChStr, length);
                 return wChStr.ToString();
             }
@@ -551,9 +551,10 @@ namespace NCurses.Core.Window
         {
             unsafe
             {
+                int charLength = encoding.GetCharCount(str);
                 int byteLength = MultiByteCharFactoryInternal<TMultiByte>.Instance.GetByteCount(str, encoding);
                 byte* buffer = stackalloc byte[byteLength];
-                MultiByteCharString<TMultiByte> wChStr = MultiByteCharFactoryInternal<TMultiByte>.Instance.GetNativeStringInternal(buffer, byteLength, str, encoding);
+                MultiByteCharString<TMultiByte> wChStr = MultiByteCharFactoryInternal<TMultiByte>.Instance.GetNativeStringInternal(buffer, byteLength, str, charLength, encoding);
                 Window.wadd_wchnstr(this.WindowBaseSafeHandle, in wChStr, wChStr.Length);
             }
         }
@@ -562,9 +563,10 @@ namespace NCurses.Core.Window
         {
             unsafe
             {
+                int charLength = encoding.GetCharCount(str);
                 int byteLength = MultiByteCharFactoryInternal<TMultiByte>.Instance.GetByteCount(str, encoding);
                 byte* buffer = stackalloc byte[byteLength];
-                MultiByteCharString<TMultiByte> wChStr = MultiByteCharFactoryInternal<TMultiByte>.Instance.GetNativeStringInternal(buffer, byteLength, str, encoding, attrs, pair);
+                MultiByteCharString<TMultiByte> wChStr = MultiByteCharFactoryInternal<TMultiByte>.Instance.GetNativeStringInternal(buffer, byteLength, str, charLength, encoding, attrs, pair);
                 Window.wadd_wchnstr(this.WindowBaseSafeHandle, in wChStr, wChStr.Length);
             }
         }
@@ -573,9 +575,10 @@ namespace NCurses.Core.Window
         {
             unsafe
             {
+                int charLength = encoding.GetCharCount(str);
                 int byteLength = MultiByteCharFactoryInternal<TMultiByte>.Instance.GetByteCount(str, encoding);
                 byte* buffer = stackalloc byte[byteLength];
-                MultiByteCharString<TMultiByte> wChStr = MultiByteCharFactoryInternal<TMultiByte>.Instance.GetNativeStringInternal(buffer, byteLength, str, encoding);
+                MultiByteCharString<TMultiByte> wChStr = MultiByteCharFactoryInternal<TMultiByte>.Instance.GetNativeStringInternal(buffer, byteLength, str, charLength, encoding);
                 Window.mvwadd_wchnstr(this.WindowBaseSafeHandle, nline, ncol,  in wChStr, wChStr.Length);
             }
         }
@@ -584,9 +587,10 @@ namespace NCurses.Core.Window
         {
             unsafe
             {
+                int charLength = encoding.GetCharCount(str);
                 int byteLength = MultiByteCharFactoryInternal<TMultiByte>.Instance.GetByteCount(str, encoding);
                 byte* buffer = stackalloc byte[byteLength];
-                MultiByteCharString<TMultiByte> wChStr = MultiByteCharFactoryInternal<TMultiByte>.Instance.GetNativeStringInternal(buffer, byteLength, str, encoding, attrs, pair);
+                MultiByteCharString<TMultiByte> wChStr = MultiByteCharFactoryInternal<TMultiByte>.Instance.GetNativeStringInternal(buffer, byteLength, str, charLength, encoding, attrs, pair);
                 Window.mvwadd_wchnstr(this.WindowBaseSafeHandle, nline, ncol, in wChStr, wChStr.Length);
             }
         }

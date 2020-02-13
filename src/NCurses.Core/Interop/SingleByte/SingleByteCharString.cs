@@ -11,24 +11,23 @@ using System.Runtime.CompilerServices;
 
 namespace NCurses.Core.Interop.SingleByte
 {
-    internal struct SingleByteCharString<TSingleByte> : ISingleByteCharString, IEquatable<SingleByteCharString<TSingleByte>>
-        where TSingleByte : unmanaged, ISingleByteChar, IEquatable<TSingleByte>
+    internal struct SingleByteCharString<TSingleByte> : ISingleByteNCursesCharString, IEquatable<SingleByteCharString<TSingleByte>>
+        where TSingleByte : unmanaged, ISingleByteNCursesChar, IEquatable<TSingleByte>
     {
         public unsafe Span<byte> ByteSpan =>
             this.BufferArray is null ? new Span<byte>(this.BufferPointer, this.BufferPointerLength) : new Span<byte>(this.BufferArray);
         public unsafe Span<TSingleByte> CharSpan =>
             this.BufferArray is null ? new Span<TSingleByte>(this.BufferPointer, this.BufferPointerLength / Marshal.SizeOf<TSingleByte>()) : MemoryMarshal.Cast<byte, TSingleByte>(this.ByteSpan);
 
-        public int Length => this.CharSpan.Length;
+        public int Length { get; }
 
         public ref TSingleByte GetPinnableReference() => ref this.CharSpan.GetPinnableReference();
 
+        public INCursesChar this[int index] => this.CharSpan[index];
+
         private unsafe byte* BufferPointer;
         private int BufferPointerLength;
-
         private byte[] BufferArray;
-
-        public INCursesChar this[int index] => this.CharSpan[index];
 
         public unsafe SingleByteCharString(
             byte* buffer, 
@@ -38,6 +37,7 @@ namespace NCurses.Core.Interop.SingleByte
             this.BufferPointer = buffer;
             this.BufferPointerLength = length;
             this.BufferArray = null;
+            this.Length = str.Length;
 
             CreateCharString(
                 new Span<byte>(buffer, length),
@@ -51,6 +51,7 @@ namespace NCurses.Core.Interop.SingleByte
             this.BufferArray = buffer;
             this.BufferPointer = (byte*)0;
             this.BufferPointerLength = 0;
+            this.Length = str.Length;
 
             CreateCharString(
                 new Span<byte>(buffer),
@@ -59,16 +60,17 @@ namespace NCurses.Core.Interop.SingleByte
 
         public unsafe SingleByteCharString(
             byte* buffer,
-            int length,
+            int bufferLenght,
             string str,
             ulong attrs)
         {
             this.BufferPointer = buffer;
-            this.BufferPointerLength = length;
+            this.BufferPointerLength = bufferLenght;
             this.BufferArray = null;
+            this.Length = str.Length;
 
             CreateCharString(
-                new Span<byte>(buffer, length),
+                new Span<byte>(buffer, bufferLenght),
                 str.AsSpan(), 
                 attrs);
         }
@@ -81,6 +83,7 @@ namespace NCurses.Core.Interop.SingleByte
             this.BufferArray = buffer;
             this.BufferPointer = (byte*)0;
             this.BufferPointerLength = 0;
+            this.Length = str.Length;
 
             CreateCharString(
                 new Span<byte>(buffer),
@@ -90,17 +93,18 @@ namespace NCurses.Core.Interop.SingleByte
 
         public unsafe SingleByteCharString(
             byte* buffer,
-            int length,
+            int bufferLength,
             string str, 
             ulong attrs, 
             short pair)
         {
             this.BufferPointer = buffer;
-            this.BufferPointerLength = length;
+            this.BufferPointerLength = bufferLength;
             this.BufferArray = null;
+            this.Length = str.Length;
 
             CreateCharString(
-                new Span<byte>(buffer, length),
+                new Span<byte>(buffer, bufferLength),
                 str.AsSpan(), 
                 attrs, 
                 pair);
@@ -115,6 +119,7 @@ namespace NCurses.Core.Interop.SingleByte
             this.BufferArray = buffer;
             this.BufferPointer = (byte*)0;
             this.BufferPointerLength = 0;
+            this.Length = str.Length;
 
             CreateCharString(
                 new Span<byte>(buffer),
@@ -125,19 +130,23 @@ namespace NCurses.Core.Interop.SingleByte
 
         public unsafe SingleByteCharString(
             byte* buffer,
-            int length)
+            int bufferLength,
+            int stringLength)
         {
             this.BufferPointer = buffer;
-            this.BufferPointerLength = length;
+            this.BufferPointerLength = bufferLength;
             this.BufferArray = null;
+            this.Length = stringLength;
         }
 
         public unsafe SingleByteCharString(
-            byte[] buffer)
+            byte[] buffer,
+            int stringLength)
         {
             this.BufferArray = buffer;
             this.BufferPointer = (byte*)0;
             this.BufferPointerLength = 0;
+            this.Length = stringLength;
         }
 
         public unsafe SingleByteCharString(ref TSingleByte strRef)
@@ -145,7 +154,7 @@ namespace NCurses.Core.Interop.SingleByte
             TSingleByte* wideArr = (TSingleByte*)Unsafe.AsPointer<TSingleByte>(ref strRef);
 
             this.BufferPointer = (byte*)wideArr;
-            this.BufferPointerLength = FindStringLength(wideArr);
+            this.Length = FindStringLength(wideArr, out this.BufferPointerLength);
             this.BufferArray = null;
         }
 
@@ -211,7 +220,7 @@ namespace NCurses.Core.Interop.SingleByte
             }
         }
 
-        internal unsafe static int FindStringLength(TSingleByte* strArr)
+        internal unsafe static int FindStringLength(TSingleByte* strArr, out int byteLength)
         {
             TSingleByte zero = SingleByteCharFactoryInternal<TSingleByte>.Instance.GetNativeEmptyCharInternal();
             TSingleByte val;
@@ -225,42 +234,25 @@ namespace NCurses.Core.Interop.SingleByte
                     break;
                 }
             }
+
+            byteLength = length * Marshal.SizeOf<TSingleByte>();
             return --length;
         }
 
-        public IEnumerator<ISingleByteChar> GetEnumerator()
-        {
-            return new SingleByteCharStringEnumerator(this);
-        }
+        IEnumerator IEnumerable.GetEnumerator() => new SingleByteCharStringEnumerator(this);
 
-        IEnumerator<INCursesChar> IEnumerable<INCursesChar>.GetEnumerator()
-        {
-            return new SingleByteCharStringEnumerator(this);
-        }
+        IEnumerator<IChar> IEnumerable<IChar>.GetEnumerator() => new SingleByteCharStringEnumerator(this);
 
-        IEnumerator IEnumerable.GetEnumerator()
-        {
-            return new SingleByteCharStringEnumerator(this);
-        }
+        IEnumerator<ISingleByteChar> IEnumerable<ISingleByteChar>.GetEnumerator() => new SingleByteCharStringEnumerator(this);
 
-        IEnumerator<IChar> IEnumerable<IChar>.GetEnumerator()
-        {
-            return new SingleByteCharStringEnumerator(this);
-        }
+        IEnumerator<ISingleByteNCursesChar> IEnumerable<ISingleByteNCursesChar>.GetEnumerator() => new SingleByteCharStringEnumerator(this);
+
+        IEnumerator<INCursesChar> IEnumerable<INCursesChar>.GetEnumerator() => new SingleByteCharStringEnumerator(this);
 
         //TODO: crashes Visual Studio debugger when using netcoreapp2.0
         public static explicit operator string(SingleByteCharString<TSingleByte> str)
         {
-            unsafe
-            {
-                char* charArr = stackalloc char[str.Length];
-                for (int i = 0; i < str.Length; i++)
-                {
-                    charArr[i] = str.CharSpan[i].Char;
-                }   
-                ReadOnlySpan<char> charSpan = new ReadOnlySpan<char>(charArr, str.Length);
-                return charSpan.ToString();
-            }
+            return str.ToString();
         }
 
         public static bool operator ==(in SingleByteCharString<TSingleByte> chStrLeft, in SingleByteCharString<TSingleByte> chStrRight)
@@ -275,27 +267,18 @@ namespace NCurses.Core.Interop.SingleByte
 
         public override bool Equals(object obj)
         {
-            if (obj is ISingleByteCharString other)
+            if (obj is SingleByteCharString<TSingleByte> charString)
             {
-                return this.Equals(other);
+                return this.Equals(charString);
             }
             return false;
         }
 
         public bool Equals(ICharString obj)
         {
-            if (obj is ISingleByteCharString other)
+            if (obj is SingleByteCharString<TSingleByte> charString)
             {
-                return this.Equals(other);
-            }
-            return false;
-        }
-
-        public bool Equals(INCursesCharString obj)
-        {
-            if (obj is ISingleByteCharString other)
-            {
-                return this.Equals(other);
+                return this.Equals(charString);
             }
             return false;
         }
@@ -309,14 +292,48 @@ namespace NCurses.Core.Interop.SingleByte
             return false;
         }
 
+        public bool Equals(INCursesCharString obj)
+        {
+            if (obj is SingleByteCharString<TSingleByte> charString)
+            {
+                return this.Equals(charString);
+            }
+            return false;
+        }
+
+        public bool Equals(ISingleByteNCursesCharString obj)
+        {
+            if (obj is SingleByteCharString<TSingleByte> charString)
+            {
+                return this.Equals(charString);
+            }
+            return false;
+        }
+
         public bool Equals(SingleByteCharString<TSingleByte> other)
         {
-            return this.ByteSpan.SequenceEqual(other.ByteSpan);
+            //remove null terminator
+            Span<byte> thisSpan = this.ByteSpan.Slice(0, this.Length * Marshal.SizeOf<TSingleByte>());
+            Span<byte> otherSpan = other.ByteSpan.Slice(0, other.Length * Marshal.SizeOf<TSingleByte>());
+
+            return thisSpan.SequenceEqual(otherSpan);
         }
 
         public override string ToString()
         {
-            return (string)this;
+            unsafe
+            {
+                Span<TSingleByte> chSpan = this.CharSpan;
+
+                char* charArr = stackalloc char[this.Length];
+                for (int i = 0; i < this.Length; i++)
+                {
+                    charArr[i] = (char)chSpan[i].EncodedChar;
+                }
+
+                ReadOnlySpan<char> charSpan = new ReadOnlySpan<char>(charArr, this.Length);
+                return charSpan.ToString();
+            }
         }
 
         public override int GetHashCode()
@@ -324,8 +341,16 @@ namespace NCurses.Core.Interop.SingleByte
             return this.CharSpan.GetHashCode();
         }
 
-        private class SingleByteCharStringEnumerator : IEnumerator<ISingleByteChar>
+        private class SingleByteCharStringEnumerator : IEnumerator<ISingleByteNCursesChar>, IEnumerator<ISingleByteChar>, IEnumerator<IChar>
         {
+            ISingleByteNCursesChar IEnumerator<ISingleByteNCursesChar>.Current => this.SingleByteCharString.CharSpan[this.Position];
+
+            ISingleByteChar IEnumerator<ISingleByteChar>.Current => this.SingleByteCharString.CharSpan[this.Position];
+
+            IChar IEnumerator<IChar>.Current => this.SingleByteCharString.CharSpan[this.Position];
+
+            object IEnumerator.Current => this.SingleByteCharString.CharSpan[this.Position];
+
             private SingleByteCharString<TSingleByte> SingleByteCharString;
             private int Position;
 
@@ -334,10 +359,6 @@ namespace NCurses.Core.Interop.SingleByte
                 this.SingleByteCharString = singleByteCharString;
                 this.Position = -1;
             }
-
-            public ISingleByteChar Current => this.SingleByteCharString.CharSpan[this.Position];
-
-            object IEnumerator.Current => this.SingleByteCharString.CharSpan[this.Position];
 
             public bool MoveNext() => ++this.Position < this.SingleByteCharString.Length;
 
