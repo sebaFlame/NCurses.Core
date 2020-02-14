@@ -206,6 +206,18 @@ namespace NCurses.Core
                 return new SingleByteWindow<TMultiByte, TWideChar, TSingleByte, TChar, TMouseEvent>(windowBaseSafeHandle);
             }
         }
+
+        internal static WindowInternal<TMultiByte, TWideChar, TSingleByte, TChar, TMouseEvent> CreateWindow(int nlines, int ncols, int begy, int begx)
+        {
+            if (NativeNCurses.HasUnicodeSupport)
+            {
+                return new MultiByteWindow<TMultiByte, TWideChar, TSingleByte, TChar, TMouseEvent>(nlines, ncols, begy, begx);
+            }
+            else
+            {
+                return new SingleByteWindow<TMultiByte, TWideChar, TSingleByte, TChar, TMouseEvent>(nlines, ncols, begy, begx);
+            }
+        }
         #endregion
 
         #region Window encoding switch

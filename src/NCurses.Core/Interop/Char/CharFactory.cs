@@ -40,8 +40,8 @@ namespace NCurses.Core.Interop.Char
         public unsafe ICharString GetNativeEmptyString(byte* buffer, int bufferLength, int stringLength)
             => Factory.GetNativeEmptyString(buffer, bufferLength, stringLength);
 
-        public ICharString GetNativeEmptyString(byte[] buffer, int stringLength)
-            => Factory.GetNativeEmptyString(buffer, stringLength);
+        public ICharString GetNativeEmptyString(byte[] buffer, int bufferLength, int stringLength)
+            => Factory.GetNativeEmptyString(buffer, bufferLength, stringLength);
 
         public ICharString GetNativeString(string str)
             => Factory.GetNativeString(str);
@@ -49,8 +49,8 @@ namespace NCurses.Core.Interop.Char
         public unsafe ICharString GetNativeString(byte* buffer, int length, string str)
             => Factory.GetNativeString(buffer, length, str);
 
-        public ICharString GetNativeString(byte[] buffer, string str)
-            => Factory.GetNativeString(buffer, str);
+        public ICharString GetNativeString(byte[] buffer, int bufferLength, string str)
+            => Factory.GetNativeString(buffer, bufferLength, str);
 
         public int GetByteCount(string str)
             => Factory.GetByteCount(str);
@@ -97,14 +97,14 @@ namespace NCurses.Core.Interop.Char
         public unsafe CharString<TChar> GetNativeEmptyStringInternal(byte* buffer, int bufferLength, int stringLength)
             => new CharString<TChar>(buffer, bufferLength, stringLength);
 
-        public CharString<TChar> GetNativeEmptyStringInternal(byte[] buffer, int stringLength)
-            => new CharString<TChar>(buffer, stringLength);
+        public CharString<TChar> GetNativeEmptyStringInternal(byte[] buffer, int bufferLength, int stringLength)
+            => new CharString<TChar>(buffer, bufferLength, stringLength);
 
         public unsafe CharString<TChar> GetNativeStringInternal(byte* buffer, int length, string str)
             => new CharString<TChar>(buffer, length, str);
 
-        public CharString<TChar> GetNativeStringInternal(byte[] buffer, string str)
-            => new CharString<TChar>(buffer, str);
+        public CharString<TChar> GetNativeStringInternal(byte[] buffer, int bufferLength, string str)
+            => new CharString<TChar>(buffer, bufferLength, str);
 
         public CharString<TChar> CreateNativeString(ref TChar strRef)
             => new CharString<TChar>(ref strRef);

@@ -15,9 +15,9 @@ namespace NCurses.Core.Interop.SingleByte
         where TSingleByte : unmanaged, ISingleByteNCursesChar, IEquatable<TSingleByte>
     {
         public unsafe Span<byte> ByteSpan =>
-            this.BufferArray is null ? new Span<byte>(this.BufferPointer, this.BufferPointerLength) : new Span<byte>(this.BufferArray);
+            this.BufferArray is null ? new Span<byte>(this.BufferPointer, this.BufferLength) : new Span<byte>(this.BufferArray, 0, this.BufferLength);
         public unsafe Span<TSingleByte> CharSpan =>
-            this.BufferArray is null ? new Span<TSingleByte>(this.BufferPointer, this.BufferPointerLength / Marshal.SizeOf<TSingleByte>()) : MemoryMarshal.Cast<byte, TSingleByte>(this.ByteSpan);
+            this.BufferArray is null ? new Span<TSingleByte>(this.BufferPointer, this.BufferLength / Marshal.SizeOf<TSingleByte>()) : MemoryMarshal.Cast<byte, TSingleByte>(this.ByteSpan);
 
         public int Length { get; }
 
@@ -26,8 +26,8 @@ namespace NCurses.Core.Interop.SingleByte
         public INCursesChar this[int index] => this.CharSpan[index];
 
         private unsafe byte* BufferPointer;
-        private int BufferPointerLength;
         private byte[] BufferArray;
+        private int BufferLength;
 
         public unsafe SingleByteCharString(
             byte* buffer, 
@@ -35,7 +35,7 @@ namespace NCurses.Core.Interop.SingleByte
             string str)
         {
             this.BufferPointer = buffer;
-            this.BufferPointerLength = length;
+            this.BufferLength = length;
             this.BufferArray = null;
             this.Length = str.Length;
 
@@ -46,11 +46,12 @@ namespace NCurses.Core.Interop.SingleByte
 
         public unsafe SingleByteCharString(
             byte[] buffer,
+            int bufferLength,
             string str)
         {
             this.BufferArray = buffer;
             this.BufferPointer = (byte*)0;
-            this.BufferPointerLength = 0;
+            this.BufferLength = bufferLength;
             this.Length = str.Length;
 
             CreateCharString(
@@ -60,29 +61,30 @@ namespace NCurses.Core.Interop.SingleByte
 
         public unsafe SingleByteCharString(
             byte* buffer,
-            int bufferLenght,
+            int bufferLength,
             string str,
             ulong attrs)
         {
             this.BufferPointer = buffer;
-            this.BufferPointerLength = bufferLenght;
+            this.BufferLength = bufferLength;
             this.BufferArray = null;
             this.Length = str.Length;
 
             CreateCharString(
-                new Span<byte>(buffer, bufferLenght),
+                new Span<byte>(buffer, bufferLength),
                 str.AsSpan(), 
                 attrs);
         }
 
         public unsafe SingleByteCharString(
             byte[] buffer,
+            int bufferLength,
             string str,
             ulong attrs)
         {
             this.BufferArray = buffer;
             this.BufferPointer = (byte*)0;
-            this.BufferPointerLength = 0;
+            this.BufferLength = bufferLength;
             this.Length = str.Length;
 
             CreateCharString(
@@ -99,7 +101,7 @@ namespace NCurses.Core.Interop.SingleByte
             short pair)
         {
             this.BufferPointer = buffer;
-            this.BufferPointerLength = bufferLength;
+            this.BufferLength = bufferLength;
             this.BufferArray = null;
             this.Length = str.Length;
 
@@ -112,13 +114,14 @@ namespace NCurses.Core.Interop.SingleByte
 
         public unsafe SingleByteCharString(
             byte[] buffer,
+            int bufferLength,
             string str,
             ulong attrs,
             short pair)
         {
             this.BufferArray = buffer;
             this.BufferPointer = (byte*)0;
-            this.BufferPointerLength = 0;
+            this.BufferLength = bufferLength;
             this.Length = str.Length;
 
             CreateCharString(
@@ -134,18 +137,19 @@ namespace NCurses.Core.Interop.SingleByte
             int stringLength)
         {
             this.BufferPointer = buffer;
-            this.BufferPointerLength = bufferLength;
+            this.BufferLength = bufferLength;
             this.BufferArray = null;
             this.Length = stringLength;
         }
 
         public unsafe SingleByteCharString(
             byte[] buffer,
+            int bufferLength,
             int stringLength)
         {
             this.BufferArray = buffer;
             this.BufferPointer = (byte*)0;
-            this.BufferPointerLength = 0;
+            this.BufferLength = bufferLength;
             this.Length = stringLength;
         }
 
@@ -154,7 +158,7 @@ namespace NCurses.Core.Interop.SingleByte
             TSingleByte* wideArr = (TSingleByte*)Unsafe.AsPointer<TSingleByte>(ref strRef);
 
             this.BufferPointer = (byte*)wideArr;
-            this.Length = FindStringLength(wideArr, out this.BufferPointerLength);
+            this.Length = FindStringLength(wideArr, out this.BufferLength);
             this.BufferArray = null;
         }
 

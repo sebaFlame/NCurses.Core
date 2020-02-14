@@ -9,7 +9,7 @@ namespace NCurses.Core.Interop.SingleByte
 {
     internal class NativeNCursesSingleByte<TSingleByte, TChar, TMouseEvent> 
             : SingleByteWrapper<TSingleByte, TChar, TMouseEvent>, 
-            INativeNCursesSingleByte<TSingleByte, SingleByteCharString<TSingleByte>>
+            INativeNCursesSingleByte<TSingleByte, SingleByteCharString<TSingleByte>, TMouseEvent>
         where TSingleByte : unmanaged, ISingleByteNCursesChar, IEquatable<TSingleByte>
         where TChar : unmanaged, ISingleByteChar, IEquatable<TChar>
         where TMouseEvent : unmanaged, IMEVENT
@@ -17,22 +17,10 @@ namespace NCurses.Core.Interop.SingleByte
         internal NativeNCursesSingleByte(ISingleByteWrapper<TSingleByte, TChar, TMouseEvent> wrapper)
             : base(wrapper) { }
 
-        public void getmouse(out IMEVENT ev)
+        public void getmouse(out TMouseEvent ev)
         {
-            int size = Marshal.SizeOf<TMouseEvent>();
-            Span<byte> span;
-
-            unsafe
-            {
-                byte* arr = stackalloc byte[size];
-                span = new Span<byte>(arr, size);
-
-                Span<TMouseEvent> spanEv = MemoryMarshal.Cast<byte, TMouseEvent>(span);
-                ref TMouseEvent spanRef = ref spanEv.GetPinnableReference();
-
-                NCursesException.Verify(this.Wrapper.getmouse(ref spanRef), "getmouse");
-                ev = spanEv[0]; //TODO: does this get nulled afterwards?
-            }
+            ev = default;
+            NCursesException.Verify(this.Wrapper.getmouse(ref ev), "getmouse");
         }
 
         public ulong mousemask(ulong newmask, out ulong oldmask)
@@ -105,19 +93,9 @@ namespace NCurses.Core.Interop.SingleByte
             return CharFactoryInternal<TChar>.Instance.CreateNativeString(ref this.Wrapper.unctrl(sch)).ToString();
         }
 
-        public void ungetmouse(in IMEVENT ev)
+        public void ungetmouse(in TMouseEvent ev)
         {
-            if (!(ev is TMouseEvent castedEv))
-                throw new InvalidCastException("Mouse event not of the correct type");
-
-            unsafe
-            {
-                TMouseEvent* arr = stackalloc TMouseEvent[1];
-                Span<TMouseEvent> span = new Span<TMouseEvent>(arr, 1);
-                span[0] = castedEv;
-
-                NCursesException.Verify(this.Wrapper.ungetmouse(span.GetPinnableReference()), "ungetmouse");
-            }
+            NCursesException.Verify(this.Wrapper.ungetmouse(in ev), "ungetmouse");
         }
 
         public void vid_attr(ulong attrs, short pair)

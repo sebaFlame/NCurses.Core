@@ -6,11 +6,12 @@ using NCurses.Core.Interop.Mouse;
 
 namespace NCurses.Core.Interop.SingleByte
 {
-    public interface INativeNCursesSingleByte<TChar, TCharString>
+    public interface INativeNCursesSingleByte<TChar, TCharString, TMouseEvent>
         where TChar : ISingleByteNCursesChar
         where TCharString : ISingleByteNCursesCharString
+        where TMouseEvent : IMEVENT
     {
-        void getmouse(out IMEVENT ev);
+        void getmouse(out TMouseEvent ev);
         ulong mousemask(ulong newmask, out ulong oldmask);
         ulong slk_attr();
         void slk_attr_off(ulong attrs);
@@ -22,7 +23,7 @@ namespace NCurses.Core.Interop.SingleByte
         ulong term_attrs();
         ulong termattrs();
         string unctrl(in TChar ch);
-        void ungetmouse(in IMEVENT ev);
+        void ungetmouse(in TMouseEvent ev);
         void vid_attr(ulong attrs, short pair);
         void vid_puts(ulong attrs, short pair, Func<int, int> putc);
         void vidattr(ulong attrs);

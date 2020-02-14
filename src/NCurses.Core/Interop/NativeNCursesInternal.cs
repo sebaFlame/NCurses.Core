@@ -147,17 +147,9 @@ namespace NCurses.Core.Interop
         /// <param name="red">The intensity of red</param>
         /// <param name="green">The intensity fo green</param>
         /// <param name="blue">The intensity of blue</param>
-        public unsafe void color_content(short color, ref short red, ref short green, ref short blue)
+        public void color_content(short color, ref short red, ref short green, ref short blue)
         {
-            Span<short> spanRed = new Span<short>(Unsafe.AsPointer<short>(ref red), Marshal.SizeOf<short>());
-            Span<short> spanGreen = new Span<short>(Unsafe.AsPointer<short>(ref green), Marshal.SizeOf<short>());
-            Span<short> spanBlue = new Span<short>(Unsafe.AsPointer<short>(ref blue), Marshal.SizeOf<short>());
-
-            ref short redRef = ref spanRed.GetPinnableReference();
-            ref short greenRef = ref spanGreen.GetPinnableReference();
-            ref short blueRef = ref spanBlue.GetPinnableReference();
-
-            NCursesException.Verify(NativeNCurses.NCursesWrapper.color_content(color, ref redRef, ref greenRef, ref blueRef), "color_content");
+            NCursesException.Verify(NativeNCurses.NCursesWrapper.color_content(color, ref red, ref green, ref blue), "color_content");
         }
         #endregion
 
@@ -1011,28 +1003,7 @@ namespace NCurses.Core.Interop
         }
         #endregion
 
-        #region ripoffline
-        private delegate int ripoffDelegate(NewWindowSafeHandle win, int cols);
 
-        /// <summary>
-        /// The ripoffline routine provides access to the same facility that  slk_init[see  curs_slk(3x)] uses to reduce the
-        /// size of the screen.ripoffline must  be called  before
-        /// initscr or newterm is called
-        /// http://invisible-island.net/ncurses/man/curs_kernel.3x.html
-        /// <para />native method wrapped with verification.
-        /// </summary>
-        /// <param name="line">a positive or negative integer</param>
-        /// <param name="init">a method to be called on initscr (a window pointer and number of columns gets passed)</param>
-        public void ripoffline(int line, Func<WindowBaseSafeHandle, int, IntPtr, int> init)
-        {
-            IntPtr func = IntPtr.Zero;
-            Func<NewWindowSafeHandle, int, int> initCallback = (NewWindowSafeHandle win, int cols) => init(win, cols, func);
-            func = Marshal.GetFunctionPointerForDelegate(new ripoffDelegate(initCallback)); //TODO: needs to be double wrapped as pointer?
-
-            //TODO: register func for GC
-            NCursesException.Verify(NativeNCurses.NCursesWrapper.ripoffline(line, func), "ripoffline");
-        }
-        #endregion
 
         #region savetty
         /// <summary>
@@ -2174,7 +2145,7 @@ namespace NCurses.Core.Interop
         /// next older item from the queue.
         /// <para />native method wrapped with verification.
         /// </summary>
-        public void getmouse(out IMEVENT ev)
+        public void getmouse(out TMouseEvent ev)
         {
             SingleByteNCursesWrapper.getmouse(out ev);
         }
@@ -2187,7 +2158,7 @@ namespace NCurses.Core.Interop
         /// screen-relative character-cell coordinates.
         /// <para />native method wrapped with verification.
         /// </summary>
-        public void ungetmouse(in IMEVENT ev)
+        public void ungetmouse(in TMouseEvent ev)
         {
             SingleByteNCursesWrapper.ungetmouse(ev);
         }
@@ -2436,6 +2407,18 @@ namespace NCurses.Core.Interop
         {
             CharString<TChar> casted = this.CharNCursesWrapper.CastString(capname);
             return this.tigetstr(in casted);
+        }
+
+        public void getmouse(out IMEVENT ev)
+        {
+            this.getmouse(out TMouseEvent evCasted);
+            ev = evCasted;
+        }
+
+        public void ungetmouse(in IMEVENT ev)
+        {
+            TMouseEvent mouseEvent = this.SingleByteNCursesWrapper.CastMouseEvent(ev);
+            this.ungetmouse(in mouseEvent);
         }
         #endregion
     }

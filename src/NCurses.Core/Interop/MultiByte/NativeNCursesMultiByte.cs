@@ -21,7 +21,7 @@ namespace NCurses.Core.Interop.MultiByte
         internal NativeNCursesMultiByte(IMultiByteWrapper<TMultiByte, TWideChar, TSingleByte, TChar> wrapper)
             : base(wrapper) { }
 
-        public unsafe void getcchar(in TMultiByte wcval, out char wch, out ulong attrs, out short color_pair)
+        public void getcchar(in TMultiByte wcval, out char wch, out ulong attrs, out short color_pair)
         {
             TWideChar ch = WideCharFactoryInternal<TWideChar>.Instance.GetNativeEmptyCharInternal();
 
@@ -35,7 +35,7 @@ namespace NCurses.Core.Interop.MultiByte
             attrs = attrChar.Attributes;
         }
 
-        public unsafe void setcchar(out TMultiByte wcval, in char wch, ulong attrs, short color_pair)
+        public void setcchar(out TMultiByte wcval, in char wch, ulong attrs, short color_pair)
         {
             TMultiByte output = MultiByteCharFactoryInternal<TMultiByte>.Instance.GetNativeEmptyCharInternal();
 

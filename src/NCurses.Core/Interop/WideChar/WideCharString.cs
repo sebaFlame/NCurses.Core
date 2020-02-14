@@ -15,18 +15,17 @@ namespace NCurses.Core.Interop.WideChar
         where TWideChar : unmanaged, IMultiByteChar, IEquatable<TWideChar>
     {
         public unsafe Span<byte> ByteSpan =>
-            this.BufferArray is null ? new Span<byte>(this.BufferPointer, this.BufferPointerLength) : new Span<byte>(this.BufferArray);
+            this.BufferArray is null ? new Span<byte>(this.BufferPointer, this.BufferLength) : new Span<byte>(this.BufferArray, 0, this.BufferLength);
         public unsafe Span<TWideChar> CharSpan =>
-            this.BufferArray is null ? new Span<TWideChar>(this.BufferPointer, this.BufferPointerLength / Marshal.SizeOf<TWideChar>()) : MemoryMarshal.Cast<byte, TWideChar>(this.ByteSpan);
+            this.BufferArray is null ? new Span<TWideChar>(this.BufferPointer, this.BufferLength / Marshal.SizeOf<TWideChar>()) : MemoryMarshal.Cast<byte, TWideChar>(this.ByteSpan);
 
         public int Length { get; }
 
         public ref TWideChar GetPinnableReference() => ref this.CharSpan.GetPinnableReference();
 
         private unsafe byte* BufferPointer;
-        private int BufferPointerLength;
-
         private byte[] BufferArray;
+        private int BufferLength;
 
         public unsafe WideCharString(
             byte* buffer,
@@ -34,7 +33,7 @@ namespace NCurses.Core.Interop.WideChar
             string str)
         {
             this.BufferPointer = buffer;
-            this.BufferPointerLength = bufferLength;
+            this.BufferLength = bufferLength;
             this.BufferArray = null;
             this.Length = str.Length;
 
@@ -43,11 +42,12 @@ namespace NCurses.Core.Interop.WideChar
 
         public unsafe WideCharString(
             byte[] buffer,
+            int bufferLength,
             string str)
         {
             this.BufferArray = buffer;
             this.BufferPointer = (byte*)0;
-            this.BufferPointerLength = 0;
+            this.BufferLength = bufferLength;
             this.Length = str.Length;
 
             CreateCharString(new Span<byte>(buffer), str.AsSpan());
@@ -59,18 +59,19 @@ namespace NCurses.Core.Interop.WideChar
             int stringLength)
         {
             this.BufferPointer = buffer;
-            this.BufferPointerLength = bufferLength;
+            this.BufferLength = bufferLength;
             this.BufferArray = null;
             this.Length = stringLength;
         }
 
         public unsafe WideCharString(
             byte[] buffer,
+            int bufferLength,
             int stringLength)
         {
             this.BufferArray = buffer;
             this.BufferPointer = (byte*)0;
-            this.BufferPointerLength = 0;
+            this.BufferLength = bufferLength;
             this.Length = stringLength;
         }
 
@@ -79,7 +80,7 @@ namespace NCurses.Core.Interop.WideChar
             TWideChar* wideArr = (TWideChar*)Unsafe.AsPointer<TWideChar>(ref strRef);
 
             this.BufferPointer = (byte*)wideArr;
-            this.Length = FindStringLength(wideArr, out this.BufferPointerLength);
+            this.Length = FindStringLength(wideArr, out this.BufferLength);
             this.BufferArray = null;
         }
 

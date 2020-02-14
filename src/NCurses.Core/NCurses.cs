@@ -141,13 +141,13 @@ namespace NCurses.Core
                 throw new InvalidOperationException("RipOffLine is not supported on windows.");
             }
 
-            Func<WindowBaseSafeHandle, int, IntPtr, int> initCallback = (WindowBaseSafeHandle win, int cols, IntPtr func) =>
+            Func<WindowBaseSafeHandle, int, int> initCallback = (WindowBaseSafeHandle win, int cols) =>
             {
                 assignWindowDelegate(CreateWindow(win), cols);
                 return Constants.OK;
             };
 
-            NCursesWrapper.ripoffline(direction, initCallback);
+            NativeNCurses.ripoffline(direction, initCallback);
         }
 
         /// <summary>

@@ -119,6 +119,9 @@ namespace NCurses.Core.Interop
         internal static ICustomTypeWrapper NCursesCustomTypeWrapper { get; }
         #endregion
 
+        [ThreadStatic]
+        private static byte[] Buffer;
+
         static NativeNCurses()
         {
             if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
@@ -303,6 +306,32 @@ namespace NCurses.Core.Interop
         }
         #endregion
 
+        #region ripoffline
+        private delegate int ripoffDelegate(NewWindowSafeHandle win, int cols);
+
+        /// <summary>
+        /// The ripoffline routine provides access to the same facility that  slk_init[see  curs_slk(3x)] uses to reduce the
+        /// size of the screen.ripoffline must  be called  before
+        /// initscr or newterm is called
+        /// http://invisible-island.net/ncurses/man/curs_kernel.3x.html
+        /// <para />native method wrapped with verification.
+        /// </summary>
+        /// <param name="line">a positive or negative integer</param>
+        /// <param name="init">a method to be called on initscr (a window pointer and number of columns gets passed)</param>
+        public static void ripoffline(int line, Func<WindowBaseSafeHandle, int, int> init)
+        {
+            IntPtr opts = IntPtr.Zero;
+            Func<NewWindowSafeHandle, int, int> initCallback = (NewWindowSafeHandle win, int cols) => init(win, cols);
+
+            //TODO: needs to be double wrapped as pointer?
+            /* Needs to be assigned in a non-generic class */
+            IntPtr function = Marshal.GetFunctionPointerForDelegate(new ripoffDelegate(initCallback));
+
+            //TODO: register func for GC
+            NCursesException.Verify(NCursesWrapper.ripoffline(line, function), "ripoffline");
+        }
+        #endregion
+
         #region unsafe helper methods
         //source: https://stackoverflow.com/questions/43289/comparing-two-byte-arrays-in-net
         internal static unsafe bool EqualBytesLongUnrolled(byte* bytes1, byte* bytes2, int length)
@@ -332,6 +361,24 @@ namespace NCurses.Core.Interop
                     return false;
 
             return true;
+        }
+        #endregion
+
+        #region Buffer "pooling"
+        internal static byte[] GetBuffer(int byteLength = Constants.MAX_STRING_LENGTH)
+        {
+            if (Buffer is null)
+            {
+                Buffer = new byte[Constants.MAX_STRING_LENGTH];
+            }
+
+            if (byteLength <= Buffer.Length)
+            {
+                Array.Clear(Buffer, 0, Buffer.Length);
+                return Buffer;
+            }
+
+            return new byte[byteLength];
         }
         #endregion
     }

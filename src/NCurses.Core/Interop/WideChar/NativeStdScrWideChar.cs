@@ -61,7 +61,7 @@ namespace NCurses.Core.Interop.WideChar
         /// <param name="key">the read function key</param>
         /// Windows only supports extended ASCII input!
         /// <returns>returns TRUE if a funtion key has been pressed</returns>
-        public unsafe bool get_wch(out TWideChar wch, out Key key)
+        public bool get_wch(out TWideChar wch, out Key key)
         {
             if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
             {
@@ -113,7 +113,7 @@ namespace NCurses.Core.Interop.WideChar
         /// <param name="wch">the read wide character</param>
         /// <param name="key">the read function key</param>
         /// <returns>returns TRUE if a funtion key has been pressed</returns>
-        public unsafe bool mvget_wch(int y, int x, out TWideChar wch, out Key key)
+        public bool mvget_wch(int y, int x, out TWideChar wch, out Key key)
         {
             if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
             {

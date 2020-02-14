@@ -128,7 +128,7 @@ namespace NCurses.Core.Interop
         /// <para />native method wrapped with verification.
         /// </summary>
         /// <param name="screen">A pointer to a screen</param>
-        public unsafe void color_content_sp(IntPtr screen, short color, ref short red, ref short green, ref short blue)
+        public void color_content_sp(IntPtr screen, short color, ref short red, ref short green, ref short blue)
         {
             NCursesException.Verify(NativeNCurses.NCursesWrapper.color_content_sp(screen, color, ref red, ref green, ref blue), "color_content_sp");
         }

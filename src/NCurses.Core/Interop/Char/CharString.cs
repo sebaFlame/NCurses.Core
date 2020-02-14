@@ -15,18 +15,18 @@ namespace NCurses.Core.Interop.Char
         where TChar : unmanaged, ISingleByteChar, IEquatable<TChar>
     {
         public unsafe Span<byte> ByteSpan =>
-            this.BufferArray is null ? new Span<byte>(this.BufferPointer, this.BufferPointerLength) : new Span<byte>(this.BufferArray);
+            this.BufferArray is null ? new Span<byte>(this.BufferPointer, this.BufferLength) : new Span<byte>(this.BufferArray, 0, this.BufferLength);
         public unsafe Span<TChar> CharSpan =>
-            this.BufferArray is null ? new Span<TChar>(this.BufferPointer, this.BufferPointerLength / Marshal.SizeOf<TChar>()) : MemoryMarshal.Cast<byte, TChar>(this.ByteSpan);
+            this.BufferArray is null ? new Span<TChar>(this.BufferPointer, this.BufferLength / Marshal.SizeOf<TChar>()) : MemoryMarshal.Cast<byte, TChar>(this.ByteSpan);
 
         public int Length { get; }
 
         public ref TChar GetPinnableReference() => ref this.CharSpan.GetPinnableReference();
 
         private unsafe byte* BufferPointer;
-        private int BufferPointerLength;
-
         private byte[] BufferArray;
+        private int BufferLength;
+        
 
         public unsafe CharString(
             byte* buffer,
@@ -34,7 +34,7 @@ namespace NCurses.Core.Interop.Char
             string str)
         {
             this.BufferPointer = buffer;
-            this.BufferPointerLength = bufferLength;
+            this.BufferLength = bufferLength;
             this.BufferArray = null;
             this.Length = str.Length;
 
@@ -43,11 +43,12 @@ namespace NCurses.Core.Interop.Char
 
         public unsafe CharString(
             byte[] buffer,
+            int bufferLength,
             string str)
         {
             this.BufferArray = buffer;
             this.BufferPointer = (byte*)0;
-            this.BufferPointerLength = 0;
+            this.BufferLength = bufferLength;
             this.Length = str.Length;
 
             CreateCharString(new Span<byte>(buffer), str.AsSpan());
@@ -59,18 +60,19 @@ namespace NCurses.Core.Interop.Char
             int stringLength)
         {
             this.BufferPointer = buffer;
-            this.BufferPointerLength = bufferLength;
+            this.BufferLength = bufferLength;
             this.BufferArray = null;
             this.Length = stringLength;
         }
 
         public unsafe CharString(
             byte[] buffer,
+            int bufferLength,
             int stringLength)
         {
             this.BufferArray = buffer;
             this.BufferPointer = (byte*)0;
-            this.BufferPointerLength = 0;
+            this.BufferLength = bufferLength;
             this.Length = stringLength;
         }
 
@@ -79,7 +81,7 @@ namespace NCurses.Core.Interop.Char
             TChar* wideArr = (TChar*)Unsafe.AsPointer<TChar>(ref strRef);
 
             this.BufferPointer = (byte*)wideArr;
-            this.Length = FindStringLength(wideArr, out this.BufferPointerLength);
+            this.Length = FindStringLength(wideArr, out this.BufferLength);
             this.BufferArray = null;
         }
 

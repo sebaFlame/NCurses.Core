@@ -40,6 +40,16 @@ namespace NCurses.Core.Interop.SingleByte
             return chCasted;
         }
 
+        public TMouseEvent CastMouseEvent(in IMEVENT mEvent)
+        {
+            if (!(mEvent is TMouseEvent casted))
+            {
+                throw new InvalidCastException("Mouse event is in incorrect format");
+            }
+
+            return casted;
+        }
+
         public unsafe static T ToPrimitiveType<T>(in TSingleByte wch)
             where T : unmanaged
         {

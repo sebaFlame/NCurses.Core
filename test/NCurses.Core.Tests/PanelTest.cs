@@ -8,8 +8,6 @@ using Xunit.Abstractions;
 
 using NCurses.Core.Tests.Model;
 
-using NCurses.Core.Interop;
-
 namespace NCurses.Core.Tests
 {
     public abstract class PanelTest : TestBase
@@ -33,15 +31,18 @@ namespace NCurses.Core.Tests
 
             resultPanel = panel2.Below();
             Assert.Equal(panel1, resultPanel);
+            resultPanel.Dispose();
 
             resultPanel = panel1.Above();
             Assert.Equal(panel2, resultPanel);
+            resultPanel.Dispose();
 
             panel3 = NCurses.CreatePanel(win3);
 
             panel1.Top();
             resultPanel = panel3.Above();
             Assert.Equal(panel1, resultPanel);
+            resultPanel.Dispose();
 
             panel2.WrappedWindow = win4;
             Assert.Equal(win4, panel2.WrappedWindow);
@@ -51,6 +52,7 @@ namespace NCurses.Core.Tests
 
             resultPanel = panel2.Above();
             Assert.Equal(panel1, resultPanel);
+            resultPanel.Dispose();
 
             panel1.Dispose();
             panel2.Dispose();

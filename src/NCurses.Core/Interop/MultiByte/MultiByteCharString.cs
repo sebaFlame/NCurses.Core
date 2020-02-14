@@ -15,9 +15,9 @@ namespace NCurses.Core.Interop.MultiByte
         where TMultiByte : unmanaged, IMultiByteNCursesChar, IEquatable<TMultiByte>
     {
         public unsafe Span<byte> ByteSpan => 
-            this.BufferArray is null ? new Span<byte>(this.BufferPointer, this.BufferPointerLength) : new Span<byte>(this.BufferArray);
+            this.BufferArray is null ? new Span<byte>(this.BufferPointer, this.BufferLength) : new Span<byte>(this.BufferArray, 0, this.BufferLength);
         public unsafe Span<TMultiByte> CharSpan =>
-            this.BufferArray is null ? new Span<TMultiByte>(this.BufferPointer, this.BufferPointerLength / Marshal.SizeOf<TMultiByte>()) : MemoryMarshal.Cast<byte, TMultiByte>(this.ByteSpan);
+            this.BufferArray is null ? new Span<TMultiByte>(this.BufferPointer, this.BufferLength / Marshal.SizeOf<TMultiByte>()) : MemoryMarshal.Cast<byte, TMultiByte>(this.ByteSpan);
 
         public int Length { get; }
 
@@ -26,8 +26,8 @@ namespace NCurses.Core.Interop.MultiByte
         public INCursesChar this[int index] => this.CharSpan[index];
 
         private unsafe byte* BufferPointer;
-        private int BufferPointerLength;
         private byte[] BufferArray;
+        private int BufferLength;
 
         public unsafe MultiByteCharString(
             byte* buffer, 
@@ -35,7 +35,7 @@ namespace NCurses.Core.Interop.MultiByte
             string str)
         {
             this.BufferPointer = buffer;
-            this.BufferPointerLength = bufferLength;
+            this.BufferLength = bufferLength;
             this.BufferArray = null;
             this.Length = str.Length;
 
@@ -44,11 +44,12 @@ namespace NCurses.Core.Interop.MultiByte
 
         public unsafe MultiByteCharString(
             byte[] buffer,
+            int bufferLength,
             string str)
         {
             this.BufferArray = buffer;
             this.BufferPointer = (byte*)0;
-            this.BufferPointerLength = 0;
+            this.BufferLength = bufferLength;
             this.Length = str.Length;
 
             CreateCharString(new Span<byte>(buffer), str.AsSpan());
@@ -61,7 +62,7 @@ namespace NCurses.Core.Interop.MultiByte
             ulong attrs)
         {
             this.BufferPointer = buffer;
-            this.BufferPointerLength = bufferLength;
+            this.BufferLength = bufferLength;
             this.BufferArray = null;
             this.Length = str.Length;
 
@@ -70,12 +71,13 @@ namespace NCurses.Core.Interop.MultiByte
 
         public unsafe MultiByteCharString(
             byte[] buffer,
+            int bufferLength,
             string str,
             ulong attrs)
         {
             this.BufferArray = buffer;
             this.BufferPointer = (byte*)0;
-            this.BufferPointerLength = 0;
+            this.BufferLength = bufferLength;
             this.Length = str.Length;
 
             CreateCharString(new Span<byte>(buffer), str.AsSpan(), attrs);
@@ -89,7 +91,7 @@ namespace NCurses.Core.Interop.MultiByte
             short pair)
         {
             this.BufferPointer = buffer;
-            this.BufferPointerLength = length;
+            this.BufferLength = length;
             this.BufferArray = null;
             this.Length = str.Length;
 
@@ -98,13 +100,14 @@ namespace NCurses.Core.Interop.MultiByte
 
         public unsafe MultiByteCharString(
             byte[] buffer,
+            int bufferLength,
             string str,
             ulong attrs,
             short pair)
         {
             this.BufferArray = buffer;
             this.BufferPointer = (byte*)0;
-            this.BufferPointerLength = 0;
+            this.BufferLength = bufferLength;
             this.Length = str.Length;
 
             CreateCharString(new Span<byte>(buffer), str.AsSpan(), attrs, pair);
@@ -118,7 +121,7 @@ namespace NCurses.Core.Interop.MultiByte
             Encoding encoding)
         {
             this.BufferPointer = buffer;
-            this.BufferPointerLength = bufferLength;
+            this.BufferLength = bufferLength;
             this.BufferArray = null;
             this.Length = stringLength;
 
@@ -127,13 +130,14 @@ namespace NCurses.Core.Interop.MultiByte
 
         public unsafe MultiByteCharString(
             byte[] buffer,
+            int bufferLength,
             ReadOnlySpan<byte> str,
             int stringLength,
             Encoding encoding)
         {
             this.BufferArray = buffer;
             this.BufferPointer = (byte*)0;
-            this.BufferPointerLength = 0;
+            this.BufferLength = bufferLength;
             this.Length = stringLength;
 
             CreateCharString(new Span<byte>(buffer), str, encoding);
@@ -148,7 +152,7 @@ namespace NCurses.Core.Interop.MultiByte
             ulong attrs)
         {
             this.BufferPointer = buffer;
-            this.BufferPointerLength = bufferLength;
+            this.BufferLength = bufferLength;
             this.BufferArray = null;
             this.Length = stringLength;
 
@@ -161,6 +165,7 @@ namespace NCurses.Core.Interop.MultiByte
 
         public unsafe MultiByteCharString(
             byte[] buffer,
+            int bufferLength,
             ReadOnlySpan<byte> str,
             int stringLength,
             Encoding encoding,
@@ -168,7 +173,7 @@ namespace NCurses.Core.Interop.MultiByte
         {
             this.BufferArray = buffer;
             this.BufferPointer = (byte*)0;
-            this.BufferPointerLength = 0;
+            this.BufferLength = bufferLength;
             this.Length = stringLength;
 
             CreateCharString(
@@ -188,7 +193,7 @@ namespace NCurses.Core.Interop.MultiByte
             short color)
         {
             this.BufferPointer = buffer;
-            this.BufferPointerLength = bufferLength;
+            this.BufferLength = bufferLength;
             this.BufferArray = null;
             this.Length = stringLength;
 
@@ -202,6 +207,7 @@ namespace NCurses.Core.Interop.MultiByte
 
         public unsafe MultiByteCharString(
             byte[] buffer,
+            int bufferLength,
             ReadOnlySpan<byte> str,
             int stringLength,
             Encoding encoding,
@@ -210,7 +216,7 @@ namespace NCurses.Core.Interop.MultiByte
         {
             this.BufferArray = buffer;
             this.BufferPointer = (byte*)0;
-            this.BufferPointerLength = 0;
+            this.BufferLength = bufferLength;
             this.Length = stringLength;
 
             CreateCharString(
@@ -222,23 +228,24 @@ namespace NCurses.Core.Interop.MultiByte
         }
 
         public unsafe MultiByteCharString(
-            byte* buffer, 
+            byte* buffer,
             int bufferLength,
             int stringLength)
         {
             this.BufferPointer = buffer;
-            this.BufferPointerLength = bufferLength;
+            this.BufferLength = bufferLength;
             this.BufferArray = null;
             this.Length = stringLength;
         }
 
         public unsafe MultiByteCharString(
             byte[] buffer,
+            int bufferLength,
             int stringLength)
         {
             this.BufferArray = buffer;
             this.BufferPointer = (byte*)0;
-            this.BufferPointerLength = 0;
+            this.BufferLength = bufferLength;
             this.Length = stringLength;
         }
 
@@ -247,7 +254,7 @@ namespace NCurses.Core.Interop.MultiByte
             TMultiByte* wideArr = (TMultiByte*)Unsafe.AsPointer<TMultiByte>(ref strRef);
 
             this.BufferPointer = (byte*)wideArr;
-            this.Length = FindStringLength(wideArr, out this.BufferPointerLength);
+            this.Length = FindStringLength(wideArr, out this.BufferLength);
             this.BufferArray = null;
         }
 

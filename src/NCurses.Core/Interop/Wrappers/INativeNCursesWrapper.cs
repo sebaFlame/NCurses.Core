@@ -14,7 +14,7 @@ namespace NCurses.Core.Interop.Wrappers
     public interface INativeNCursesWrapper<TMultiByte, TMultiByteString, TWideChar, TWideCharString, TSingleByte, TSingleByteString, TChar, TCharString, TMouseEvent>
             : INativeNCursesMultiByte<TMultiByte, TMultiByteString>,
             INativeNCursesWideChar<TWideChar, TWideCharString>,
-            INativeNCursesSingleByte<TSingleByte, TSingleByteString>,
+            INativeNCursesSingleByte<TSingleByte, TSingleByteString, TMouseEvent>,
             INativeNCursesChar<TChar, TCharString>
         where TMultiByte : IMultiByteNCursesChar
         where TMultiByteString : IMultiByteNCursesCharString
@@ -99,7 +99,6 @@ namespace NCurses.Core.Interop.Wrappers
         void reset_shell_mode();
         void resizeterm(int lines, int columns);
         void resize_term(int lines, int columns);
-        void ripoffline(int line, Func<WindowBaseSafeHandle, int, IntPtr, int> init);
         void savetty();
         void set_escdelay(int size);
         void set_tabsize(int size);

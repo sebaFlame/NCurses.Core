@@ -33,28 +33,25 @@ namespace NCurses.Core.Interop.WideChar
             NCursesException.Verify(this.Wrapper.mvwaddwstr(window, y, x, in wstr.GetPinnableReference()), "mvwaddwstr");
         }
 
-        public unsafe bool mvwget_wch(WindowBaseSafeHandle window, int y, int x, out TWideChar wch, out Key key)
+        public bool mvwget_wch(WindowBaseSafeHandle window, int y, int x, out TWideChar wch, out Key key)
         {
-            unsafe
+            if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
             {
-                if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
-                {
-                    return VerifyInput(
-                        "mvwget_wch-mvwgetch",
-                        NativeCustomTypeWrapper<TMultiByte, TWideChar, TSingleByte, TChar, TMouseEvent>.WindowInternal.mvwgetch(window, y, x),
-                        NativeCustomTypeWrapper<TMultiByte, TWideChar, TSingleByte, TChar, TMouseEvent>.WindowInternal.is_keypad(window),
-                        out wch,
-                        out key);
-                }
-
-                int wc = 0;
-
-                return VerifyInput("mvwget_wch",
-                    this.Wrapper.mvwget_wch(window, y, x, ref wc),
-                    in wc,
+                return VerifyInput(
+                    "mvwget_wch-mvwgetch",
+                    NativeCustomTypeWrapper<TMultiByte, TWideChar, TSingleByte, TChar, TMouseEvent>.WindowInternal.mvwgetch(window, y, x),
+                    NativeCustomTypeWrapper<TMultiByte, TWideChar, TSingleByte, TChar, TMouseEvent>.WindowInternal.is_keypad(window),
                     out wch,
                     out key);
             }
+
+            int wc = 0;
+
+            return VerifyInput("mvwget_wch",
+                this.Wrapper.mvwget_wch(window, y, x, ref wc),
+                in wc,
+                out wch,
+                out key);
         }
 
         public void mvwget_wstr(WindowBaseSafeHandle window, int y, int x, ref WideCharString<TWideChar> wstr)
@@ -99,28 +96,25 @@ namespace NCurses.Core.Interop.WideChar
             NCursesException.Verify(this.Wrapper.waddwstr(window, in wstr.GetPinnableReference()), "waddwstr");
         }
 
-        public unsafe bool wget_wch(WindowBaseSafeHandle window, out TWideChar wch, out Key key)
+        public bool wget_wch(WindowBaseSafeHandle window, out TWideChar wch, out Key key)
         {
-            unsafe
+            if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
             {
-                if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
-                {
-                    return VerifyInput(
-                        "wget_wch-wgetch",
-                        NativeCustomTypeWrapper<TMultiByte, TWideChar, TSingleByte, TChar, TMouseEvent>.WindowInternal.wgetch(window),
-                        NativeCustomTypeWrapper<TMultiByte, TWideChar, TSingleByte, TChar, TMouseEvent>.WindowInternal.is_keypad(window),
-                        out wch,
-                        out key);
-                }
-
-                int wc = 0;
-
-                return VerifyInput("wget_wch",
-                    this.Wrapper.wget_wch(window, ref wc),
-                    in wc,
+                return VerifyInput(
+                    "wget_wch-wgetch",
+                    NativeCustomTypeWrapper<TMultiByte, TWideChar, TSingleByte, TChar, TMouseEvent>.WindowInternal.wgetch(window),
+                    NativeCustomTypeWrapper<TMultiByte, TWideChar, TSingleByte, TChar, TMouseEvent>.WindowInternal.is_keypad(window),
                     out wch,
                     out key);
             }
+
+            int wc = 0;
+
+            return VerifyInput("wget_wch",
+                this.Wrapper.wget_wch(window, ref wc),
+                in wc,
+                out wch,
+                out key);
         }
 
         public void wget_wstr(WindowBaseSafeHandle window, ref WideCharString<TWideChar> wstr)
