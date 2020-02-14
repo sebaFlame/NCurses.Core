@@ -32,8 +32,7 @@ namespace NCurses.Core.Interop.Dynamic.chtype
         public chtype(sbyte ch, ulong attr, short pair)
             : this(ch, attr)
         {
-            this.charWithAttr |= (UInt32)NativeNCurses.NCurses.COLOR_PAIR(pair);
-            //this.charWithAttr |= (UInt64)((UInt32)NativeNCurses.COLOR_PAIR(pair));
+            this.charWithAttr |= (UInt32)NativeNCurses.COLOR_PAIR(pair);
         }
 
         //attributes only

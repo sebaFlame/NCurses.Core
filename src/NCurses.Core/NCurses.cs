@@ -417,7 +417,7 @@ namespace NCurses.Core
         /// <returns>attribute of the color</returns>
         public static ulong ColorPair(short pairIndex)
         {
-            return (ulong)NCursesWrapper.COLOR_PAIR(pairIndex);
+            return (ulong)NativeNCurses.COLOR_PAIR(pairIndex);
         }
 
         public static int Colors

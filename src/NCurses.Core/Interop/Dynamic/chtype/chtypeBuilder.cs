@@ -24,7 +24,7 @@ namespace NCurses.Core.Interop.Dynamic.chtype
             CustomAttributeBuilder attrBuilder;
             ConstructorBuilder ctorBuilder, charCtorBuilder, charAttrCtorBuilder, attrCtorBuilder;
             ILGenerator ctorIl, methodIl;
-            MethodBuilder methodBuilder, opEquality, chEquality;
+            MethodBuilder methodBuilder, opEquality, chEquals;
             ParameterBuilder parameterBuilder;
             Label lbl1, lbl2, lbl3, lbl4;
             LocalBuilder lcl0, lcl1, lcl2, lcl3;
@@ -40,9 +40,6 @@ namespace NCurses.Core.Interop.Dynamic.chtype
                 TypeAttributes.NotPublic | TypeAttributes.SequentialLayout | TypeAttributes.Sealed | TypeAttributes.BeforeFieldInit,
                 typeof(ValueType));
             typeBuilder.AddInterfaceImplementation(typeof(ISingleByteNCursesChar));
-            typeBuilder.AddInterfaceImplementation(typeof(INCursesChar));
-            typeBuilder.AddInterfaceImplementation(typeof(IEquatable<INCursesChar>));
-            typeBuilder.AddInterfaceImplementation(typeof(IEquatable<ISingleByteNCursesChar>));
             typeBuilder.AddInterfaceImplementation(typeof(IEquatable<>).MakeGenericType(typeBuilder.AsType()));
 
             /* fields */
@@ -108,7 +105,7 @@ namespace NCurses.Core.Interop.Dynamic.chtype
             ctorIl.Emit(OpCodes.Ldarg_0);
             ctorIl.Emit(OpCodes.Ldfld, charWithAttrField);
             ctorIl.Emit(OpCodes.Ldarg_3);
-            ctorIl.Emit(OpCodes.Call, typeof(NativeNCurses).GetMethod("COLOR_PAIR"));
+            ctorIl.Emit(OpCodes.Call, typeof(NativeNCurses).GetMethod(nameof(NativeNCurses.COLOR_PAIR)));
             if(isLong)
                 ctorIl.Emit(OpCodes.Conv_U8);
             ctorIl.Emit(OpCodes.Or);
@@ -205,6 +202,29 @@ namespace NCurses.Core.Interop.Dynamic.chtype
                 PropertyAttributes.None,
                 typeof(short),
                 new Type[] { typeof(short) });
+            propBuilder.SetGetMethod(methodBuilder);
+            #endregion
+
+            #region EncodedChar
+            methodBuilder = typeBuilder.DefineMethod("get_EncodedChar",
+                MethodAttributes.Public | MethodAttributes.Final | MethodAttributes.HideBySig | MethodAttributes.SpecialName | MethodAttributes.NewSlot | MethodAttributes.Virtual,
+                typeof(byte),
+                Array.Empty<Type>());
+            methodIl = methodBuilder.GetILGenerator();
+
+            methodIl.Emit(OpCodes.Ldarg_0);
+            methodIl.Emit(OpCodes.Ldfld, charWithAttrField);
+            if (!isLong)
+                methodIl.Emit(OpCodes.Conv_U8);
+            methodIl.Emit(OpCodes.Ldsfld, typeof(Attrs).GetField("CHARTEXT"));
+            methodIl.Emit(OpCodes.And);
+            methodIl.Emit(OpCodes.Conv_U1);
+            methodIl.Emit(OpCodes.Ret);
+
+            propBuilder = typeBuilder.DefineProperty("EncodedChar",
+                PropertyAttributes.None,
+                typeof(byte),
+                new Type[] { typeof(byte) });
             propBuilder.SetGetMethod(methodBuilder);
             #endregion
 
@@ -488,102 +508,12 @@ namespace NCurses.Core.Interop.Dynamic.chtype
             methodIl.Emit(OpCodes.Ret);
             #endregion
 
-            #region public bool Equals(INCursesSCHAR obj)
-            chEquality = typeBuilder.DefineMethod("Equals",
-                MethodAttributes.Public | MethodAttributes.Final | MethodAttributes.HideBySig | MethodAttributes.NewSlot | MethodAttributes.Virtual,
-                typeof(bool),
-                new Type[] { typeof(ISingleByteNCursesChar) });
-            methodIl = chEquality.GetILGenerator();
-
-            lcl0 = methodIl.DeclareLocal(typeBuilder.AsType());
-            lcl1 = methodIl.DeclareLocal(typeof(bool));
-            lcl2 = methodIl.DeclareLocal(typeof(ISingleByteNCursesChar));
-            lcl3 = methodIl.DeclareLocal(typeof(bool));
-
-            lbl1 = methodIl.DefineLabel();
-            lbl2 = methodIl.DefineLabel();
-            lbl3 = methodIl.DefineLabel();
-            lbl4 = methodIl.DefineLabel();
-
-            //if (obj is chtype other)
-            methodIl.Emit(OpCodes.Nop);
-            methodIl.Emit(OpCodes.Ldarg_1);
-            methodIl.Emit(OpCodes.Dup);
-            methodIl.Emit(OpCodes.Stloc_2);
-            methodIl.Emit(OpCodes.Isinst, typeBuilder.AsType());
-            methodIl.Emit(OpCodes.Brfalse_S, lbl1);
-            methodIl.Emit(OpCodes.Ldloc_2);
-            methodIl.Emit(OpCodes.Unbox_Any, typeBuilder.AsType());
-            methodIl.Emit(OpCodes.Stloc_0);
-            methodIl.Emit(OpCodes.Ldc_I4_1);
-            methodIl.Emit(OpCodes.Br_S, lbl2);
-            methodIl.MarkLabel(lbl1);
-            methodIl.Emit(OpCodes.Ldc_I4_0);
-            methodIl.MarkLabel(lbl2);
-            methodIl.Emit(OpCodes.Stloc_1);
-            methodIl.Emit(OpCodes.Ldloc_1);
-            methodIl.Emit(OpCodes.Brfalse_S, lbl3);
-            //this == other
-            methodIl.Emit(OpCodes.Ldarg_0);
-            methodIl.Emit(OpCodes.Ldloca_S, lcl0);
-            methodIl.Emit(OpCodes.Call, opEquality);
-            methodIl.Emit(OpCodes.Stloc_3);
-            methodIl.Emit(OpCodes.Br_S, lbl4);
-            methodIl.MarkLabel(lbl3);
-            methodIl.Emit(OpCodes.Ldc_I4_0);
-            methodIl.Emit(OpCodes.Stloc_3);
-            methodIl.Emit(OpCodes.Br_S, lbl4);
-            methodIl.MarkLabel(lbl4);
-            methodIl.Emit(OpCodes.Ldloc_3);
-            methodIl.Emit(OpCodes.Ret);
-            #endregion
-
-            #region public bool Equals(INCursesChar obj)
-            methodBuilder = typeBuilder.DefineMethod("Equals",
-                MethodAttributes.Public | MethodAttributes.Final | MethodAttributes.HideBySig | MethodAttributes.NewSlot | MethodAttributes.Virtual,
-                typeof(bool),
-                new Type[] { typeof(INCursesChar) });
-            methodIl = methodBuilder.GetILGenerator();
-
-            lcl0 = methodIl.DeclareLocal(typeof(ISingleByteNCursesChar));
-            lcl1 = methodIl.DeclareLocal(typeof(bool));
-            lcl2 = methodIl.DeclareLocal(typeof(bool));
-
-            lbl1 = methodIl.DefineLabel();
-            lbl2 = methodIl.DefineLabel();
-
-            //if (obj is INCursesSCHAR other)
-            methodIl.Emit(OpCodes.Nop);
-            methodIl.Emit(OpCodes.Ldarg_1);
-            methodIl.Emit(OpCodes.Isinst, typeof(ISingleByteNCursesChar));
-            methodIl.Emit(OpCodes.Dup);
-            methodIl.Emit(OpCodes.Stloc_0);
-            methodIl.Emit(OpCodes.Ldnull);
-            methodIl.Emit(OpCodes.Cgt_Un);
-            methodIl.Emit(OpCodes.Stloc_1);
-            methodIl.Emit(OpCodes.Ldloc_1);
-            methodIl.Emit(OpCodes.Brfalse_S, lbl1);
-            //this.Equals(other);
-            methodIl.Emit(OpCodes.Ldarg_0);
-            methodIl.Emit(OpCodes.Ldloc_0);
-            methodIl.Emit(OpCodes.Call, chEquality);
-            methodIl.Emit(OpCodes.Stloc_2);
-            methodIl.Emit(OpCodes.Br_S, lbl2);
-            methodIl.MarkLabel(lbl1);
-            methodIl.Emit(OpCodes.Ldc_I4_0);
-            methodIl.Emit(OpCodes.Stloc_2);
-            methodIl.Emit(OpCodes.Br_S, lbl2);
-            methodIl.MarkLabel(lbl2);
-            methodIl.Emit(OpCodes.Ldloc_2);
-            methodIl.Emit(OpCodes.Ret);
-            #endregion
-
             #region public bool Equals(chtype other)
-            methodBuilder = typeBuilder.DefineMethod("Equals",
+            chEquals = typeBuilder.DefineMethod("Equals",
                 MethodAttributes.Public | MethodAttributes.Final | MethodAttributes.HideBySig | MethodAttributes.NewSlot | MethodAttributes.Virtual,
                 typeof(bool),
                 new Type[] { typeBuilder.AsType() });
-            methodIl = methodBuilder.GetILGenerator();
+            methodIl = chEquals.GetILGenerator();
 
             lcl0 = methodIl.DeclareLocal(typeof(bool));
             lbl1 = methodIl.DefineLabel();
@@ -608,8 +538,7 @@ namespace NCurses.Core.Interop.Dynamic.chtype
 
             lcl0 = methodIl.DeclareLocal(typeBuilder.AsType());
             lcl1 = methodIl.DeclareLocal(typeof(bool));
-            lcl2 = methodIl.DeclareLocal(typeof(object));
-            lcl3 = methodIl.DeclareLocal(typeof(bool));
+            lcl2 = methodIl.DeclareLocal(typeof(bool));
 
             lbl1 = methodIl.DefineLabel();
             lbl2 = methodIl.DefineLabel();
@@ -619,33 +548,224 @@ namespace NCurses.Core.Interop.Dynamic.chtype
             //if (obj is chtype other)
             methodIl.Emit(OpCodes.Nop);
             methodIl.Emit(OpCodes.Ldarg_1);
-            methodIl.Emit(OpCodes.Dup);
-            methodIl.Emit(OpCodes.Stloc_2);
             methodIl.Emit(OpCodes.Isinst, typeBuilder.AsType());
             methodIl.Emit(OpCodes.Brfalse_S, lbl1);
-            methodIl.Emit(OpCodes.Ldloc_2);
+            methodIl.Emit(OpCodes.Ldarg_1);
             methodIl.Emit(OpCodes.Unbox_Any, typeBuilder.AsType());
-            methodIl.Emit(OpCodes.Stloc_0);
+            methodIl.Emit(OpCodes.Stloc_S, lcl0);
             methodIl.Emit(OpCodes.Ldc_I4_1);
             methodIl.Emit(OpCodes.Br_S, lbl2);
             methodIl.MarkLabel(lbl1);
             methodIl.Emit(OpCodes.Ldc_I4_0);
             methodIl.MarkLabel(lbl2);
-            methodIl.Emit(OpCodes.Stloc_1);
-            methodIl.Emit(OpCodes.Ldloc_1);
+            methodIl.Emit(OpCodes.Stloc_S, lcl1);
+            methodIl.Emit(OpCodes.Ldloc_S, lcl1);
             methodIl.Emit(OpCodes.Brfalse_S, lbl3);
-            //this == other
+            //return this.Equals(other);
+            methodIl.Emit(OpCodes.Nop);
             methodIl.Emit(OpCodes.Ldarg_0);
-            methodIl.Emit(OpCodes.Ldloca_S, lcl0);
-            methodIl.Emit(OpCodes.Call, opEquality);
-            methodIl.Emit(OpCodes.Stloc_3);
+            methodIl.Emit(OpCodes.Ldloc_S, lcl0);
+            methodIl.Emit(OpCodes.Call, chEquals);
+            methodIl.Emit(OpCodes.Stloc_S, lcl2);
             methodIl.Emit(OpCodes.Br_S, lbl4);
             methodIl.MarkLabel(lbl3);
             methodIl.Emit(OpCodes.Ldc_I4_0);
-            methodIl.Emit(OpCodes.Stloc_3);
+            methodIl.Emit(OpCodes.Stloc_S, lcl2);
             methodIl.Emit(OpCodes.Br_S, lbl4);
             methodIl.MarkLabel(lbl4);
-            methodIl.Emit(OpCodes.Ldloc_3);
+            methodIl.Emit(OpCodes.Ldloc_S, lcl2);
+            methodIl.Emit(OpCodes.Ret);
+            #endregion
+
+            #region public bool Equals(IChar obj)
+            methodBuilder = typeBuilder.DefineMethod("Equals",
+                MethodAttributes.Public | MethodAttributes.Final | MethodAttributes.HideBySig | MethodAttributes.NewSlot | MethodAttributes.Virtual,
+                typeof(bool),
+                new Type[] { typeof(IChar) });
+            methodIl = methodBuilder.GetILGenerator();
+
+            lcl0 = methodIl.DeclareLocal(typeBuilder.AsType());
+            lcl1 = methodIl.DeclareLocal(typeof(bool));
+            lcl2 = methodIl.DeclareLocal(typeof(bool));
+
+            lbl1 = methodIl.DefineLabel();
+            lbl2 = methodIl.DefineLabel();
+            lbl3 = methodIl.DefineLabel();
+            lbl4 = methodIl.DefineLabel();
+
+            //if (obj is chtype other)
+            methodIl.Emit(OpCodes.Nop);
+            methodIl.Emit(OpCodes.Ldarg_1);
+            methodIl.Emit(OpCodes.Isinst, typeBuilder.AsType());
+            methodIl.Emit(OpCodes.Brfalse_S, lbl1);
+            methodIl.Emit(OpCodes.Ldarg_1);
+            methodIl.Emit(OpCodes.Unbox_Any, typeBuilder.AsType());
+            methodIl.Emit(OpCodes.Stloc_S, lcl0);
+            methodIl.Emit(OpCodes.Ldc_I4_1);
+            methodIl.Emit(OpCodes.Br_S, lbl2);
+            methodIl.MarkLabel(lbl1);
+            methodIl.Emit(OpCodes.Ldc_I4_0);
+            methodIl.MarkLabel(lbl2);
+            methodIl.Emit(OpCodes.Stloc_S, lcl1);
+            methodIl.Emit(OpCodes.Ldloc_S, lcl1);
+            methodIl.Emit(OpCodes.Brfalse_S, lbl3);
+            //return this.Equals(other);
+            methodIl.Emit(OpCodes.Nop);
+            methodIl.Emit(OpCodes.Ldarg_0);
+            methodIl.Emit(OpCodes.Ldloc_S, lcl0);
+            methodIl.Emit(OpCodes.Call, chEquals);
+            methodIl.Emit(OpCodes.Stloc_S, lcl2);
+            methodIl.Emit(OpCodes.Br_S, lbl4);
+            methodIl.MarkLabel(lbl3);
+            methodIl.Emit(OpCodes.Ldc_I4_0);
+            methodIl.Emit(OpCodes.Stloc_S, lcl2);
+            methodIl.Emit(OpCodes.Br_S, lbl4);
+            methodIl.MarkLabel(lbl4);
+            methodIl.Emit(OpCodes.Ldloc_S, lcl2);
+            methodIl.Emit(OpCodes.Ret);
+            #endregion
+
+            #region public bool Equals(ISingleByteChar obj)
+            chEquals = typeBuilder.DefineMethod("Equals",
+                MethodAttributes.Public | MethodAttributes.Final | MethodAttributes.HideBySig | MethodAttributes.NewSlot | MethodAttributes.Virtual,
+                typeof(bool),
+                new Type[] { typeof(ISingleByteChar) });
+            methodIl = chEquals.GetILGenerator();
+
+            lcl0 = methodIl.DeclareLocal(typeBuilder.AsType());
+            lcl1 = methodIl.DeclareLocal(typeof(bool));
+            lcl2 = methodIl.DeclareLocal(typeof(bool));
+
+            lbl1 = methodIl.DefineLabel();
+            lbl2 = methodIl.DefineLabel();
+            lbl3 = methodIl.DefineLabel();
+            lbl4 = methodIl.DefineLabel();
+
+            //if (obj is chtype other)
+            methodIl.Emit(OpCodes.Nop);
+            methodIl.Emit(OpCodes.Ldarg_1);
+            methodIl.Emit(OpCodes.Isinst, typeBuilder.AsType());
+            methodIl.Emit(OpCodes.Brfalse_S, lbl1);
+            methodIl.Emit(OpCodes.Ldarg_1);
+            methodIl.Emit(OpCodes.Unbox_Any, typeBuilder.AsType());
+            methodIl.Emit(OpCodes.Stloc_S, lcl0);
+            methodIl.Emit(OpCodes.Ldc_I4_1);
+            methodIl.Emit(OpCodes.Br_S, lbl2);
+            methodIl.MarkLabel(lbl1);
+            methodIl.Emit(OpCodes.Ldc_I4_0);
+            methodIl.MarkLabel(lbl2);
+            methodIl.Emit(OpCodes.Stloc_S, lcl1);
+            methodIl.Emit(OpCodes.Ldloc_S, lcl1);
+            methodIl.Emit(OpCodes.Brfalse_S, lbl3);
+            //return this.Equals(other);
+            methodIl.Emit(OpCodes.Nop);
+            methodIl.Emit(OpCodes.Ldarg_0);
+            methodIl.Emit(OpCodes.Ldloc_S, lcl0);
+            methodIl.Emit(OpCodes.Call, chEquals);
+            methodIl.Emit(OpCodes.Stloc_S, lcl2);
+            methodIl.Emit(OpCodes.Br_S, lbl4);
+            methodIl.MarkLabel(lbl3);
+            methodIl.Emit(OpCodes.Ldc_I4_0);
+            methodIl.Emit(OpCodes.Stloc_S, lcl2);
+            methodIl.Emit(OpCodes.Br_S, lbl4);
+            methodIl.MarkLabel(lbl4);
+            methodIl.Emit(OpCodes.Ldloc_S, lcl2);
+            methodIl.Emit(OpCodes.Ret);
+            #endregion
+
+            #region public bool Equals(INCursesChar obj)
+            methodBuilder = typeBuilder.DefineMethod("Equals",
+                MethodAttributes.Public | MethodAttributes.Final | MethodAttributes.HideBySig | MethodAttributes.NewSlot | MethodAttributes.Virtual,
+                typeof(bool),
+                new Type[] { typeof(INCursesChar) });
+            methodIl = methodBuilder.GetILGenerator();
+
+            lcl0 = methodIl.DeclareLocal(typeBuilder.AsType());
+            lcl1 = methodIl.DeclareLocal(typeof(bool));
+            lcl2 = methodIl.DeclareLocal(typeof(bool));
+
+            lbl1 = methodIl.DefineLabel();
+            lbl2 = methodIl.DefineLabel();
+            lbl3 = methodIl.DefineLabel();
+            lbl4 = methodIl.DefineLabel();
+
+            //if (obj is chtype other)
+            methodIl.Emit(OpCodes.Nop);
+            methodIl.Emit(OpCodes.Ldarg_1);
+            methodIl.Emit(OpCodes.Isinst, typeBuilder.AsType());
+            methodIl.Emit(OpCodes.Brfalse_S, lbl1);
+            methodIl.Emit(OpCodes.Ldarg_1);
+            methodIl.Emit(OpCodes.Unbox_Any, typeBuilder.AsType());
+            methodIl.Emit(OpCodes.Stloc_S, lcl0);
+            methodIl.Emit(OpCodes.Ldc_I4_1);
+            methodIl.Emit(OpCodes.Br_S, lbl2);
+            methodIl.MarkLabel(lbl1);
+            methodIl.Emit(OpCodes.Ldc_I4_0);
+            methodIl.MarkLabel(lbl2);
+            methodIl.Emit(OpCodes.Stloc_S, lcl1);
+            methodIl.Emit(OpCodes.Ldloc_S, lcl1);
+            methodIl.Emit(OpCodes.Brfalse_S, lbl3);
+            //return this.Equals(other);
+            methodIl.Emit(OpCodes.Nop);
+            methodIl.Emit(OpCodes.Ldarg_0);
+            methodIl.Emit(OpCodes.Ldloc_S, lcl0);
+            methodIl.Emit(OpCodes.Call, chEquals);
+            methodIl.Emit(OpCodes.Stloc_S, lcl2);
+            methodIl.Emit(OpCodes.Br_S, lbl4);
+            methodIl.MarkLabel(lbl3);
+            methodIl.Emit(OpCodes.Ldc_I4_0);
+            methodIl.Emit(OpCodes.Stloc_S, lcl2);
+            methodIl.Emit(OpCodes.Br_S, lbl4);
+            methodIl.MarkLabel(lbl4);
+            methodIl.Emit(OpCodes.Ldloc_S, lcl2);
+            methodIl.Emit(OpCodes.Ret);
+            #endregion
+
+            #region public bool Equals(ISingleByteNCursesChar obj)
+            methodBuilder = typeBuilder.DefineMethod("Equals",
+                MethodAttributes.Public | MethodAttributes.Final | MethodAttributes.HideBySig | MethodAttributes.NewSlot | MethodAttributes.Virtual,
+                typeof(bool),
+                new Type[] { typeof(ISingleByteNCursesChar) });
+            methodIl = methodBuilder.GetILGenerator();
+
+            lcl0 = methodIl.DeclareLocal(typeBuilder.AsType());
+            lcl1 = methodIl.DeclareLocal(typeof(bool));
+            lcl2 = methodIl.DeclareLocal(typeof(bool));
+
+            lbl1 = methodIl.DefineLabel();
+            lbl2 = methodIl.DefineLabel();
+            lbl3 = methodIl.DefineLabel();
+            lbl4 = methodIl.DefineLabel();
+
+            //if (obj is chtype other)
+            methodIl.Emit(OpCodes.Nop);
+            methodIl.Emit(OpCodes.Ldarg_1);
+            methodIl.Emit(OpCodes.Isinst, typeBuilder.AsType());
+            methodIl.Emit(OpCodes.Brfalse_S, lbl1);
+            methodIl.Emit(OpCodes.Ldarg_1);
+            methodIl.Emit(OpCodes.Unbox_Any, typeBuilder.AsType());
+            methodIl.Emit(OpCodes.Stloc_S, lcl0);
+            methodIl.Emit(OpCodes.Ldc_I4_1);
+            methodIl.Emit(OpCodes.Br_S, lbl2);
+            methodIl.MarkLabel(lbl1);
+            methodIl.Emit(OpCodes.Ldc_I4_0);
+            methodIl.MarkLabel(lbl2);
+            methodIl.Emit(OpCodes.Stloc_S, lcl1);
+            methodIl.Emit(OpCodes.Ldloc_S, lcl1);
+            methodIl.Emit(OpCodes.Brfalse_S, lbl3);
+            //return this.Equals(other);
+            methodIl.Emit(OpCodes.Nop);
+            methodIl.Emit(OpCodes.Ldarg_0);
+            methodIl.Emit(OpCodes.Ldloc_S, lcl0);
+            methodIl.Emit(OpCodes.Call, chEquals);
+            methodIl.Emit(OpCodes.Stloc_S, lcl2);
+            methodIl.Emit(OpCodes.Br_S, lbl4);
+            methodIl.MarkLabel(lbl3);
+            methodIl.Emit(OpCodes.Ldc_I4_0);
+            methodIl.Emit(OpCodes.Stloc_S, lcl2);
+            methodIl.Emit(OpCodes.Br_S, lbl4);
+            methodIl.MarkLabel(lbl4);
+            methodIl.Emit(OpCodes.Ldloc_S, lcl2);
             methodIl.Emit(OpCodes.Ret);
             #endregion
 

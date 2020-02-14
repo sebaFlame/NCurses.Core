@@ -28,7 +28,7 @@
 
   <!-- Predefined types only work in windows -->
   <PropertyGroup>
-    <DynamicTypes Condition="'$(DynamicTypes)' == ''">false</DynamicTypes>
+    <DynamicTypes Condition="'$(DynamicTypes)' == ''">true</DynamicTypes>
     <DefineConstants Condition="'$(DynamicTypes)' == 'true' OR ('$(DynamicTypes)' == 'false' AND '$(Configuration)' != 'Debug') OR '$(OS)' != 'Windows_NT'">$(DefineConstants);DYNAMICTYPES</DefineConstants>
   </PropertyGroup>
 

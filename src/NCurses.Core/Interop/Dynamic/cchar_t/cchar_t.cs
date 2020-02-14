@@ -61,7 +61,7 @@ namespace NCurses.Core.Interop.Dynamic.cchar_t
         {
             if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
                 this.ext_color = pair;
-            this.attr |= (ulong)NativeNCurses.NCurses.COLOR_PAIR(pair);
+            this.attr |= (ulong)NativeNCurses.COLOR_PAIR(pair);
         }
 
         public cchar_t(ArraySegment<byte> encodedBytesChar)
@@ -91,7 +91,7 @@ namespace NCurses.Core.Interop.Dynamic.cchar_t
             {
                 this.ext_color = pair;
             }
-            this.attr |= (ulong)NativeNCurses.NCurses.COLOR_PAIR(pair);
+            this.attr |= (ulong)NativeNCurses.COLOR_PAIR(pair);
         }
 
         public cchar_t(Span<byte> encodedBytesChar)
@@ -121,7 +121,7 @@ namespace NCurses.Core.Interop.Dynamic.cchar_t
             {
                 this.ext_color = pair;
             }
-            this.attr |= (ulong)NativeNCurses.NCurses.COLOR_PAIR(pair);
+            this.attr |= (ulong)NativeNCurses.COLOR_PAIR(pair);
         }
 
         public static explicit operator cchar_t(char ch)

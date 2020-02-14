@@ -306,6 +306,19 @@ namespace NCurses.Core.Interop
         }
         #endregion
 
+        #region COLOR_PAIR
+        /// <summary>
+        /// Converts a color pair number to an attribute.
+        /// Attributes can hold color pairs in the range 0 to 255.
+        /// </summary>
+        /// <param name="pair">A color pair index</param>
+        /// <returns>The attribute of the specified color pair</returns>
+        public static int COLOR_PAIR(int pair)
+        {
+            return NCursesWrapper.COLOR_PAIR(pair);
+        }
+        #endregion
+
         #region ripoffline
         private delegate int ripoffDelegate(NewWindowSafeHandle win, int cols);
 

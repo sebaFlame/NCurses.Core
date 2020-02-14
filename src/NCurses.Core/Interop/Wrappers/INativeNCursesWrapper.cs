@@ -36,7 +36,6 @@ namespace NCurses.Core.Interop.Wrappers
         void cbreak();
         int COLORS();
         void color_content(short color, ref short red, ref short green, ref short blue);
-        int COLOR_PAIR(int pair);
         int COLOR_PAIRS();
         int COLS();
         void copywin(IntPtr srcwin, IntPtr dstwin, int sminrow, int smincol, int dminrow, int dmincol, int dmaxrow, int dmaxcol, int overlay);
