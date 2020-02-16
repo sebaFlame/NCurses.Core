@@ -218,7 +218,7 @@ namespace NCurses.Core.Window
         {
             Window.win_wch(this.WindowBaseSafeHandle, out TMultiByte ch);
             attrs = ch.Attributes;
-            pair = ch.Color;
+            pair = ch.ColorPair;
             return ch.Char;
         }
 
@@ -226,7 +226,7 @@ namespace NCurses.Core.Window
         {
             Window.mvwin_wch(this.WindowBaseSafeHandle, nline, ncol, out TMultiByte ch);
             attrs = ch.Attributes;
-            pair = ch.Color;
+            pair = ch.ColorPair;
             return ch.Char;
         }
 

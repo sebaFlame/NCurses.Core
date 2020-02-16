@@ -40,7 +40,7 @@ namespace NCurses.Core.Interop.Wrappers
 
         static NativeCustomTypeWrapper()
         {
-            object wrapper = Activator.CreateInstance(DynamicTypeBuilder.CreateCustomTypeWrapper(Constants.DLLNAME, NativeNCurses.HasUnicodeSupport));
+            object wrapper = Activator.CreateInstance(DynamicTypeBuilder.CreateCustomTypeWrapper(Constants.DLLNAME));
 
             MultiByteWrapper = (IMultiByteWrapper<TMultiByte, TWideChar, TSingleByte, TChar>)wrapper;
             SingleByteWrapper = (ISingleByteWrapper<TSingleByte, TChar, TMouseEvent>)wrapper;

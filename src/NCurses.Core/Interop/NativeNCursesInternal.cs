@@ -489,7 +489,7 @@ namespace NCurses.Core.Interop
                     return NativeNCurses.StdScrSafeHandle;
                 }
 
-                NativeNCurses.NativeLoader.SetLocale("");
+                bool supportsUnicode = NativeNCurses.HasUnicodeSupport;
 
                 NativeNCurses.StdScrSafeHandle = NCursesException.Verify(NativeNCurses.NCursesWrapper.initscr(), "initscr");
 
@@ -498,7 +498,7 @@ namespace NCurses.Core.Interop
                  * use correct chtype type
                 */
                 {
-                    //chtype size calculation
+                    // chtype size calculation
                     string version = this.curses_version().ToString();
                     int major = (int)char.GetNumericValue(version, version.IndexOf(' ') + 1);
 
@@ -523,7 +523,7 @@ namespace NCurses.Core.Interop
                     NativeNCurses.LoadProperty("acs_map", loadAcs);
                 }
 
-                if (NativeNCurses.HasUnicodeSupport && WACSMapInternal is null)
+                if (supportsUnicode && WACSMapInternal is null)
                 {
                     Action<IntPtr> loadWacs = (IntPtr wacsPtr) =>
                     {

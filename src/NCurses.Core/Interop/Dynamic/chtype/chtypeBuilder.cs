@@ -184,7 +184,7 @@ namespace NCurses.Core.Interop.Dynamic.chtype
             #endregion
 
             #region Color
-            methodBuilder = typeBuilder.DefineMethod("get_Color",
+            methodBuilder = typeBuilder.DefineMethod("get_ColorPair",
                 MethodAttributes.Public | MethodAttributes.Final | MethodAttributes.HideBySig | MethodAttributes.SpecialName | MethodAttributes.NewSlot | MethodAttributes.Virtual,
                 typeof(short),
                 Array.Empty<Type>());
@@ -198,7 +198,7 @@ namespace NCurses.Core.Interop.Dynamic.chtype
             methodIl.Emit(OpCodes.Conv_I2);
             methodIl.Emit(OpCodes.Ret);
 
-            propBuilder = typeBuilder.DefineProperty("Color",
+            propBuilder = typeBuilder.DefineProperty("ColorPair",
                 PropertyAttributes.None,
                 typeof(short),
                 new Type[] { typeof(short) });

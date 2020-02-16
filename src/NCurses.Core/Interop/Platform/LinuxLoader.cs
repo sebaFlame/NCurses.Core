@@ -35,10 +35,15 @@ namespace NCurses.Core.Interop.Platform
             return dlclose(modulePtr) == 0;
         }
 
-        public void SetLocale(string locale)
+        //guarantee this gets called only once!!! causes random "corrupted double-linked list"
+        public void SetLocale()
         {
             //LC_ALL = 6
-            setlocale(6, locale);
+            string res = setlocale(6, "");
+
+            /* Return values:
+             * ubuntu-18.04-x64 (WSL): C.UTF-8
+             */
         }
     }
 }

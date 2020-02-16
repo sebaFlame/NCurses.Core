@@ -76,28 +76,25 @@ namespace NCurses.Core.Interop.Dynamic
 #endregion
 
 #region Custom single/multibyte types
-        internal static Type CreateCustomTypeWrapper(string dllName, bool unicodeSuported)
+        internal static Type CreateCustomTypeWrapper(string dllName)
         {
             TypeBuilder typeBuilder = ModuleBuilder.DefineType("NCursesCustomTypeWrapper", TypeAttributes.Public);
             MethodInfo[] interfaceMethod;
             Type interfaceType;
 
-            if (unicodeSuported)
-            {
-                //wide (cchar_t) methods
-                interfaceType = typeof(IMultiByteWrapper<,,,>).MakeGenericType(cchar_t, wchar_t, chtype, schar);
-                typeBuilder.AddInterfaceImplementation(interfaceType);
-                interfaceMethod = interfaceType.GetMethods();
-                foreach (MethodInfo ifMethod in interfaceMethod)
-                    createInterfaceImplementation(dllName, typeBuilder, ifMethod);
+            //wide (cchar_t) methods
+            interfaceType = typeof(IMultiByteWrapper<,,,>).MakeGenericType(cchar_t, wchar_t, chtype, schar);
+            typeBuilder.AddInterfaceImplementation(interfaceType);
+            interfaceMethod = interfaceType.GetMethods();
+            foreach (MethodInfo ifMethod in interfaceMethod)
+                createInterfaceImplementation(dllName, typeBuilder, ifMethod);
 
-                //wide string (wchar_t) methods
-                interfaceType = typeof(IWideCharWrapper<,>).MakeGenericType(wchar_t, schar);
-                typeBuilder.AddInterfaceImplementation(interfaceType);
-                interfaceMethod = interfaceType.GetMethods();
-                foreach (MethodInfo ifMethod in interfaceMethod)
-                    createInterfaceImplementation(dllName, typeBuilder, ifMethod);
-            }
+            //wide string (wchar_t) methods
+            interfaceType = typeof(IWideCharWrapper<,>).MakeGenericType(wchar_t, schar);
+            typeBuilder.AddInterfaceImplementation(interfaceType);
+            interfaceMethod = interfaceType.GetMethods();
+            foreach (MethodInfo ifMethod in interfaceMethod)
+                createInterfaceImplementation(dllName, typeBuilder, ifMethod);
 
             //small (chtype) methods
             interfaceType = typeof(ISingleByteWrapper<,,>).MakeGenericType(chtype, schar, MEVENT);

@@ -117,7 +117,7 @@ namespace NCurses.Core.Interop.Dynamic.wchar_t
             ctorIl.Emit(OpCodes.Ldloc_0);
             ctorIl.Emit(OpCodes.Ldc_I4_1);
             ctorIl.Emit(OpCodes.Ldloc_1);
-            ctorIl.Emit(OpCodes.Ldc_I4_2);
+            ctorIl.Emit(OpCodes.Ldc_I4_S, Constants.SIZEOF_WCHAR_T);
             ctorIl.Emit(OpCodes.Callvirt, typeof(Encoding).GetMethod(
                 "GetBytes",
                 new Type[] 
@@ -240,6 +240,7 @@ namespace NCurses.Core.Interop.Dynamic.wchar_t
             lcl1 = ctorIl.DeclareLocal(typeof(byte*), true);
 
             ctorIl.Emit(OpCodes.Nop);
+            ctorIl.Emit(OpCodes.Nop);
             ctorIl.Emit(OpCodes.Ldarg_0);
             ctorIl.Emit(OpCodes.Ldflda, charField);
             ctorIl.Emit(OpCodes.Ldflda, fixedElementField);
@@ -250,7 +251,9 @@ namespace NCurses.Core.Interop.Dynamic.wchar_t
             ctorIl.Emit(OpCodes.Nop);
             ctorIl.Emit(OpCodes.Ldloc_S, lcl0);
             ctorIl.Emit(OpCodes.Ldarg_1);
-            ctorIl.Emit(OpCodes.Call, typeof(Unsafe).GetMethod(nameof(Unsafe.Write)));
+            MethodInfo unsafeMethod = typeof(Unsafe).GetMethod(nameof(Unsafe.Write)).MakeGenericMethod(typeof(int));
+            ctorIl.Emit(OpCodes.Call, unsafeMethod);
+            ctorIl.Emit(OpCodes.Nop);
             ctorIl.Emit(OpCodes.Nop);
             ctorIl.Emit(OpCodes.Ldc_I4_0);
             ctorIl.Emit(OpCodes.Conv_U);
@@ -398,7 +401,7 @@ namespace NCurses.Core.Interop.Dynamic.wchar_t
             methodIl.Emit(OpCodes.Ldflda, charField);
             methodIl.Emit(OpCodes.Ldflda, fixedElementField);
             methodIl.Emit(OpCodes.Conv_U);
-            methodIl.Emit(OpCodes.Ldc_I4_2);
+            methodIl.Emit(OpCodes.Ldc_I4_S, Constants.SIZEOF_WCHAR_T);
             methodIl.Emit(OpCodes.Ldloc_1);
             methodIl.Emit(OpCodes.Ldc_I4_1);
             methodIl.Emit(OpCodes.Callvirt, typeof(Encoding).GetMethod(

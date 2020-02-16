@@ -213,7 +213,7 @@ namespace NCurses.Core.Window
         {
             Window.winch(this.WindowBaseSafeHandle, out TSingleByte ch);
             attrs = ch.Attributes;
-            pair = ch.Color;
+            pair = ch.ColorPair;
             return ch.Char;
         }
 
@@ -221,7 +221,7 @@ namespace NCurses.Core.Window
         {
             Window.mvwinch(this.WindowBaseSafeHandle, nline, ncol, out TSingleByte ch);
             attrs = ch.Attributes;
-            pair = ch.Color;
+            pair = ch.ColorPair;
             return ch.Char;
         }
 

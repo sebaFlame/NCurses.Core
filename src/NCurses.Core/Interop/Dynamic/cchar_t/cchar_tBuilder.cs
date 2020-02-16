@@ -1086,33 +1086,18 @@ namespace NCurses.Core.Interop.Dynamic.cchar_t
             #endregion
 
             #region Color
-            methodBuilder = typeBuilder.DefineMethod("get_Color",
+            methodBuilder = typeBuilder.DefineMethod("get_ColorPair",
                 MethodAttributes.Public | MethodAttributes.Final | MethodAttributes.HideBySig | MethodAttributes.SpecialName | MethodAttributes.NewSlot | MethodAttributes.Virtual,
                 typeof(short),
                 Array.Empty<Type>());
             methodIl = methodBuilder.GetILGenerator();
 
-            lbl1 = methodIl.DefineLabel();
-            lbl2 = methodIl.DefineLabel();
-
             methodIl.Emit(OpCodes.Ldarg_0);
-            methodIl.Emit(OpCodes.Ldfld, extField);
-            methodIl.Emit(OpCodes.Ldc_I4_0);
-            methodIl.Emit(OpCodes.Bgt_S, lbl1);
-            methodIl.Emit(OpCodes.Ldarg_0);
-            methodIl.Emit(OpCodes.Ldfld, attrField);
-            methodIl.Emit(OpCodes.Call, chtype.GetMethod("op_Implicit", new Type[] { chtype }));
-            methodIl.Emit(OpCodes.Call, typeof(Constants).GetMethod("PAIR_NUMBER"));
-            methodIl.Emit(OpCodes.Conv_I2);
-            methodIl.Emit(OpCodes.Br_S, lbl2);
-            methodIl.MarkLabel(lbl1);
-            methodIl.Emit(OpCodes.Ldarg_0);
-            methodIl.Emit(OpCodes.Ldfld, extField);
-            methodIl.MarkLabel(lbl2);
-            methodIl.Emit(OpCodes.Conv_I2);
+            methodIl.Emit(OpCodes.Ldflda, attrField);
+            methodIl.Emit(OpCodes.Call, chtype.GetTypeInfo().GetProperty("ColorPair").GetGetMethod());
             methodIl.Emit(OpCodes.Ret);
 
-            propBuilder = typeBuilder.DefineProperty("Color",
+            propBuilder = typeBuilder.DefineProperty("ColorPair",
                 PropertyAttributes.None,
                 typeof(short),
                 new Type[] { typeof(short) });

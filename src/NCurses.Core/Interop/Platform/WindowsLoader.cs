@@ -35,7 +35,7 @@ namespace NCurses.Core.Interop.Platform
             return FreeLibrary(modulePtr);
         }
 
-        public void SetLocale(string locale)
+        public void SetLocale()
         {
             //LC_ALL = 0
             setlocale(0, "");

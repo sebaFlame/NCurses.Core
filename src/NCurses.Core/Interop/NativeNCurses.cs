@@ -21,6 +21,9 @@ namespace NCurses.Core.Interop
     public delegate int NCURSES_WINDOW_CB(WindowBaseSafeHandle window, IntPtr args);
     public delegate int NCURSES_SCREEN_CB(IntPtr screen, IntPtr args);
 
+    internal delegate int RipoffDelegateInternal(IntPtr winPtr, int cols);
+    public delegate void RipoffDelegate(IWindow window, int columns);
+
     /// <summary>
     /// native curses methods.
     /// all methods can be found at http://invisible-island.net/ncurses/man/ncurses.3x.html#h3-Routine-Name-Index
@@ -99,16 +102,19 @@ namespace NCurses.Core.Interop
         {
             get
             {
-                if (hasUnicodeSupport.HasValue)
+                lock (SyncRoot)
                 {
+                    if (hasUnicodeSupport.HasValue)
+                    {
+                        return hasUnicodeSupport.Value;
+                    }
+
+                    NativeLoader.SetLocale();
+
+                    hasUnicodeSupport = NCursesWrapper._nc_unicode_locale();
+
                     return hasUnicodeSupport.Value;
                 }
-
-                NativeLoader.SetLocale("");
-
-                hasUnicodeSupport = NCursesWrapper._nc_unicode_locale();
-
-                return hasUnicodeSupport.Value;
             }
         }
 
@@ -320,8 +326,6 @@ namespace NCurses.Core.Interop
         #endregion
 
         #region ripoffline
-        private delegate int ripoffDelegate(NewWindowSafeHandle win, int cols);
-
         /// <summary>
         /// The ripoffline routine provides access to the same facility that  slk_init[see  curs_slk(3x)] uses to reduce the
         /// size of the screen.ripoffline must  be called  before
@@ -331,16 +335,27 @@ namespace NCurses.Core.Interop
         /// </summary>
         /// <param name="line">a positive or negative integer</param>
         /// <param name="init">a method to be called on initscr (a window pointer and number of columns gets passed)</param>
-        public static void ripoffline(int line, Func<WindowBaseSafeHandle, int, int> init)
+        public static void ripoffline(
+            int line,
+            RipoffDelegate assignWindowDelegate)
         {
-            IntPtr opts = IntPtr.Zero;
-            Func<NewWindowSafeHandle, int, int> initCallback = (NewWindowSafeHandle win, int cols) => init(win, cols);
+            Func<IntPtr, int, int> initCallback = (IntPtr winPtr, int cols) =>
+            {
+                NewWindowSafeHandle windowSafeHandle = new NewWindowSafeHandle(winPtr);
+                try
+                {
+                    assignWindowDelegate(WindowFactory.CreateWindow(windowSafeHandle), cols);
+                    return Constants.OK;
+                }
+                catch (Exception)
+                {
+                    return Constants.ERR;
+                }
+            };
 
-            //TODO: needs to be double wrapped as pointer?
             /* Needs to be assigned in a non-generic class */
-            IntPtr function = Marshal.GetFunctionPointerForDelegate(new ripoffDelegate(initCallback));
+            IntPtr function = Marshal.GetFunctionPointerForDelegate(new RipoffDelegateInternal(initCallback));
 
-            //TODO: register func for GC
             NCursesException.Verify(NCursesWrapper.ripoffline(line, function), "ripoffline");
         }
         #endregion

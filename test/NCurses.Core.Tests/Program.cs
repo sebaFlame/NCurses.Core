@@ -23,6 +23,8 @@ namespace NCurses.Core.Tests
 #endif
 
             DiscoverAndRunTests();
+
+            Console.WriteLine("All tests run successfully!");
         }
 
         private static void DiscoverAndRunTests()

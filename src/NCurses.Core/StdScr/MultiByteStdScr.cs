@@ -190,7 +190,7 @@ namespace NCurses.Core.StdScr
         {
             StdScr.in_wch(out TMultiByte ch);
             attrs = ch.Attributes;
-            pair = ch.Color;
+            pair = ch.ColorPair;
             return ch.Char;
         }
 
@@ -198,7 +198,7 @@ namespace NCurses.Core.StdScr
         {
             StdScr.mvin_wch(nline, ncol, out TMultiByte ch);
             attrs = ch.Attributes;
-            pair = ch.Color;
+            pair = ch.ColorPair;
             return ch.Char;
         }
 

@@ -12,8 +12,6 @@ using NCurses.Core.StdScr;
 
 namespace NCurses.Core
 {
-    public delegate void RipoffDelegate(IWindow window, int columns);
-
     //TODO: create shared lock (dictionary?)
     public static class NCurses
     {
@@ -59,11 +57,6 @@ namespace NCurses.Core
         /// </summary>
         public static void End()
         {
-            if (StdScr is null)
-            {
-                throw new InvalidOperationException("NCurses not initialized yet");
-            }
-
             NCursesWrapper.endwin();
 
             StdScr = null;
@@ -141,13 +134,7 @@ namespace NCurses.Core
                 throw new InvalidOperationException("RipOffLine is not supported on windows.");
             }
 
-            Func<WindowBaseSafeHandle, int, int> initCallback = (WindowBaseSafeHandle win, int cols) =>
-            {
-                assignWindowDelegate(CreateWindow(win), cols);
-                return Constants.OK;
-            };
-
-            NativeNCurses.ripoffline(direction, initCallback);
+            NativeNCurses.ripoffline(direction, assignWindowDelegate);
         }
 
         /// <summary>

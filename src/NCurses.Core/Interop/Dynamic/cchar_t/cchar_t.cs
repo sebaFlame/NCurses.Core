@@ -16,10 +16,11 @@ namespace NCurses.Core.Interop.Dynamic.cchar_t
 
         public chtype.chtype attr;
         public unsafe fixed byte chars[charGlobalLength];
+        //can be 32767 instead of 0 on linux (short.Max? == 16bit max color of (short)ColorPair)
         public int ext_color;
 
         public char Char => (char)this;
-        public short Color => (short)(this.ext_color > 0 ? this.ext_color : (short)Constants.PAIR_NUMBER(this.attr));
+        public short ColorPair => attr.ColorPair;
         public ulong Attributes => (ulong)(this.attr ^ (this.attr & Attrs.COLOR));
 
         public unsafe Span<byte> EncodedChar

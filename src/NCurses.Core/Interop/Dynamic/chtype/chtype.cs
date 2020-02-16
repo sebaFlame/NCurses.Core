@@ -14,7 +14,7 @@ namespace NCurses.Core.Interop.Dynamic.chtype
 
         public char Char => (char)(this.charWithAttr & Attrs.CHARTEXT);
         public ulong Attributes => (ulong)((this.charWithAttr ^ (this.charWithAttr & Attrs.COLOR)) & Attrs.ATTRIBUTES);
-        public short Color => (short)Constants.PAIR_NUMBER(this.charWithAttr);
+        public short ColorPair => (short)Constants.PAIR_NUMBER(this.charWithAttr);
 
         public byte EncodedChar => (byte)(this.charWithAttr & Attrs.CHARTEXT);
 

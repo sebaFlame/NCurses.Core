@@ -20,11 +20,6 @@
   <PropertyGroup>
     <VisualCheck Condition="'$(VisualCheck)' == ''">false</VisualCheck>
   </PropertyGroup>
-
-  <!-- Tests can not be run in batch on any other OS than Windows -->
-  <PropertyGroup Condition="'$(OS)' != 'Windows_NT'">
-    <VisualCheck>true</VisualCheck>
-  </PropertyGroup>
   
   <!-- import only when consumed -->
   <ItemGroup Condition="'$(OS)' == 'Windows_NT'">
@@ -38,19 +33,19 @@
     
     <Compile Remove="Program.cs" />
   </ItemGroup>
-  
+
   <!-- 
-    Under Linux you have to test every test class 1 by 1 using Compile Remove/Include and the included Program.cs  
-    It crashes "randomly" when running all tests through XUnit
+    Under Linux you have to test every test class 1 by 1 using Compile Remove/Include and the included Program.cs
+    So you can attach a debugger
   -->
   <ItemGroup Condition="'$(VisualCheck)' == 'true'">
     <PackageReference Include="xunit.runner.utility" Version="2.4.0" />
 
     <Compile Remove="MultiByte\*" />
     <Compile Remove="SingleByte\*" />
-    <Compile Remove="RipOffTest.cs" />
+    <Compile Remove="RipOffTest.cs" /> 
+    <Compile Remove="SimpleInitTest.cs" />
 
-    <!-- Include any test you want to test here -->
-    <Compile Include="MultiByte\*WriteTest.cs" />
+    <Compile Include="MultiByte\*WriteTest.cs" /> 
   </ItemGroup>
 </Project>

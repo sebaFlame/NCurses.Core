@@ -8,5 +8,11 @@ namespace NCurses.Core.Interop.SafeHandles
     {
         public NewWindowSafeHandle()
             : base(true) { }
+
+        internal NewWindowSafeHandle(IntPtr windowPtr)
+            : base(true) 
+        {
+            this.SetHandle(windowPtr);
+        }
     }
 }

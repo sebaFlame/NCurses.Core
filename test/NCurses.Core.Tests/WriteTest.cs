@@ -60,7 +60,7 @@ namespace NCurses.Core.Tests
             this.Window.ExtractChar(0, 0, out INCursesChar resultChar);
             Assert.Equal(this.TestChar, resultChar.Char);
             Assert.Equal(Attrs.BOLD, resultChar.Attributes);
-            Assert.Equal(4, resultChar.Color);
+            Assert.Equal(4, resultChar.ColorPair);
         }
 
         [Fact]
@@ -104,7 +104,7 @@ namespace NCurses.Core.Tests
             string resultString = resultNCursesString.ToString();
             Assert.Equal(this.TestString, resultString);
             Assert.Equal(Attrs.BOLD | Attrs.ITALIC, resultNCursesString[0].Attributes);
-            Assert.Equal(4, resultNCursesString[0].Color);
+            Assert.Equal(4, resultNCursesString[0].ColorPair);
         }
 
         [Fact]

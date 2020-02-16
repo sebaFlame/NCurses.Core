@@ -188,7 +188,7 @@ namespace NCurses.Core.StdScr
         {
             StdScr.inch(out TSingleByte ch);
             attrs = ch.Attributes;
-            pair = ch.Color;
+            pair = ch.ColorPair;
             return ch.Char;
         }
 
@@ -196,7 +196,7 @@ namespace NCurses.Core.StdScr
         {
             StdScr.mvinch(nline, ncol, out TSingleByte ch);
             attrs = ch.Attributes;
-            pair = ch.Color;
+            pair = ch.ColorPair;
             return ch.Char;
         }
 

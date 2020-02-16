@@ -13,7 +13,7 @@ namespace NCurses.Core.Interop.SafeHandles
         {
             try
             {
-                NativeNCurses.NCurses.endwin();
+                NCurses.End();
                 return true;
             }
             catch (NCursesException)
