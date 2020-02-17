@@ -1,0 +1,64 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <Description>An application programming interface (API) that allows the programmer to write text-based user interfaces in a terminal-independent manner.</Description>
+    <TargetFramework>netcoreapp3.1</TargetFramework>
+    <PackageId>runtime.win.NCurses</PackageId>
+    <PackageTags>ncurses;console</PackageTags>
+    <IncludeBuildOutput>false</IncludeBuildOutput>
+    <RuntimeIdentifiers>win7-x86;win7-x64;win8-x86;win8-x64;win81-x86;win81-x64;win10-x86;win10-x64</RuntimeIdentifiers>
+    <SuppressDependenciesWhenPacking>true</SuppressDependenciesWhenPacking>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\NCurses.Core.Tasks\NCurses.Core.Tasks.csproj" PrivateAssets="All" />
+  </ItemGroup>
+
+  <Import Project="..\NCurses.Core.Tasks\build\NCurses.Core.Tasks.props" />
+
+  <PropertyGroup>
+    <x86FileName>mingw32.zip</x86FileName>
+    <x64FileName>mingw64.zip</x64FileName>
+  </PropertyGroup>
+
+  <Target Name="DownloadAndExtractNativeLibraries" BeforeTargets="ResolveReferences" Condition="!Exists('x64\libncursesw6.dll')">
+    <MakeDir Directories="x64" />
+    <MakeDir Directories="x86" />
+
+    <WebDownload FileUri="http://invisible-island.net/datafiles/release/$(x64FileName)" FileName="x64/$(x64FileName)" />
+    <WebDownload FileUri="http://invisible-island.net/datafiles/release/$(x86FileName)" FileName="x86/$(x86FileName)" />
+
+    <Unzip ZipFileName="x64/$(x64FileName)" ExtractFile="bin/libncursesw6.dll" TargetDirectory="x64" />
+    <Unzip ZipFileName="x64/$(x64FileName)" ExtractFile="bin/libpanelw6.dll" TargetDirectory="x64" />
+    <Unzip ZipFileName="x86/$(x86FileName)" ExtractFile="bin/libncursesw6.dll" TargetDirectory="x86" />
+    <Unzip ZipFileName="x86/$(x86FileName)" ExtractFile="bin/libpanelw6.dll" TargetDirectory="x86" />
+  </Target>
+
+  <Target Name="GetLibraryVersion" BeforeTargets="GetAssemblyVersion">
+    <LibraryVersionExtractor Directory="$(MSBuildThisFileDirectory)x64">
+      <Output TaskParameter="NCursesVersion" PropertyName="NCursesVersion" />
+    </LibraryVersionExtractor>
+
+    <PropertyGroup>
+      <PackageVersion>$(NCursesVersion)</PackageVersion>
+    </PropertyGroup>
+  </Target>
+
+  <Target Name="IncludeDownloadedFiles" AfterTargets="DownloadAndExtractNativeLibraries">
+    <ItemGroup>
+      <Content Include="x86\*.dll">
+        <PackagePath>runtimes/win-x86/native/</PackagePath>
+        <Pack>true</Pack>
+      </Content>
+      <Content Include="x64\*.dll">
+        <PackagePath>runtimes/win-x64/native/</PackagePath>
+        <Pack>true</Pack>
+      </Content>
+    </ItemGroup>
+  </Target>
+
+  <ItemGroup>
+    <None Remove="**/*" />
+  </ItemGroup>
+  
+</Project>
