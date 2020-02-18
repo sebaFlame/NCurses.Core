@@ -64,6 +64,26 @@ namespace NCurses.Core.Tests
         }
 
         [Fact]
+        public void WriteCharWithAttributesTest()
+        {
+            Assert.True(this.StdScrState.SupportsColor);
+
+            this.Window.AttributesOn(Attrs.BOLD | Constants.COLOR_PAIR(4));
+
+            this.Window.Write(this.TestChar);
+
+            Assert.Equal(0, this.Window.CursorLine);
+            Assert.Equal(1, this.Window.CursorColumn);
+
+            this.Window.ExtractChar(0, 0, out INCursesChar resultChar);
+            Assert.Equal(this.TestChar, resultChar.Char);
+            Assert.Equal(Attrs.BOLD, resultChar.Attributes);
+            Assert.Equal(4, resultChar.ColorPair);
+
+            this.Window.AttributesOff(Attrs.BOLD | Constants.COLOR_PAIR(4));
+        }
+
+        [Fact]
         public void WriteStringTest()
         {
             this.Window.Write(this.TestString);
@@ -105,6 +125,28 @@ namespace NCurses.Core.Tests
             Assert.Equal(this.TestString, resultString);
             Assert.Equal(Attrs.BOLD | Attrs.ITALIC, resultNCursesString[0].Attributes);
             Assert.Equal(4, resultNCursesString[0].ColorPair);
+        }
+
+        [Fact]
+        public void WriteStringWithAttributesTest()
+        {
+            Assert.True(this.StdScrState.SupportsColor);
+
+            this.Window.AttributesOn(Attrs.BOLD | Attrs.ITALIC | Constants.COLOR_PAIR(4));
+
+            this.Window.Write(this.TestString);
+
+            Assert.Equal(0, this.Window.CursorLine);
+            Assert.Equal(this.TestString.Length, this.Window.CursorColumn); //does get advanced
+
+            this.Window.ExtractString(0, 0, out INCursesCharString resultNCursesString, this.TestString.Length);
+            Assert.Equal(this.TestString.Length, resultNCursesString.Length);
+            string resultString = resultNCursesString.ToString();
+            Assert.Equal(this.TestString, resultString);
+            Assert.Equal(Attrs.BOLD | Attrs.ITALIC, resultNCursesString[0].Attributes);
+            Assert.Equal(4, resultNCursesString[0].ColorPair);
+
+            this.Window.AttributesOff(Attrs.BOLD | Attrs.ITALIC | Constants.COLOR_PAIR(4));
         }
 
         [Fact]
