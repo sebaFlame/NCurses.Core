@@ -158,5 +158,9 @@ namespace NCurses.Core
         public IPad CreatePad(int nlines, int ncols) => CreatePadInternal(nlines, ncols);
 
         public IPanel CreatePanel(IWindow window) => CreatePanelInternal(window);
+
+        public bool HasWindows => WindowBase<TMultiByte, TWideChar, TSingleByte, TChar, TMouseEvent>.Windows.Count > 0;
+
+        public bool HasPanels => PanelInternal<TMultiByte, TWideChar, TSingleByte, TChar, TMouseEvent>.DictPanels.Count > 0;
     }
 }

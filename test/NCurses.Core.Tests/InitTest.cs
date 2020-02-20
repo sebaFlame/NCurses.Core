@@ -9,11 +9,11 @@ using NCurses.Core.Tests.Model;
 
 namespace NCurses.Core.Tests
 {
-    public class SimpleInitTest : IDisposable
+    public class InitTest : IDisposable
     {
         public IWindow Window { get; }
 
-        public SimpleInitTest()
+        public InitTest()
         {
             this.Window  = NCurses.Start();
         }

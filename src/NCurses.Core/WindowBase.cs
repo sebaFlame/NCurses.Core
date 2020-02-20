@@ -26,7 +26,7 @@ namespace NCurses.Core
         where TChar : unmanaged, ISingleByteChar, IEquatable<TChar>
         where TMouseEvent : unmanaged, IMEVENT
     {
-        internal static HashSet<WindowBase<TMultiByte, TWideChar, TSingleByte, TChar, TMouseEvent>> Windows;
+        internal static Dictionary<Guid, WeakReference<WindowBase<TMultiByte, TWideChar, TSingleByte, TChar, TMouseEvent>>> Windows;
 
         internal static NativeNCursesInternal<TMultiByte, TWideChar, TSingleByte, TChar, TMouseEvent> NCurses =>
             NativeCustomTypeWrapper<TMultiByte, TWideChar, TSingleByte, TChar, TMouseEvent>.NCursesInternal;
@@ -42,10 +42,11 @@ namespace NCurses.Core
         internal WindowBaseSafeHandle WindowBaseSafeHandle { get; private set; }
 
         private bool HasAddedRefToExistingSafeHandle = false;
+        private Guid WindowGuid { get; }
 
         static WindowBase()
         {
-            Windows = new HashSet<WindowBase<TMultiByte, TWideChar, TSingleByte, TChar, TMouseEvent>>();
+            Windows = new Dictionary<Guid, WeakReference<WindowBase<TMultiByte, TWideChar, TSingleByte, TChar, TMouseEvent>>>();
         }
 
         internal WindowBase(
@@ -58,6 +59,13 @@ namespace NCurses.Core
             {
                 this.Meta = true;
             }
+
+            if (windowBaseSafeHandle is StdScrSafeHandle)
+            {
+                return;
+            }
+
+            Windows.Add(this.WindowGuid = Guid.NewGuid(), new WeakReference<WindowBase<TMultiByte, TWideChar, TSingleByte, TChar, TMouseEvent>>(this));
         }
 
         internal WindowBase(
@@ -66,6 +74,13 @@ namespace NCurses.Core
             this.WindowBaseSafeHandle = existingWindow.WindowBaseSafeHandle;
 
             this.WindowBaseSafeHandle.DangerousAddRef(ref this.HasAddedRefToExistingSafeHandle);
+
+            if (existingWindow.WindowBaseSafeHandle is StdScrSafeHandle)
+            {
+                return;
+            }
+
+            Windows.Add(this.WindowGuid = Guid.NewGuid(), new WeakReference<WindowBase<TMultiByte, TWideChar, TSingleByte, TChar, TMouseEvent>>(this));
         }
 
         ~WindowBase()
@@ -775,9 +790,14 @@ namespace NCurses.Core
         #region IDisposable
         public virtual void Dispose()
         {
-            if (Windows.Contains(this))
+            if (this.WindowBaseSafeHandle is null)
             {
-                Windows.Remove(this);
+                return;
+            }
+
+            if (Windows.ContainsKey(this.WindowGuid))
+            {
+                Windows.Remove(this.WindowGuid);
             }
 
             if (this.HasAddedRefToExistingSafeHandle)

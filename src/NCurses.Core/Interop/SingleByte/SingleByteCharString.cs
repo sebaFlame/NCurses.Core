@@ -175,29 +175,33 @@ namespace NCurses.Core.Interop.SingleByte
                 int bytesUsed = 0, charsUsed = 0;
                 bool completed = false;
 
-                Encoder encoder = Encoding.ASCII.GetEncoder();
-                int byteCount = encoder.GetByteCount(originalChars, charArray.Length, false);
-
-                byte* bytePtr = stackalloc byte[byteCount];
-
-                encoder.Convert(
-                    originalChars, 
-                    charArray.Length,
-                    bytePtr,
-                    byteCount,
-                    true,
-                    out charsUsed, 
-                    out bytesUsed, 
-                    out completed);
-
-                if (!completed)
+                lock (NativeNCurses.SyncRoot)
                 {
-                    throw new InvalidOperationException("Could not complete encoding string");
-                }
+                    Encoder encoder = NativeNCurses.SingleByteEncoder;
+                    encoder.Reset();
 
-                for (int i = 0; i < byteCount; i++)
-                {
-                    charString[i] = CreateSmallChar((sbyte)bytePtr[i], attrs, colorPair);
+                    int byteCount = encoder.GetByteCount(originalChars, charArray.Length, false);
+                    byte* bytePtr = stackalloc byte[byteCount];
+
+                    encoder.Convert(
+                        originalChars,
+                        charArray.Length,
+                        bytePtr,
+                        byteCount,
+                        true,
+                        out charsUsed,
+                        out bytesUsed,
+                        out completed);
+
+                    if (!completed)
+                    {
+                        throw new InvalidOperationException("Could not complete encoding string");
+                    }
+
+                    for (int i = 0; i < byteCount; i++)
+                    {
+                        charString[i] = CreateSmallChar((sbyte)bytePtr[i], attrs, colorPair);
+                    }
                 }
             }
         }

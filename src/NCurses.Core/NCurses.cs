@@ -57,6 +57,21 @@ namespace NCurses.Core
         /// </summary>
         public static void End()
         {
+            if (StdScr is null)
+            {
+                return;
+            }
+
+            if (WindowFactory.HasPanels)
+            {
+                throw new NotSupportedException("Dispose of all panels before calling End()");
+            }
+
+            if (WindowFactory.HasWindows)
+            {
+                throw new NotSupportedException("Dispose of all windows before calling End()");
+            }
+
             NCursesWrapper.endwin();
 
             StdScr = null;

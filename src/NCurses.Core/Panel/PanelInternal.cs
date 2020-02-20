@@ -57,7 +57,7 @@ namespace NCurses.Core.Panel
 
         public bool Hidden => NativePanel.panel_hidden(this.PanelBaseSafeHandle);
 
-        internal static Dictionary<PanelBaseSafeHandle, PanelInternal<TMultiByte, TWideChar, TSingleByte, TChar, TMouseEvent>> DictPanels;
+        internal static Dictionary<PanelBaseSafeHandle, WeakReference<PanelInternal<TMultiByte, TWideChar, TSingleByte, TChar, TMouseEvent>>> DictPanels;
 
         internal static NativeNCursesInternal<TMultiByte, TWideChar, TSingleByte, TChar, TMouseEvent> NCurses =>
             NativeCustomTypeWrapper<TMultiByte, TWideChar, TSingleByte, TChar, TMouseEvent>.NCursesInternal;
@@ -76,7 +76,7 @@ namespace NCurses.Core.Panel
 
         static PanelInternal()
         {
-            DictPanels = new Dictionary<PanelBaseSafeHandle, PanelInternal<TMultiByte, TWideChar, TSingleByte, TChar, TMouseEvent>>();
+            DictPanels = new Dictionary<PanelBaseSafeHandle, WeakReference<PanelInternal<TMultiByte, TWideChar, TSingleByte, TChar, TMouseEvent>>>();
         }
 
         /// <summary>
@@ -88,7 +88,8 @@ namespace NCurses.Core.Panel
             this.PanelBaseSafeHandle = NativePanel.new_panel(window.WindowBaseSafeHandle);
             this.wrappedWindow = window;
 
-            DictPanels.Add(this.PanelBaseSafeHandle, this);
+            //only new panels are added
+            DictPanels.Add(this.PanelBaseSafeHandle, new WeakReference<PanelInternal<TMultiByte, TWideChar, TSingleByte, TChar, TMouseEvent>>(this));
         }
 
         internal PanelInternal(PanelBaseSafeHandle panelBaseSafeHandle)
@@ -156,7 +157,8 @@ namespace NCurses.Core.Panel
         public PanelInternal<TMultiByte, TWideChar, TSingleByte, TChar, TMouseEvent> Above()
         {
             PanelBaseSafeHandle panelBaseSafeHandle = NativePanel.panel_above(this.PanelBaseSafeHandle);
-            if (DictPanels.TryGetValue(panelBaseSafeHandle, out PanelInternal<TMultiByte, TWideChar, TSingleByte, TChar, TMouseEvent> existingPanel))
+            if (DictPanels.TryGetValue(panelBaseSafeHandle, out WeakReference<PanelInternal<TMultiByte, TWideChar, TSingleByte, TChar, TMouseEvent>> weakRef)
+                && weakRef.TryGetTarget(out PanelInternal<TMultiByte, TWideChar, TSingleByte, TChar, TMouseEvent>  existingPanel))
             {
                 return new PanelInternal<TMultiByte, TWideChar, TSingleByte, TChar, TMouseEvent>(existingPanel);
             }
@@ -172,7 +174,8 @@ namespace NCurses.Core.Panel
         public PanelInternal<TMultiByte, TWideChar, TSingleByte, TChar, TMouseEvent> Below()
         {
             PanelBaseSafeHandle panelBaseSafeHandle = NativePanel.panel_below(this.PanelBaseSafeHandle);
-            if (DictPanels.TryGetValue(panelBaseSafeHandle, out PanelInternal<TMultiByte, TWideChar, TSingleByte, TChar, TMouseEvent> existingPanel))
+            if (DictPanels.TryGetValue(panelBaseSafeHandle, out WeakReference<PanelInternal<TMultiByte, TWideChar, TSingleByte, TChar, TMouseEvent>> weakRef)
+                && weakRef.TryGetTarget(out PanelInternal<TMultiByte, TWideChar, TSingleByte, TChar, TMouseEvent> existingPanel))
             {
                 return new PanelInternal<TMultiByte, TWideChar, TSingleByte, TChar, TMouseEvent>(existingPanel);
             }
@@ -254,7 +257,9 @@ namespace NCurses.Core.Panel
             {
                 this.PanelBaseSafeHandle?.Dispose();
             }
+
             this.PanelBaseSafeHandle = null;
+            this.wrappedWindow = null;
 
             GC.SuppressFinalize(this);
         }

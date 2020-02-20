@@ -8,6 +8,9 @@ namespace NCurses.Core
 {
     internal interface IWindowFactory
     {
+        bool HasWindows { get; }
+        bool HasPanels { get; }
+
         IWindow CreateStdScr(StdScrSafeHandle stdScrSafeHandle);
         IWindow CreateStdScr(IWindow existingStdScr);
 

@@ -95,31 +95,35 @@ namespace NCurses.Core.Interop.WideChar
                 int bytesUsed = 0, charsUsed = 0, charPosition = 0, bytePosition = 0;
                 bool completed = false;
 
-                Encoder encoder = NativeNCurses.Encoding.GetEncoder();
-                int byteCount = encoder.GetByteCount(originalChars, charArray.Length, false);
-
-                byte* encodedBytes = stackalloc byte[byteCount];
-
-                for (int i = 0; i < charArray.Length; i++)
+                lock (NativeNCurses.SyncRoot)
                 {
-                    charPosition += charsUsed;
-                    bytePosition += bytesUsed;
-                    encoder.Convert(
-                        originalChars + charPosition,
-                        1,
-                        encodedBytes + bytePosition,
-                        byteCount - bytePosition,
-                        i == charArray.Length - 1 ? true : false,
-                        out charsUsed,
-                        out bytesUsed,
-                        out completed);
+                    Encoder encoder = NativeNCurses.MultiByteEncoder;
+                    encoder.Reset();
 
-                    if (!completed)
+                    int byteCount = encoder.GetByteCount(originalChars, charArray.Length, false);
+                    byte* encodedBytes = stackalloc byte[byteCount];
+
+                    for (int i = 0; i < charArray.Length; i++)
                     {
-                        throw new InvalidOperationException("Could not complete encoding string");
-                    }
+                        charPosition += charsUsed;
+                        bytePosition += bytesUsed;
+                        encoder.Convert(
+                            originalChars + charPosition,
+                            1,
+                            encodedBytes + bytePosition,
+                            byteCount - bytePosition,
+                            i == charArray.Length - 1 ? true : false,
+                            out charsUsed,
+                            out bytesUsed,
+                            out completed);
 
-                    charString[i] = WideCharFactoryInternal<TWideChar>.CreateCharFromSpan(new Span<byte>(encodedBytes + bytePosition, bytesUsed));
+                        if (!completed)
+                        {
+                            throw new InvalidOperationException("Could not complete encoding string");
+                        }
+
+                        charString[i] = WideCharFactoryInternal<TWideChar>.CreateCharFromSpan(new Span<byte>(encodedBytes + bytePosition, bytesUsed));
+                    }
                 }
             }
         }
@@ -194,9 +198,15 @@ namespace NCurses.Core.Interop.WideChar
                 Span<byte> bSpan = this.ByteSpan.Slice(0, this.Length * Marshal.SizeOf<TWideChar>());
                 char* charArr = stackalloc char[this.Length];
 
-                fixed (byte* b = bSpan)
+                lock (NativeNCurses.SyncRoot)
                 {
-                    NativeNCurses.Encoding.GetChars(b, bSpan.Length, charArr, this.Length);
+                    Decoder decoder = NativeNCurses.MultiByteDecoder;
+                    decoder.Reset();
+
+                    fixed (byte* b = bSpan)
+                    {
+                        decoder.GetChars(b, bSpan.Length, charArr, this.Length, true);
+                    }
                 }
 
                 ReadOnlySpan<char> charSpan = new ReadOnlySpan<char>(charArr, this.Length);

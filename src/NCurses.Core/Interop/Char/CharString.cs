@@ -96,29 +96,33 @@ namespace NCurses.Core.Interop.Char
                 int bytesUsed = 0, charsUsed = 0;
                 bool completed = false;
 
-                Encoder encoder = Encoding.ASCII.GetEncoder();
-                int byteCount = encoder.GetByteCount(originalChars, charArray.Length, false);
-
-                byte* bytePtr = stackalloc byte[byteCount];
-
-                encoder.Convert(
-                    originalChars,
-                    charArray.Length,
-                    bytePtr,
-                    byteCount,
-                    true,
-                    out charsUsed,
-                    out bytesUsed,
-                    out completed);
-
-                if (!completed)
+                lock (NativeNCurses.SyncRoot)
                 {
-                    throw new InvalidOperationException("Could not complete encoding string");
-                }
+                    Encoder encoder = NativeNCurses.SingleByteEncoder;
+                    encoder.Reset();
 
-                for (int i = 0; i < byteCount; i++)
-                {
-                    charString[i] = CharFactoryInternal<TChar>.CreateCharFromByte(bytePtr[i]);
+                    int byteCount = encoder.GetByteCount(originalChars, charArray.Length, false);
+                    byte* bytePtr = stackalloc byte[byteCount];
+
+                    encoder.Convert(
+                        originalChars,
+                        charArray.Length,
+                        bytePtr,
+                        byteCount,
+                        true,
+                        out charsUsed,
+                        out bytesUsed,
+                        out completed);
+
+                    if (!completed)
+                    {
+                        throw new InvalidOperationException("Could not complete encoding string");
+                    }
+
+                    for (int i = 0; i < byteCount; i++)
+                    {
+                        charString[i] = CharFactoryInternal<TChar>.CreateCharFromByte(bytePtr[i]);
+                    }
                 }
             }
         }
@@ -194,9 +198,15 @@ namespace NCurses.Core.Interop.Char
                 Span<byte> bSpan = this.ByteSpan.Slice(0, this.Length * Marshal.SizeOf<TChar>());
                 char* charArr = stackalloc char[this.Length];
 
-                fixed (byte* b = bSpan)
+                lock (NativeNCurses.SyncRoot)
                 {
-                    Encoding.ASCII.GetChars(b, bSpan.Length, charArr, this.Length);
+                    Decoder decoder = NativeNCurses.SingleByteDecoder;
+                    decoder.Reset();
+
+                    fixed (byte* b = bSpan)
+                    {
+                        decoder.GetChars(b, bSpan.Length, charArr, this.Length, true);
+                    }
                 }
 
                 ReadOnlySpan<char> charSpan = new ReadOnlySpan<char>(charArr, this.Length);

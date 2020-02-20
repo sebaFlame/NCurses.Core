@@ -120,6 +120,13 @@ namespace NCurses.Core.Interop
 
         #region Platform specific properties
         internal static Encoding Encoding { get; }
+        internal static Encoder MultiByteEncoder { get; }
+        internal static Decoder MultiByteDecoder { get; }
+
+        internal static Encoding SingleByteEncoding { get; }
+        internal static Encoder SingleByteEncoder { get; }
+        internal static Decoder SingleByteDecoder { get; }
+
         internal static INativeLoader NativeLoader { get; }
         internal static INCursesWrapper NCursesWrapper { get; }
         internal static ICustomTypeWrapper NCursesCustomTypeWrapper { get; }
@@ -140,6 +147,13 @@ namespace NCurses.Core.Interop
                 Encoding = Encoding.UTF32;
                 NativeLoader = new LinuxLoader();
             }
+
+            MultiByteDecoder = Encoding.GetDecoder();
+            MultiByteEncoder = Encoding.GetEncoder();
+
+            SingleByteEncoding = Encoding.ASCII;
+            SingleByteDecoder = SingleByteEncoding.GetDecoder();
+            SingleByteEncoder = SingleByteEncoding.GetEncoder();
 
             NCursesWrapper = (INCursesWrapper)Activator.CreateInstance(DynamicTypeBuilder.CreateDefaultWrapper<INCursesWrapper>(Constants.DLLNAME));
 

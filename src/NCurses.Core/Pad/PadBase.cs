@@ -23,16 +23,18 @@ namespace NCurses.Core.Pad
         public override INCursesChar BackGround { get => this.WrappedWindow.BackGround; set => this.WrappedWindow.BackGround = value; }
         public override INCursesChar InsertBackGround { get => this.WrappedWindow.InsertBackGround; set => this.WrappedWindow.InsertBackGround = value; }
 
-        protected WindowInternal<TMultiByte, TWideChar, TSingleByte, TChar, TMouseEvent> WrappedWindow { get; }
+        protected WindowInternal<TMultiByte, TWideChar, TSingleByte, TChar, TMouseEvent> WrappedWindow { get; private set; }
 
         private HashSet<PadBase<TMultiByte, TWideChar, TSingleByte, TChar, TMouseEvent>> SubPads
             = new HashSet<PadBase<TMultiByte, TWideChar, TSingleByte, TChar, TMouseEvent>>();
         private PadBase<TMultiByte, TWideChar, TSingleByte, TChar, TMouseEvent> ParentPad;
+        private bool CanDisposeWindow;
 
         internal PadBase(WindowBaseSafeHandle windowBaseSafeHandle)
             : base(windowBaseSafeHandle)
         {
             this.WrappedWindow = this.CreateWindow(this);
+            this.CanDisposeWindow = true;
         }
 
         internal PadBase(WindowInternal<TMultiByte, TWideChar, TSingleByte, TChar, TMouseEvent> window)
@@ -442,7 +444,14 @@ namespace NCurses.Core.Pad
                 throw new InvalidOperationException("Subwindows need to be disposed first");
             }
 
+            if (this.CanDisposeWindow)
+            {
+                this.WrappedWindow.Dispose();
+            }
+
             base.Dispose();
+
+            this.WrappedWindow = null;
         }
     }
 }
