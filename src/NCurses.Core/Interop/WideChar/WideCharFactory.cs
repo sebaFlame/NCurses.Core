@@ -49,25 +49,25 @@ namespace NCurses.Core.Interop.WideChar
         public ICharString GetNativeString(string str)
             => Factory.GetNativeString(str);
 
-        public ICharString GetNativeString(Span<char> str)
+        public ICharString GetNativeString(ReadOnlySpan<char> str)
             => Factory.GetNativeString(str);
 
         public unsafe ICharString GetNativeString(byte* buffer, int length, string str)
             => Factory.GetNativeString(buffer, length, str);
 
-        public unsafe ICharString GetNativeString(byte* buffer, int length, Span<char> str)
+        public unsafe ICharString GetNativeString(byte* buffer, int length, ReadOnlySpan<char> str)
             => Factory.GetNativeString(buffer, length, str);
 
         public ICharString GetNativeString(byte[] buffer, int bufferLength, string str)
             => Factory.GetNativeString(buffer, bufferLength, str);
 
-        public ICharString GetNativeString(byte[] buffer, int bufferLength, Span<char> str)
+        public ICharString GetNativeString(byte[] buffer, int bufferLength, ReadOnlySpan<char> str)
             => Factory.GetNativeString(buffer, bufferLength, str);
 
         public int GetByteCount(string str)
             => Factory.GetByteCount(str);
 
-        public int GetByteCount(Span<char> str)
+        public int GetByteCount(ReadOnlySpan<char> str)
             => Factory.GetByteCount(str);
 
         public int GetByteCount(int length)
@@ -137,13 +137,13 @@ namespace NCurses.Core.Interop.WideChar
         public unsafe WideCharString<TWideChar> GetNativeStringInternal(byte* buffer, int length, string str)
             => new WideCharString<TWideChar>(buffer, length, str);
 
-        public unsafe WideCharString<TWideChar> GetNativeStringInternal(byte* buffer, int length, Span<char> str)
+        public unsafe WideCharString<TWideChar> GetNativeStringInternal(byte* buffer, int length, ReadOnlySpan<char> str)
             => new WideCharString<TWideChar>(buffer, length, str);
 
         public WideCharString<TWideChar> GetNativeStringInternal(byte[] buffer, int bufferLength, string str)
             => new WideCharString<TWideChar>(buffer, bufferLength, str);
 
-        public WideCharString<TWideChar> GetNativeStringInternal(byte[] buffer, int bufferLength, Span<char> str)
+        public WideCharString<TWideChar> GetNativeStringInternal(byte[] buffer, int bufferLength, ReadOnlySpan<char> str)
             => new WideCharString<TWideChar>(buffer, bufferLength, str);
 
         public WideCharString<TWideChar> CreateNativeString(ref TWideChar strRef)
@@ -152,7 +152,7 @@ namespace NCurses.Core.Interop.WideChar
         public int GetByteCount(string str, bool addNullTerminator = true) =>
             (str.Length * Marshal.SizeOf<TWideChar>()) + (addNullTerminator ? Marshal.SizeOf<TWideChar>() : 0);
 
-        public int GetByteCount(Span<char> str, bool addNullTerminator = true) =>
+        public int GetByteCount(ReadOnlySpan<char> str, bool addNullTerminator = true) =>
             (str.Length * Marshal.SizeOf<TWideChar>()) + (addNullTerminator ? Marshal.SizeOf<TWideChar>() : 0);
 
         public int GetByteCount(int length, bool addNullTerminator = true) =>

@@ -145,7 +145,7 @@ namespace NCurses.Core.StdScr
             return MultiByteCharFactoryInternal<TMultiByte>.Instance.GetNativeStringInternal(buffer, buffer.Length, str);
         }
 
-        public override INCursesCharString CreateString(Span<char> str)
+        public override INCursesCharString CreateString(ReadOnlySpan<char> str)
         {
             byte[] buffer = new byte[MultiByteCharFactoryInternal<TMultiByte>.Instance.GetByteCount(str)];
             return MultiByteCharFactoryInternal<TMultiByte>.Instance.GetNativeStringInternal(buffer, buffer.Length, str);
@@ -157,7 +157,7 @@ namespace NCurses.Core.StdScr
             return MultiByteCharFactoryInternal<TMultiByte>.Instance.GetNativeStringInternal(buffer, buffer.Length, str, attrs);
         }
 
-        public override INCursesCharString CreateString(Span<char> str, ulong attrs)
+        public override INCursesCharString CreateString(ReadOnlySpan<char> str, ulong attrs)
         {
             byte[] buffer = new byte[MultiByteCharFactoryInternal<TMultiByte>.Instance.GetByteCount(str)];
             return MultiByteCharFactoryInternal<TMultiByte>.Instance.GetNativeStringInternal(buffer, buffer.Length, str, attrs);
@@ -169,7 +169,7 @@ namespace NCurses.Core.StdScr
             return MultiByteCharFactoryInternal<TMultiByte>.Instance.GetNativeStringInternal(buffer, buffer.Length, str, attrs, pair);
         }
 
-        public override INCursesCharString CreateString(Span<char> str, ulong attrs, short pair)
+        public override INCursesCharString CreateString(ReadOnlySpan<char> str, ulong attrs, short pair)
         {
             byte[] buffer = new byte[MultiByteCharFactoryInternal<TMultiByte>.Instance.GetByteCount(str)];
             return MultiByteCharFactoryInternal<TMultiByte>.Instance.GetNativeStringInternal(buffer, buffer.Length, str, attrs, pair);
@@ -354,7 +354,7 @@ namespace NCurses.Core.StdScr
             StdScr.ins_nwstr(in wChStr, wChStr.Length);
         }
 
-        public override void Insert(Span<char> str)
+        public override void Insert(ReadOnlySpan<char> str)
         {
             int bufferLength = WideCharFactoryInternal<TWideChar>.Instance.GetByteCount(str);
             byte[] buffer = NativeNCurses.GetBuffer(bufferLength);
@@ -370,7 +370,7 @@ namespace NCurses.Core.StdScr
             StdScr.mvins_nwstr(nline, ncol, in wChStr, wChStr.Length);
         }
 
-        public override void Insert(int nline, int ncol, Span<char> str)
+        public override void Insert(int nline, int ncol, ReadOnlySpan<char> str)
         {
             int bufferLength = WideCharFactoryInternal<TWideChar>.Instance.GetByteCount(str);
             byte[] buffer = NativeNCurses.GetBuffer(bufferLength);
@@ -391,7 +391,7 @@ namespace NCurses.Core.StdScr
             }
         }
 
-        public override void Insert(Span<char> str, ulong attrs, short pair)
+        public override void Insert(ReadOnlySpan<char> str, ulong attrs, short pair)
         {
             int bufferLength = MultiByteCharFactoryInternal<TMultiByte>.Instance.GetByteCount(str);
             byte[] buffer = NativeNCurses.GetBuffer(bufferLength);
@@ -486,7 +486,7 @@ namespace NCurses.Core.StdScr
             StdScr.addnwstr(in wChStr, wChStr.Length);
         }
 
-        public override void Write(Span<char> str)
+        public override void Write(ReadOnlySpan<char> str)
         {
             int bufferLength = WideCharFactoryInternal<TWideChar>.Instance.GetByteCount(str);
             byte[] buffer = NativeNCurses.GetBuffer(bufferLength);
@@ -502,7 +502,7 @@ namespace NCurses.Core.StdScr
             StdScr.add_wchnstr(in wChStr, wChStr.Length);
         }
 
-        public override void Write(Span<char> str, ulong attrs, short pair)
+        public override void Write(ReadOnlySpan<char> str, ulong attrs, short pair)
         {
             int bufferLength = MultiByteCharFactoryInternal<TMultiByte>.Instance.GetByteCount(str);
             byte[] buffer = NativeNCurses.GetBuffer(bufferLength);
@@ -518,7 +518,7 @@ namespace NCurses.Core.StdScr
             StdScr.mvaddnwstr(nline, ncol, in wChStr, wChStr.Length);
         }
 
-        public override void Write(int nline, int ncol, Span<char> str)
+        public override void Write(int nline, int ncol, ReadOnlySpan<char> str)
         {
             int bufferLength = WideCharFactoryInternal<TWideChar>.Instance.GetByteCount(str);
             byte[] buffer = NativeNCurses.GetBuffer(bufferLength);
@@ -534,7 +534,7 @@ namespace NCurses.Core.StdScr
             StdScr.mvadd_wchnstr(nline, ncol, in wChStr, wChStr.Length);
         }
 
-        public override void Write(int nline, int ncol, Span<char> str, ulong attrs, short pair)
+        public override void Write(int nline, int ncol, ReadOnlySpan<char> str, ulong attrs, short pair)
         {
             int bufferLength = MultiByteCharFactoryInternal<TMultiByte>.Instance.GetByteCount(str);
             byte[] buffer = NativeNCurses.GetBuffer(bufferLength);

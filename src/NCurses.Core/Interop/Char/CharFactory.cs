@@ -46,25 +46,25 @@ namespace NCurses.Core.Interop.Char
         public ICharString GetNativeString(string str)
             => Factory.GetNativeString(str);
 
-        public ICharString GetNativeString(Span<char> str)
+        public ICharString GetNativeString(ReadOnlySpan<char> str)
             => Factory.GetNativeString(str);
 
         public unsafe ICharString GetNativeString(byte* buffer, int length, string str)
             => Factory.GetNativeString(buffer, length, str);
 
-        public unsafe ICharString GetNativeString(byte* buffer, int length, Span<char> str)
+        public unsafe ICharString GetNativeString(byte* buffer, int length, ReadOnlySpan<char> str)
             => Factory.GetNativeString(buffer, length, str);
 
         public ICharString GetNativeString(byte[] buffer, int bufferLength, string str)
             => Factory.GetNativeString(buffer, bufferLength, str);
 
-        public ICharString GetNativeString(byte[] buffer, int bufferLength, Span<char> str)
+        public ICharString GetNativeString(byte[] buffer, int bufferLength, ReadOnlySpan<char> str)
             => Factory.GetNativeString(buffer, bufferLength, str);
 
         public int GetByteCount(string str)
             => Factory.GetByteCount(str);
 
-        public int GetByteCount(Span<char> str)
+        public int GetByteCount(ReadOnlySpan<char> str)
             => Factory.GetByteCount(str);
 
         public int GetByteCount(int length)
@@ -115,13 +115,13 @@ namespace NCurses.Core.Interop.Char
         public unsafe CharString<TChar> GetNativeStringInternal(byte* buffer, int length, string str)
             => new CharString<TChar>(buffer, length, str);
 
-        public unsafe CharString<TChar> GetNativeStringInternal(byte* buffer, int length, Span<char> str)
+        public unsafe CharString<TChar> GetNativeStringInternal(byte* buffer, int length, ReadOnlySpan<char> str)
             => new CharString<TChar>(buffer, length, str);
 
         public CharString<TChar> GetNativeStringInternal(byte[] buffer, int bufferLength, string str)
             => new CharString<TChar>(buffer, bufferLength, str);
 
-        public CharString<TChar> GetNativeStringInternal(byte[] buffer, int bufferLength, Span<char> str)
+        public CharString<TChar> GetNativeStringInternal(byte[] buffer, int bufferLength, ReadOnlySpan<char> str)
             => new CharString<TChar>(buffer, bufferLength, str);
 
         public CharString<TChar> CreateNativeString(ref TChar strRef)
@@ -130,7 +130,7 @@ namespace NCurses.Core.Interop.Char
         public int GetByteCount(string str, bool addNullTerminator = true) =>
             (str.Length * Marshal.SizeOf<TChar>()) + (addNullTerminator ? Marshal.SizeOf<TChar>() : 0);
 
-        public int GetByteCount(Span<char> str, bool addNullTerminator = true) =>
+        public int GetByteCount(ReadOnlySpan<char> str, bool addNullTerminator = true) =>
             (str.Length * Marshal.SizeOf<TChar>()) + (addNullTerminator ? Marshal.SizeOf<TChar>() : 0);
 
         public int GetByteCount(int length, bool addNullTerminator = true) =>

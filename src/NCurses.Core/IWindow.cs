@@ -43,11 +43,11 @@ namespace NCurses.Core
         INCursesChar CreateChar(char ch, ulong attrs);
         INCursesChar CreateChar(char ch, ulong attrs, short pair);
         INCursesCharString CreateString(string str);
-        INCursesCharString CreateString(Span<char> str);
+        INCursesCharString CreateString(ReadOnlySpan<char> str);
         INCursesCharString CreateString(string str, ulong attrs);
-        INCursesCharString CreateString(Span<char> str, ulong attrs);
+        INCursesCharString CreateString(ReadOnlySpan<char> str, ulong attrs);
         INCursesCharString CreateString(string str, ulong attrs, short pair);
-        INCursesCharString CreateString(Span<char> str, ulong attrs, short pair);
+        INCursesCharString CreateString(ReadOnlySpan<char> str, ulong attrs, short pair);
 
         void CurrentAttributesAndColor(out ulong attrs, out short colorPair);
         void EnableAttributesAndColor(ulong attrs, short colorPair);
@@ -82,11 +82,11 @@ namespace NCurses.Core
         void Insert(int nline, int ncol, char ch);
         void Insert(int nline, int ncol, char ch, ulong attrs, short pair);
         void Insert(int nline, int ncol, string str);
-        void Insert(int nline, int ncol, Span<char> str);
+        void Insert(int nline, int ncol, ReadOnlySpan<char> str);
         void Insert(string str);
-        void Insert(Span<char> str);
+        void Insert(ReadOnlySpan<char> str);
         void Insert(string str, ulong attrs, short pair);
-        void Insert(Span<char> str, ulong attrs, short pair);
+        void Insert(ReadOnlySpan<char> str, ulong attrs, short pair);
         void MoveCursor(int lineNumber, int columnNumber);
         void NoOutRefresh();
         bool ReadKey(out char ch, out Key key);
@@ -110,13 +110,13 @@ namespace NCurses.Core
         void Write(int nline, int ncol, char ch);
         void Write(int nline, int ncol, char ch, ulong attrs, short pair);
         void Write(int nline, int ncol, string str);
-        void Write(int nline, int ncol, Span<char> str);
+        void Write(int nline, int ncol, ReadOnlySpan<char> str);
         void Write(int nline, int ncol, string str, ulong attrs, short pair);
-        void Write(int nline, int ncol, Span<char> str, ulong attrs, short pair);
+        void Write(int nline, int ncol, ReadOnlySpan<char> str, ulong attrs, short pair);
         void Write(string str);
-        void Write(Span<char> str);
+        void Write(ReadOnlySpan<char> str);
         void Write(string str, ulong attrs, short pair);
-        void Write(Span<char> str, ulong attrs, short pair);
+        void Write(ReadOnlySpan<char> str, ulong attrs, short pair);
         void Write(int nline, int ncol, in INCursesChar ch);
         void Write(int nline, int ncol, in INCursesCharString str);
         void Put(char ch);

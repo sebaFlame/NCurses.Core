@@ -47,7 +47,7 @@ namespace NCurses.Core.Interop.SingleByte
         public unsafe SingleByteCharString(
             byte* buffer,
             int length,
-            Span<char> str)
+            ReadOnlySpan<char> str)
         {
             this.BufferPointer = buffer;
             this.BufferLength = length;
@@ -77,7 +77,7 @@ namespace NCurses.Core.Interop.SingleByte
         public unsafe SingleByteCharString(
             byte[] buffer,
             int bufferLength,
-            Span<char> str)
+            ReadOnlySpan<char> str)
         {
             this.BufferArray = buffer;
             this.BufferPointer = (byte*)0;
@@ -109,7 +109,7 @@ namespace NCurses.Core.Interop.SingleByte
         public unsafe SingleByteCharString(
             byte* buffer,
             int bufferLength,
-            Span<char> str,
+            ReadOnlySpan<char> str,
             ulong attrs)
         {
             this.BufferPointer = buffer;
@@ -143,7 +143,7 @@ namespace NCurses.Core.Interop.SingleByte
         public unsafe SingleByteCharString(
             byte[] buffer,
             int bufferLength,
-            Span<char> str,
+            ReadOnlySpan<char> str,
             ulong attrs)
         {
             this.BufferArray = buffer;
@@ -179,7 +179,7 @@ namespace NCurses.Core.Interop.SingleByte
         public unsafe SingleByteCharString(
             byte* buffer,
             int bufferLength,
-            Span<char> str,
+            ReadOnlySpan<char> str,
             ulong attrs,
             short pair)
         {
@@ -217,7 +217,7 @@ namespace NCurses.Core.Interop.SingleByte
         public unsafe SingleByteCharString(
             byte[] buffer,
             int bufferLength,
-            Span<char> str,
+            ReadOnlySpan<char> str,
             ulong attrs,
             short pair)
         {

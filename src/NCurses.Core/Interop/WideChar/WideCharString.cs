@@ -43,7 +43,7 @@ namespace NCurses.Core.Interop.WideChar
         public unsafe WideCharString(
             byte* buffer,
             int bufferLength,
-            Span<char> str)
+            ReadOnlySpan<char> str)
         {
             this.BufferPointer = buffer;
             this.BufferLength = bufferLength;
@@ -69,7 +69,7 @@ namespace NCurses.Core.Interop.WideChar
         public unsafe WideCharString(
             byte[] buffer,
             int bufferLength,
-            Span<char> str)
+            ReadOnlySpan<char> str)
         {
             this.BufferArray = buffer;
             this.BufferPointer = (byte*)0;

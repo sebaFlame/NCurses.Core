@@ -157,7 +157,7 @@ namespace NCurses.Core.Pad
             this.WrappedWindow.Insert(str, attrs, pair);
         }
 
-        public override void Insert(Span<char> str, ulong attrs, short pair)
+        public override void Insert(ReadOnlySpan<char> str, ulong attrs, short pair)
         {
             this.WrappedWindow.Insert(str, attrs, pair);
         }
@@ -187,7 +187,7 @@ namespace NCurses.Core.Pad
             this.WrappedWindow.Write(str);
         }
 
-        public override void Write(Span<char> str)
+        public override void Write(ReadOnlySpan<char> str)
         {
             this.WrappedWindow.Write(str);
         }
@@ -197,7 +197,7 @@ namespace NCurses.Core.Pad
             this.WrappedWindow.Write(str, attrs, pair);
         }
 
-        public override void Write(Span<char> str, ulong attrs, short pair)
+        public override void Write(ReadOnlySpan<char> str, ulong attrs, short pair)
         {
             this.WrappedWindow.Write(str, attrs, pair);
         }
@@ -207,7 +207,7 @@ namespace NCurses.Core.Pad
             this.WrappedWindow.Write(nline, ncol, str);
         }
 
-        public override void Write(int nline, int ncol, Span<char> str)
+        public override void Write(int nline, int ncol, ReadOnlySpan<char> str)
         {
             this.WrappedWindow.Write(nline, ncol, str);
         }
@@ -217,7 +217,7 @@ namespace NCurses.Core.Pad
             this.WrappedWindow.Write(nline, ncol, str, attrs, pair);
         }
 
-        public override void Write(int nline, int ncol, Span<char> str, ulong attrs, short pair)
+        public override void Write(int nline, int ncol, ReadOnlySpan<char> str, ulong attrs, short pair)
         {
             this.WrappedWindow.Write(nline, ncol, str, attrs, pair);
         }
@@ -317,7 +317,7 @@ namespace NCurses.Core.Pad
             this.WrappedWindow.Insert(str);
         }
 
-        public override void Insert(Span<char> str)
+        public override void Insert(ReadOnlySpan<char> str)
         {
             this.WrappedWindow.Insert(str);
         }
@@ -327,7 +327,7 @@ namespace NCurses.Core.Pad
             this.WrappedWindow.Insert(nline, ncol, str);
         }
 
-        public override void Insert(int nline, int ncol, Span<char> str)
+        public override void Insert(int nline, int ncol, ReadOnlySpan<char> str)
         {
             this.WrappedWindow.Insert(nline, ncol, str);
         }
@@ -422,7 +422,7 @@ namespace NCurses.Core.Pad
             return this.WrappedWindow.CreateString(str);
         }
 
-        public override INCursesCharString CreateString(Span<char> str)
+        public override INCursesCharString CreateString(ReadOnlySpan<char> str)
         {
             return this.WrappedWindow.CreateString(str);
         }
@@ -432,7 +432,7 @@ namespace NCurses.Core.Pad
             return this.WrappedWindow.CreateString(str, attrs);
         }
 
-        public override INCursesCharString CreateString(Span<char> str, ulong attrs)
+        public override INCursesCharString CreateString(ReadOnlySpan<char> str, ulong attrs)
         {
             return this.WrappedWindow.CreateString(str, attrs);
         }
@@ -442,7 +442,7 @@ namespace NCurses.Core.Pad
             return this.WrappedWindow.CreateString(str, attrs, pair);
         }
 
-        public override INCursesCharString CreateString(Span<char> str, ulong attrs, short pair)
+        public override INCursesCharString CreateString(ReadOnlySpan<char> str, ulong attrs, short pair)
         {
             return this.WrappedWindow.CreateString(str, attrs, pair);
         }
