@@ -257,6 +257,7 @@ namespace NCurses.Core
         /// </summary>
         /// <param name="str">the string to write</param>
         public abstract void Write(string str);
+        public abstract void Write(Span<char> str);
 
         /// <summary>
         /// write string <paramref name="str"/> to the window. with defined attributes/color pair.
@@ -265,6 +266,7 @@ namespace NCurses.Core
         /// <param name="attrs">the attributes you want to add (eg <see cref="Attrs.BOLD"/>)</param>
         /// <param name="pair">the color pair you want to use on this character</param>
         public abstract void Write(string str, ulong attrs, short pair);
+        public abstract void Write(Span<char> str, ulong attrs, short pair);
 
         /// <summary>
         /// write string <paramref name="str"/> to the window on line <paramref name="nline"/> and column <paramref name="ncol"/>.
@@ -273,6 +275,7 @@ namespace NCurses.Core
         /// <param name="ncol">the column number to start writing</param>
         /// <param name="str">the string to add</param>
         public abstract void Write(int nline, int ncol, string str);
+        public abstract void Write(int nline, int ncol, Span<char> str);
 
         /// <summary>
         /// write string <paramref name="str"/> to the window on line <paramref name="nline"/> and column <paramref name="ncol"/>.
@@ -284,6 +287,7 @@ namespace NCurses.Core
         /// <param name="attrs">the attributes you want to add (eg <see cref="Attrs.BOLD"/>)</param>
         /// <param name="pair">the color pair you want to use on this character</param>
         public abstract void Write(int nline, int ncol, string str, ulong attrs, short pair);
+        public abstract void Write(int nline, int ncol, Span<char> str, ulong attrs, short pair);
 
         /// <summary>
         /// write character <paramref name="ch"/> to the window.
@@ -469,6 +473,7 @@ namespace NCurses.Core
         /// </summary>
         /// <param name="str">the string to insert</param>
         public abstract void Insert(string str);
+        public abstract void Insert(Span<char> str);
 
         /// <summary>
         /// insert a string on line <paramref name="nline"/> and column <paramref name="ncol"/>. all characaters on the right move 1 column. character might fall off at the end of the line.
@@ -477,8 +482,10 @@ namespace NCurses.Core
         /// <param name="ncol">the column number to start writing</param>
         /// <param name="str">the string to insert</param>
         public abstract void Insert(int nline, int ncol, string str);
+        public abstract void Insert(int nline, int ncol, Span<char> str);
 
         public abstract void Insert(string str, ulong attrs, short pair);
+        public abstract void Insert(Span<char> str, ulong attrs, short pair);
         #endregion
 
         #region extract output
@@ -631,6 +638,7 @@ namespace NCurses.Core
         /// <param name="str">The string to convert</param>
         /// <returns>The converted str</returns>
         public abstract INCursesCharString CreateString(string str);
+        public abstract INCursesCharString CreateString(Span<char> str);
 
         /// <summary>
         /// Get a native string representing <paramref name="str"/>
@@ -639,6 +647,7 @@ namespace NCurses.Core
         /// <param name="attrs">attributes applied to the character</param>
         /// <returns>The converted str</returns>
         public abstract INCursesCharString CreateString(string str, ulong attrs);
+        public abstract INCursesCharString CreateString(Span<char> str, ulong attrs);
 
         /// <summary>
         /// Get a native string representing <paramref name="str"/> with attributes/color applied
@@ -648,6 +657,7 @@ namespace NCurses.Core
         /// <param name="pair">pair number applied to the character</param>
         /// <returns>The converted cahracter</returns>
         public abstract INCursesCharString CreateString(string str, ulong attrs, short pair);
+        public abstract INCursesCharString CreateString(Span<char> str, ulong attrs, short pair);
         #endregion
 
         #region border

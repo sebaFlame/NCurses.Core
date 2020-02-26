@@ -41,6 +41,19 @@ namespace NCurses.Core.Interop.WideChar
         }
 
         public unsafe WideCharString(
+            byte* buffer,
+            int bufferLength,
+            Span<char> str)
+        {
+            this.BufferPointer = buffer;
+            this.BufferLength = bufferLength;
+            this.BufferArray = null;
+            this.Length = str.Length;
+
+            CreateCharString(new Span<byte>(buffer, bufferLength), str);
+        }
+
+        public unsafe WideCharString(
             byte[] buffer,
             int bufferLength,
             string str)
@@ -51,6 +64,19 @@ namespace NCurses.Core.Interop.WideChar
             this.Length = str.Length;
 
             CreateCharString(new Span<byte>(buffer), str.AsSpan());
+        }
+
+        public unsafe WideCharString(
+            byte[] buffer,
+            int bufferLength,
+            Span<char> str)
+        {
+            this.BufferArray = buffer;
+            this.BufferPointer = (byte*)0;
+            this.BufferLength = bufferLength;
+            this.Length = str.Length;
+
+            CreateCharString(new Span<byte>(buffer), str);
         }
 
         public unsafe WideCharString(

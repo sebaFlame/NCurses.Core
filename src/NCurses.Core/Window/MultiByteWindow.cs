@@ -173,13 +173,31 @@ namespace NCurses.Core.Window
             return MultiByteCharFactoryInternal<TMultiByte>.Instance.GetNativeStringInternal(buffer, buffer.Length, str);
         }
 
+        public override INCursesCharString CreateString(Span<char> str)
+        {
+            byte[] buffer = new byte[MultiByteCharFactoryInternal<TMultiByte>.Instance.GetByteCount(str)];
+            return MultiByteCharFactoryInternal<TMultiByte>.Instance.GetNativeStringInternal(buffer, buffer.Length, str);
+        }
+
         public override INCursesCharString CreateString(string str, ulong attrs)
         {
             byte[] buffer = new byte[MultiByteCharFactoryInternal<TMultiByte>.Instance.GetByteCount(str)];
             return MultiByteCharFactoryInternal<TMultiByte>.Instance.GetNativeStringInternal(buffer, buffer.Length, str, attrs);
         }
 
+        public override INCursesCharString CreateString(Span<char> str, ulong attrs)
+        {
+            byte[] buffer = new byte[MultiByteCharFactoryInternal<TMultiByte>.Instance.GetByteCount(str)];
+            return MultiByteCharFactoryInternal<TMultiByte>.Instance.GetNativeStringInternal(buffer, buffer.Length, str, attrs);
+        }
+
         public override INCursesCharString CreateString(string str, ulong attrs, short pair)
+        {
+            byte[] buffer = new byte[MultiByteCharFactoryInternal<TMultiByte>.Instance.GetByteCount(str)];
+            return MultiByteCharFactoryInternal<TMultiByte>.Instance.GetNativeStringInternal(buffer, buffer.Length, str, attrs, pair);
+        }
+
+        public override INCursesCharString CreateString(Span<char> str, ulong attrs, short pair)
         {
             byte[] buffer = new byte[MultiByteCharFactoryInternal<TMultiByte>.Instance.GetByteCount(str)];
             return MultiByteCharFactoryInternal<TMultiByte>.Instance.GetNativeStringInternal(buffer, buffer.Length, str, attrs, pair);
@@ -364,6 +382,14 @@ namespace NCurses.Core.Window
             Window.wins_nwstr(this.WindowBaseSafeHandle, in wChStr, wChStr.Length);
         }
 
+        public override void Insert(Span<char> str)
+        {
+            int bufferLength = WideCharFactoryInternal<TWideChar>.Instance.GetByteCount(str);
+            byte[] buffer = NativeNCurses.GetBuffer(bufferLength);
+            WideCharString<TWideChar> wChStr = WideCharFactoryInternal<TWideChar>.Instance.GetNativeStringInternal(buffer, bufferLength, str);
+            Window.wins_nwstr(this.WindowBaseSafeHandle, in wChStr, wChStr.Length);
+        }
+
         public override void Insert(int nline, int ncol, string str)
         {
             int bufferLength = WideCharFactoryInternal<TWideChar>.Instance.GetByteCount(str);
@@ -372,7 +398,28 @@ namespace NCurses.Core.Window
             Window.mvwins_nwstr(this.WindowBaseSafeHandle, nline, ncol, in wChStr, wChStr.Length);
         }
 
+        public override void Insert(int nline, int ncol, Span<char> str)
+        {
+            int bufferLength = WideCharFactoryInternal<TWideChar>.Instance.GetByteCount(str);
+            byte[] buffer = NativeNCurses.GetBuffer(bufferLength);
+            WideCharString<TWideChar> wChStr = WideCharFactoryInternal<TWideChar>.Instance.GetNativeStringInternal(buffer, bufferLength, str);
+            Window.mvwins_nwstr(this.WindowBaseSafeHandle, nline, ncol, in wChStr, wChStr.Length);
+        }
+
         public override void Insert(string str, ulong attrs, short pair)
+        {
+            int bufferLength = MultiByteCharFactoryInternal<TMultiByte>.Instance.GetByteCount(str);
+            byte[] buffer = NativeNCurses.GetBuffer(bufferLength);
+            MultiByteCharString<TMultiByte> mbStr = MultiByteCharFactoryInternal<TMultiByte>.Instance.GetNativeStringInternal(buffer, bufferLength, str, attrs, pair);
+
+            IEnumerable<IMultiByteNCursesChar> wchars = mbStr;
+            foreach (IMultiByteNCursesChar wch in wchars.Reverse())
+            {
+                Window.wins_wch(this.WindowBaseSafeHandle, VerifyChar(wch));
+            }
+        }
+
+        public override void Insert(Span<char> str, ulong attrs, short pair)
         {
             int bufferLength = MultiByteCharFactoryInternal<TMultiByte>.Instance.GetByteCount(str);
             byte[] buffer = NativeNCurses.GetBuffer(bufferLength);
@@ -467,7 +514,23 @@ namespace NCurses.Core.Window
             Window.waddnwstr(this.WindowBaseSafeHandle, in wChStr, wChStr.Length);
         }
 
+        public override void Write(Span<char> str)
+        {
+            int bufferLength = WideCharFactoryInternal<TWideChar>.Instance.GetByteCount(str);
+            byte[] buffer = NativeNCurses.GetBuffer(bufferLength);
+            WideCharString<TWideChar> wChStr = WideCharFactoryInternal<TWideChar>.Instance.GetNativeStringInternal(buffer, bufferLength, str);
+            Window.waddnwstr(this.WindowBaseSafeHandle, in wChStr, wChStr.Length);
+        }
+
         public override void Write(string str, ulong attrs, short pair)
+        {
+            int bufferLength = MultiByteCharFactoryInternal<TMultiByte>.Instance.GetByteCount(str);
+            byte[] buffer = NativeNCurses.GetBuffer(bufferLength);
+            MultiByteCharString<TMultiByte> wChStr = MultiByteCharFactoryInternal<TMultiByte>.Instance.GetNativeStringInternal(buffer, bufferLength, str, attrs, pair);
+            Window.wadd_wchnstr(this.WindowBaseSafeHandle, in wChStr, wChStr.Length);
+        }
+
+        public override void Write(Span<char> str, ulong attrs, short pair)
         {
             int bufferLength = MultiByteCharFactoryInternal<TMultiByte>.Instance.GetByteCount(str);
             byte[] buffer = NativeNCurses.GetBuffer(bufferLength);
@@ -483,7 +546,23 @@ namespace NCurses.Core.Window
             Window.mvwaddnwstr(this.WindowBaseSafeHandle, nline, ncol, in wChStr, wChStr.Length);
         }
 
+        public override void Write(int nline, int ncol, Span<char> str)
+        {
+            int bufferLength = WideCharFactoryInternal<TWideChar>.Instance.GetByteCount(str);
+            byte[] buffer = NativeNCurses.GetBuffer(bufferLength);
+            WideCharString<TWideChar> wChStr = WideCharFactoryInternal<TWideChar>.Instance.GetNativeStringInternal(buffer, bufferLength, str);
+            Window.mvwaddnwstr(this.WindowBaseSafeHandle, nline, ncol, in wChStr, wChStr.Length);
+        }
+
         public override void Write(int nline, int ncol, string str, ulong attrs, short pair)
+        {
+            int bufferLength = MultiByteCharFactoryInternal<TMultiByte>.Instance.GetByteCount(str);
+            byte[] buffer = NativeNCurses.GetBuffer(bufferLength);
+            MultiByteCharString<TMultiByte> wChStr = MultiByteCharFactoryInternal<TMultiByte>.Instance.GetNativeStringInternal(buffer, bufferLength, str, attrs, pair);
+            Window.mvwadd_wchnstr(this.WindowBaseSafeHandle, nline, ncol, in wChStr, wChStr.Length);
+        }
+
+        public override void Write(int nline, int ncol, Span<char> str, ulong attrs, short pair)
         {
             int bufferLength = MultiByteCharFactoryInternal<TMultiByte>.Instance.GetByteCount(str);
             byte[] buffer = NativeNCurses.GetBuffer(bufferLength);

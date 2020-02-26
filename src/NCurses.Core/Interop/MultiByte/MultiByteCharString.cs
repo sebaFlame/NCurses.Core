@@ -43,6 +43,19 @@ namespace NCurses.Core.Interop.MultiByte
         }
 
         public unsafe MultiByteCharString(
+            byte* buffer,
+            int bufferLength,
+            Span<char> str)
+        {
+            this.BufferPointer = buffer;
+            this.BufferLength = bufferLength;
+            this.BufferArray = null;
+            this.Length = str.Length;
+
+            CreateCharString(new Span<byte>(buffer, bufferLength), str);
+        }
+
+        public unsafe MultiByteCharString(
             byte[] buffer,
             int bufferLength,
             string str)
@@ -53,6 +66,19 @@ namespace NCurses.Core.Interop.MultiByte
             this.Length = str.Length;
 
             CreateCharString(new Span<byte>(buffer), str.AsSpan());
+        }
+
+        public unsafe MultiByteCharString(
+            byte[] buffer,
+            int bufferLength,
+            Span<char> str)
+        {
+            this.BufferArray = buffer;
+            this.BufferPointer = (byte*)0;
+            this.BufferLength = bufferLength;
+            this.Length = str.Length;
+
+            CreateCharString(new Span<byte>(buffer), str);
         }
 
         public unsafe MultiByteCharString(
@@ -70,6 +96,20 @@ namespace NCurses.Core.Interop.MultiByte
         }
 
         public unsafe MultiByteCharString(
+            byte* buffer,
+            int bufferLength,
+            Span<char> str,
+            ulong attrs)
+        {
+            this.BufferPointer = buffer;
+            this.BufferLength = bufferLength;
+            this.BufferArray = null;
+            this.Length = str.Length;
+
+            CreateCharString(new Span<byte>(buffer, bufferLength), str, attrs);
+        }
+
+        public unsafe MultiByteCharString(
             byte[] buffer,
             int bufferLength,
             string str,
@@ -81,6 +121,20 @@ namespace NCurses.Core.Interop.MultiByte
             this.Length = str.Length;
 
             CreateCharString(new Span<byte>(buffer), str.AsSpan(), attrs);
+        }
+
+        public unsafe MultiByteCharString(
+            byte[] buffer,
+            int bufferLength,
+            Span<char> str,
+            ulong attrs)
+        {
+            this.BufferArray = buffer;
+            this.BufferPointer = (byte*)0;
+            this.BufferLength = bufferLength;
+            this.Length = str.Length;
+
+            CreateCharString(new Span<byte>(buffer), str, attrs);
         }
 
         public unsafe MultiByteCharString(
@@ -99,6 +153,21 @@ namespace NCurses.Core.Interop.MultiByte
         }
 
         public unsafe MultiByteCharString(
+            byte* buffer,
+            int length,
+            Span<char> str,
+            ulong attrs,
+            short pair)
+        {
+            this.BufferPointer = buffer;
+            this.BufferLength = length;
+            this.BufferArray = null;
+            this.Length = str.Length;
+
+            CreateCharString(new Span<byte>(buffer, length), str, attrs, pair);
+        }
+
+        public unsafe MultiByteCharString(
             byte[] buffer,
             int bufferLength,
             string str,
@@ -111,6 +180,21 @@ namespace NCurses.Core.Interop.MultiByte
             this.Length = str.Length;
 
             CreateCharString(new Span<byte>(buffer), str.AsSpan(), attrs, pair);
+        }
+
+        public unsafe MultiByteCharString(
+            byte[] buffer,
+            int bufferLength,
+            Span<char> str,
+            ulong attrs,
+            short pair)
+        {
+            this.BufferArray = buffer;
+            this.BufferPointer = (byte*)0;
+            this.BufferLength = bufferLength;
+            this.Length = str.Length;
+
+            CreateCharString(new Span<byte>(buffer), str, attrs, pair);
         }
 
         public unsafe MultiByteCharString(
