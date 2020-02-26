@@ -151,6 +151,16 @@ namespace NCurses.Core.Panel
             NativePanel.move_panel(this.PanelBaseSafeHandle, starty, startx);
         }
 
+        public void Replace(IWindow window)
+        {
+            if(!(window is WindowBase<TMultiByte, TWideChar, TSingleByte, TChar, TMouseEvent> wBase))
+            {
+                throw new NotSupportedException("Unsupported window type");
+            }
+
+            NativePanel.replace_panel(this.PanelBaseSafeHandle, wBase.WindowBaseSafeHandle);
+        }
+
         /// <summary>
         /// Get the panel above the current panel
         /// </summary>

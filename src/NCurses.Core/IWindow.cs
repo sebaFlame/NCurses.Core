@@ -36,6 +36,9 @@ namespace NCurses.Core
         IWindow ToSingleByteWindow();
         IWindow ToMultiByteWindow();
 
+        void ResizeWindow(int nlines, int ncols);
+        void MoveWindow(int y, int x);
+
         INCursesChar CreateChar(char ch);
         INCursesChar CreateChar(char ch, ulong attrs);
         INCursesChar CreateChar(char ch, ulong attrs, short pair);
@@ -108,5 +111,7 @@ namespace NCurses.Core
         void Write(int nline, int ncol, in INCursesCharString str);
         void Put(char ch);
         void Put(Key key);
+        void Delete();
+        void Delete(int nline, int ncol);
     }
 }

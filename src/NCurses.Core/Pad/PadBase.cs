@@ -25,9 +25,8 @@ namespace NCurses.Core.Pad
 
         protected WindowInternal<TMultiByte, TWideChar, TSingleByte, TChar, TMouseEvent> WrappedWindow { get; private set; }
 
-        private HashSet<PadBase<TMultiByte, TWideChar, TSingleByte, TChar, TMouseEvent>> SubPads
-            = new HashSet<PadBase<TMultiByte, TWideChar, TSingleByte, TChar, TMouseEvent>>();
         private PadBase<TMultiByte, TWideChar, TSingleByte, TChar, TMouseEvent> ParentPad;
+
         private bool CanDisposeWindow;
 
         internal PadBase(WindowBaseSafeHandle windowBaseSafeHandle)
@@ -51,29 +50,22 @@ namespace NCurses.Core.Pad
             this.ParentPad = parentPad;
         }
 
-        internal void RemoveSubPad(PadBase<TMultiByte, TWideChar, TSingleByte, TChar, TMouseEvent> childPad)
-        {
-            this.SubPads.Remove(childPad);
-        }
-
         /// <summary>
         /// create a subwindow with the current pad as parent
         /// </summary>
         /// <returns>the new subwindow</returns>
-        public PadBase<TMultiByte, TWideChar, TSingleByte, TChar, TMouseEvent> SubPad(int nlines, int ncols, int begin_y, int begin_x)
+        public WindowInternal<TMultiByte, TWideChar, TSingleByte, TChar, TMouseEvent> SubPad(int nlines, int ncols, int begin_y, int begin_x)
         {
-            PadBase<TMultiByte, TWideChar, TSingleByte, TChar, TMouseEvent> subPad = 
-                this.CreatePad(NCurses.subpad(this.WindowBaseSafeHandle, nlines, ncols, begin_y, begin_x), this);
-            this.SubPads.Add(subPad);
-            return subPad;
+            WindowInternal<TMultiByte, TWideChar, TSingleByte, TChar, TMouseEvent> subWindow = 
+                this.CreateWindow(NCurses.subpad(this.WindowBaseSafeHandle, nlines, ncols, begin_y, begin_x), this);
+
+            this.SubWindows.Add(subWindow);
+
+            return subWindow;
         }
 
-        IPad IPad.SubPad(int nlines, int ncols, int begin_y, int begin_x)
+        IWindow IPad.SubPad(int nlines, int ncols, int begin_y, int begin_x)
             => this.SubPad(nlines, ncols, begin_y, begin_x);
-
-        internal abstract PadBase<TMultiByte, TWideChar, TSingleByte, TChar, TMouseEvent> CreatePad(
-            WindowBaseSafeHandle windowBaseSafeHandle,
-            PadBase<TMultiByte, TWideChar, TSingleByte, TChar, TMouseEvent> parentPad);
 
         #region NoOutRefresh
         /// <summary>
@@ -437,13 +429,6 @@ namespace NCurses.Core.Pad
 
         public override void Dispose()
         {
-            this.ParentPad?.RemoveSubPad(this);
-
-            if (this.SubPads.Count > 0)
-            {
-                throw new InvalidOperationException("Subwindows need to be disposed first");
-            }
-
             if (this.CanDisposeWindow)
             {
                 this.WrappedWindow.Dispose();

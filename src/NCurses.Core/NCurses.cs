@@ -8,6 +8,7 @@ using NCurses.Core.Interop.SafeHandles;
 using NCurses.Core.Interop.Wrappers;
 using NCurses.Core.Interop.MultiByte;
 using NCurses.Core.Interop.SingleByte;
+using NCurses.Core.Interop.Panel;
 using NCurses.Core.StdScr;
 
 namespace NCurses.Core
@@ -133,6 +134,11 @@ namespace NCurses.Core
         public static IPanel CreatePanel(IWindow window)
         {
             return WindowFactory.CreatePanel(window);
+        }
+
+        public static void UpdatePanels()
+        {
+            NativePanel.update_panels();
         }
         #endregion
 
@@ -366,8 +372,10 @@ namespace NCurses.Core
             int colorCount = NCursesWrapper.COLORS();
             int pairCount = NCursesWrapper.COLOR_PAIRS();
 
-            if(pairCount <= colorCount * colorCount)
+            if (pairCount <= colorCount * colorCount)
+            {
                 colorCount = (int)Math.Sqrt(pairCount);
+            }   
 
             short pairIndex = 0;
             for (short i = 0; i < colorCount; i++)

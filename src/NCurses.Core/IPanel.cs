@@ -8,6 +8,8 @@ namespace NCurses.Core
 
         IWindow WrappedWindow { get; set; }
 
+        void Replace(IWindow window);
+
         IPanel Above();
         IPanel Below();
 

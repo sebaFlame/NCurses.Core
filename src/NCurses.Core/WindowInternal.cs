@@ -21,7 +21,7 @@ namespace NCurses.Core
         where TChar : unmanaged, ISingleByteChar, IEquatable<TChar>
         where TMouseEvent : unmanaged, IMEVENT
     {
-        private HashSet<WindowInternal<TMultiByte, TWideChar, TSingleByte, TChar, TMouseEvent>> SubWindows
+        protected HashSet<WindowInternal<TMultiByte, TWideChar, TSingleByte, TChar, TMouseEvent>> SubWindows
             = new HashSet<WindowInternal<TMultiByte, TWideChar, TSingleByte, TChar, TMouseEvent>>();
 
         private WindowInternal<TMultiByte, TWideChar, TSingleByte, TChar, TMouseEvent> ParentWindow;
@@ -110,7 +110,7 @@ namespace NCurses.Core
         /// </summary>
         /// <param name="nlines">The line to move the window to</param>
         /// <param name="ncols">The column to move the window to</param>
-        public void MoveWindow(int nlines, int ncols)
+        public override void MoveWindow(int nlines, int ncols)
         {
             NCurses.mvwin(this.WindowBaseSafeHandle, nlines, ncols);
         }
@@ -182,9 +182,19 @@ namespace NCurses.Core
         /// </summary>
         /// <param name="lines">The number of lines to resize to</param>
         /// <param name="columns">The numbe rof columns to resize to</param>
-        public void Resize(int lines, int columns)
+        public override void ResizeWindow(int lines, int columns)
         {
             Window.wresize(this.WindowBaseSafeHandle, lines, columns);
+        }
+
+        public override void Delete()
+        {
+            Window.wdelch(this.WindowBaseSafeHandle);
+        }
+
+        public override void Delete(int y, int x)
+        {
+            Window.mvwdelch(this.WindowBaseSafeHandle, y, x);
         }
 
         #region window creation

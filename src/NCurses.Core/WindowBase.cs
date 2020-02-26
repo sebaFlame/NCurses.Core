@@ -745,6 +745,12 @@ namespace NCurses.Core
         public abstract IWindow ToSingleByteWindow();
         public abstract IWindow ToMultiByteWindow();
 
+        public abstract void ResizeWindow(int nlines, int ncols);
+        public abstract void MoveWindow(int y, int x);
+        public abstract void Delete();
+        public abstract void Delete(int y, int x);
+
+
         #region Equality
         public override bool Equals(object obj)
         {

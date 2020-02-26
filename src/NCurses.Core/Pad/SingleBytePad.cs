@@ -54,13 +54,6 @@ namespace NCurses.Core.Pad
                     NCurses.dupwin(this.WindowBaseSafeHandle)));
         }
 
-        internal override PadBase<TMultiByte, TWideChar, TSingleByte, TChar, TMouseEvent> CreatePad(
-            WindowBaseSafeHandle windowBaseSafeHandle,
-            PadBase<TMultiByte, TWideChar, TSingleByte, TChar, TMouseEvent> parentPad)
-        {
-            return new SingleBytePad<TMultiByte, TWideChar, TSingleByte, TChar, TMouseEvent>(windowBaseSafeHandle, parentPad);
-        }
-
         internal override WindowInternal<TMultiByte, TWideChar, TSingleByte, TChar, TMouseEvent> CreateWindow(
             WindowBaseSafeHandle windowBaseSafeHandle, 
             WindowInternal<TMultiByte, TWideChar, TSingleByte, TChar, TMouseEvent> parentWindow)
