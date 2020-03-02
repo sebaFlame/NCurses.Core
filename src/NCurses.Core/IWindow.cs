@@ -19,6 +19,7 @@ namespace NCurses.Core
         int MaxLine { get; }
         bool NoTimeout { get; set; }
         bool Scroll { get; set; }
+        bool Cursor { set; }
         bool UseHwInsDelLine { get; set; }
         bool HasUnicodeSupport { get; }
 
@@ -32,12 +33,18 @@ namespace NCurses.Core
 
         IWindow SubWindow(int nlines, int ncols, int begin_y, int begin_x);
         IWindow DerWindow(int nlines, int ncols, int begin_y, int begin_x);
+        IWindow Duplicate();
 
         IWindow ToSingleByteWindow();
         IWindow ToMultiByteWindow();
 
         void ResizeWindow(int nlines, int ncols);
         void MoveWindow(int y, int x);
+        void Overlay(IWindow destination);
+        void Overwrite(IWindow destination);
+        void Copy(IWindow destination, int sminrow, int smincol, int dminrow, int dmincol, int dmaxrow, int dmaxcol, bool overlay);
+        void Touch();
+        void TouchLines(int start, int count);
 
         INCursesChar CreateChar(char ch);
         INCursesChar CreateChar(char ch, ulong attrs);

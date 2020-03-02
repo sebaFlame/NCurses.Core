@@ -53,7 +53,7 @@ namespace NCurses.Core.Interop
         //int color_set(short pair, void* opts);
         int color_set(short pair, IntPtr opts);
         //int copywin(const WINDOW *srcwin, WINDOW *dstwin, int sminrow, int smincol, int dminrow, int dmincol, int dmaxrow, int dmaxcol, int overlay);
-        int copywin(IntPtr srcwin, IntPtr dstwin, int sminrow, int smincol, int dminrow, int dmincol, int dmaxrow, int dmaxcol, int overlay);
+        int copywin(WindowBaseSafeHandle srcwin, WindowBaseSafeHandle dstwin, int sminrow, int smincol, int dminrow, int dmincol, int dmaxrow, int dmaxcol, int overlay);
         //int curs_set(int visibility);
         int curs_set(int visibility);
         //int curs_set_sp(SCREEN* sp, int visibility);
@@ -296,9 +296,9 @@ namespace NCurses.Core.Interop
         //int notimeout(WINDOW *win, bool bf);
         int notimeout(WindowBaseSafeHandle window, bool bf);
         //int overlay(const WINDOW *srcwin, WINDOW *dstwin);
-        int overlay(IntPtr srcWin, IntPtr destWin);
+        int overlay(WindowBaseSafeHandle srcWin, WindowBaseSafeHandle destWin);
         //int overwrite(const WINDOW *srcwin, WINDOW *dstwin);
-        int overwrite(IntPtr srcWin, IntPtr destWin);
+        int overwrite(WindowBaseSafeHandle srcWin, WindowBaseSafeHandle destWin);
         //int pair_content(short pair, short *f, short *b);
         int pair_content(short pair, out short fg, out short bg);
         //int pair_content_sp(SCREEN* sp, short pair, short* f, short* b);

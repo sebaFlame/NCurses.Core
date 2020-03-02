@@ -203,11 +203,6 @@ namespace NCurses.Core.Window
             return MultiByteCharFactoryInternal<TMultiByte>.Instance.GetNativeStringInternal(buffer, buffer.Length, str, attrs, pair);
         }
 
-        public override WindowInternal<TMultiByte, TWideChar, TSingleByte, TChar, TMouseEvent> Duplicate()
-        {
-            return new MultiByteWindow<TMultiByte, TWideChar, TSingleByte, TChar, TMouseEvent>(NCurses.dupwin(this.WindowBaseSafeHandle));
-        }
-
         public override void ExtractChar(out INCursesChar ch)
         {
             Window.win_wch(this.WindowBaseSafeHandle, out TMultiByte sch);
@@ -255,7 +250,7 @@ namespace NCurses.Core.Window
                 buffer,
                 buffer.Length,
                 buffer.Length / WideCharFactoryInternal<TWideChar>.Instance.GetCharLength());
-            Window.winwstr(this.WindowBaseSafeHandle, ref wChStr);
+            Window.winnwstr(this.WindowBaseSafeHandle, ref wChStr, buffer.Length / WideCharFactoryInternal<TWideChar>.Instance.GetCharLength(), out int read);
             return wChStr.ToString();
         }
 
@@ -275,7 +270,7 @@ namespace NCurses.Core.Window
                 buffer,
                 buffer.Length,
                 buffer.Length / WideCharFactoryInternal<TWideChar>.Instance.GetCharLength());
-            Window.mvwinwstr(this.WindowBaseSafeHandle, nline, ncol, ref wChStr);
+            Window.mvwinnwstr(this.WindowBaseSafeHandle, nline, ncol, ref wChStr, buffer.Length / WideCharFactoryInternal<TWideChar>.Instance.GetCharLength(), out int read);
             return wChStr.ToString();
         }
 

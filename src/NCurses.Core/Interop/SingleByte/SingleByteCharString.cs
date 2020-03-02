@@ -349,6 +349,22 @@ namespace NCurses.Core.Interop.SingleByte
             return --length;
         }
 
+        internal static int FindStringLength(Span<TSingleByte> str, out int byteLength)
+        {
+            TSingleByte zero = SingleByteCharFactoryInternal<TSingleByte>.Instance.GetNativeEmptyCharInternal();
+
+            int length = str.IndexOf(zero);
+
+            if (length == -1)
+            {
+                length = str.Length;
+            }
+
+            byteLength = length * Marshal.SizeOf<TSingleByte>();
+
+            return length;
+        }
+
         IEnumerator IEnumerable.GetEnumerator() => new SingleByteCharStringEnumerator(this);
 
         IEnumerator<IChar> IEnumerable<IChar>.GetEnumerator() => new SingleByteCharStringEnumerator(this);
@@ -431,17 +447,22 @@ namespace NCurses.Core.Interop.SingleByte
 
         public override string ToString()
         {
+            Span<TSingleByte> chSpan = this.CharSpan;
+            int length = FindStringLength(chSpan, out int byteLength);
+            if (length == 0)
+            {
+                return string.Empty;
+            }
+
             unsafe
             {
-                Span<TSingleByte> chSpan = this.CharSpan;
-
-                char* charArr = stackalloc char[this.Length];
-                for (int i = 0; i < this.Length; i++)
+                char* charArr = stackalloc char[length];
+                for (int i = 0; i < length; i++)
                 {
                     charArr[i] = (char)chSpan[i].EncodedChar;
                 }
 
-                ReadOnlySpan<char> charSpan = new ReadOnlySpan<char>(charArr, this.Length);
+                ReadOnlySpan<char> charSpan = new ReadOnlySpan<char>(charArr, length);
                 return charSpan.ToString();
             }
         }

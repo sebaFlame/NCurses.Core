@@ -27,12 +27,6 @@ namespace NCurses.Core.Pad
             : base(windowBaseSafeHandle)
         { }
 
-        internal MultiBytePad(
-            WindowBaseSafeHandle windowBaseSafeHandle,
-            PadBase<TMultiByte, TWideChar, TSingleByte, TChar, TMouseEvent> parentPad)
-            : base(windowBaseSafeHandle, parentPad)
-        { }
-
         internal MultiBytePad(WindowInternal<TMultiByte, TWideChar, TSingleByte, TChar, TMouseEvent> window)
             : base(window)
         { }
@@ -45,13 +39,6 @@ namespace NCurses.Core.Pad
         {
             TMultiByte wCh = MultiByteCharFactoryInternal<TMultiByte>.Instance.GetNativeCharInternal(ch);
             Pad.pecho_wchar(this.WindowBaseSafeHandle, in wCh);
-        }
-
-        public override WindowInternal<TMultiByte, TWideChar, TSingleByte, TChar, TMouseEvent> Duplicate()
-        {
-            return new MultiBytePad<TMultiByte, TWideChar, TSingleByte, TChar, TMouseEvent>(
-                new MultiByteWindow<TMultiByte, TWideChar, TSingleByte, TChar, TMouseEvent>(
-                    NCurses.dupwin(this.WindowBaseSafeHandle)));
         }
 
         internal override WindowInternal<TMultiByte, TWideChar, TSingleByte, TChar, TMouseEvent> CreateWindow(

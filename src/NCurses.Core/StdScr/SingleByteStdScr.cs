@@ -173,11 +173,6 @@ namespace NCurses.Core.StdScr
             return SingleByteCharFactoryInternal<TSingleByte>.Instance.GetNativeStringInternal(buffer, buffer.Length, str, attrs, pair);
         }
 
-        public override WindowInternal<TMultiByte, TWideChar, TSingleByte, TChar, TMouseEvent> Duplicate()
-        {
-            return new SingleByteWindow<TMultiByte, TWideChar, TSingleByte, TChar, TMouseEvent>(NCurses.dupwin(this.WindowBaseSafeHandle));
-        }
-
         public override char ExtractChar()
         {
             StdScr.inch(out TSingleByte ch);
@@ -225,7 +220,7 @@ namespace NCurses.Core.StdScr
                 buffer,
                 buffer.Length,
                 buffer.Length / CharFactoryInternal<TChar>.Instance.GetCharLength());
-            StdScr.instr(ref chStr, out int read);
+            StdScr.innstr(ref chStr, buffer.Length / CharFactoryInternal<TChar>.Instance.GetCharLength(), out int read);
             return chStr.ToString();
         }
 
@@ -245,7 +240,7 @@ namespace NCurses.Core.StdScr
                 buffer,
                 buffer.Length,
                 buffer.Length / CharFactoryInternal<TChar>.Instance.GetCharLength());
-            StdScr.mvinstr(nline, ncol, ref chStr, out int read);
+            StdScr.mvinnstr(nline, ncol, ref chStr, buffer.Length / CharFactoryInternal<TChar>.Instance.GetCharLength(), out int read);
             return chStr.ToString();
         }
 

@@ -422,9 +422,7 @@ namespace NCurses.Core.Interop
         /// <param name="window">A pointer to a window</param>
         public int wgetch(WindowBaseSafeHandle window)
         {
-            int ret = 0;
-            NCursesException.Verify(ret = NativeNCurses.NCursesWrapper.wgetch(window), "wgetch");
-            return ret;
+            return NativeNCurses.NCursesWrapper.wgetch(window);
         }
 
         /// <summary>

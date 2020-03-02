@@ -42,14 +42,6 @@ namespace NCurses.Core.Pad
             this.WrappedWindow = window;
         }
 
-        internal PadBase(
-            WindowBaseSafeHandle windowBaseSafeHandle,
-            PadBase<TMultiByte, TWideChar, TSingleByte, TChar, TMouseEvent> parentPad)
-            : this(windowBaseSafeHandle)
-        {
-            this.ParentPad = parentPad;
-        }
-
         /// <summary>
         /// create a subwindow with the current pad as parent
         /// </summary>
@@ -481,7 +473,7 @@ namespace NCurses.Core.Pad
         {
             if (this.CanDisposeWindow)
             {
-                this.WrappedWindow.Dispose();
+                this.WrappedWindow?.Dispose();
             }
 
             base.Dispose();

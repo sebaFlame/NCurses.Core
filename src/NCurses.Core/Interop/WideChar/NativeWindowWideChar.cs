@@ -41,6 +41,7 @@ namespace NCurses.Core.Interop.WideChar
                     "mvwget_wch-mvwgetch",
                     NativeCustomTypeWrapper<TMultiByte, TWideChar, TSingleByte, TChar, TMouseEvent>.WindowInternal.mvwgetch(window, y, x),
                     NativeCustomTypeWrapper<TMultiByte, TWideChar, TSingleByte, TChar, TMouseEvent>.WindowInternal.is_keypad(window),
+                    NativeCustomTypeWrapper<TMultiByte, TWideChar, TSingleByte, TChar, TMouseEvent>.WindowInternal.is_nodelay(window),
                     out wch,
                     out key);
             }
@@ -49,6 +50,7 @@ namespace NCurses.Core.Interop.WideChar
 
             return VerifyInput("mvwget_wch",
                 this.Wrapper.mvwget_wch(window, y, x, ref wc),
+                NativeCustomTypeWrapper<TMultiByte, TWideChar, TSingleByte, TChar, TMouseEvent>.WindowInternal.is_nodelay(window),
                 in wc,
                 out wch,
                 out key);
@@ -104,6 +106,7 @@ namespace NCurses.Core.Interop.WideChar
                     "wget_wch-wgetch",
                     NativeCustomTypeWrapper<TMultiByte, TWideChar, TSingleByte, TChar, TMouseEvent>.WindowInternal.wgetch(window),
                     NativeCustomTypeWrapper<TMultiByte, TWideChar, TSingleByte, TChar, TMouseEvent>.WindowInternal.is_keypad(window),
+                    NativeCustomTypeWrapper<TMultiByte, TWideChar, TSingleByte, TChar, TMouseEvent>.WindowInternal.is_nodelay(window),
                     out wch,
                     out key);
             }
@@ -112,6 +115,7 @@ namespace NCurses.Core.Interop.WideChar
 
             return VerifyInput("wget_wch",
                 this.Wrapper.wget_wch(window, ref wc),
+                NativeCustomTypeWrapper<TMultiByte, TWideChar, TSingleByte, TChar, TMouseEvent>.WindowInternal.is_nodelay(window),
                 in wc,
                 out wch,
                 out key);

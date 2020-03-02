@@ -173,6 +173,22 @@ namespace NCurses.Core.Interop.Char
             return --length;
         }
 
+        internal static int FindStringLength(Span<TChar> str, out int byteLength)
+        {
+            TChar zero = CharFactoryInternal<TChar>.Instance.GetNativeEmptyCharInternal();
+
+            int length = str.IndexOf(zero);
+
+            if (length == -1)
+            {
+                length = str.Length;
+            }
+
+            byteLength = length * Marshal.SizeOf<TChar>();
+
+            return length;
+        }
+
         IEnumerator IEnumerable.GetEnumerator() => new CharStringEnumerator(this);
 
         IEnumerator<IChar> IEnumerable<IChar>.GetEnumerator() => new CharStringEnumerator(this);
@@ -219,10 +235,16 @@ namespace NCurses.Core.Interop.Char
 
         public override string ToString()
         {
+            int length = FindStringLength(this.CharSpan, out int byteLength);
+            if (length == 0)
+            {
+                return string.Empty;
+            }
+
             unsafe
             {
-                Span<byte> bSpan = this.ByteSpan.Slice(0, this.Length * Marshal.SizeOf<TChar>());
-                char* charArr = stackalloc char[this.Length];
+                Span<byte> bSpan = this.ByteSpan.Slice(0, length * Marshal.SizeOf<TChar>());
+                char* charArr = stackalloc char[length];
 
                 lock (NativeNCurses.SyncRoot)
                 {
@@ -231,11 +253,11 @@ namespace NCurses.Core.Interop.Char
 
                     fixed (byte* b = bSpan)
                     {
-                        decoder.GetChars(b, bSpan.Length, charArr, this.Length, true);
+                        decoder.GetChars(b, bSpan.Length, charArr, length, true);
                     }
                 }
 
-                ReadOnlySpan<char> charSpan = new ReadOnlySpan<char>(charArr, this.Length);
+                ReadOnlySpan<char> charSpan = new ReadOnlySpan<char>(charArr, length);
                 return charSpan.ToString();
             }
         }

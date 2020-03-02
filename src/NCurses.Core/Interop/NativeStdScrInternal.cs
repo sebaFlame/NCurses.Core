@@ -429,9 +429,7 @@ namespace NCurses.Core.Interop
         /// </summary>
         public int getch()
         {
-            int ret = 0;
-            NCursesException.Verify(ret = NativeNCurses.NCursesWrapper.getch(), "getch");
-            return ret;
+            return NativeNCurses.NCursesWrapper.getch();
         }
 
         /// <summary>
@@ -765,9 +763,7 @@ namespace NCurses.Core.Interop
         /// <param name="x">the column number to move to</param>
         public int mvgetch(int y, int x)
         {
-            int ret = 0;
-            NCursesException.Verify(NativeNCurses.NCursesWrapper.mvgetch(y, x), "mvgetch");
-            return ret;
+            return NativeNCurses.NCursesWrapper.mvgetch(y, x);
         }
 
         /// <summary>

@@ -189,6 +189,11 @@ namespace NCurses.Core
             set { Window.notimeout(this.WindowBaseSafeHandle, value); }
             get { return Window.is_notimeout(this.WindowBaseSafeHandle); }
         }
+
+        public bool Cursor
+        {
+            set => NCurses.curs_set(value ? 1 : 0);
+        }
         #endregion
 
         public abstract bool HasUnicodeSupport { get; }
@@ -760,6 +765,17 @@ namespace NCurses.Core
         public abstract void Delete();
         public abstract void Delete(int y, int x);
 
+        /// <summary>
+        /// Creates an exact duplicate of the window win.
+        /// </summary>
+        /// <returns></returns>
+        public abstract IWindow Duplicate();
+
+        public abstract void Overlay(IWindow destination);
+        public abstract void Overwrite(IWindow destination);
+        public abstract void Copy(IWindow destination, int sminrow, int smincol, int dminrow, int dmincol, int dmaxrow, int dmaxcol, bool overlay);
+        public abstract void Touch();
+        public abstract void TouchLines(int start, int count);
 
         #region Equality
         public override bool Equals(object obj)

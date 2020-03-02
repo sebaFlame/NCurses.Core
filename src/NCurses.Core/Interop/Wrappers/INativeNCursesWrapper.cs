@@ -38,7 +38,7 @@ namespace NCurses.Core.Interop.Wrappers
         void color_content(short color, ref short red, ref short green, ref short blue);
         int COLOR_PAIRS();
         int COLS();
-        void copywin(IntPtr srcwin, IntPtr dstwin, int sminrow, int smincol, int dminrow, int dmincol, int dmaxrow, int dmaxcol, int overlay);
+        void copywin(WindowBaseSafeHandle srcwin, WindowBaseSafeHandle dstwin, int sminrow, int smincol, int dminrow, int dmincol, int dmaxrow, int dmaxcol, int overlay);
         IntPtr curscr();
         void curs_set(int visibility);
         int def_prog_mode();
@@ -87,8 +87,8 @@ namespace NCurses.Core.Interop.Wrappers
         void nonl();
         void noqiflush();
         void noraw();
-        void overlay(IntPtr srcWin, IntPtr destWin);
-        void overwrite(IntPtr srcWin, IntPtr destWin);
+        void overlay(WindowBaseSafeHandle srcWin, WindowBaseSafeHandle destWin);
+        void overwrite(WindowBaseSafeHandle srcWin, WindowBaseSafeHandle destWin);
         void pair_content(short pair, out short fg, out short bg);
         int PAIR_NUMBER(uint attrs);
         void qiflush();

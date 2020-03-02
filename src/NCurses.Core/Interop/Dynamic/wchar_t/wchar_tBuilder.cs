@@ -318,11 +318,11 @@ namespace NCurses.Core.Interop.Dynamic.wchar_t
             #endregion
 
             #region public static bool operator !=(in wchar_t wchLeft, in wchar_t wchRight)
-            opEquality = typeBuilder.DefineMethod("op_Inequality",
+            methodBuilder = typeBuilder.DefineMethod("op_Inequality",
                 MethodAttributes.Public | MethodAttributes.HideBySig | MethodAttributes.SpecialName | MethodAttributes.Static,
                 typeof(bool),
                 new Type[] { typeBuilder.AsType().MakeByRefType(), typeBuilder.AsType().MakeByRefType() });
-            methodIl = opEquality.GetILGenerator();
+            methodIl = methodBuilder.GetILGenerator();
 
             lcl0 = methodIl.DeclareLocal(typeof(byte*));
             lcl1 = methodIl.DeclareLocal(typeof(byte*));
@@ -332,13 +332,13 @@ namespace NCurses.Core.Interop.Dynamic.wchar_t
 
             lbl1 = methodIl.DefineLabel();
 
-            parameterBuilder = opEquality.DefineParameter(1, ParameterAttributes.In, "wchLeft");
+            parameterBuilder = methodBuilder.DefineParameter(1, ParameterAttributes.In, "wchLeft");
             attrBuilder = new CustomAttributeBuilder(typeof(InAttribute).GetConstructor(Array.Empty<Type>()), Array.Empty<object>());
             parameterBuilder.SetCustomAttribute(attrBuilder);
             attrBuilder = new CustomAttributeBuilder(readOnlyAttribute.GetConstructor(Array.Empty<Type>()), Array.Empty<object>());
             parameterBuilder.SetCustomAttribute(attrBuilder);
 
-            parameterBuilder = opEquality.DefineParameter(2, ParameterAttributes.In, "wchRight");
+            parameterBuilder = methodBuilder.DefineParameter(2, ParameterAttributes.In, "wchRight");
             attrBuilder = new CustomAttributeBuilder(typeof(InAttribute).GetConstructor(Array.Empty<Type>()), Array.Empty<object>());
             parameterBuilder.SetCustomAttribute(attrBuilder);
             attrBuilder = new CustomAttributeBuilder(readOnlyAttribute.GetConstructor(Array.Empty<Type>()), Array.Empty<object>());

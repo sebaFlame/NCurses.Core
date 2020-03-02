@@ -482,6 +482,22 @@ namespace NCurses.Core.Interop.MultiByte
             return --length;
         }
 
+        internal static int FindStringLength(Span<TMultiByte> str, out int byteLength)
+        {
+            TMultiByte zero = MultiByteCharFactoryInternal<TMultiByte>.Instance.GetNativeEmptyCharInternal();
+
+            int length = str.IndexOf(zero);
+
+            if (length == -1)
+            {
+                length = str.Length;
+            }
+
+            byteLength = length * Marshal.SizeOf<TMultiByte>();
+
+            return length;
+        }
+
         IEnumerator IEnumerable.GetEnumerator() => new MultiByteCharStringEnumerator(this);
 
         IEnumerator<IChar> IEnumerable<IChar>.GetEnumerator() => new MultiByteCharStringEnumerator(this);
@@ -563,34 +579,40 @@ namespace NCurses.Core.Interop.MultiByte
 
         public override string ToString()
         {
+            Span<TMultiByte> chSpan = this.CharSpan;
+            int length = FindStringLength(chSpan, out int byteLength);
+
+            if (length == 0)
+            {
+                return string.Empty;
+            }
+
             unsafe
             {
-                Span<TMultiByte> chSpan = this.CharSpan;
-
                 //copy all chars (without attributes) into a single array
-                int byteLength = Constants.SIZEOF_WCHAR_T * this.Length;
+                byteLength = Constants.SIZEOF_WCHAR_T * length;
                 byte* bArr = stackalloc byte[byteLength];
                 Span<byte> destination;
                 Span<byte> encodedChar;
 
-                for(int i = 0; i < this.Length; i++)
+                for(int i = 0; i < length; i++)
                 {
                     destination = new Span<byte>(bArr + (Constants.SIZEOF_WCHAR_T * i), Constants.SIZEOF_WCHAR_T);
                     encodedChar = chSpan[i].EncodedChar;
                     encodedChar.CopyTo(destination);
                 }
 
-                char* charArr = stackalloc char[this.Length];
+                char* charArr = stackalloc char[length];
 
                 lock (NativeNCurses.SyncRoot)
                 {
                     Decoder decoder = NativeNCurses.MultiByteDecoder;
                     decoder.Reset();
 
-                    decoder.GetChars(bArr, byteLength, charArr, this.Length, true);
+                    decoder.GetChars(bArr, byteLength, charArr, length, true);
                 }
 
-                ReadOnlySpan<char> charSpan = new ReadOnlySpan<char>(charArr, this.Length);
+                ReadOnlySpan<char> charSpan = new ReadOnlySpan<char>(charArr, length);
                 return charSpan.ToString();
             }
         }

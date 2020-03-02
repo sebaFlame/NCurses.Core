@@ -265,6 +265,18 @@ namespace NCurses.Core.Interop
             return value == CTRL(key);
         }
 
+        public static bool IsCtrlKey(char ch, out char key)
+        {
+            key = default;
+            string keyName = NCurses.keyname(ch).ToString();
+            bool isCtrl = keyName[0] == '^';
+            if (isCtrl)
+            {
+                key = keyName[1];
+            }
+            return isCtrl;
+        }
+
         public static bool IsALT(int key, int value)
         {
             return value == ALT(key);
@@ -284,21 +296,27 @@ namespace NCurses.Core.Interop
 
         internal static bool VerifyInput(WindowBaseSafeHandle windowPtr, string method, int val, out char ch, out Key key)
         {
-            return VerifyInput(method, Window.is_keypad(windowPtr), val, out ch, out key);
+            return VerifyInput(method, Window.is_keypad(windowPtr), Window.is_nodelay(windowPtr), val, out ch, out key);
         }
 
-        internal static bool VerifyInput(string method, bool keyPadEnabled, int val, out char ch, out Key key)
+        internal static bool VerifyInput(string method, bool keyPadEnabled, bool isNoDelay, int val, out char ch, out Key key)
         {
+            key = default;
+            ch = default;
+
+            if (isNoDelay 
+                && val == Constants.ERR)
+            {
+                return false;
+            }
+
             NCursesException.Verify(val, method);
 
             if (keyPadEnabled
                 && HasKey(val, out key))
             {
-                ch = '\0';
                 return true;
             }
-
-            key = default;
 
             if (val < 0
                 && RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
@@ -399,8 +417,12 @@ namespace NCurses.Core.Interop
             }
 
             for (int i = 0; i < rem; i++)
+            {
                 if (bytes1[length - 1 - i] != bytes2[length - 1 - i])
+                {
                     return false;
+                }
+            }
 
             return true;
         }

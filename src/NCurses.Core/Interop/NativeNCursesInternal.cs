@@ -167,7 +167,7 @@ namespace NCurses.Core.Interop
         /// <param name="dmaxrow">Maximal row to be copied to</param>
         /// <param name="dmaxcol">Maximal column to be copied to</param>
         /// <param name="overlay">1 if copying is non-destructive</param>
-        public void copywin(IntPtr srcwin, IntPtr dstwin, int sminrow, int smincol, int dminrow, int dmincol, int dmaxrow, int dmaxcol, int overlay)
+        public void copywin(WindowBaseSafeHandle srcwin, WindowBaseSafeHandle dstwin, int sminrow, int smincol, int dminrow, int dmincol, int dmaxrow, int dmaxcol, int overlay)
         {
             NCursesException.Verify(NativeNCurses.NCursesWrapper.copywin(srcwin, dstwin, sminrow, smincol, dminrow, dmincol, dmaxrow, dmaxcol, overlay), "copywin");
         }
@@ -859,7 +859,7 @@ namespace NCurses.Core.Interop
         /// </summary>
         /// <param name="srcWin">pointer to the source window</param>
         /// <param name="destWin">pointer to the destination window</param>
-        public void overlay(IntPtr srcWin, IntPtr destWin)
+        public void overlay(WindowBaseSafeHandle srcWin, WindowBaseSafeHandle destWin)
         {
             NCursesException.Verify(NativeNCurses.NCursesWrapper.overlay(srcWin, destWin), "overlay");
         }
@@ -870,7 +870,7 @@ namespace NCurses.Core.Interop
         /// see <see cref="overlay(IntPtr, IntPtr)"/>
         /// <para />native method wrapped with verification.
         /// </summary>
-        public void overwrite(IntPtr srcWin, IntPtr destWin)
+        public void overwrite(WindowBaseSafeHandle srcWin, WindowBaseSafeHandle destWin)
         {
             NCursesException.Verify(NativeNCurses.NCursesWrapper.overwrite(srcWin, destWin), "overwrite");
         }

@@ -68,7 +68,8 @@ namespace NCurses.Core.Interop.WideChar
                 return VerifyInput(
                     "get_wch-getch",
                     NativeCustomTypeWrapper<TMultiByte, TWideChar, TSingleByte, TChar, TMouseEvent>.StdScrInternal.getch(),
-                    NCurses.StdScr.KeyPad,
+                    NativeCustomTypeWrapper<TMultiByte, TWideChar, TSingleByte, TChar, TMouseEvent>.WindowInternal.is_keypad(NativeNCurses.StdScrSafeHandle),
+                    NativeCustomTypeWrapper<TMultiByte, TWideChar, TSingleByte, TChar, TMouseEvent>.WindowInternal.is_nodelay(NativeNCurses.StdScrSafeHandle),
                     out wch,
                     out key);
             }
@@ -78,6 +79,7 @@ namespace NCurses.Core.Interop.WideChar
             return VerifyInput(
                 "get_wch", 
                 this.Wrapper.get_wch(ref wc),
+                NativeCustomTypeWrapper<TMultiByte, TWideChar, TSingleByte, TChar, TMouseEvent>.WindowInternal.is_nodelay(NativeNCurses.StdScrSafeHandle),
                 in wc,
                 out wch, 
                 out key);
@@ -120,7 +122,8 @@ namespace NCurses.Core.Interop.WideChar
                 return VerifyInput(
                     "mvget_wch-mvgetch",
                     NativeCustomTypeWrapper<TMultiByte, TWideChar, TSingleByte, TChar, TMouseEvent>.StdScrInternal.mvgetch(y, x),
-                    NCurses.StdScr.KeyPad,
+                    NativeCustomTypeWrapper<TMultiByte, TWideChar, TSingleByte, TChar, TMouseEvent>.WindowInternal.is_keypad(NativeNCurses.StdScrSafeHandle),
+                    NativeCustomTypeWrapper<TMultiByte, TWideChar, TSingleByte, TChar, TMouseEvent>.WindowInternal.is_nodelay(NativeNCurses.StdScrSafeHandle),
                     out wch,
                     out key);
             }
@@ -130,6 +133,7 @@ namespace NCurses.Core.Interop.WideChar
             return VerifyInput(
                 "mvget_wch", 
                 this.Wrapper.mvget_wch(y, x, ref wc),
+                NativeCustomTypeWrapper<TMultiByte, TWideChar, TSingleByte, TChar, TMouseEvent>.WindowInternal.is_nodelay(NativeNCurses.StdScrSafeHandle),
                 in wc,
                 out wch,
                 out key);

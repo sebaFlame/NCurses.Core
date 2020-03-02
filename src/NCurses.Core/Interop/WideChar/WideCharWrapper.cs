@@ -47,8 +47,16 @@ namespace NCurses.Core.Interop.WideChar
             return Unsafe.Read<T>(arr);
         }
 
-        internal static bool VerifyInput(string method, int ret, in int wc, out TWideChar wch, out Key key)
+        internal static bool VerifyInput(string method, int ret, bool isNoDelay, in int wc, out TWideChar wch, out Key key)
         {
+            key = default;
+            wch = default;
+
+            if (isNoDelay && ret == Constants.ERR)
+            {
+                return false;
+            }
+
             if (ret == (int)Key.CODE_YES)
             {
                 wch = WideCharFactoryInternal<TWideChar>.Instance.GetNativeEmptyCharInternal();
@@ -63,9 +71,17 @@ namespace NCurses.Core.Interop.WideChar
             return false;
         }
 
-        internal static bool VerifyInput(string method, int ret, bool hasKeyPad, out TWideChar wch, out Key key)
+        internal static bool VerifyInput(string method, int ret, bool hasKeyPad, bool isNoDelay, out TWideChar wch, out Key key)
         {
-            bool functionKey = NativeNCurses.VerifyInput(method, hasKeyPad, ret, out char ch, out key);
+            key = default;
+            wch = default;
+
+            if (isNoDelay && ret == Constants.ERR)
+            {
+                return false;
+            }
+
+            bool functionKey = NativeNCurses.VerifyInput(method, hasKeyPad, isNoDelay, ret, out char ch, out key);
 
             //could be a unicode char
             if ((!functionKey && ret > 0 && (ret != ch))

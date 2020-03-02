@@ -160,12 +160,6 @@ namespace NCurses.Core
         public override IWindow DerWindow(int nlines, int ncols, int begin_y, int begin_x) => this.DerWindowInternal(nlines, ncols, begin_y, begin_x);
 
         /// <summary>
-        /// Creates an exact duplicate of the window win.
-        /// </summary>
-        /// <returns></returns>
-        public abstract WindowInternal<TMultiByte, TWideChar, TSingleByte, TChar, TMouseEvent> Duplicate();
-
-        /// <summary>
         /// Draw a box around the edges of the window
         /// </summary>
         /// <param name="verticalChar">the vertical char with attributes to use</param>
@@ -251,6 +245,51 @@ namespace NCurses.Core
         public override IWindow ToSingleByteWindow() => this.ToSingleByteWindowInternal();
         public override IWindow ToMultiByteWindow() => this.ToMultiByteWindowInternal();
         #endregion
+
+        public override IWindow Duplicate()
+        {
+            return CreateWindow(NCurses.dupwin(this.WindowBaseSafeHandle));
+        }
+
+        public override void Overlay(IWindow destination)
+        {
+            if(!(destination is WindowInternal<TMultiByte, TWideChar, TSingleByte, TChar, TMouseEvent> destWindow))
+            {
+                throw new NotSupportedException("Unknown window type");
+            }
+
+            NCurses.overlay(this.WindowBaseSafeHandle, destWindow.WindowBaseSafeHandle);
+        }
+
+        public override void Overwrite(IWindow destination)
+        {
+            if (!(destination is WindowInternal<TMultiByte, TWideChar, TSingleByte, TChar, TMouseEvent> destWindow))
+            {
+                throw new NotSupportedException("Unknown window type");
+            }
+
+            NCurses.overwrite(this.WindowBaseSafeHandle, destWindow.WindowBaseSafeHandle);
+        }
+
+        public override void Copy(IWindow destination, int sminrow, int smincol, int dminrow, int dmincol, int dmaxrow, int dmaxcol, bool overlay)
+        {
+            if (!(destination is WindowInternal<TMultiByte, TWideChar, TSingleByte, TChar, TMouseEvent> destWindow))
+            {
+                throw new NotSupportedException("Unknown window type");
+            }
+
+            NCurses.copywin(this.WindowBaseSafeHandle, destWindow.WindowBaseSafeHandle, sminrow, smincol, dminrow, dmincol, dmaxrow, dmaxcol, overlay ? 1 : 0);
+        }
+
+        public override void Touch()
+        {
+            Window.touchwin(this.WindowBaseSafeHandle);
+        }
+
+        public override void TouchLines(int start, int count)
+        {
+            Window.touchline(this.WindowBaseSafeHandle, start, count);
+        }
 
         public override void Dispose()
         {
