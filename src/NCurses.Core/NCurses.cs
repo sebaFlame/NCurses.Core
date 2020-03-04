@@ -296,7 +296,7 @@ namespace NCurses.Core
         /// </code>
         /// </example>
         /// <returns></returns>
-        public static InternalLockDisposable CreateThreadSafeDisposable()
+        public static IDisposable CreateThreadSafeDisposable()
         {
             return new InternalLockDisposable(NativeNCurses.EnableLocking);
         }

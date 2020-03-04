@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Collections.Concurrent;
 using System.Linq;
 using System.Text;
 using System.Runtime.InteropServices;
@@ -26,7 +27,7 @@ namespace NCurses.Core
         where TChar : unmanaged, ISingleByteChar, IEquatable<TChar>
         where TMouseEvent : unmanaged, IMEVENT
     {
-        internal static Dictionary<Guid, WeakReference<WindowBase<TMultiByte, TWideChar, TSingleByte, TChar, TMouseEvent>>> Windows;
+        internal static ConcurrentDictionary<Guid, WeakReference<WindowBase<TMultiByte, TWideChar, TSingleByte, TChar, TMouseEvent>>> Windows;
 
         internal static NativeNCursesInternal<TMultiByte, TWideChar, TSingleByte, TChar, TMouseEvent> NCurses =>
             NativeCustomTypeWrapper<TMultiByte, TWideChar, TSingleByte, TChar, TMouseEvent>.NCursesInternal;
@@ -46,7 +47,7 @@ namespace NCurses.Core
 
         static WindowBase()
         {
-            Windows = new Dictionary<Guid, WeakReference<WindowBase<TMultiByte, TWideChar, TSingleByte, TChar, TMouseEvent>>>();
+            Windows = new ConcurrentDictionary<Guid, WeakReference<WindowBase<TMultiByte, TWideChar, TSingleByte, TChar, TMouseEvent>>>();
         }
 
         internal WindowBase(
@@ -65,7 +66,7 @@ namespace NCurses.Core
                 return;
             }
 
-            Windows.Add(this.WindowGuid = Guid.NewGuid(), new WeakReference<WindowBase<TMultiByte, TWideChar, TSingleByte, TChar, TMouseEvent>>(this));
+            Windows.TryAdd(this.WindowGuid = Guid.NewGuid(), new WeakReference<WindowBase<TMultiByte, TWideChar, TSingleByte, TChar, TMouseEvent>>(this));
         }
 
         internal WindowBase(
@@ -80,7 +81,7 @@ namespace NCurses.Core
                 return;
             }
 
-            Windows.Add(this.WindowGuid = Guid.NewGuid(), new WeakReference<WindowBase<TMultiByte, TWideChar, TSingleByte, TChar, TMouseEvent>>(this));
+            Windows.TryAdd(this.WindowGuid = Guid.NewGuid(), new WeakReference<WindowBase<TMultiByte, TWideChar, TSingleByte, TChar, TMouseEvent>>(this));
         }
 
         ~WindowBase()
@@ -827,10 +828,7 @@ namespace NCurses.Core
                 return;
             }
 
-            if (Windows.ContainsKey(this.WindowGuid))
-            {
-                Windows.Remove(this.WindowGuid);
-            }
+            Windows.TryRemove(this.WindowGuid, out WeakReference<WindowBase<TMultiByte, TWideChar, TSingleByte, TChar, TMouseEvent>> weakRef);
 
             if (this.HasAddedRefToExistingSafeHandle)
             {

@@ -5,7 +5,7 @@ using System.Threading;
 
 namespace NCurses.Core.Interop
 {
-    public struct InternalLockDisposable : IDisposable
+    internal struct InternalLockDisposable : IDisposable
     {
         private bool prevVal;
 
