@@ -122,6 +122,8 @@ namespace NCurses.Core
         void Write(int nline, int ncol, ReadOnlySpan<char> str, ulong attrs, short pair);
         void Write(string str);
         void Write(ReadOnlySpan<char> str);
+        void Write(string str, int maxLength);
+        void Write(ReadOnlySpan<char> str, int maxLength);
         void Write(string str, ulong attrs, short pair);
         void Write(ReadOnlySpan<char> str, ulong attrs, short pair);
         void Write(int nline, int ncol, in INCursesChar ch);

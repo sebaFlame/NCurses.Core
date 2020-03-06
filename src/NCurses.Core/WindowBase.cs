@@ -778,6 +778,9 @@ namespace NCurses.Core
         public abstract void Touch();
         public abstract void TouchLines(int start, int count);
 
+        public abstract void Write(string str, int maxLength);
+        public abstract void Write(ReadOnlySpan<char> str, int maxLength);
+
         #region Equality
         public override bool Equals(object obj)
         {

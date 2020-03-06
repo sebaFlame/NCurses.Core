@@ -645,5 +645,21 @@ namespace NCurses.Core.Window
         {
             NCurses.ungetch((int)key);
         }
+
+        public override void Write(string str, int maxLength)
+        {
+            int bufferLength = WideCharFactoryInternal<TWideChar>.Instance.GetByteCount(str);
+            byte[] buffer = NativeNCurses.GetBuffer(bufferLength);
+            WideCharString<TWideChar> wChStr = WideCharFactoryInternal<TWideChar>.Instance.GetNativeStringInternal(buffer, bufferLength, str);
+            Window.waddnwstr(this.WindowBaseSafeHandle, in wChStr, maxLength);
+        }
+
+        public override void Write(ReadOnlySpan<char> str, int maxLength)
+        {
+            int bufferLength = WideCharFactoryInternal<TWideChar>.Instance.GetByteCount(str);
+            byte[] buffer = NativeNCurses.GetBuffer(bufferLength);
+            WideCharString<TWideChar> wChStr = WideCharFactoryInternal<TWideChar>.Instance.GetNativeStringInternal(buffer, bufferLength, str);
+            Window.waddnwstr(this.WindowBaseSafeHandle, in wChStr, maxLength);
+        }
     }
 }

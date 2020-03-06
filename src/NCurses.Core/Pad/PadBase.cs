@@ -469,6 +469,16 @@ namespace NCurses.Core.Pad
             this.WrappedWindow.VerticalLine(nline, ncol, lineChar, length);
         }
 
+        public override void Write(string str, int maxLength)
+        {
+            this.WrappedWindow.Write(str, maxLength);
+        }
+
+        public override void Write(ReadOnlySpan<char> str, int maxLength)
+        {
+            this.WrappedWindow.Write(str, maxLength);
+        }
+
         public override void Dispose()
         {
             if (this.CanDisposeWindow)

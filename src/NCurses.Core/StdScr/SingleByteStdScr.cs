@@ -588,5 +588,21 @@ namespace NCurses.Core.StdScr
         {
             NCurses.ungetch((int)key);
         }
+
+        public override void Write(string str, int maxLength)
+        {
+            int bufferLength = CharFactoryInternal<TChar>.Instance.GetByteCount(str);
+            byte[] buffer = NativeNCurses.GetBuffer(bufferLength);
+            CharString<TChar> chStr = CharFactoryInternal<TChar>.Instance.GetNativeStringInternal(buffer, bufferLength, str);
+            StdScr.addnstr(in chStr, maxLength);
+        }
+
+        public override void Write(ReadOnlySpan<char> str, int maxLength)
+        {
+            int bufferLength = CharFactoryInternal<TChar>.Instance.GetByteCount(str);
+            byte[] buffer = NativeNCurses.GetBuffer(bufferLength);
+            CharString<TChar> chStr = CharFactoryInternal<TChar>.Instance.GetNativeStringInternal(buffer, bufferLength, str);
+            StdScr.addnstr(in chStr, maxLength);
+        }
     }
 }
