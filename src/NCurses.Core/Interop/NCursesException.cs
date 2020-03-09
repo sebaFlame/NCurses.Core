@@ -5,7 +5,7 @@ using NCurses.Core.Interop.SafeHandles;
 
 namespace NCurses.Core.Interop
 {
-    internal class NCursesException : Exception
+    public class NCursesException : Exception
     {
         internal NCursesException(string message)
             : base(message)
