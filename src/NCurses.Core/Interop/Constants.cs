@@ -82,6 +82,11 @@ namespace NCurses.Core.Interop
 
         public static ulong COLOR_PAIR(ulong number)
         {
+            if (number > 255)
+            {
+                return 255 << 8;
+            }
+
             return (NCURSES_BITS(number, 0) & Attrs.COLOR);
         }
 

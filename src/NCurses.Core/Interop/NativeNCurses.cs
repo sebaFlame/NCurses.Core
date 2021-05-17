@@ -353,7 +353,18 @@ namespace NCurses.Core.Interop
         /// <returns>The attribute of the specified color pair</returns>
         public static int COLOR_PAIR(int pair)
         {
+            //Attributes do not support color pairs > 255
+            if (pair > 255)
+            {
+                return 255 << 8;
+            }
+
             return NCursesWrapper.COLOR_PAIR(pair);
+        }
+
+        public static int PAIR_NUMBER(uint attrs)
+        {
+            return NCursesWrapper.PAIR_NUMBER(attrs);
         }
         #endregion
 

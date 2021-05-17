@@ -1,6 +1,6 @@
 ﻿using System;
 using System.Runtime.InteropServices;
-using System.Text;
+using System.Collections.Generic;
 
 using NCurses.Core.Interop;
 using NCurses.Core.Interop.Mouse;
@@ -32,6 +32,10 @@ namespace NCurses.Core
             IMEVENT> NCursesWrapper => NativeNCurses.NCurses;
 
         internal static IWindowFactory WindowFactory => NativeNCurses.WindowFactory;
+
+        private static int _ColorBitShift;
+        private static byte _ColorBitMask;
+        private static int _BgBitShift;
 
         #region init/end
         /// <summary>
@@ -322,8 +326,14 @@ namespace NCurses.Core
         /// <summary>
         /// Assigns the default terminal colors to pair -1.
         /// </summary>
+        /// <exception cref="PlatformNotSupportedException">When not supported on the current platform</exception>
         public static void UseDefaultColors()
         {
+            if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
+            {
+                throw new PlatformNotSupportedException("UseDefaultColors is not supported on windows.");
+            }
+
             NCursesWrapper.use_default_colors();
         }
 
@@ -365,31 +375,162 @@ namespace NCurses.Core
         }
 
         /// <summary>
-        /// if you want to use default colors, this method initializes default pairs with all default color combinations
+        /// If you want to use default colors, this method initializes default pairs with all default color combinations
         /// </summary>
-        public static void InitDefaultPairs()
+        /// <returns>The number of colors which got initialized</returns>
+        public static int InitDefaultPairs()
         {
+            /*
+                Colors
+                0 black     4 blue      8 dark gray         12 bright blue
+                1 red       5 magenta   9 bright red        13 bright magenta
+                2 green     6 cyan      10 bright green     14 bright cyan
+                3 yellow    7 white     11 bright yellow    15 bright white
+
+                Default color: -1
+            */
+
+            //initialize default colors
+            short startFg = -1;
+            short startBg = -1;
+            try
+            {
+                UseDefaultColors();
+            }
+            catch (PlatformNotSupportedException)
+            {
+                //no default colors!
+                startFg = 0;
+                startBg = 0;
+            }
+
             int colorCount = NCursesWrapper.COLORS();
             int pairCount = NCursesWrapper.COLOR_PAIRS();
 
-            if (pairCount <= colorCount * colorCount)
+            //only support upto 16 default colors
+            if (colorCount > 16)
+            {
+                colorCount = 16;
+            }
+
+            if (pairCount < colorCount * colorCount)
             {
                 colorCount = (int)Math.Sqrt(pairCount);
-            }   
+            }
+
+            int colorMostSignificantBit = SetBitNumber(colorCount - 1);
+            _ColorBitShift = FindPosition(colorMostSignificantBit);
+
+            //set extra bit to account for default colors
+            if (startFg < 0)
+            {
+                _ColorBitShift++;
+            }
+            else
+            {
+                /* if no default color support
+                 * shift to left, so you get 0 (black) */
+                _BgBitShift = _ColorBitShift;
+            }
+
+            _ColorBitMask = (byte)(byte.MaxValue >> (8 - _ColorBitShift));
 
             short pairIndex = 0;
-            for (short i = 0; i < colorCount; i++)
+            for (short bg = startBg ; bg < colorCount; bg++)
             {
-                for (short j = (short)(colorCount - 1); j >= 0; j--)
+                for (short fg = startFg ; fg < colorCount; fg++)
                 {
-                    if (pairIndex == 0)
-                    {
-                        pairIndex++;
-                        continue;
-                    }
-                    NCursesWrapper.init_pair(pairIndex++, j, i);
+                    pairIndex = ComputeDefaultColorPair(fg, bg);
+
+                    NCursesWrapper.init_pair
+                    (
+                        pairIndex,
+                        fg,
+                        bg
+                    );
                 }
             }
+
+            return colorCount;
+        }
+
+        /// <summary>
+        /// Compute the color pair referencing <paramref name="fg"/> and <paramref name="bg"/>
+        /// Using this method upto 127 colors are supported (127 * 127 pairs)
+        /// You can only use upto 256 pairs on single byte chars (windows)!
+        /// </summary>
+        /// <param name="fg">Foreground color (-1 for default)</param>
+        /// <param name="bg">Background color (-1 for default)</param>
+        /// <returns>The pair number of the combined foreground and background color</returns>
+        public static short ComputeDefaultColorPair(short fg, short bg)
+        {
+            if (_ColorBitShift == 0)
+            {
+                throw new InvalidOperationException("Color bit shift has not been set!");
+            }
+
+            short pairIndex = 0;
+            ushort cFg, cBg, mFg, mBg;
+
+            unchecked
+            {
+                cFg = (ushort)fg;
+                cBg = (ushort)bg;
+            }
+
+            mFg = (ushort)(cFg & _ColorBitMask);
+
+            if (cBg - (mBg = (ushort)(cBg & _ColorBitMask)) > 0)
+            {
+                mBg = (ushort)(mBg >> _BgBitShift);
+            }
+
+            pairIndex = (short)(mFg | (mBg << _ColorBitShift));
+
+            //account for reserved pair 0
+            return ++pairIndex;
+        }
+
+        private static int SetBitNumber(int n)
+        {
+            n |= n >> 1;
+            n |= n >> 2;
+
+            n |= n >> 4;
+            n |= n >> 8;
+            n |= n >> 16;
+
+            n = n + 1;
+
+            return (n >> 1);
+        }
+
+        private static bool IsPowerOfTwo(int n)
+        {
+            return n > 0 && ((n & (n - 1)) == 0);
+        }
+
+        // Returns position of the only set bit in 'n'
+        private static int FindPosition(int n)
+        {
+            if (!IsPowerOfTwo(n))
+            {
+                return -1;
+            }
+
+            int count = 0;
+
+            // One by one move the only set bit
+            // to right till it reaches end
+            while (n > 0)
+            {
+                n = n >> 1;
+
+                // increment count of shifts
+                ++count;
+            }
+
+            return count;
         }
 
         /// <summary>
@@ -428,6 +569,16 @@ namespace NCurses.Core
         public static ulong ColorPair(short pairIndex)
         {
             return (ulong)NativeNCurses.COLOR_PAIR(pairIndex);
+        }
+
+        /// <summary>
+        /// returns the pair index by (color) attribute
+        /// </summary>
+        /// <param name="attrs">the (color) attribute we want the pair index for</param>
+        /// <returns>pair index of the color attribute</returns>
+        public static int PairNumber(uint attrs)
+        {
+            return NativeNCurses.PAIR_NUMBER(attrs);
         }
 
         public static int Colors

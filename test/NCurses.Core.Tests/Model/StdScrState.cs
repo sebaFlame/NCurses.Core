@@ -19,6 +19,8 @@ namespace NCurses.Core.Tests.Model
         //DOES NOT work without NCurses initialization
         public bool SupportsMouse => NCurses.HasMouse;
 
+        public int ColorCount { get; private set; }
+
         protected IWindow StdScr { get; }
 
         public StdScrState()
@@ -34,7 +36,7 @@ namespace NCurses.Core.Tests.Model
         public void InitializeColor()
         {
             NCurses.StartColor();
-            NCurses.InitDefaultPairs();
+            this.ColorCount = NCurses.InitDefaultPairs();
         }
 
         public void Dispose()

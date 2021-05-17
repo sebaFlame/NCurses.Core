@@ -68,7 +68,7 @@ namespace NCurses.Core.Tests
         {
             Assert.True(this.StdScrState.SupportsColor);
 
-            this.Window.AttributesOn(Attrs.BOLD | Constants.COLOR_PAIR(4));
+            this.Window.EnableAttributesAndColor(Attrs.BOLD, 4);
 
             this.Window.Write(this.TestChar);
 
@@ -80,7 +80,7 @@ namespace NCurses.Core.Tests
             Assert.Equal(Attrs.BOLD, resultChar.Attributes);
             Assert.Equal(4, resultChar.ColorPair);
 
-            this.Window.AttributesOff(Attrs.BOLD | Constants.COLOR_PAIR(4));
+            this.Window.AttributesOff(Attrs.BOLD | Attrs.COLOR);
         }
 
         [Fact]
@@ -132,7 +132,7 @@ namespace NCurses.Core.Tests
         {
             Assert.True(this.StdScrState.SupportsColor);
 
-            this.Window.AttributesOn(Attrs.BOLD | Attrs.ITALIC | Constants.COLOR_PAIR(4));
+            this.Window.EnableAttributesAndColor(Attrs.BOLD | Attrs.ITALIC, NCurses.ComputeDefaultColorPair(3, 0));
 
             this.Window.Write(this.TestString);
 
@@ -144,9 +144,9 @@ namespace NCurses.Core.Tests
             string resultString = resultNCursesString.ToString();
             Assert.Equal(this.TestString, resultString);
             Assert.Equal(Attrs.BOLD | Attrs.ITALIC, resultNCursesString[0].Attributes);
-            Assert.Equal(4, resultNCursesString[0].ColorPair);
+            Assert.Equal(NCurses.ComputeDefaultColorPair(3, 0), resultNCursesString[0].ColorPair);
 
-            this.Window.AttributesOff(Attrs.BOLD | Attrs.ITALIC | Constants.COLOR_PAIR(4));
+            this.Window.AttributesOff(Attrs.BOLD | Attrs.ITALIC | Attrs.COLOR);
         }
 
         [Fact]
@@ -154,7 +154,7 @@ namespace NCurses.Core.Tests
         {
             Assert.True(this.StdScrState.SupportsColor);
 
-            INCursesCharString managedString = this.Window.CreateString(this.TestString, Attrs.BOLD | Attrs.ITALIC, 4);
+            INCursesCharString managedString = this.Window.CreateString(this.TestString, Attrs.BOLD | Attrs.ITALIC, NCurses.ComputeDefaultColorPair(3, 0));
 
             this.Window.Write(managedString);
 

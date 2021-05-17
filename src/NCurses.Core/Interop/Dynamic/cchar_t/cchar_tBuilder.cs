@@ -205,7 +205,6 @@ namespace NCurses.Core.Interop.Dynamic.cchar_t
             ctorIl = ctorBuilder.GetILGenerator();
 
             lcl0 = ctorIl.DeclareLocal(typeof(bool));
-            lbl1 = ctorIl.DefineLabel();
 
             //: this(c, attrs)
             ctorIl.Emit(OpCodes.Ldarg_0);
@@ -213,18 +212,11 @@ namespace NCurses.Core.Interop.Dynamic.cchar_t
             ctorIl.Emit(OpCodes.Ldarg_2);
             ctorIl.Emit(OpCodes.Call, charAttrCtorBuilder);
             ctorIl.Emit(OpCodes.Nop);
-            //if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
-            ctorIl.Emit(OpCodes.Call, typeof(OSPlatform).GetTypeInfo().GetProperty("Windows").GetMethod);
-            ctorIl.Emit(OpCodes.Call, typeof(RuntimeInformation).GetTypeInfo().GetMethod("IsOSPlatform"));
-            ctorIl.Emit(OpCodes.Stloc_0);
-            ctorIl.Emit(OpCodes.Ldloc_0);
-            ctorIl.Emit(OpCodes.Brfalse_S, lbl1);
             //this.ext_color = pair;
             ctorIl.Emit(OpCodes.Ldarg_0);
             ctorIl.Emit(OpCodes.Ldarg_3);
             ctorIl.Emit(OpCodes.Stfld, extField);
             //this.attr |= (ulong)NativeNCurses.COLOR_PAIR(pair);
-            ctorIl.MarkLabel(lbl1);
             ctorIl.Emit(OpCodes.Ldarg_0);
             ctorIl.Emit(OpCodes.Ldarg_0);
             ctorIl.Emit(OpCodes.Ldfld, attrField);
@@ -326,7 +318,6 @@ namespace NCurses.Core.Interop.Dynamic.cchar_t
             ctorIl = ctorBuilder.GetILGenerator();
 
             lcl0 = ctorIl.DeclareLocal(typeof(bool));
-            lbl1 = ctorIl.DefineLabel();
 
             //: this(encodedBytesChar, attrs)
             ctorIl.Emit(OpCodes.Ldarg_0);
@@ -334,17 +325,10 @@ namespace NCurses.Core.Interop.Dynamic.cchar_t
             ctorIl.Emit(OpCodes.Ldarg_2);
             ctorIl.Emit(OpCodes.Call, arrAttrCtorBuilder);
             ctorIl.Emit(OpCodes.Nop);
-            //if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
-            ctorIl.Emit(OpCodes.Call, typeof(OSPlatform).GetTypeInfo().GetProperty("Windows").GetMethod);
-            ctorIl.Emit(OpCodes.Call, typeof(RuntimeInformation).GetTypeInfo().GetMethod("IsOSPlatform"));
-            ctorIl.Emit(OpCodes.Stloc_0);
-            ctorIl.Emit(OpCodes.Ldloc_0);
-            ctorIl.Emit(OpCodes.Brfalse_S, lbl1);
             //this.ext_color = pair;
             ctorIl.Emit(OpCodes.Ldarg_0);
             ctorIl.Emit(OpCodes.Ldarg_3);
             ctorIl.Emit(OpCodes.Stfld, extField);
-            ctorIl.MarkLabel(lbl1);
             //this.attr |= (ulong)NativeNCurses.COLOR_PAIR(pair);
             ctorIl.Emit(OpCodes.Ldarg_0);
             ctorIl.Emit(OpCodes.Ldarg_0);
@@ -438,24 +422,15 @@ namespace NCurses.Core.Interop.Dynamic.cchar_t
 
             lcl0 = ctorIl.DeclareLocal(typeof(bool));
 
-            lbl1 = ctorIl.DefineLabel();
-
             ctorIl.Emit(OpCodes.Ldarg_0);
             ctorIl.Emit(OpCodes.Ldarg_1);
             ctorIl.Emit(OpCodes.Ldarg_2);
             ctorIl.Emit(OpCodes.Call, spanAttrCtorBuilder);
             ctorIl.Emit(OpCodes.Nop);
-            ctorIl.Emit(OpCodes.Call, typeof(OSPlatform).GetTypeInfo().GetProperty("Windows").GetMethod);
-            ctorIl.Emit(OpCodes.Call, typeof(RuntimeInformation).GetTypeInfo().GetMethod("IsOSPlatform"));
-            ctorIl.Emit(OpCodes.Stloc_S, lcl0);
-            ctorIl.Emit(OpCodes.Ldloc_S, lcl0);
-            ctorIl.Emit(OpCodes.Brfalse_S, lbl1);
-            ctorIl.Emit(OpCodes.Nop);
             ctorIl.Emit(OpCodes.Ldarg_0);
             ctorIl.Emit(OpCodes.Ldarg_3);
             ctorIl.Emit(OpCodes.Stfld, extField);
             ctorIl.Emit(OpCodes.Nop);
-            ctorIl.MarkLabel(lbl1);
             ctorIl.Emit(OpCodes.Ldarg_0);
             ctorIl.Emit(OpCodes.Ldarg_0);
             ctorIl.Emit(OpCodes.Ldfld, attrField);

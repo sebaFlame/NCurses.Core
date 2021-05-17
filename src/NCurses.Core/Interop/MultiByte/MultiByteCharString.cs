@@ -345,8 +345,8 @@ namespace NCurses.Core.Interop.MultiByte
         private static unsafe void CreateCharString(
             Span<byte> buffer,
             ReadOnlySpan<char> charArray, 
-            ulong attrs = 0, short 
-            colorPair = 0)
+            ulong attrs = 0, 
+            short colorPair = 0)
         {
             Span<TMultiByte> charString = MemoryMarshal.Cast<byte, TMultiByte>(buffer);
 

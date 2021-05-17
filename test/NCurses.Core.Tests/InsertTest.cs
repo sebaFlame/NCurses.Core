@@ -68,7 +68,7 @@ namespace NCurses.Core.Tests
         {
             Assert.True(this.StdScrState.SupportsColor);
 
-            this.Window.AttributesOn(Attrs.BOLD | Constants.COLOR_PAIR(4));
+            this.Window.EnableAttributesAndColor(Attrs.BOLD, 4);
 
             this.Window.Insert(this.TestChar);
 
@@ -80,7 +80,7 @@ namespace NCurses.Core.Tests
             Assert.Equal(Attrs.BOLD, resultChar.Attributes);
             Assert.Equal(4, resultChar.ColorPair);
 
-            this.Window.AttributesOff(Attrs.BOLD | Constants.COLOR_PAIR(4));
+            this.Window.AttributesOff(Attrs.BOLD | Attrs.COLOR);
         }
 
         [Fact]
@@ -132,7 +132,7 @@ namespace NCurses.Core.Tests
         {
             Assert.True(this.StdScrState.SupportsColor);
 
-            this.Window.AttributesOn(Attrs.BOLD | Attrs.ITALIC | Constants.COLOR_PAIR(4));
+            this.Window.EnableAttributesAndColor(Attrs.BOLD | Attrs.ITALIC, 4);
 
             this.Window.Insert(this.TestString);
 
@@ -146,7 +146,7 @@ namespace NCurses.Core.Tests
             Assert.Equal(Attrs.BOLD | Attrs.ITALIC, resultNCursesString[0].Attributes);
             Assert.Equal(4, resultNCursesString[0].ColorPair);
 
-            this.Window.AttributesOff(Attrs.BOLD | Attrs.ITALIC | Constants.COLOR_PAIR(4));
+            this.Window.AttributesOff(Attrs.BOLD | Attrs.ITALIC | Attrs.COLOR);
         }
     }
 }

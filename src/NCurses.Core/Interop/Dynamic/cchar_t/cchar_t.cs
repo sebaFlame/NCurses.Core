@@ -60,8 +60,7 @@ namespace NCurses.Core.Interop.Dynamic.cchar_t
         public cchar_t(char c, ulong attrs, short pair)
             : this(c, attrs)
         {
-            if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
-                this.ext_color = pair;
+            this.ext_color = pair;
             this.attr |= (ulong)NativeNCurses.COLOR_PAIR(pair);
         }
 
@@ -88,10 +87,7 @@ namespace NCurses.Core.Interop.Dynamic.cchar_t
         public cchar_t(ArraySegment<byte> encodedBytesChar, ulong attrs, short pair)
             : this(encodedBytesChar, attrs)
         {
-            if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
-            {
-                this.ext_color = pair;
-            }
+            this.ext_color = pair;
             this.attr |= (ulong)NativeNCurses.COLOR_PAIR(pair);
         }
 
@@ -118,10 +114,7 @@ namespace NCurses.Core.Interop.Dynamic.cchar_t
         public cchar_t(Span<byte> encodedBytesChar, ulong attrs, short pair)
             : this(encodedBytesChar, attrs)
         {
-            if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
-            {
-                this.ext_color = pair;
-            }
+            this.ext_color = pair;
             this.attr |= (ulong)NativeNCurses.COLOR_PAIR(pair);
         }
 

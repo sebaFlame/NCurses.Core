@@ -59,6 +59,8 @@ namespace NCurses.Core
         void CurrentAttributesAndColor(out ulong attrs, out short colorPair);
         void EnableAttributesAndColor(ulong attrs, short colorPair);
         void EnableColor(short colorPair);
+        void WriteColorCodex(int colorCount);
+
         void Erase();
         char ExtractChar();
         void ExtractChar(out INCursesChar ch);

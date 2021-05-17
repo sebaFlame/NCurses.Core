@@ -4,6 +4,7 @@ using System.Collections.Concurrent;
 using System.Linq;
 using System.Text;
 using System.Runtime.InteropServices;
+using System.Globalization;
 
 using NCurses.Core.Interop.MultiByte;
 using NCurses.Core.Interop.SingleByte;
@@ -19,7 +20,7 @@ namespace NCurses.Core
     /* TODO
      * methods using INCursesChar should allow other types than their own implementation
     */
-    public abstract class WindowBase<TMultiByte, TWideChar, TSingleByte, TChar, TMouseEvent> 
+    public abstract class WindowBase<TMultiByte, TWideChar, TSingleByte, TChar, TMouseEvent>
         : IWindow, IEquatable<WindowBase<TMultiByte, TWideChar, TSingleByte, TChar, TMouseEvent>>, IDisposable
         where TMultiByte : unmanaged, IMultiByteNCursesChar, IEquatable<TMultiByte>
         where TWideChar : unmanaged, IMultiByteChar, IEquatable<TWideChar>
@@ -242,6 +243,23 @@ namespace NCurses.Core
         /// </summary>
         /// <param name="colorPair">The color pair to use</param>
         public abstract void EnableColor(short colorPair);
+
+        public void WriteColorCodex(int colorCount)
+        {
+            int digits = (int)Math.Floor(Math.Log10(colorCount) + 1);
+            string digitFormat = new string('0', digits);
+            string format;
+
+            for (short bg = 0; bg < colorCount; bg++)
+            {
+                for (short fg = 0; fg < colorCount; fg++)
+                {
+                    format = string.Format($"({{0:{digitFormat}}},{{1:{digitFormat}}})", fg, bg);
+                    this.EnableAttributesAndColor(0, Core.NCurses.ComputeDefaultColorPair(fg, bg));
+                    this.Write(format);
+                }
+            }
+        }
         #endregion
 
         #region Write
