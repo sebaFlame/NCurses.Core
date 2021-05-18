@@ -197,11 +197,11 @@ namespace NCurses.Core.Interop.Dynamic.cchar_t
             ctorIl.Emit(OpCodes.Ret);
             #endregion
 
-            #region cchar_t(char c, ulong attrs, short pair)
+            #region cchar_t(char c, ulong attrs, ushort pair)
             ctorBuilder = typeBuilder.DefineConstructor(
                 MethodAttributes.Public | MethodAttributes.HideBySig | MethodAttributes.SpecialName | MethodAttributes.RTSpecialName,
                 CallingConventions.Standard,
-                new Type[] { typeof(char), typeof(ulong), typeof(short) });
+                new Type[] { typeof(char), typeof(ulong), typeof(ushort) });
             ctorIl = ctorBuilder.GetILGenerator();
 
             lcl0 = ctorIl.DeclareLocal(typeof(bool));
@@ -310,11 +310,11 @@ namespace NCurses.Core.Interop.Dynamic.cchar_t
             ctorIl.Emit(OpCodes.Ret);
             #endregion
 
-            #region cchar_t(ArraySegment<byte> encodedBytesChar, ulong attrs, short pair)
+            #region cchar_t(ArraySegment<byte> encodedBytesChar, ulong attrs, ushort pair)
             ctorBuilder = typeBuilder.DefineConstructor(
                 MethodAttributes.Public | MethodAttributes.HideBySig | MethodAttributes.SpecialName | MethodAttributes.RTSpecialName,
                 CallingConventions.Standard,
-                new Type[] { typeof(ArraySegment<byte>), typeof(ulong), typeof(short) });
+                new Type[] { typeof(ArraySegment<byte>), typeof(ulong), typeof(ushort) });
             ctorIl = ctorBuilder.GetILGenerator();
 
             lcl0 = ctorIl.DeclareLocal(typeof(bool));
@@ -413,11 +413,11 @@ namespace NCurses.Core.Interop.Dynamic.cchar_t
             ctorIl.Emit(OpCodes.Ret);
             #endregion
 
-            #region cchar_t(Span<byte> encodedBytesChar, ulong attrs, short pair)
+            #region cchar_t(Span<byte> encodedBytesChar, ulong attrs, ushort pair)
             ctorBuilder = typeBuilder.DefineConstructor(
                 MethodAttributes.Public | MethodAttributes.HideBySig | MethodAttributes.SpecialName | MethodAttributes.RTSpecialName,
                 CallingConventions.Standard,
-                new Type[] { typeof(Span<byte>), typeof(ulong), typeof(short) });
+                new Type[] { typeof(Span<byte>), typeof(ulong), typeof(ushort) });
             ctorIl = ctorBuilder.GetILGenerator();
 
             lcl0 = ctorIl.DeclareLocal(typeof(bool));
@@ -1061,21 +1061,34 @@ namespace NCurses.Core.Interop.Dynamic.cchar_t
             #endregion
 
             #region Color
+            //TODO: not correct!!!
             methodBuilder = typeBuilder.DefineMethod("get_ColorPair",
                 MethodAttributes.Public | MethodAttributes.Final | MethodAttributes.HideBySig | MethodAttributes.SpecialName | MethodAttributes.NewSlot | MethodAttributes.Virtual,
-                typeof(short),
+                typeof(ushort),
                 Array.Empty<Type>());
             methodIl = methodBuilder.GetILGenerator();
 
+            lbl1 = methodIl.DefineLabel();
+            lbl2 = methodIl.DefineLabel();
+
+            methodIl.Emit(OpCodes.Ldarg_0);
+            methodIl.Emit(OpCodes.Ldfld, extField);
+            methodIl.Emit(OpCodes.Brfalse_S, lbl1);
+            methodIl.Emit(OpCodes.Ldarg_0);
+            methodIl.Emit(OpCodes.Ldfld, extField);
+            methodIl.Emit(OpCodes.Conv_U2);
+            methodIl.Emit(OpCodes.Br_S, lbl2);
+            methodIl.MarkLabel(lbl1);
             methodIl.Emit(OpCodes.Ldarg_0);
             methodIl.Emit(OpCodes.Ldflda, attrField);
             methodIl.Emit(OpCodes.Call, chtype.GetTypeInfo().GetProperty("ColorPair").GetGetMethod());
+            methodIl.MarkLabel(lbl2);
             methodIl.Emit(OpCodes.Ret);
 
             propBuilder = typeBuilder.DefineProperty("ColorPair",
                 PropertyAttributes.None,
-                typeof(short),
-                new Type[] { typeof(short) });
+                typeof(ushort),
+                new Type[] { typeof(ushort) });
             propBuilder.SetGetMethod(methodBuilder);
             #endregion
 

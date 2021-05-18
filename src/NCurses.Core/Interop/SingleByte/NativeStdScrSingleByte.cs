@@ -31,12 +31,17 @@ namespace NCurses.Core.Interop.SingleByte
             NCursesException.Verify(this.Wrapper.addchstr(in txt.GetPinnableReference()), "addchstr");
         }
 
-        public void attr_get(out ulong attrs, out short pair)
+        public void attr_get(out ulong attrs, out ushort pair)
         {
             TSingleByte ch = SingleByteCharFactoryInternal<TSingleByte>.Instance.GetNativeEmptyCharInternal();
-            pair = 0;
-            NCursesException.Verify(this.Wrapper.attr_get(ref ch, ref pair, IntPtr.Zero), "attr_get");
+
+            short limitedPair = 0;
+            int extendedPair = 0;
+
+            NCursesException.Verify(this.Wrapper.attr_get(ref ch, ref limitedPair, ref extendedPair), "attr_get");
+
             attrs = ch.Attributes;
+            pair = extendedPair == 0 ? (ushort)limitedPair : (ushort)extendedPair;
         }
 
         public void attr_off(ulong attrs)
@@ -51,10 +56,12 @@ namespace NCurses.Core.Interop.SingleByte
             NCursesException.Verify(this.Wrapper.attr_on(attr, IntPtr.Zero), "attr_on");
         }
 
-        public void attr_set(ulong attrs, short pair)
+        public void attr_set(ulong attrs, ushort pair)
         {
             TSingleByte attr = SingleByteCharFactoryInternal<TSingleByte>.Instance.GetAttributeInternal(attrs);
-            NCursesException.Verify(this.Wrapper.attr_set(attr, pair, IntPtr.Zero), "attr_set");
+
+            int extendedPair = (int)pair;
+            NCursesException.Verify(this.Wrapper.attr_set(attr, (short)pair, ref extendedPair), "attr_set");
         }
 
         public void bkgd(in TSingleByte bkgd)

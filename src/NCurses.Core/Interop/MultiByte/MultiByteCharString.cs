@@ -142,7 +142,7 @@ namespace NCurses.Core.Interop.MultiByte
             int length, 
             string str, 
             ulong attrs, 
-            short pair)
+            ushort pair)
         {
             this.BufferPointer = buffer;
             this.BufferLength = length;
@@ -157,7 +157,7 @@ namespace NCurses.Core.Interop.MultiByte
             int length,
             ReadOnlySpan<char> str,
             ulong attrs,
-            short pair)
+            ushort pair)
         {
             this.BufferPointer = buffer;
             this.BufferLength = length;
@@ -172,7 +172,7 @@ namespace NCurses.Core.Interop.MultiByte
             int bufferLength,
             string str,
             ulong attrs,
-            short pair)
+            ushort pair)
         {
             this.BufferArray = buffer;
             this.BufferPointer = (byte*)0;
@@ -187,7 +187,7 @@ namespace NCurses.Core.Interop.MultiByte
             int bufferLength,
             ReadOnlySpan<char> str,
             ulong attrs,
-            short pair)
+            ushort pair)
         {
             this.BufferArray = buffer;
             this.BufferPointer = (byte*)0;
@@ -274,7 +274,7 @@ namespace NCurses.Core.Interop.MultiByte
             int stringLength,
             Encoding encoding, 
             ulong attrs, 
-            short color)
+            ushort color)
         {
             this.BufferPointer = buffer;
             this.BufferLength = bufferLength;
@@ -296,7 +296,7 @@ namespace NCurses.Core.Interop.MultiByte
             int stringLength,
             Encoding encoding,
             ulong attrs,
-            short color)
+            ushort color)
         {
             this.BufferArray = buffer;
             this.BufferPointer = (byte*)0;
@@ -346,7 +346,7 @@ namespace NCurses.Core.Interop.MultiByte
             Span<byte> buffer,
             ReadOnlySpan<char> charArray, 
             ulong attrs = 0, 
-            short colorPair = 0)
+            ushort colorPair = 0)
         {
             Span<TMultiByte> charString = MemoryMarshal.Cast<byte, TMultiByte>(buffer);
 
@@ -393,7 +393,7 @@ namespace NCurses.Core.Interop.MultiByte
             ReadOnlySpan<byte> bytes, 
             Encoding encoding, 
             ulong attrs = 0, 
-            short colorPair = 0)
+            ushort colorPair = 0)
         {
             Span<TMultiByte> charString = MemoryMarshal.Cast<byte, TMultiByte>(buffer);
 
@@ -431,7 +431,7 @@ namespace NCurses.Core.Interop.MultiByte
         public static unsafe int GetByteCount(ReadOnlySpan<byte> bytes, Encoding encoding, bool addNullTerminator = true) =>
             MultiByteCharFactoryInternal<TMultiByte>.Instance.GetByteCount(bytes, encoding, addNullTerminator);
 
-        private static TMultiByte CreateWideChar(ArraySegment<byte> encodedBytes, ulong attrs = 0, short colorPair = 0)
+        private static TMultiByte CreateWideChar(ArraySegment<byte> encodedBytes, ulong attrs = 0, ushort colorPair = 0)
         {
             if (attrs == 0 && colorPair == 0)
             {
@@ -447,7 +447,7 @@ namespace NCurses.Core.Interop.MultiByte
             }
         }
 
-        private static TMultiByte CreateWideChar(Span<byte> encodedBytes, ulong attrs = 0, short colorPair = 0)
+        private static TMultiByte CreateWideChar(Span<byte> encodedBytes, ulong attrs = 0, ushort colorPair = 0)
         {
             if (attrs == 0 && colorPair == 0)
             {

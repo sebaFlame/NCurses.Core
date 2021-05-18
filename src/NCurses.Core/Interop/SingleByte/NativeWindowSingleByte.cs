@@ -93,12 +93,17 @@ namespace NCurses.Core.Interop.SingleByte
             NCursesException.Verify(this.Wrapper.waddchstr(window, in chstr.GetPinnableReference()), "waddchstr");
         }
 
-        public void wattr_get(WindowBaseSafeHandle window, out ulong attrs, out short pair)
+        public void wattr_get(WindowBaseSafeHandle window, out ulong attrs, out ushort pair)
         {
             TSingleByte ch = SingleByteCharFactoryInternal<TSingleByte>.Instance.GetNativeEmptyCharInternal();
-            pair = 0;
-            NCursesException.Verify(this.Wrapper.wattr_get(window, ref ch, ref pair, IntPtr.Zero), "wattr_get");
+
+            short limitedPair = 0;
+            int extendedPair = 0;
+
+            NCursesException.Verify(this.Wrapper.wattr_get(window, ref ch, ref limitedPair, ref extendedPair), "wattr_get");
+
             attrs = ch.Attributes;
+            pair = extendedPair == 0 ? (ushort)limitedPair : (ushort)extendedPair;
         }
 
         public void wattr_off(WindowBaseSafeHandle window, ulong attrs)
@@ -113,10 +118,12 @@ namespace NCurses.Core.Interop.SingleByte
             NCursesException.Verify(this.Wrapper.wattr_on(window, attr, IntPtr.Zero), "wattr_on");
         }
 
-        public void wattr_set(WindowBaseSafeHandle window, ulong attrs, short pair)
+        public void wattr_set(WindowBaseSafeHandle window, ulong attrs, ushort pair)
         {
             TSingleByte attr = SingleByteCharFactoryInternal<TSingleByte>.Instance.GetAttributeInternal(attrs);
-            NCursesException.Verify(this.Wrapper.wattr_set(window, attr, pair, IntPtr.Zero), "wattr_set");
+
+            int extendedPair = (int)pair;
+            NCursesException.Verify(this.Wrapper.wattr_set(window, attr, (short)pair, ref extendedPair), "wattr_set");
         }
 
         public void wbkgd(WindowBaseSafeHandle window, in TSingleByte bkgd)

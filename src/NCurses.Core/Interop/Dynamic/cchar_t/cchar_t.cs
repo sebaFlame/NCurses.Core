@@ -16,11 +16,10 @@ namespace NCurses.Core.Interop.Dynamic.cchar_t
 
         public chtype.chtype attr;
         public unsafe fixed byte chars[charGlobalLength];
-        //can be 32767 instead of 0 on linux (short.Max? == 16bit max color of (short)ColorPair)
         public int ext_color;
 
         public char Char => (char)this;
-        public short ColorPair => attr.ColorPair;
+        public ushort ColorPair => ext_color == 0 ? attr.ColorPair : (ushort)ext_color;
         public ulong Attributes => (ulong)(this.attr ^ (this.attr & Attrs.COLOR));
 
         public unsafe Span<byte> EncodedChar
@@ -57,7 +56,7 @@ namespace NCurses.Core.Interop.Dynamic.cchar_t
             this.attr = attrs;
         }
 
-        public cchar_t(char c, ulong attrs, short pair)
+        public cchar_t(char c, ulong attrs, ushort pair)
             : this(c, attrs)
         {
             this.ext_color = pair;
@@ -84,7 +83,7 @@ namespace NCurses.Core.Interop.Dynamic.cchar_t
             this.attr = attrs;
         }
 
-        public cchar_t(ArraySegment<byte> encodedBytesChar, ulong attrs, short pair)
+        public cchar_t(ArraySegment<byte> encodedBytesChar, ulong attrs, ushort pair)
             : this(encodedBytesChar, attrs)
         {
             this.ext_color = pair;
@@ -111,7 +110,7 @@ namespace NCurses.Core.Interop.Dynamic.cchar_t
             this.attr = attrs;
         }
 
-        public cchar_t(Span<byte> encodedBytesChar, ulong attrs, short pair)
+        public cchar_t(Span<byte> encodedBytesChar, ulong attrs, ushort pair)
             : this(encodedBytesChar, attrs)
         {
             this.ext_color = pair;

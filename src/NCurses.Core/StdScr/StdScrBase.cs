@@ -50,12 +50,12 @@ namespace NCurses.Core.StdScr
             StdScr.clrtoeol();
         }
 
-        public override void CurrentAttributesAndColor(out ulong attrs, out short colorPair)
+        public override void CurrentAttributesAndColor(out ulong attrs, out ushort colorPair)
         {
             StdScr.attr_get(out attrs, out colorPair);
         }
 
-        public override void EnableAttributesAndColor(ulong attrs, short colorPair)
+        public override void EnableAttributesAndColor(ulong attrs, ushort colorPair)
         {
             StdScr.attr_set(attrs, colorPair);
         }

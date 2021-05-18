@@ -229,14 +229,14 @@ namespace NCurses.Core
         /// </summary>
         /// <param name="attrs">The current enabled attributes OR'd together</param>
         /// <param name="colorPair">The current active color pair</param>
-        public abstract void CurrentAttributesAndColor(out ulong attrs, out short colorPair);
+        public abstract void CurrentAttributesAndColor(out ulong attrs, out ushort colorPair);
 
         /// <summary>
         /// Activate attributes OR's together and color
         /// </summary>
         /// <param name="attrs">Attributes to enable</param>
         /// <param name="colorPair">Color pair to use</param>
-        public abstract void EnableAttributesAndColor(ulong attrs, short colorPair);
+        public abstract void EnableAttributesAndColor(ulong attrs, ushort colorPair);
 
         /// <summary>
         /// Activate a color
@@ -289,8 +289,8 @@ namespace NCurses.Core
         /// <param name="str">the string to write</param>
         /// <param name="attrs">the attributes you want to add (eg <see cref="Attrs.BOLD"/>)</param>
         /// <param name="pair">the color pair you want to use on this character</param>
-        public abstract void Write(string str, ulong attrs, short pair);
-        public abstract void Write(ReadOnlySpan<char> str, ulong attrs, short pair);
+        public abstract void Write(string str, ulong attrs, ushort pair);
+        public abstract void Write(ReadOnlySpan<char> str, ulong attrs, ushort pair);
 
         /// <summary>
         /// write string <paramref name="str"/> to the window on line <paramref name="nline"/> and column <paramref name="ncol"/>.
@@ -310,8 +310,8 @@ namespace NCurses.Core
         /// <param name="str">the string to add</param>
         /// <param name="attrs">the attributes you want to add (eg <see cref="Attrs.BOLD"/>)</param>
         /// <param name="pair">the color pair you want to use on this character</param>
-        public abstract void Write(int nline, int ncol, string str, ulong attrs, short pair);
-        public abstract void Write(int nline, int ncol, ReadOnlySpan<char> str, ulong attrs, short pair);
+        public abstract void Write(int nline, int ncol, string str, ulong attrs, ushort pair);
+        public abstract void Write(int nline, int ncol, ReadOnlySpan<char> str, ulong attrs, ushort pair);
 
         /// <summary>
         /// write character <paramref name="ch"/> to the window.
@@ -325,7 +325,7 @@ namespace NCurses.Core
         /// <param name="ch">the character to add</param>
         /// <param name="attrs">the attributes you want to add (eg <see cref="Attrs.BOLD"/>)</param>
         /// <param name="pair">the color pair you want to use on this character</param>
-        public abstract void Write(char ch, ulong attrs, short pair);
+        public abstract void Write(char ch, ulong attrs, ushort pair);
 
         /// <summary>
         /// write the character/attributes <paramref name="ch"/> to line <paramref name="nline"/> and column <paramref name="ncol"/>.
@@ -345,7 +345,7 @@ namespace NCurses.Core
         /// <param name="ch">the character/attributes to add</param>
         /// <param name="attrs">the attributes you want to add (eg <see cref="Attrs.BOLD"/>)</param>
         /// <param name="pair">the color pair you want to use on this character</param>
-        public abstract void Write(int nline, int ncol, char ch, ulong attrs, short pair);
+        public abstract void Write(int nline, int ncol, char ch, ulong attrs, ushort pair);
 
         /// <summary>
         /// write byte array <paramref name="str"/>  encoded in <paramref name="encoding"/> to the window.
@@ -361,7 +361,7 @@ namespace NCurses.Core
         /// <param name="encoding">encoding of <paramref name="str"/></param>
         /// <param name="attrs">the attributes you want to add (eg <see cref="Attrs.BOLD"/>)</param>
         /// <param name="pair">the color pair you want to use on this character</param>
-        public abstract void Write(byte[] str, Encoding encoding, ulong attrs, short pair);
+        public abstract void Write(byte[] str, Encoding encoding, ulong attrs, ushort pair);
 
         /// <summary>
         /// write byte array <paramref name="str"/> encoded in <paramref name="encoding"/> to the window on line <paramref name="nline"/> and column <paramref name="ncol"/>.
@@ -382,7 +382,7 @@ namespace NCurses.Core
         /// <param name="encoding">encoding of <paramref name="str"/></param>
         /// <param name="attrs">the attributes you want to add (eg <see cref="Attrs.BOLD"/>)</param>
         /// <param name="pair">the color pair you want to use on this character</param>
-        public abstract void Write(int nline, int ncol, byte[] str, Encoding encoding, ulong attrs, short pair);
+        public abstract void Write(int nline, int ncol, byte[] str, Encoding encoding, ulong attrs, ushort pair);
 
         public abstract void Write(int nline, int ncol, in INCursesChar ch);
         public abstract void Write(int nline, int ncol, in INCursesCharString str);
@@ -478,7 +478,7 @@ namespace NCurses.Core
         /// <param name="ch">the character to insert</param>
         /// <param name="attrs">the attributes you want to add (eg <see cref="Attrs.BOLD"/>)</param>
         /// <param name="pair">the color pair you want to use on this character</param>
-        public abstract void Insert(char ch, ulong attrs, short pair);
+        public abstract void Insert(char ch, ulong attrs, ushort pair);
 
         /// <summary>
         /// insert a character with attributes/color on line <paramref name="nline"/> and column <paramref name="ncol"/>. 
@@ -489,7 +489,7 @@ namespace NCurses.Core
         /// <param name="ch">the character to insert</param>
         /// <param name="attrs">the attributes you want to add (eg <see cref="Attrs.BOLD"/>)</param>
         /// <param name="pair">the color pair you want to use on this character</param>
-        public abstract void Insert(int nline, int ncol, char ch, ulong attrs, short pair);
+        public abstract void Insert(int nline, int ncol, char ch, ulong attrs, ushort pair);
 
         /// <summary>
         /// insert a string on the current cursor position. all characaters on the right move the lenght of the string.
@@ -508,8 +508,8 @@ namespace NCurses.Core
         public abstract void Insert(int nline, int ncol, string str);
         public abstract void Insert(int nline, int ncol, ReadOnlySpan<char> str);
 
-        public abstract void Insert(string str, ulong attrs, short pair);
-        public abstract void Insert(ReadOnlySpan<char> str, ulong attrs, short pair);
+        public abstract void Insert(string str, ulong attrs, ushort pair);
+        public abstract void Insert(ReadOnlySpan<char> str, ulong attrs, ushort pair);
         #endregion
 
         #region extract output
@@ -549,7 +549,7 @@ namespace NCurses.Core
         /// <param name="attrs">attributes applied to the character</param>
         /// <param name="pair">pair number applied to the character</param>
         /// <returns>the read character</returns>
-        public abstract char ExtractChar(out ulong attrs, out short pair);
+        public abstract char ExtractChar(out ulong attrs, out ushort pair);
 
         /// <summary>
         /// read a character with all its attributes from the console output on line <paramref name="nline"/> and column <paramref name="ncol"/>. 
@@ -561,7 +561,7 @@ namespace NCurses.Core
         /// <param name="attrs">attributes applied to the character</param>
         /// <param name="pair">pair number applied to the character</param>
         /// <returns>the read character</returns>
-        public abstract char ExtractChar(int nline, int ncol, out ulong attrs, out short pair);
+        public abstract char ExtractChar(int nline, int ncol, out ulong attrs, out ushort pair);
 
         /// <summary>
         /// read a string of atmost <see cref="Constants.MAX_STRING_LENGTH"/> characters or until the right margin from the console output.
@@ -654,7 +654,7 @@ namespace NCurses.Core
         /// <param name="attrs">attributes applied to the character</param>
         /// <param name="pair">pair number applied to the character</param>
         /// <returns>The converted cahracter</returns>
-        public abstract INCursesChar CreateChar(char ch, ulong attrs, short pair);
+        public abstract INCursesChar CreateChar(char ch, ulong attrs, ushort pair);
 
         /// <summary>
         /// Get a native string representing <paramref name="str"/>
@@ -680,8 +680,8 @@ namespace NCurses.Core
         /// <param name="attrs">attributes applied to the character</param>
         /// <param name="pair">pair number applied to the character</param>
         /// <returns>The converted cahracter</returns>
-        public abstract INCursesCharString CreateString(string str, ulong attrs, short pair);
-        public abstract INCursesCharString CreateString(ReadOnlySpan<char> str, ulong attrs, short pair);
+        public abstract INCursesCharString CreateString(string str, ulong attrs, ushort pair);
+        public abstract INCursesCharString CreateString(ReadOnlySpan<char> str, ulong attrs, ushort pair);
         #endregion
 
         #region border

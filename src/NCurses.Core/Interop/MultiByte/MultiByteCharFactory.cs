@@ -14,7 +14,7 @@ namespace NCurses.Core.Interop.MultiByte
     internal delegate TMultiByte CreateMultiByteCharWithAttributeFromSpan<TMultiByte>(Span<byte> byteSpan, ulong attrs)
         where TMultiByte : unmanaged, IMultiByteNCursesChar, IEquatable<TMultiByte>;
 
-    internal delegate TMultiByte CreateMultiByteCharWithAttributeAndColorPairFromSpan<TMultiByte>(Span<byte> byteSpan, ulong attrs, short color)
+    internal delegate TMultiByte CreateMultiByteCharWithAttributeAndColorPairFromSpan<TMultiByte>(Span<byte> byteSpan, ulong attrs, ushort color)
         where TMultiByte : unmanaged, IMultiByteNCursesChar, IEquatable<TMultiByte>;
 
     /// <summary>
@@ -50,7 +50,7 @@ namespace NCurses.Core.Interop.MultiByte
         public IMultiByteNCursesChar GetNativeChar(char ch, ulong attrs) => 
             Factory.GetNativeChar(ch, attrs);
 
-        public IMultiByteNCursesChar GetNativeChar(char ch, ulong attrs, short colorPair) =>
+        public IMultiByteNCursesChar GetNativeChar(char ch, ulong attrs, ushort colorPair) =>
             Factory.GetNativeChar(ch, attrs, colorPair);
 
         public IMultiByteNCursesCharString GetNativeEmptyString(int length) =>
@@ -68,10 +68,10 @@ namespace NCurses.Core.Interop.MultiByte
         public IMultiByteNCursesCharString GetNativeString(ReadOnlySpan<char> str, ulong attrs) =>
             Factory.GetNativeString(str, attrs);
 
-        public IMultiByteNCursesCharString GetNativeString(string str, ulong attrs, short colorPair) =>
+        public IMultiByteNCursesCharString GetNativeString(string str, ulong attrs, ushort colorPair) =>
             Factory.GetNativeString(str, attrs, colorPair);
 
-        public IMultiByteNCursesCharString GetNativeString(ReadOnlySpan<char> str, ulong attrs, short colorPair) =>
+        public IMultiByteNCursesCharString GetNativeString(ReadOnlySpan<char> str, ulong attrs, ushort colorPair) =>
             Factory.GetNativeString(str, attrs, colorPair);
 
         public unsafe IMultiByteNCursesCharString GetNativeEmptyString(byte* buffer, int bufferLenght, int stringLength)
@@ -104,16 +104,16 @@ namespace NCurses.Core.Interop.MultiByte
         public IMultiByteNCursesCharString GetNativeString(byte[] buffer, int bufferLength, ReadOnlySpan<char> str, ulong attrs)
             => Factory.GetNativeString(buffer, bufferLength, str, attrs);
 
-        public unsafe IMultiByteNCursesCharString GetNativeString(byte* buffer, int length, string str, ulong attrs, short colorPair)
+        public unsafe IMultiByteNCursesCharString GetNativeString(byte* buffer, int length, string str, ulong attrs, ushort colorPair)
             => Factory.GetNativeString(buffer, length, str, attrs, colorPair);
 
-        public unsafe IMultiByteNCursesCharString GetNativeString(byte* buffer, int length, ReadOnlySpan<char> str, ulong attrs, short colorPair)
+        public unsafe IMultiByteNCursesCharString GetNativeString(byte* buffer, int length, ReadOnlySpan<char> str, ulong attrs, ushort colorPair)
             => Factory.GetNativeString(buffer, length, str, attrs, colorPair);
 
-        public IMultiByteNCursesCharString GetNativeString(byte[] buffer, int bufferLength, string str, ulong attrs, short colorPair)
+        public IMultiByteNCursesCharString GetNativeString(byte[] buffer, int bufferLength, string str, ulong attrs, ushort colorPair)
             => Factory.GetNativeString(buffer, bufferLength, str, attrs, colorPair);
 
-        public IMultiByteNCursesCharString GetNativeString(byte[] buffer, int bufferLength, ReadOnlySpan<char> str, ulong attrs, short colorPair)
+        public IMultiByteNCursesCharString GetNativeString(byte[] buffer, int bufferLength, ReadOnlySpan<char> str, ulong attrs, ushort colorPair)
             => Factory.GetNativeString(buffer, bufferLength, str, attrs, colorPair);
 
         public int GetByteCount(string str)
@@ -135,7 +135,7 @@ namespace NCurses.Core.Interop.MultiByte
     {
         internal static Func<ArraySegment<byte>, TMultiByte> CreateCharFromArraySegment;
         internal static Func<ArraySegment<byte>, ulong, TMultiByte> CreateCharWithAttributeFromArraySegment;
-        internal static Func<ArraySegment<byte>, ulong, short, TMultiByte> CreateCharWithAttributeAndColorPairFromArraySegment;
+        internal static Func<ArraySegment<byte>, ulong, ushort, TMultiByte> CreateCharWithAttributeAndColorPairFromArraySegment;
 
         internal static CreateMultiByteCharFromSpan<TMultiByte> CreateCharFromSpan;
         internal static CreateMultiByteCharWithAttributeFromSpan<TMultiByte> CreateCharWithAttributeFromSpan;
@@ -143,7 +143,7 @@ namespace NCurses.Core.Interop.MultiByte
 
         internal static Func<char, TMultiByte> CreateCharFromChar;
         internal static Func<char, ulong, TMultiByte> CreateCharWithAttributeFromChar;
-        internal static Func<char, ulong, short, TMultiByte> CreateCharWithAttributeAndColorPairFromChar;
+        internal static Func<char, ulong, ushort, TMultiByte> CreateCharWithAttributeAndColorPairFromChar;
 
         internal static MultiByteCharFactoryInternal<TMultiByte> Instance { get; }
 
@@ -156,7 +156,7 @@ namespace NCurses.Core.Interop.MultiByte
 
             par1 = Expression.Parameter(typeof(ArraySegment<byte>));
             par2 = Expression.Parameter(typeof(ulong));
-            par3 = Expression.Parameter(typeof(short));
+            par3 = Expression.Parameter(typeof(ushort));
 
             ctor = typeof(TMultiByte).GetConstructor(new Type[] { typeof(ArraySegment<byte>) });
             CreateCharFromArraySegment =
@@ -166,9 +166,9 @@ namespace NCurses.Core.Interop.MultiByte
             CreateCharWithAttributeFromArraySegment =
                 Expression.Lambda<Func<ArraySegment<byte>, ulong, TMultiByte>>(Expression.New(ctor, par1, par2), par1, par2).Compile();
 
-            ctor = typeof(TMultiByte).GetConstructor(new Type[] { typeof(ArraySegment<byte>), typeof(ulong), typeof(short) });
+            ctor = typeof(TMultiByte).GetConstructor(new Type[] { typeof(ArraySegment<byte>), typeof(ulong), typeof(ushort) });
             CreateCharWithAttributeAndColorPairFromArraySegment =
-                Expression.Lambda<Func<ArraySegment<byte>, ulong, short, TMultiByte>>(Expression.New(ctor, par1, par2, par3), par1, par2, par3).Compile();
+                Expression.Lambda<Func<ArraySegment<byte>, ulong, ushort, TMultiByte>>(Expression.New(ctor, par1, par2, par3), par1, par2, par3).Compile();
 
             par1 = Expression.Parameter(typeof(Span<byte>));
 
@@ -180,7 +180,7 @@ namespace NCurses.Core.Interop.MultiByte
             CreateCharWithAttributeFromSpan =
                 Expression.Lambda<CreateMultiByteCharWithAttributeFromSpan<TMultiByte>>(Expression.New(ctor, par1, par2), par1, par2).Compile();
 
-            ctor = typeof(TMultiByte).GetConstructor(new Type[] { typeof(Span<byte>), typeof(ulong), typeof(short) });
+            ctor = typeof(TMultiByte).GetConstructor(new Type[] { typeof(Span<byte>), typeof(ulong), typeof(ushort) });
             CreateCharWithAttributeAndColorPairFromSpan =
                 Expression.Lambda<CreateMultiByteCharWithAttributeAndColorPairFromSpan<TMultiByte>>(Expression.New(ctor, par1, par2, par3), par1, par2, par3).Compile();
 
@@ -193,9 +193,9 @@ namespace NCurses.Core.Interop.MultiByte
             CreateCharWithAttributeFromChar =
                 Expression.Lambda<Func<char, ulong, TMultiByte>>(Expression.New(ctor, par1, par2), par1, par2).Compile();
 
-            ctor = typeof(TMultiByte).GetConstructor(new Type[] { typeof(char), typeof(ulong), typeof(short) });
+            ctor = typeof(TMultiByte).GetConstructor(new Type[] { typeof(char), typeof(ulong), typeof(ushort) });
             CreateCharWithAttributeAndColorPairFromChar =
-                Expression.Lambda<Func<char, ulong, short, TMultiByte>>(Expression.New(ctor, par1, par2, par3), par1, par2, par3).Compile();
+                Expression.Lambda<Func<char, ulong, ushort, TMultiByte>>(Expression.New(ctor, par1, par2, par3), par1, par2, par3).Compile();
         }
 
         #region ICharFactoryInternal<TChar, TString>
@@ -242,7 +242,7 @@ namespace NCurses.Core.Interop.MultiByte
         public TMultiByte GetNativeCharInternal(char ch, ulong attrs) => 
             CreateCharWithAttributeFromChar(ch, attrs);
 
-        public TMultiByte GetNativeCharInternal(char ch, ulong attrs, short colorPair) => 
+        public TMultiByte GetNativeCharInternal(char ch, ulong attrs, ushort colorPair) => 
             CreateCharWithAttributeAndColorPairFromChar(ch, attrs, colorPair);
 
         public unsafe MultiByteCharString<TMultiByte> GetNativeStringInternal(byte* buffer, int length, string str, ulong attrs) => 
@@ -257,16 +257,16 @@ namespace NCurses.Core.Interop.MultiByte
         public MultiByteCharString<TMultiByte> GetNativeStringInternal(byte[] buffer, int bufferLength, ReadOnlySpan<char> str, ulong attrs) =>
             new MultiByteCharString<TMultiByte>(buffer, bufferLength, str, attrs);
 
-        public unsafe MultiByteCharString<TMultiByte> GetNativeStringInternal(byte* buffer, int length, string str, ulong attrs, short colorPair) =>
+        public unsafe MultiByteCharString<TMultiByte> GetNativeStringInternal(byte* buffer, int length, string str, ulong attrs, ushort colorPair) =>
             new MultiByteCharString<TMultiByte>(buffer, length, str, attrs, colorPair);
 
-        public unsafe MultiByteCharString<TMultiByte> GetNativeStringInternal(byte* buffer, int length, ReadOnlySpan<char> str, ulong attrs, short colorPair) =>
+        public unsafe MultiByteCharString<TMultiByte> GetNativeStringInternal(byte* buffer, int length, ReadOnlySpan<char> str, ulong attrs, ushort colorPair) =>
             new MultiByteCharString<TMultiByte>(buffer, length, str, attrs, colorPair);
 
-        public MultiByteCharString<TMultiByte> GetNativeStringInternal(byte[] buffer, int bufferLength, string str, ulong attrs, short colorPair) =>
+        public MultiByteCharString<TMultiByte> GetNativeStringInternal(byte[] buffer, int bufferLength, string str, ulong attrs, ushort colorPair) =>
             new MultiByteCharString<TMultiByte>(buffer, bufferLength, str, attrs, colorPair);
 
-        public MultiByteCharString<TMultiByte> GetNativeStringInternal(byte[] buffer, int bufferLength, ReadOnlySpan<char> str, ulong attrs, short colorPair) =>
+        public MultiByteCharString<TMultiByte> GetNativeStringInternal(byte[] buffer, int bufferLength, ReadOnlySpan<char> str, ulong attrs, ushort colorPair) =>
             new MultiByteCharString<TMultiByte>(buffer, bufferLength, str, attrs, colorPair);
         #endregion
 
@@ -280,7 +280,7 @@ namespace NCurses.Core.Interop.MultiByte
         public IMultiByteNCursesChar GetNativeChar(char ch, ulong attr) =>
             this.GetNativeCharInternal(ch, attr);
 
-        public IMultiByteNCursesChar GetNativeChar(char ch, ulong attr, short pair) =>
+        public IMultiByteNCursesChar GetNativeChar(char ch, ulong attr, ushort pair) =>
             this.GetNativeCharInternal(ch, attr, pair);
 
         public unsafe IMultiByteNCursesCharString GetNativeEmptyString(byte* buffer, int bufferLength, int stringLength)
@@ -328,22 +328,22 @@ namespace NCurses.Core.Interop.MultiByte
         public IMultiByteNCursesCharString GetNativeString(ReadOnlySpan<char> str, ulong attrs)
             => this.GetNativeString(new byte[this.GetByteCount(str)], this.GetByteCount(str), str, attrs);
 
-        public unsafe IMultiByteNCursesCharString GetNativeString(byte* buffer, int length, string str, ulong attrs, short colorPair)
+        public unsafe IMultiByteNCursesCharString GetNativeString(byte* buffer, int length, string str, ulong attrs, ushort colorPair)
             => this.GetNativeStringInternal(buffer, length, str, attrs, colorPair);
 
-        public unsafe IMultiByteNCursesCharString GetNativeString(byte* buffer, int length, ReadOnlySpan<char> str, ulong attrs, short colorPair)
+        public unsafe IMultiByteNCursesCharString GetNativeString(byte* buffer, int length, ReadOnlySpan<char> str, ulong attrs, ushort colorPair)
             => this.GetNativeStringInternal(buffer, length, str, attrs, colorPair);
 
-        public IMultiByteNCursesCharString GetNativeString(byte[] buffer, int bufferLength, string str, ulong attrs, short colorPair)
+        public IMultiByteNCursesCharString GetNativeString(byte[] buffer, int bufferLength, string str, ulong attrs, ushort colorPair)
             => this.GetNativeStringInternal(buffer, bufferLength, str, attrs, colorPair);
 
-        public IMultiByteNCursesCharString GetNativeString(byte[] buffer, int bufferLength, ReadOnlySpan<char> str, ulong attrs, short colorPair)
+        public IMultiByteNCursesCharString GetNativeString(byte[] buffer, int bufferLength, ReadOnlySpan<char> str, ulong attrs, ushort colorPair)
             => this.GetNativeStringInternal(buffer, bufferLength, str, attrs, colorPair);
 
-        public IMultiByteNCursesCharString GetNativeString(string str, ulong attrs, short colorPair)
+        public IMultiByteNCursesCharString GetNativeString(string str, ulong attrs, ushort colorPair)
             => this.GetNativeStringInternal(new byte[this.GetByteCount(str)], this.GetByteCount(str), str, attrs, colorPair);
 
-        public IMultiByteNCursesCharString GetNativeString(ReadOnlySpan<char> str, ulong attrs, short colorPair)
+        public IMultiByteNCursesCharString GetNativeString(ReadOnlySpan<char> str, ulong attrs, ushort colorPair)
             => this.GetNativeStringInternal(new byte[this.GetByteCount(str)], this.GetByteCount(str), str, attrs, colorPair);
 
         public int GetByteCount(string str)
@@ -368,10 +368,10 @@ namespace NCurses.Core.Interop.MultiByte
         public MultiByteCharString<TMultiByte> GetNativeStringInternal(byte[] buffer, int bufferLength, ReadOnlySpan<byte> str, int stringLength, Encoding encoding, ulong attrs) =>
             new MultiByteCharString<TMultiByte>(buffer, bufferLength, str, stringLength, encoding, attrs);
 
-        public unsafe MultiByteCharString<TMultiByte> GetNativeStringInternal(byte* buffer, int bufferLength, ReadOnlySpan<byte> str, int stringLength, Encoding encoding, ulong attrs, short colorPair) =>
+        public unsafe MultiByteCharString<TMultiByte> GetNativeStringInternal(byte* buffer, int bufferLength, ReadOnlySpan<byte> str, int stringLength, Encoding encoding, ulong attrs, ushort colorPair) =>
             new MultiByteCharString<TMultiByte>(buffer, bufferLength, str, stringLength, encoding, attrs, colorPair);
 
-        public MultiByteCharString<TMultiByte> GetNativeStringInternal(byte[] buffer, int bufferLength, ReadOnlySpan<byte> str, int stringLength, Encoding encoding, ulong attrs, short colorPair) =>
+        public MultiByteCharString<TMultiByte> GetNativeStringInternal(byte[] buffer, int bufferLength, ReadOnlySpan<byte> str, int stringLength, Encoding encoding, ulong attrs, ushort colorPair) =>
             new MultiByteCharString<TMultiByte>(buffer, bufferLength, str, stringLength, encoding, attrs, colorPair);
 
         public unsafe int GetByteCount(ReadOnlySpan<byte> bytes, Encoding encoding, bool addNullTerminator = true)
@@ -401,13 +401,13 @@ namespace NCurses.Core.Interop.MultiByte
         public IMultiByteNCursesCharString GetNativeString(ReadOnlySpan<byte> str, int stringLength, Encoding encoding, ulong attrs)
             => this.GetNativeString(new byte[this.GetByteCount(str, encoding)], this.GetByteCount(str, encoding), str, stringLength, encoding, attrs);
 
-        public unsafe IMultiByteNCursesCharString GetNativeString(byte* buffer, int length, ReadOnlySpan<byte> str, int stringLength, Encoding encoding, ulong attr, short pair)
+        public unsafe IMultiByteNCursesCharString GetNativeString(byte* buffer, int length, ReadOnlySpan<byte> str, int stringLength, Encoding encoding, ulong attr, ushort pair)
             => this.GetNativeStringInternal(buffer, length, str, stringLength, encoding, attr, pair);
 
-        public IMultiByteNCursesCharString GetNativeString(byte[] buffer, int bufferLength, ReadOnlySpan<byte> str, int stringLength, Encoding encoding, ulong attr, short pair)
+        public IMultiByteNCursesCharString GetNativeString(byte[] buffer, int bufferLength, ReadOnlySpan<byte> str, int stringLength, Encoding encoding, ulong attr, ushort pair)
             => this.GetNativeStringInternal(buffer, bufferLength, str, stringLength, encoding, attr, pair);
 
-        public IMultiByteNCursesCharString GetNativeString(ReadOnlySpan<byte> str, int stringLength, Encoding encoding, ulong attr, short pair)
+        public IMultiByteNCursesCharString GetNativeString(ReadOnlySpan<byte> str, int stringLength, Encoding encoding, ulong attr, ushort pair)
             => this.GetNativeString(new byte[this.GetByteCount(str, encoding)], this.GetByteCount(str, encoding), str, stringLength, encoding, attr, pair);
     }
 }

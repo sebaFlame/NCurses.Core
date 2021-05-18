@@ -34,21 +34,21 @@ namespace NCurses.Core.Interop
         where TString : INCursesCharString
     {
         TChar GetNativeChar(char ch, ulong attrs);
-        TChar GetNativeChar(char ch, ulong attrs, short colorPair);
+        TChar GetNativeChar(char ch, ulong attrs, ushort colorPair);
 
         TString GetNativeString(string str, ulong attrs);
         TString GetNativeString(ReadOnlySpan<char> str, ulong attrs);
-        TString GetNativeString(string str, ulong attrs, short colorPair);
-        TString GetNativeString(ReadOnlySpan<char> str, ulong attrs, short colorPair);
+        TString GetNativeString(string str, ulong attrs, ushort colorPair);
+        TString GetNativeString(ReadOnlySpan<char> str, ulong attrs, ushort colorPair);
 
         unsafe TString GetNativeString(byte* buffer, int bufferLength, string str, ulong attrs);
         unsafe TString GetNativeString(byte* buffer, int bufferLength, ReadOnlySpan<char> str, ulong attrs);
         TString GetNativeString(byte[] buffer, int bufferLength, string str, ulong attrs);
         TString GetNativeString(byte[] buffer, int bufferLength, ReadOnlySpan<char> str, ulong attrs);
-        unsafe TString GetNativeString(byte* buffer, int bufferLength, string str, ulong attrs, short colorPair);
-        unsafe TString GetNativeString(byte* buffer, int bufferLength, ReadOnlySpan<char> str, ulong attrs, short colorPair);
-        TString GetNativeString(byte[] buffer, int bufferLength, string str, ulong attrs, short colorPair);
-        TString GetNativeString(byte[] buffer, int bufferLength, ReadOnlySpan<char> str, ulong attrs, short colorPair);
+        unsafe TString GetNativeString(byte* buffer, int bufferLength, string str, ulong attrs, ushort colorPair);
+        unsafe TString GetNativeString(byte* buffer, int bufferLength, ReadOnlySpan<char> str, ulong attrs, ushort colorPair);
+        TString GetNativeString(byte[] buffer, int bufferLength, string str, ulong attrs, ushort colorPair);
+        TString GetNativeString(byte[] buffer, int bufferLength, ReadOnlySpan<char> str, ulong attrs, ushort colorPair);
     }
 
     internal interface ICharFactoryInternal<TChar, TString>
@@ -81,15 +81,15 @@ namespace NCurses.Core.Interop
         where TString : struct, TStringType, IEnumerable<TCharType>
     {
         TChar GetNativeCharInternal(char ch, ulong attrs);
-        TChar GetNativeCharInternal(char ch, ulong attrs, short colorPair);
+        TChar GetNativeCharInternal(char ch, ulong attrs, ushort colorPair);
 
         unsafe TString GetNativeStringInternal(byte* buffer, int bufferLength, string str, ulong attrs);
         unsafe TString GetNativeStringInternal(byte* buffer, int bufferLength, ReadOnlySpan<char> str, ulong attrs);
         TString GetNativeStringInternal(byte[] buffer, int bufferLength, string str, ulong attrs);
         TString GetNativeStringInternal(byte[] buffer, int bufferLength, ReadOnlySpan<char> str, ulong attrs);
-        unsafe TString GetNativeStringInternal(byte* buffer, int bufferLength, string str, ulong attrs, short colorPair);
-        unsafe TString GetNativeStringInternal(byte* buffer, int bufferLength, ReadOnlySpan<char> str, ulong attrs, short colorPair);
-        TString GetNativeStringInternal(byte[] buffer, int bufferLength, string str, ulong attrs, short colorPair);
-        TString GetNativeStringInternal(byte[] buffer, int bufferLength, ReadOnlySpan<char> str, ulong attrs, short colorPair);
+        unsafe TString GetNativeStringInternal(byte* buffer, int bufferLength, string str, ulong attrs, ushort colorPair);
+        unsafe TString GetNativeStringInternal(byte* buffer, int bufferLength, ReadOnlySpan<char> str, ulong attrs, ushort colorPair);
+        TString GetNativeStringInternal(byte[] buffer, int bufferLength, string str, ulong attrs, ushort colorPair);
+        TString GetNativeStringInternal(byte[] buffer, int bufferLength, ReadOnlySpan<char> str, ulong attrs, ushort colorPair);
     }
 }

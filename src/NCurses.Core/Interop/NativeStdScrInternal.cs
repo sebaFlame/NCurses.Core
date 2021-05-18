@@ -208,7 +208,7 @@ namespace NCurses.Core.Interop
         /// </summary>
         /// <param name="attrs">attribute(s) to enable</param>
         /// <param name="pair">color pair to enable</param>
-        public void attr_set(ulong attrs, short pair)
+        public void attr_set(ulong attrs, ushort pair)
         {
             SingleByteNCursesWrapper.attr_set(attrs, pair);
         }
@@ -221,7 +221,7 @@ namespace NCurses.Core.Interop
         /// </summary>
         /// <param name="attrs">Pointer to an chtype to retrieve current attributes</param>
         /// <param name="pair">Pointer to a short to retrieve current color pair</param>
-        public void attr_get(out ulong attrs, out short pair)
+        public void attr_get(out ulong attrs, out ushort pair)
         {
             SingleByteNCursesWrapper.attr_get(out attrs, out pair);
         }

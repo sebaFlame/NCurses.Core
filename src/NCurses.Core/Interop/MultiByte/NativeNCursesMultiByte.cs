@@ -21,21 +21,25 @@ namespace NCurses.Core.Interop.MultiByte
         internal NativeNCursesMultiByte(IMultiByteWrapper<TMultiByte, TWideChar, TSingleByte, TChar> wrapper)
             : base(wrapper) { }
 
-        public void getcchar(in TMultiByte wcval, out char wch, out ulong attrs, out short color_pair)
+        public void getcchar(in TMultiByte wcval, out char wch, out ulong attrs, out ushort color_pair)
         {
             TWideChar ch = WideCharFactoryInternal<TWideChar>.Instance.GetNativeEmptyCharInternal();
 
             TSingleByte attrChar = SingleByteCharFactoryInternal<TSingleByte>.Instance.GetNativeEmptyCharInternal();
 
-            color_pair = 0;
+            short limitedPair = 0;
+            //int extendedPair = 0;
 
-            NCursesException.Verify(this.Wrapper.getcchar(in wcval, ref ch, ref attrChar, ref color_pair, IntPtr.Zero), "getcchar");
+            //TODO: replace IntPtr.Zero with a ref int when ubuntu switches to ncurses6.2+20210116
+            NCursesException.Verify(this.Wrapper.getcchar(in wcval, ref ch, ref attrChar, ref limitedPair, IntPtr.Zero), "getcchar");
 
             wch = ch.Char;
             attrs = attrChar.Attributes;
+            //color_pair = extendedPair == 0 ? (ushort)limitedPair : (ushort)extendedPair;
+            color_pair = (ushort)limitedPair;
         }
 
-        public void setcchar(out TMultiByte wcval, in char wch, ulong attrs, short color_pair)
+        public void setcchar(out TMultiByte wcval, in char wch, ulong attrs, ushort color_pair)
         {
             TMultiByte output = MultiByteCharFactoryInternal<TMultiByte>.Instance.GetNativeEmptyCharInternal();
 
@@ -43,12 +47,14 @@ namespace NCurses.Core.Interop.MultiByte
 
             TSingleByte attrChar = SingleByteCharFactoryInternal<TSingleByte>.Instance.GetAttributeInternal(attrs);
 
+            int extendedColor = color_pair;
+
             NCursesException.Verify(this.Wrapper.setcchar(
                 ref output, 
                 wideCh, 
                 attrChar, 
-                color_pair, 
-                IntPtr.Zero), "setcchar");
+                (short)color_pair,
+                ref extendedColor), "setcchar");
 
             wcval = output;
         }

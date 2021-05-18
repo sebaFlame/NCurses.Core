@@ -13,10 +13,10 @@ namespace NCurses.Core.Interop.SingleByte
         void addch(in TChar ch);
         void addchnstr(in TCharString txt, int number);
         void addchstr(in TCharString txt);
-        void attr_get(out ulong attrs, out short pair);
+        void attr_get(out ulong attrs, out ushort pair);
         void attr_off(ulong attrs);
         void attr_on(ulong attrs);
-        void attr_set(ulong attrs, short pair);
+        void attr_set(ulong attrs, ushort pair);
         void bkgd(in TChar bkgd);
         void bkgdset(in TChar bkgd);
         void border(

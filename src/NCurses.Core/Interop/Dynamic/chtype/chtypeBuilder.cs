@@ -87,11 +87,11 @@ namespace NCurses.Core.Interop.Dynamic.chtype
             ctorIl.Emit(OpCodes.Ret);
             #endregion
 
-            #region public chtype(sbyte ch, ulong attr, short pair)
+            #region public chtype(sbyte ch, ulong attr, ushort pair)
             ctorBuilder = typeBuilder.DefineConstructor(
                 MethodAttributes.Public | MethodAttributes.HideBySig | MethodAttributes.SpecialName | MethodAttributes.RTSpecialName,
                 CallingConventions.Standard,
-                new Type[] { typeof(sbyte), typeof(ulong), typeof(short) });
+                new Type[] { typeof(sbyte), typeof(ulong), typeof(ushort) });
             ctorIl = ctorBuilder.GetILGenerator();
 
             ctorIl.Emit(OpCodes.Ldarg_0);
@@ -186,7 +186,7 @@ namespace NCurses.Core.Interop.Dynamic.chtype
             #region Color
             methodBuilder = typeBuilder.DefineMethod("get_ColorPair",
                 MethodAttributes.Public | MethodAttributes.Final | MethodAttributes.HideBySig | MethodAttributes.SpecialName | MethodAttributes.NewSlot | MethodAttributes.Virtual,
-                typeof(short),
+                typeof(ushort),
                 Array.Empty<Type>());
             methodIl = methodBuilder.GetILGenerator();
 
@@ -195,13 +195,13 @@ namespace NCurses.Core.Interop.Dynamic.chtype
             if (!isLong)
                 methodIl.Emit(OpCodes.Conv_U8);
             methodIl.Emit(OpCodes.Call, typeof(Constants).GetMethod("PAIR_NUMBER"));
-            methodIl.Emit(OpCodes.Conv_I2);
+            methodIl.Emit(OpCodes.Conv_U2);
             methodIl.Emit(OpCodes.Ret);
 
             propBuilder = typeBuilder.DefineProperty("ColorPair",
                 PropertyAttributes.None,
-                typeof(short),
-                new Type[] { typeof(short) });
+                typeof(ushort),
+                new Type[] { typeof(ushort) });
             propBuilder.SetGetMethod(methodBuilder);
             #endregion
 

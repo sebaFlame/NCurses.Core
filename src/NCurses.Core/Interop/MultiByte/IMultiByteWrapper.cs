@@ -80,7 +80,7 @@ namespace NCurses.Core.Interop.MultiByte
         //int pecho_wchar(WINDOW *pad, const cchar_t *wch);
         int pecho_wchar(WindowBaseSafeHandle pad, in TMultiByte wch);
         //int setcchar(cchar_t* wcval, const wchar_t* wch, const attr_t attrs, short color_pair, void* opts );
-        int setcchar(ref TMultiByte wcval, in TWideChar wch, TSingleByte attrs, short color_pair, IntPtr opts);
+        int setcchar(ref TMultiByte wcval, in TWideChar wch, TSingleByte attrs, short color_pair, ref int opts);
         //int vline_set(const cchar_t* wch, int n);
         int vline_set(in TMultiByte wch, int n);
         //int wadd_wch( WINDOW *win, const cchar_t *wch );

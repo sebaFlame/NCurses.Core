@@ -25,10 +25,10 @@ namespace NCurses.Core.Interop.SingleByte
         void waddch(WindowBaseSafeHandle window, in TChar ch);
         void waddchnstr(WindowBaseSafeHandle window, in TCharString chstr, int number);
         void waddchstr(WindowBaseSafeHandle window, in TCharString chstr);
-        void wattr_get(WindowBaseSafeHandle window, out ulong attrs, out short pair);
+        void wattr_get(WindowBaseSafeHandle window, out ulong attrs, out ushort pair);
         void wattr_off(WindowBaseSafeHandle window, ulong attrs);
         void wattr_on(WindowBaseSafeHandle window, ulong attrs);
-        void wattr_set(WindowBaseSafeHandle window, ulong attrs, short pair);
+        void wattr_set(WindowBaseSafeHandle window, ulong attrs, ushort pair);
         void wbkgd(WindowBaseSafeHandle window, in TChar bkgd);
         void wbkgdset(WindowBaseSafeHandle window, in TChar bkgd);
         void wborder(WindowBaseSafeHandle window, in TChar ls, in TChar rs, in TChar ts, in TChar bs, in TChar tl, in TChar tr, in TChar bl, in TChar br);

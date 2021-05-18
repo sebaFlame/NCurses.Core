@@ -41,7 +41,7 @@ namespace NCurses.Core.Interop.SingleByte
         public ISingleByteNCursesChar GetNativeChar(char ch, ulong attrs) =>
             Factory.GetNativeChar(ch, attrs);
 
-        public ISingleByteNCursesChar GetNativeChar(char ch, ulong attrs, short colorPair) =>
+        public ISingleByteNCursesChar GetNativeChar(char ch, ulong attrs, ushort colorPair) =>
             Factory.GetNativeChar(ch, attrs, colorPair);
 
         public ISingleByteNCursesCharString GetNativeEmptyString(int length) =>
@@ -59,10 +59,10 @@ namespace NCurses.Core.Interop.SingleByte
         public ISingleByteNCursesCharString GetNativeString(ReadOnlySpan<char> str, ulong attrs) =>
             Factory.GetNativeString(str, attrs);
 
-        public ISingleByteNCursesCharString GetNativeString(string str, ulong attrs, short colorPair) =>
+        public ISingleByteNCursesCharString GetNativeString(string str, ulong attrs, ushort colorPair) =>
             Factory.GetNativeString(str, attrs, colorPair);
 
-        public ISingleByteNCursesCharString GetNativeString(ReadOnlySpan<char> str, ulong attrs, short colorPair) =>
+        public ISingleByteNCursesCharString GetNativeString(ReadOnlySpan<char> str, ulong attrs, ushort colorPair) =>
             Factory.GetNativeString(str, attrs, colorPair);
 
         public unsafe ISingleByteNCursesCharString GetNativeEmptyString(byte* buffer, int bufferLength, int stringLength)
@@ -95,16 +95,16 @@ namespace NCurses.Core.Interop.SingleByte
         public ISingleByteNCursesCharString GetNativeString(byte[] buffer, int bufferLength, ReadOnlySpan<char> str, ulong attrs)
             => Factory.GetNativeString(buffer, bufferLength, str, attrs);
 
-        public unsafe ISingleByteNCursesCharString GetNativeString(byte* buffer, int length, string str, ulong attrs, short colorPair)
+        public unsafe ISingleByteNCursesCharString GetNativeString(byte* buffer, int length, string str, ulong attrs, ushort colorPair)
             => Factory.GetNativeString(buffer, length, str, attrs, colorPair);
 
-        public unsafe ISingleByteNCursesCharString GetNativeString(byte* buffer, int length, ReadOnlySpan<char> str, ulong attrs, short colorPair)
+        public unsafe ISingleByteNCursesCharString GetNativeString(byte* buffer, int length, ReadOnlySpan<char> str, ulong attrs, ushort colorPair)
             => Factory.GetNativeString(buffer, length, str, attrs, colorPair);
 
-        public ISingleByteNCursesCharString GetNativeString(byte[] buffer, int bufferLength, string str, ulong attrs, short colorPair)
+        public ISingleByteNCursesCharString GetNativeString(byte[] buffer, int bufferLength, string str, ulong attrs, ushort colorPair)
             => Factory.GetNativeString(buffer, bufferLength, str, attrs, colorPair);
 
-        public ISingleByteNCursesCharString GetNativeString(byte[] buffer, int bufferLength, ReadOnlySpan<char> str, ulong attrs, short colorPair)
+        public ISingleByteNCursesCharString GetNativeString(byte[] buffer, int bufferLength, ReadOnlySpan<char> str, ulong attrs, ushort colorPair)
             => Factory.GetNativeString(buffer, bufferLength, str, attrs, colorPair);
 
         public int GetByteCount(string str) => Factory.GetByteCount(str);
@@ -122,7 +122,7 @@ namespace NCurses.Core.Interop.SingleByte
     {
         internal static Func<sbyte, TSingleByte> CreateCharFromByte;
         internal static Func<sbyte, ulong, TSingleByte> CreateCharWithAttributeFromByte;
-        internal static Func<sbyte, ulong, short, TSingleByte> CreateCharWithAttributeAndColorPairFromByte;
+        internal static Func<sbyte, ulong, ushort, TSingleByte> CreateCharWithAttributeAndColorPairFromByte;
         internal static Func<ulong, TSingleByte> CreateCharFromAttribute;
 
         internal static SingleByteCharFactoryInternal<TSingleByte> Instance { get; }
@@ -145,10 +145,10 @@ namespace NCurses.Core.Interop.SingleByte
             CreateCharWithAttributeFromByte =
                 Expression.Lambda<Func<sbyte, ulong, TSingleByte>>(Expression.New(ctor, par1, par2), par1, par2).Compile();
 
-            par3 = Expression.Parameter(typeof(short));
-            ctor = typeof(TSingleByte).GetConstructor(new Type[] { typeof(sbyte), typeof(ulong), typeof(short) });
+            par3 = Expression.Parameter(typeof(ushort));
+            ctor = typeof(TSingleByte).GetConstructor(new Type[] { typeof(sbyte), typeof(ulong), typeof(ushort) });
             CreateCharWithAttributeAndColorPairFromByte =
-                Expression.Lambda<Func<sbyte, ulong, short, TSingleByte>>(Expression.New(ctor, par1, par2, par3), par1, par2, par3).Compile();
+                Expression.Lambda<Func<sbyte, ulong, ushort, TSingleByte>>(Expression.New(ctor, par1, par2, par3), par1, par2, par3).Compile();
 
             par1 = Expression.Parameter(typeof(ulong));
             ctor = typeof(TSingleByte).GetConstructor(new Type[] { typeof(ulong) });
@@ -204,7 +204,7 @@ namespace NCurses.Core.Interop.SingleByte
         public TSingleByte GetNativeCharInternal(char ch, ulong attrs) =>
             CreateCharWithAttributeFromByte((sbyte)ch, attrs);
 
-        public TSingleByte GetNativeCharInternal(char ch, ulong attrs, short colorPair) =>
+        public TSingleByte GetNativeCharInternal(char ch, ulong attrs, ushort colorPair) =>
             CreateCharWithAttributeAndColorPairFromByte((sbyte)ch, attrs, colorPair);
 
         public unsafe SingleByteCharString<TSingleByte> GetNativeStringInternal(byte* buffer, int bufferLength, string str, ulong attrs) =>
@@ -219,16 +219,16 @@ namespace NCurses.Core.Interop.SingleByte
         public SingleByteCharString<TSingleByte> GetNativeStringInternal(byte[] buffer, int bufferLength, ReadOnlySpan<char> str, ulong attrs) =>
             new SingleByteCharString<TSingleByte>(buffer, bufferLength, str, attrs);
 
-        public unsafe SingleByteCharString<TSingleByte> GetNativeStringInternal(byte* buffer, int length, string str, ulong attrs, short colorPair) =>
+        public unsafe SingleByteCharString<TSingleByte> GetNativeStringInternal(byte* buffer, int length, string str, ulong attrs, ushort colorPair) =>
             new SingleByteCharString<TSingleByte>(buffer, length, str, attrs, colorPair);
 
-        public unsafe SingleByteCharString<TSingleByte> GetNativeStringInternal(byte* buffer, int length, ReadOnlySpan<char> str, ulong attrs, short colorPair) =>
+        public unsafe SingleByteCharString<TSingleByte> GetNativeStringInternal(byte* buffer, int length, ReadOnlySpan<char> str, ulong attrs, ushort colorPair) =>
             new SingleByteCharString<TSingleByte>(buffer, length, str, attrs, colorPair);
 
-        public unsafe SingleByteCharString<TSingleByte> GetNativeStringInternal(byte[] buffer, int bufferLength, string str, ulong attrs, short colorPair) =>
+        public unsafe SingleByteCharString<TSingleByte> GetNativeStringInternal(byte[] buffer, int bufferLength, string str, ulong attrs, ushort colorPair) =>
             new SingleByteCharString<TSingleByte>(buffer, bufferLength, str, attrs, colorPair);
 
-        public unsafe SingleByteCharString<TSingleByte> GetNativeStringInternal(byte[] buffer, int bufferLength, ReadOnlySpan<char> str, ulong attrs, short colorPair) =>
+        public unsafe SingleByteCharString<TSingleByte> GetNativeStringInternal(byte[] buffer, int bufferLength, ReadOnlySpan<char> str, ulong attrs, ushort colorPair) =>
             new SingleByteCharString<TSingleByte>(buffer, bufferLength, str, attrs, colorPair);
         #endregion
 
@@ -242,7 +242,7 @@ namespace NCurses.Core.Interop.SingleByte
         public ISingleByteNCursesChar GetNativeChar(char ch, ulong attrs) =>
             GetNativeCharInternal(ch, attrs);
 
-        public ISingleByteNCursesChar GetNativeChar(char ch, ulong attrs, short colorPair) =>
+        public ISingleByteNCursesChar GetNativeChar(char ch, ulong attrs, ushort colorPair) =>
             GetNativeChar(ch, attrs, colorPair);
 
         public unsafe ISingleByteNCursesCharString GetNativeEmptyString(byte* buffer, int bufferLength, int stringLength)
@@ -290,22 +290,22 @@ namespace NCurses.Core.Interop.SingleByte
         public ISingleByteNCursesCharString GetNativeString(ReadOnlySpan<char> str, ulong attrs)
             => this.GetNativeString(new byte[this.GetByteCount(str)], this.GetByteCount(str), str, attrs);
 
-        public unsafe ISingleByteNCursesCharString GetNativeString(byte* buffer, int length, string str, ulong attrs, short colorPair)
+        public unsafe ISingleByteNCursesCharString GetNativeString(byte* buffer, int length, string str, ulong attrs, ushort colorPair)
             => this.GetNativeStringInternal(buffer, length, str, attrs, colorPair);
 
-        public unsafe ISingleByteNCursesCharString GetNativeString(byte* buffer, int length, ReadOnlySpan<char> str, ulong attrs, short colorPair)
+        public unsafe ISingleByteNCursesCharString GetNativeString(byte* buffer, int length, ReadOnlySpan<char> str, ulong attrs, ushort colorPair)
             => this.GetNativeStringInternal(buffer, length, str, attrs, colorPair);
 
-        public ISingleByteNCursesCharString GetNativeString(byte[] buffer, int bufferLength, string str, ulong attrs, short colorPair)
+        public ISingleByteNCursesCharString GetNativeString(byte[] buffer, int bufferLength, string str, ulong attrs, ushort colorPair)
             => this.GetNativeStringInternal(buffer, bufferLength, str, attrs, colorPair);
 
-        public ISingleByteNCursesCharString GetNativeString(byte[] buffer, int bufferLength, ReadOnlySpan<char> str, ulong attrs, short colorPair)
+        public ISingleByteNCursesCharString GetNativeString(byte[] buffer, int bufferLength, ReadOnlySpan<char> str, ulong attrs, ushort colorPair)
             => this.GetNativeStringInternal(buffer, bufferLength, str, attrs, colorPair);
 
-        public ISingleByteNCursesCharString GetNativeString(string str, ulong attrs, short colorPair)
+        public ISingleByteNCursesCharString GetNativeString(string str, ulong attrs, ushort colorPair)
             => this.GetNativeString(new byte[this.GetByteCount(str)], this.GetByteCount(str), str, attrs, colorPair);
 
-        public ISingleByteNCursesCharString GetNativeString(ReadOnlySpan<char> str, ulong attrs, short colorPair)
+        public ISingleByteNCursesCharString GetNativeString(ReadOnlySpan<char> str, ulong attrs, ushort colorPair)
             => this.GetNativeString(new byte[this.GetByteCount(str)], this.GetByteCount(str), str, attrs, colorPair);
 
         public int GetByteCount(string str) => this.GetByteCount(str, true);

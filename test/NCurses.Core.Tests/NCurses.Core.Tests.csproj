@@ -54,7 +54,7 @@
   
   <!-- import only when consumed -->
   <ItemGroup Condition="'$(OS)' == 'Windows_NT'">
-    <PackageReference Include="runtime.win.NCurses" Version="6.0.2017.0225" />
+    <PackageReference Include="runtime.win.NCurses" Version="6.2.20210116" />
   </ItemGroup>
   
   <ItemGroup Condition="'$(VisualCheck)' == 'false'">

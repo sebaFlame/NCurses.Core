@@ -36,6 +36,7 @@ namespace NCurses.Core.Interop.Wrappers
         void cbreak();
         int COLORS();
         void color_content(short color, ref short red, ref short green, ref short blue);
+        void extended_color_content(int color, out int r, out int g, out int b);
         int COLOR_PAIRS();
         int COLS();
         void copywin(WindowBaseSafeHandle srcwin, WindowBaseSafeHandle dstwin, int sminrow, int smincol, int dminrow, int dmincol, int dmaxrow, int dmaxcol, int overlay);
@@ -64,7 +65,9 @@ namespace NCurses.Core.Interop.Wrappers
         bool has_mouse();
         StdScrSafeHandle initscr();
         void init_color(short color, short r, short g, short b);
+        void init_extended_color(int color, int r, int g, int b);
         void init_pair(short pair, short f, short b);
+        void init_extended_pair(int pair, int f, int b);
         void intrflush(bool bf);
         bool isendwin();
         bool is_term_resized(int lines, int columns);
@@ -90,6 +93,7 @@ namespace NCurses.Core.Interop.Wrappers
         void overlay(WindowBaseSafeHandle srcWin, WindowBaseSafeHandle destWin);
         void overwrite(WindowBaseSafeHandle srcWin, WindowBaseSafeHandle destWin);
         void pair_content(short pair, out short fg, out short bg);
+        void extended_pair_content(int pair, out int f, out int b);
         int PAIR_NUMBER(uint attrs);
         void qiflush();
         void raw();

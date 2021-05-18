@@ -153,6 +153,24 @@ namespace NCurses.Core.Interop
         }
         #endregion
 
+        #region extended_color_content
+        /// <summary>
+        /// Because color_content uses signed shorts for its parameters, that  lim-
+        /// its color-values and their red, green, and blue components to 32767 on
+        /// modern hardware.The extension extended_color_content uses  ints  for
+        /// the color value and for returning the red, green, and blue components,
+        /// allowing a larger number of colors to be supported.
+        /// </summary>
+        /// <param name="color">Color number to get the content for</param>
+        /// <param name="r">The intensity of red</param>
+        /// <param name="g">The intensity of green</param>
+        /// <param name="b">The intensity of blue</param>
+        public void extended_color_content(int color, out int r, out int g, out int b)
+        {
+            NCursesException.Verify(NativeNCurses.NCursesWrapper.extended_color_content(color, out r, out g, out b), "extended_color_content");
+        }
+        #endregion
+
         #region copywin
         /// <summary>
         /// Text where the two windows overlap gets copied to destination within the rectangle defined
@@ -561,6 +579,24 @@ namespace NCurses.Core.Interop
         }
         #endregion
 
+        #region init_extended_color
+        /// <summary>
+        /// Because  init_color  uses signed shorts for its parameters, that limits
+        /// color-values and their red, green, and blue components to 32767 on mod-
+        /// ern hardware.The extension init_extended_color uses ints for the col-
+        /// or value and for setting the red, green, and blue components, allowing
+        /// a larger number of colors to be supported.
+        /// </summary>
+        /// <param name="color">The color to change</param>
+        /// <param name="r">The amount of red in the range 0 through 1000</param>
+        /// <param name="g">The amount of green in the range 0 through 1000</param>
+        /// <param name="b">The amount of blue in the range 0 through 1000</param>
+        public void init_extended_color(int color, int r, int g, int b)
+        {
+            NCursesException.Verify(NativeNCurses.NCursesWrapper.init_extended_color(color, r, g, b), "init_extended_color");
+        }
+        #endregion
+
         #region init_pair
         /// <summary>
         /// The init_pair  routine changes the definition of a color-
@@ -581,6 +617,22 @@ namespace NCurses.Core.Interop
         public void init_pair(short pair, short f, short b)
         {
             NCursesException.Verify(NativeNCurses.NCursesWrapper.init_pair(pair, f, b), "init_pair");
+        }
+        #endregion
+
+        #region init_extended_pair
+        /// <summary>
+        /// Because init_pair uses signed shorts for its  parameters,  that  limits
+        /// color-pairs and  color-values to 32767 on modern hardware.The exten-
+        /// sion init_extended_pair uses ints for the color-pair and  color-value,
+        /// allowing a larger number of colors to be supported.
+        /// </summary>
+        /// <param name="pair">A pair number higher then 32767</param>
+        /// <param name="f">The foreground color value</param>
+        /// <param name="b">The background color value</param>
+        public void init_extended_pair(int pair, int f, int b)
+        {
+            NCursesException.Verify(NativeNCurses.NCursesWrapper.init_extended_pair(pair, f, b), "init_extended_pair");
         }
         #endregion
 
@@ -894,6 +946,23 @@ namespace NCurses.Core.Interop
         public void pair_content(short pair, out short fg, out short bg)
         {
             NCursesException.Verify(NativeNCurses.NCursesWrapper.pair_content(pair, out fg, out bg), "pair_content");
+        }
+        #endregion
+
+        #region extended_pair_content
+        /// <summary>
+        /// Because pair_content uses signed shorts for its parameters, that limits
+        /// color-pair and color-values to 32767 on modern hardware.The extension
+        /// extended_pair_content uses ints for the color pair and  for  returning
+        /// the  foreground and background colors, allowing a larger number of col-
+        /// ors to be supported.
+        /// </summary>
+        /// <param name="pair">the number of the pair you want to know the content of</param>
+        /// <param name="f">Index of the foreground color</param>
+        /// <param name="b">Index of the background color</param>
+        public void extended_pair_content(int pair, out int f, out int b)
+        {
+            NCursesException.Verify(NativeNCurses.NCursesWrapper.extended_pair_content(pair, out f, out b), "extended_pair_content");
         }
         #endregion
 
@@ -1951,7 +2020,7 @@ namespace NCurses.Core.Interop
         /// <param name="wch">a reference to store the string (initialized as StringBuilder(5))</param>
         /// <param name="attrs">a reference to store the attributes in</param>
         /// <param name="color_pair">a reference to store the color pair in</param>
-        public void getcchar(in TMultiByte wcval, out char wch, out ulong attrs, out short color_pair)
+        public void getcchar(in TMultiByte wcval, out char wch, out ulong attrs, out ushort color_pair)
         {
             MultiByteNCursesWrapper.getcchar(in wcval, out wch, out attrs, out color_pair);
         }
@@ -2003,7 +2072,7 @@ namespace NCurses.Core.Interop
         /// <param name="wch">a reference to store the string</param>
         /// <param name="attrs">a reference to store the attributes in</param>
         /// <param name="color_pair">a reference to store the color pair in</param>
-        public void setcchar(out TMultiByte wcval, in char wch, ulong attrs, short color_pair)
+        public void setcchar(out TMultiByte wcval, in char wch, ulong attrs, ushort color_pair)
         {
             MultiByteNCursesWrapper.setcchar(out wcval, wch, attrs, color_pair);
         }
@@ -2236,13 +2305,13 @@ namespace NCurses.Core.Interop
         }
 
         #region Interfaces implementation
-        public void getcchar(in IMultiByteNCursesChar wcval, out char wch, out ulong attrs, out short color_pair)
+        public void getcchar(in IMultiByteNCursesChar wcval, out char wch, out ulong attrs, out ushort color_pair)
         {
             TMultiByte casted = this.MultiByteNCursesWrapper.CastChar(wcval);
             this.getcchar(in casted, out wch, out attrs, out color_pair);
         }
 
-        public void setcchar(out IMultiByteNCursesChar wcval, in char wch, ulong attrs, short color_pair)
+        public void setcchar(out IMultiByteNCursesChar wcval, in char wch, ulong attrs, ushort color_pair)
         {
             this.setcchar(out TMultiByte wc, in wch, attrs, color_pair);
             wcval = wc;

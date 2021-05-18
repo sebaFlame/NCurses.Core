@@ -205,7 +205,7 @@ namespace NCurses.Core.Interop
         /// <para />native method wrapped with verification.
         /// </summary>
         /// <param name="window">A pointer to a window</param>
-        public void wattr_set(WindowBaseSafeHandle window, ulong attrs, short pair)
+        public void wattr_set(WindowBaseSafeHandle window, ulong attrs, ushort pair)
         {
             SingleByteNCursesWrapper.wattr_set(window, attrs, pair);
         }
@@ -217,7 +217,7 @@ namespace NCurses.Core.Interop
         /// <para />native method wrapped with verification.
         /// </summary>
         /// <param name="window">A pointer to a window</param>
-        public void wattr_get(WindowBaseSafeHandle window, out ulong attrs, out short pair)
+        public void wattr_get(WindowBaseSafeHandle window, out ulong attrs, out ushort pair)
         {
             SingleByteNCursesWrapper.wattr_get(window, out attrs, out pair);
         }

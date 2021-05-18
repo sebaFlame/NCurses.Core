@@ -72,12 +72,12 @@ namespace NCurses.Core
             Window.wclrtoeol(this.WindowBaseSafeHandle);
         }
 
-        public override void CurrentAttributesAndColor(out ulong attrs, out short colorPair)
+        public override void CurrentAttributesAndColor(out ulong attrs, out ushort colorPair)
         {
             Window.wattr_get(this.WindowBaseSafeHandle, out attrs, out colorPair);
         }
 
-        public override void EnableAttributesAndColor(ulong attrs, short colorPair)
+        public override void EnableAttributesAndColor(ulong attrs, ushort colorPair)
         {
             Window.wattr_set(this.WindowBaseSafeHandle, attrs, colorPair);
         }

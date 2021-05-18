@@ -50,6 +50,8 @@ namespace NCurses.Core.Interop
         int color_content(short color, ref short red, ref short green, ref short blue);
         //int color_content_sp(SCREEN* sp, short color, short *r, short *g, short *b);
         int color_content_sp(IntPtr screen, short color, ref short red, ref short green, ref short blue);
+        //int extended_color_content(int color, int *r, int *g, int *b);
+        int extended_color_content(int color, out int r, out int g, out int b);
         //int color_set(short pair, void* opts);
         int color_set(short pair, IntPtr opts);
         //int copywin(const WINDOW *srcwin, WINDOW *dstwin, int sminrow, int smincol, int dminrow, int dmincol, int dmaxrow, int dmaxcol, int overlay);
@@ -164,10 +166,14 @@ namespace NCurses.Core.Interop
         int init_color(short color, short r, short g, short b);
         //int init_color_sp(SCREEN* sp, short color, short r, short g, short b);
         int init_color_sp(IntPtr screen, short color, short r, short g, short b);
+        //int init_extended_color(int color, int r, int g, int b);
+        int init_extended_color(int color, int r, int g, int b);
         //int init_pair(short pair, short f, short b);
         int init_pair(short pair, short f, short b);
         //int init_pair_sp(SCREEN* sp, short pair, short f, short b);
         int init_pair_sp(IntPtr screen, short pair, short f, short b);
+        //int init_extended_pair(int pair, int f, int b);
+        int init_extended_pair(int pair, int f, int b);
         //WINDOW *initscr(void);
         StdScrSafeHandle initscr();
         //int insdelln(int n);
@@ -303,6 +309,8 @@ namespace NCurses.Core.Interop
         int pair_content(short pair, out short fg, out short bg);
         //int pair_content_sp(SCREEN* sp, short pair, short* f, short* b);
         int pair_content_sp(IntPtr screen, short pair, ref short f, ref short b);
+        //int extended_pair_content(int pair, int *f, int *b);
+        int extended_pair_content(int pair, out int f, out int b);
         //int pnoutrefresh(WINDOW *pad, int pminrow, int pmincol, int sminrow, int smincol, int smaxrow, int smaxcol);
         int pnoutrefresh(WindowBaseSafeHandle pad, int pminrow, int pmincol, int sminrow, int smincol, int smaxrow, int smaxcol);
         //int prefresh(WINDOW *pad, int pminrow, int pmincol, int sminrow, int smincol, int smaxrow, int smaxcol);

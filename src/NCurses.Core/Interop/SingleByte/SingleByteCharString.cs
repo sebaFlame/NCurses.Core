@@ -162,7 +162,7 @@ namespace NCurses.Core.Interop.SingleByte
             int bufferLength,
             string str, 
             ulong attrs, 
-            short pair)
+            ushort pair)
         {
             this.BufferPointer = buffer;
             this.BufferLength = bufferLength;
@@ -181,7 +181,7 @@ namespace NCurses.Core.Interop.SingleByte
             int bufferLength,
             ReadOnlySpan<char> str,
             ulong attrs,
-            short pair)
+            ushort pair)
         {
             this.BufferPointer = buffer;
             this.BufferLength = bufferLength;
@@ -200,7 +200,7 @@ namespace NCurses.Core.Interop.SingleByte
             int bufferLength,
             string str,
             ulong attrs,
-            short pair)
+            ushort pair)
         {
             this.BufferArray = buffer;
             this.BufferPointer = (byte*)0;
@@ -219,7 +219,7 @@ namespace NCurses.Core.Interop.SingleByte
             int bufferLength,
             ReadOnlySpan<char> str,
             ulong attrs,
-            short pair)
+            ushort pair)
         {
             this.BufferArray = buffer;
             this.BufferPointer = (byte*)0;
@@ -268,7 +268,7 @@ namespace NCurses.Core.Interop.SingleByte
             Span<byte> buffer,
             ReadOnlySpan<char> charArray, 
             ulong attrs = 0, 
-            short colorPair = 0)
+            ushort colorPair = 0)
         {
             Span<TSingleByte> charString = MemoryMarshal.Cast<byte, TSingleByte>(buffer);
 
@@ -314,7 +314,7 @@ namespace NCurses.Core.Interop.SingleByte
         public static int GetByteCount(int length, bool addNullTerminator = true) =>
             SingleByteCharFactoryInternal<TSingleByte>.Instance.GetByteCount(length, addNullTerminator);
 
-        private static TSingleByte CreateSmallChar(sbyte encodedByte, ulong attrs = 0, short colorPair = 0)
+        private static TSingleByte CreateSmallChar(sbyte encodedByte, ulong attrs = 0, ushort colorPair = 0)
         {
             if (attrs == 0 && colorPair == 0)
             {

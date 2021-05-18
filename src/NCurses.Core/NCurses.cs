@@ -361,15 +361,22 @@ namespace NCurses.Core
         /// <param name="pairIndex">the pair index to initialize</param>
         /// <param name="foreGround">the foreground color to use</param>
         /// <param name="backGround">the background color to use</param>
-        public static void InitPair(short pairIndex, short foreGround, short backGround)
+        public static void InitPair(ushort pairIndex, short foreGround, short backGround)
         {
-            NCursesWrapper.init_pair(pairIndex, foreGround, backGround);
+            if (pairIndex > Int16.MaxValue)
+            {
+                NCursesWrapper.init_extended_pair(pairIndex, foreGround, backGround);
+            }
+            else
+            {
+                NCursesWrapper.init_pair((short)pairIndex, foreGround, backGround);
+            }
         }
 
         /// <summary>
         /// see <see cref="InitPair(short, short, short)"/> 
         /// </summary>
-        public static void InitPair(short pairIndex, Color foreGround, Color backGround)
+        public static void InitPair(ushort pairIndex, Color foreGround, Color backGround)
         {
             InitPair(pairIndex, (short)foreGround, (short)backGround);
         }
@@ -435,14 +442,14 @@ namespace NCurses.Core
 
             _ColorBitMask = (byte)(byte.MaxValue >> (8 - _ColorBitShift));
 
-            short pairIndex = 0;
+            ushort pairIndex = 0;
             for (short bg = startBg ; bg < colorCount; bg++)
             {
                 for (short fg = startFg ; fg < colorCount; fg++)
                 {
                     pairIndex = ComputeDefaultColorPair(fg, bg);
 
-                    NCursesWrapper.init_pair
+                    InitPair
                     (
                         pairIndex,
                         fg,
@@ -462,14 +469,14 @@ namespace NCurses.Core
         /// <param name="fg">Foreground color (-1 for default)</param>
         /// <param name="bg">Background color (-1 for default)</param>
         /// <returns>The pair number of the combined foreground and background color</returns>
-        public static short ComputeDefaultColorPair(short fg, short bg)
+        public static ushort ComputeDefaultColorPair(short fg, short bg)
         {
             if (_ColorBitShift == 0)
             {
                 throw new InvalidOperationException("Color bit shift has not been set!");
             }
 
-            short pairIndex = 0;
+            ushort pairIndex = 0;
             ushort cFg, cBg, mFg, mBg;
 
             unchecked
@@ -485,7 +492,7 @@ namespace NCurses.Core
                 mBg = (ushort)(mBg >> _BgBitShift);
             }
 
-            pairIndex = (short)(mFg | (mBg << _ColorBitShift));
+            pairIndex = (ushort)(mFg | (mBg << _ColorBitShift));
 
             //account for reserved pair 0
             return ++pairIndex;
