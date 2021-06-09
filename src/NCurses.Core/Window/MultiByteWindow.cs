@@ -501,6 +501,8 @@ namespace NCurses.Core.Window
         public override void Write(in INCursesCharString str)
         {
             Window.wadd_wchstr(this.WindowBaseSafeHandle, VerifyString(str));
+
+            this.Advance(str.Length);
         }
 
         public override void Write(string str)

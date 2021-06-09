@@ -472,6 +472,8 @@ namespace NCurses.Core.StdScr
         public override void Write(in INCursesCharString str)
         {
             StdScr.add_wchstr(VerifyString(str));
+
+            this.Advance(str.Length);
         }
 
         public override void Write(string str)

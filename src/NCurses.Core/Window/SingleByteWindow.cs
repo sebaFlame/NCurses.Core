@@ -485,6 +485,8 @@ namespace NCurses.Core.Window
         public override void Write(in INCursesCharString str)
         {
             Window.waddchstr(this.WindowBaseSafeHandle, VerifyString(str));
+
+            this.Advance(str.Length);
         }
 
         public override void Write(string str)
@@ -508,7 +510,10 @@ namespace NCurses.Core.Window
             int bufferLength = SingleByteCharFactoryInternal<TSingleByte>.Instance.GetByteCount(str);
             byte[] buffer = NativeNCurses.GetBuffer(bufferLength);
             SingleByteCharString<TSingleByte> chStr = SingleByteCharFactoryInternal<TSingleByte>.Instance.GetNativeStringInternal(buffer, bufferLength, str, attrs, pair);
+
             Window.waddchnstr(this.WindowBaseSafeHandle, in chStr, chStr.Length);
+
+            this.Advance(chStr.Length);
         }
 
         public override void Write(ReadOnlySpan<char> str, ulong attrs, ushort pair)
@@ -516,7 +521,10 @@ namespace NCurses.Core.Window
             int bufferLength = SingleByteCharFactoryInternal<TSingleByte>.Instance.GetByteCount(str);
             byte[] buffer = NativeNCurses.GetBuffer(bufferLength);
             SingleByteCharString<TSingleByte> chStr = SingleByteCharFactoryInternal<TSingleByte>.Instance.GetNativeStringInternal(buffer, bufferLength, str, attrs, pair);
+
             Window.waddchnstr(this.WindowBaseSafeHandle, in chStr, chStr.Length);
+
+            this.Advance(chStr.Length);
         }
 
         public override void Write(int nline, int ncol, string str)
@@ -540,7 +548,10 @@ namespace NCurses.Core.Window
             int bufferLength = SingleByteCharFactoryInternal<TSingleByte>.Instance.GetByteCount(str);
             byte[] buffer = NativeNCurses.GetBuffer(bufferLength);
             SingleByteCharString<TSingleByte> chStr = SingleByteCharFactoryInternal<TSingleByte>.Instance.GetNativeStringInternal(buffer, bufferLength, str, attrs, pair);
+
             Window.mvwaddchnstr(this.WindowBaseSafeHandle, nline, ncol, in chStr, chStr.Length);
+
+            this.Advance(chStr.Length);
         }
 
         public override void Write(int nline, int ncol, ReadOnlySpan<char> str, ulong attrs, ushort pair)
@@ -548,7 +559,10 @@ namespace NCurses.Core.Window
             int bufferLength = SingleByteCharFactoryInternal<TSingleByte>.Instance.GetByteCount(str);
             byte[] buffer = NativeNCurses.GetBuffer(bufferLength);
             SingleByteCharString<TSingleByte> chStr = SingleByteCharFactoryInternal<TSingleByte>.Instance.GetNativeStringInternal(buffer, bufferLength, str, attrs, pair);
+
             Window.mvwaddchnstr(this.WindowBaseSafeHandle, nline, ncol, in chStr, chStr.Length);
+
+            this.Advance(chStr.Length);
         }
 
         public override void Write(char ch)

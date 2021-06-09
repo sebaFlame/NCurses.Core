@@ -117,7 +117,7 @@ namespace NCurses.Core.Tests
             this.Window.Write(this.TestString, Attrs.BOLD | Attrs.ITALIC, 4);
 
             Assert.Equal(0, this.Window.CursorLine);
-            Assert.Equal(0, this.Window.CursorColumn); //does not get advanced
+            Assert.Equal(this.TestString.Length, this.Window.CursorColumn); //does not get advanced
 
             this.Window.ExtractString(0, 0, out INCursesCharString resultNCursesString, this.TestString.Length);
             Assert.Equal(this.TestString.Length, resultNCursesString.Length);
@@ -159,7 +159,7 @@ namespace NCurses.Core.Tests
             this.Window.Write(managedString);
 
             Assert.Equal(0, this.Window.CursorLine);
-            Assert.Equal(0, this.Window.CursorColumn); //does not get advanced
+            Assert.Equal(managedString.Length, this.Window.CursorColumn); //does not get advanced
 
             this.Window.ExtractString(0, 0, out INCursesCharString resultNCursesString, this.TestString.Length);
 

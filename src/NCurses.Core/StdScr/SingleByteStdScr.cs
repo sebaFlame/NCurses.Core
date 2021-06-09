@@ -460,6 +460,8 @@ namespace NCurses.Core.StdScr
         public override void Write(in INCursesCharString str)
         {
             StdScr.addchstr(VerifyString(str));
+
+            this.Advance(str.Length);
         }
 
         public override void Write(string str)
@@ -483,7 +485,10 @@ namespace NCurses.Core.StdScr
             int bufferLength = SingleByteCharFactoryInternal<TSingleByte>.Instance.GetByteCount(str);
             byte[] buffer = NativeNCurses.GetBuffer(bufferLength);
             SingleByteCharString<TSingleByte> chStr = SingleByteCharFactoryInternal<TSingleByte>.Instance.GetNativeStringInternal(buffer, bufferLength, str, attrs, pair);
+
             StdScr.addchnstr(in chStr, chStr.Length);
+
+            this.Advance(chStr.Length);
         }
 
         public override void Write(ReadOnlySpan<char> str, ulong attrs, ushort pair)
@@ -491,7 +496,10 @@ namespace NCurses.Core.StdScr
             int bufferLength = SingleByteCharFactoryInternal<TSingleByte>.Instance.GetByteCount(str);
             byte[] buffer = NativeNCurses.GetBuffer(bufferLength);
             SingleByteCharString<TSingleByte> chStr = SingleByteCharFactoryInternal<TSingleByte>.Instance.GetNativeStringInternal(buffer, bufferLength, str, attrs, pair);
+
             StdScr.addchnstr(in chStr, chStr.Length);
+
+            this.Advance(chStr.Length);
         }
 
         public override void Write(int nline, int ncol, string str)
@@ -515,7 +523,10 @@ namespace NCurses.Core.StdScr
             int bufferLength = SingleByteCharFactoryInternal<TSingleByte>.Instance.GetByteCount(str);
             byte[] buffer = NativeNCurses.GetBuffer(bufferLength);
             SingleByteCharString<TSingleByte> chStr = SingleByteCharFactoryInternal<TSingleByte>.Instance.GetNativeStringInternal(buffer, bufferLength, str, attrs, pair);
+
             StdScr.mvaddchnstr(nline, ncol, in chStr, chStr.Length);
+
+            this.Advance(chStr.Length);
         }
 
         public override void Write(int nline, int ncol, ReadOnlySpan<char> str, ulong attrs, ushort pair)
@@ -523,7 +534,10 @@ namespace NCurses.Core.StdScr
             int bufferLength = SingleByteCharFactoryInternal<TSingleByte>.Instance.GetByteCount(str);
             byte[] buffer = NativeNCurses.GetBuffer(bufferLength);
             SingleByteCharString<TSingleByte> chStr = SingleByteCharFactoryInternal<TSingleByte>.Instance.GetNativeStringInternal(buffer, bufferLength, str, attrs, pair);
+
             StdScr.mvaddchnstr(nline, ncol, in chStr, chStr.Length);
+
+            this.Advance(chStr.Length);
         }
 
         public override void Write(char ch)
