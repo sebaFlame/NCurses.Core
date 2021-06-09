@@ -539,6 +539,7 @@ namespace NCurses.Core
 
             return count;
         }
+        public static bool CanChangeColor => NCursesWrapper.can_change_color();
 
         /// <summary>
         /// Initialize a color with a RGB value

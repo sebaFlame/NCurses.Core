@@ -159,7 +159,7 @@ namespace NCurses.Core.Interop.Dynamic.wchar_t
             ctorIl.Emit(OpCodes.Ldflda, fixedElementField);
             ctorIl.Emit(OpCodes.Ldloc_S, lcl0);
             ctorIl.Emit(OpCodes.Add);
-            ctorIl.Emit(OpCodes.Ldarga_S, 1);
+            ctorIl.Emit(OpCodes.Ldarga_S, (byte)1);
             ctorIl.Emit(OpCodes.Ldloc_S, lcl0);
             ctorIl.Emit(OpCodes.Call, typeof(Span<byte>).GetMethod("get_Item"));
             ctorIl.Emit(OpCodes.Ldind_U1);
@@ -397,7 +397,7 @@ namespace NCurses.Core.Interop.Dynamic.wchar_t
             methodIl.Emit(OpCodes.Stloc_1);
             //if (NativeNCurses.Encoding.GetChars(ch.ch, wchar_t_size, charArr, 1) > 0)
             methodIl.Emit(OpCodes.Call, typeof(NativeNCurses).GetProperty("Encoding", BindingFlags.NonPublic | BindingFlags.Static).GetMethod);
-            methodIl.Emit(OpCodes.Ldarga_S, 0);
+            methodIl.Emit(OpCodes.Ldarga_S, (byte)0);
             methodIl.Emit(OpCodes.Ldflda, charField);
             methodIl.Emit(OpCodes.Ldflda, fixedElementField);
             methodIl.Emit(OpCodes.Conv_U);

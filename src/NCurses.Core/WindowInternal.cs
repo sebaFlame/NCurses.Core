@@ -47,6 +47,25 @@ namespace NCurses.Core
             this.SubWindows.Remove(childWindow);
         }
 
+        internal void Advance(int charLength)
+        {
+            int currentLine = this.CursorLine;
+            int currentColumn = this.CursorColumn;
+
+            int newPosition = (currentColumn + (currentLine * this.MaxColumn)) + charLength;
+
+            int newLine = (int)Math.Floor(newPosition / (double)this.MaxColumn);
+            int newColumn = newPosition - (newLine * this.MaxColumn);
+
+            if (newLine > this.MaxLine)
+            {
+                this.ScrollWindow(newLine - this.MaxLine);
+                newLine = this.MaxLine;
+            }
+
+            this.MoveCursor(newLine, newColumn);
+        }
+
         public override void AttributesOn(ulong attrs)
         {
             Window.wattr_on(this.WindowBaseSafeHandle, attrs);

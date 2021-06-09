@@ -76,7 +76,7 @@ namespace NCurses.Core.Interop.Dynamic
 #endregion
 
 #region Custom single/multibyte types
-        internal static Type CreateCustomTypeWrapper(string dllName)
+        internal static Type CreateCustomTypeWrapper(string dllName, Type cchar_t, Type wchar_t, Type chtype, Type schar, Type mevent)
         {
             TypeBuilder typeBuilder = ModuleBuilder.DefineType("NCursesCustomTypeWrapper", TypeAttributes.Public);
             MethodInfo[] interfaceMethod;
@@ -97,7 +97,7 @@ namespace NCurses.Core.Interop.Dynamic
                 createInterfaceImplementation(dllName, typeBuilder, ifMethod);
 
             //small (chtype) methods
-            interfaceType = typeof(ISingleByteWrapper<,,>).MakeGenericType(chtype, schar, MEVENT);
+            interfaceType = typeof(ISingleByteWrapper<,,>).MakeGenericType(chtype, schar, mevent);
             typeBuilder.AddInterfaceImplementation(interfaceType);
             interfaceMethod = interfaceType.GetMethods();
             foreach (MethodInfo ifMethod in interfaceMethod)

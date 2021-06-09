@@ -53,30 +53,110 @@ namespace NCurses.Core.Interop.WideChar
             CreateCharString(new Span<byte>(buffer, bufferLength), str);
         }
 
-        public unsafe WideCharString(
+        public WideCharString(
             byte[] buffer,
             int bufferLength,
             string str)
         {
             this.BufferArray = buffer;
-            this.BufferPointer = (byte*)0;
+
+            unsafe
+            {
+                this.BufferPointer = (byte*)0;
+            }
+            
             this.BufferLength = bufferLength;
             this.Length = str.Length;
 
             CreateCharString(new Span<byte>(buffer), str.AsSpan());
         }
 
-        public unsafe WideCharString(
+        public WideCharString(
             byte[] buffer,
             int bufferLength,
             ReadOnlySpan<char> str)
         {
             this.BufferArray = buffer;
-            this.BufferPointer = (byte*)0;
+
+            unsafe
+            {
+                this.BufferPointer = (byte*)0;
+            }
+            
             this.BufferLength = bufferLength;
             this.Length = str.Length;
 
             CreateCharString(new Span<byte>(buffer), str);
+        }
+
+        public unsafe WideCharString(
+            byte* buffer,
+            int bufferLength,
+            ReadOnlySpan<byte> str,
+            int charLength,
+            Encoding encoding)
+        {
+            this.BufferPointer = buffer;
+            this.BufferLength = bufferLength;
+            this.BufferArray = null;
+            this.Length = charLength;
+
+            CreateCharString(new Span<byte>(buffer, bufferLength), str, charLength, encoding);
+        }
+
+        public unsafe WideCharString(
+            byte* buffer,
+            int bufferLength,
+            ReadOnlySequence<byte> str,
+            int charLength,
+            Encoding encoding)
+        {
+            this.BufferPointer = buffer;
+            this.BufferLength = bufferLength;
+            this.BufferArray = null;
+            this.Length = charLength;
+
+            CreateCharString(new Span<byte>(buffer, bufferLength), str, charLength, encoding);
+        }
+
+        public WideCharString(
+            byte[] buffer,
+            int bufferLength,
+            ReadOnlySpan<byte> str,
+            int charLength,
+            Encoding encoding)
+        {
+            this.BufferArray = buffer;
+
+            unsafe
+            {
+                this.BufferPointer = (byte*)0;
+            }
+            
+            this.BufferLength = bufferLength;
+            this.Length = charLength;
+
+            CreateCharString(new Span<byte>(buffer), str, charLength, encoding);
+        }
+
+        public WideCharString(
+            byte[] buffer,
+            int bufferLength,
+            ReadOnlySequence<byte> str,
+            int charLength,
+            Encoding encoding)
+        {
+            this.BufferArray = buffer;
+
+            unsafe
+            {
+                this.BufferPointer = (byte*)0;
+            }
+            
+            this.BufferLength = bufferLength;
+            this.Length = charLength;
+
+            CreateCharString(new Span<byte>(buffer), str, charLength, encoding);
         }
 
         public unsafe WideCharString(
@@ -90,13 +170,18 @@ namespace NCurses.Core.Interop.WideChar
             this.Length = stringLength;
         }
 
-        public unsafe WideCharString(
+        public WideCharString(
             byte[] buffer,
             int bufferLength,
             int stringLength)
         {
             this.BufferArray = buffer;
-            this.BufferPointer = (byte*)0;
+
+            unsafe
+            {
+                this.BufferPointer = (byte*)0;
+            }
+            
             this.BufferLength = bufferLength;
             this.Length = stringLength;
         }
@@ -152,6 +237,84 @@ namespace NCurses.Core.Interop.WideChar
                     }
                 }
             }
+        }
+
+        private static unsafe void CreateCharString(
+            Span<byte> buffer,
+            ReadOnlySpan<byte> bytes,
+            int charLength,
+            Encoding encoding)
+        {
+            fixed (byte* originalBytes = bytes)
+            {
+                Decoder decoder = encoding.GetDecoder();
+                char* chars = stackalloc char[charLength];
+
+                decoder.Convert(
+                    originalBytes,
+                    bytes.Length,
+                    chars,
+                    charLength,
+                    true,
+                    out int bytesUsed,
+                    out int charsUsed,
+                    out bool completed);
+
+                if (!completed)
+                {
+                    throw new InvalidOperationException($"Could not cast {encoding.EncodingName} to characters");
+                }
+
+                ReadOnlySpan<char> charSpan = new ReadOnlySpan<char>(chars, charLength);
+                CreateCharString(buffer, charSpan);
+            }
+        }
+
+        private static unsafe void CreateCharString(
+            Span<byte> buffer,
+            ReadOnlySequence<byte> sequence,
+            int charLength,
+            Encoding encoding)
+        {
+            Decoder decoder = encoding.GetDecoder();
+            char* chars = stackalloc char[charLength];
+
+            int totalCharsUsed = 0;
+            int charsUsed = 0;
+            bool completed = false;
+
+            foreach (ReadOnlyMemory<byte> memory in sequence)
+            {
+                if (memory.IsEmpty)
+                {
+                    continue;
+                }
+
+                fixed (byte* originalBytes = memory.Span)
+                {
+                    decoder.Convert
+                    (
+                        originalBytes,
+                        memory.Length,
+                        chars + totalCharsUsed,
+                        charLength - totalCharsUsed,
+                        false,
+                        out _,
+                        out charsUsed,
+                        out completed
+                    );
+
+                    totalCharsUsed += charsUsed;
+                }
+            }
+
+            if (!completed)
+            {
+                throw new InvalidOperationException($"Could not cast {encoding.EncodingName} to characters");
+            }
+
+            ReadOnlySpan<char> charSpan = new ReadOnlySpan<char>(chars, charLength);
+            CreateCharString(buffer, charSpan);
         }
 
         internal unsafe static int FindStringLength(TWideChar* strArr, out int byteLength)

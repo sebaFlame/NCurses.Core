@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Text;
 using System.Linq;
+using System.Buffers;
 
 using NCurses.Core.Window;
 using NCurses.Core.Interop;
@@ -554,7 +555,27 @@ namespace NCurses.Core.StdScr
             throw new NotImplementedException("Only useful in multibyte mode");
         }
 
+        public override void Write(ReadOnlySpan<byte> str, Encoding encoding)
+        {
+            throw new NotImplementedException("Only useful in multibyte mode");
+        }
+
+        public override void Write(ReadOnlySequence<byte> str, Encoding encoding)
+        {
+            throw new NotImplementedException("Only useful in multibyte mode");
+        }
+
         public override void Write(byte[] str, Encoding encoding, ulong attrs, ushort pair)
+        {
+            throw new NotImplementedException("Only useful in multibyte mode");
+        }
+
+        public override void Write(ReadOnlySpan<byte> str, Encoding encoding, ulong attrs, ushort pair)
+        {
+            throw new NotImplementedException("Only useful in multibyte mode");
+        }
+
+        public override void Write(ReadOnlySequence<byte> str, Encoding encoding, ulong attrs, ushort pair)
         {
             throw new NotImplementedException("Only useful in multibyte mode");
         }
@@ -564,7 +585,27 @@ namespace NCurses.Core.StdScr
             throw new NotImplementedException("Only useful in multibyte mode");
         }
 
+        public override void Write(int nline, int ncol, ReadOnlySpan<byte> str, Encoding encoding)
+        {
+            throw new NotImplementedException("Only useful in multibyte mode");
+        }
+
+        public override void Write(int nline, int ncol, ReadOnlySequence<byte> str, Encoding encoding)
+        {
+            throw new NotImplementedException("Only useful in multibyte mode");
+        }
+
         public override void Write(int nline, int ncol, byte[] str, Encoding encoding, ulong attrs, ushort pair)
+        {
+            throw new NotImplementedException("Only useful in multibyte mode");
+        }
+
+        public override void Write(int nline, int ncol, ReadOnlySpan<byte> str, Encoding encoding, ulong attrs, ushort pair)
+        {
+            throw new NotImplementedException("Only useful in multibyte mode");
+        }
+
+        public override void Write(int nline, int ncol, ReadOnlySequence<byte> str, Encoding encoding, ulong attrs, ushort pair)
         {
             throw new NotImplementedException("Only useful in multibyte mode");
         }
@@ -603,6 +644,16 @@ namespace NCurses.Core.StdScr
             byte[] buffer = NativeNCurses.GetBuffer(bufferLength);
             CharString<TChar> chStr = CharFactoryInternal<TChar>.Instance.GetNativeStringInternal(buffer, bufferLength, str);
             StdScr.addnstr(in chStr, maxLength);
+        }
+
+        public override void Write(ReadOnlySpan<byte> str, int maxLength, Encoding encoding)
+        {
+            throw new NotImplementedException("Only useful in multibyte mode");
+        }
+
+        public override void Write(ReadOnlySequence<byte> str, int maxLength, Encoding encoding)
+        {
+            throw new NotImplementedException("Only useful in multibyte mode");
         }
     }
 }

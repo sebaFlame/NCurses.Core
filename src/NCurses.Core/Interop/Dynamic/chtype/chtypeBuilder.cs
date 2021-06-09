@@ -75,6 +75,7 @@ namespace NCurses.Core.Interop.Dynamic.chtype
             ctorIl.Emit(OpCodes.Ldarg_1);
             ctorIl.Emit(OpCodes.Call, charCtorBuilder);
             ctorIl.Emit(OpCodes.Nop);
+            ctorIl.Emit(OpCodes.Nop);
             //this.charWithAttr |= (UInt32)attr;
             ctorIl.Emit(OpCodes.Ldarg_0);
             ctorIl.Emit(OpCodes.Ldarg_0);
@@ -99,6 +100,7 @@ namespace NCurses.Core.Interop.Dynamic.chtype
             ctorIl.Emit(OpCodes.Ldarg_1);
             ctorIl.Emit(OpCodes.Ldarg_2);
             ctorIl.Emit(OpCodes.Call, charAttrCtorBuilder);
+            ctorIl.Emit(OpCodes.Nop);
             ctorIl.Emit(OpCodes.Nop);
             //this.charWithAttr |= (UInt32)NativeNCurses.COLOR_PAIR(pair);
             ctorIl.Emit(OpCodes.Ldarg_0);
@@ -183,7 +185,7 @@ namespace NCurses.Core.Interop.Dynamic.chtype
             propBuilder.SetGetMethod(methodBuilder);
             #endregion
 
-            #region Color
+            #region ColorPair
             methodBuilder = typeBuilder.DefineMethod("get_ColorPair",
                 MethodAttributes.Public | MethodAttributes.Final | MethodAttributes.HideBySig | MethodAttributes.SpecialName | MethodAttributes.NewSlot | MethodAttributes.Virtual,
                 typeof(ushort),
@@ -240,6 +242,7 @@ namespace NCurses.Core.Interop.Dynamic.chtype
             lbl1 = methodIl.DefineLabel();
 
             //ch.charWithAttr |= (UInt32)attr;
+            methodIl.Emit(OpCodes.Nop);
             methodIl.Emit(OpCodes.Ldarg_S, (byte)0);
             methodIl.Emit(OpCodes.Ldflda, charWithAttrField);
             methodIl.Emit(OpCodes.Dup);
@@ -274,6 +277,7 @@ namespace NCurses.Core.Interop.Dynamic.chtype
             lbl1 = methodIl.DefineLabel();
 
             //ch.charWithAttr &= (UInt32)attr;
+            methodIl.Emit(OpCodes.Nop);
             methodIl.Emit(OpCodes.Ldarg_S, (byte)0);
             methodIl.Emit(OpCodes.Ldflda, charWithAttrField);
             methodIl.Emit(OpCodes.Dup);
@@ -308,6 +312,7 @@ namespace NCurses.Core.Interop.Dynamic.chtype
             lbl1 = methodIl.DefineLabel();
 
             //return ch.Char;
+            methodIl.Emit(OpCodes.Nop);
             methodIl.Emit(OpCodes.Ldarga_S, (byte)0);
             methodIl.Emit(OpCodes.Call, charPropertyBuilder.GetMethod);
             methodIl.Emit(OpCodes.Stloc_0);
@@ -328,6 +333,7 @@ namespace NCurses.Core.Interop.Dynamic.chtype
             lbl1 = methodIl.DefineLabel();
 
             //return (sbyte)ch.Char;
+            methodIl.Emit(OpCodes.Nop);
             methodIl.Emit(OpCodes.Ldarga_S, (byte)0);
             methodIl.Emit(OpCodes.Call, charPropertyBuilder.GetMethod);
             methodIl.Emit(OpCodes.Conv_I1);
@@ -351,6 +357,7 @@ namespace NCurses.Core.Interop.Dynamic.chtype
             lbl2 = methodIl.DefineLabel();
 
             //if (ch > sbyte.MaxValue)
+            methodIl.Emit(OpCodes.Nop);
             methodIl.Emit(OpCodes.Ldarg_0);
             methodIl.Emit(OpCodes.Ldc_I4_S, sbyte.MaxValue);
             methodIl.Emit(OpCodes.Cgt);
@@ -383,6 +390,7 @@ namespace NCurses.Core.Interop.Dynamic.chtype
             lbl1 = methodIl.DefineLabel();
 
             //return new chtype(ch);
+            methodIl.Emit(OpCodes.Nop);
             methodIl.Emit(OpCodes.Ldarg_0);
             methodIl.Emit(OpCodes.Newobj, charCtorBuilder);
             methodIl.Emit(OpCodes.Stloc_0);
@@ -403,6 +411,7 @@ namespace NCurses.Core.Interop.Dynamic.chtype
             lbl1 = methodIl.DefineLabel();
 
             //return ch.charWithAttr;
+            methodIl.Emit(OpCodes.Nop);
             methodIl.Emit(OpCodes.Ldarg_0);
             methodIl.Emit(OpCodes.Ldfld, charWithAttrField);
             if(!isLong)
@@ -425,6 +434,7 @@ namespace NCurses.Core.Interop.Dynamic.chtype
             lbl1 = methodIl.DefineLabel();
 
             //return new chtype(val);
+            methodIl.Emit(OpCodes.Nop);
             methodIl.Emit(OpCodes.Ldarg_0);
             methodIl.Emit(OpCodes.Newobj, attrCtorBuilder);
             methodIl.Emit(OpCodes.Stloc_0);
@@ -458,6 +468,7 @@ namespace NCurses.Core.Interop.Dynamic.chtype
             lbl1 = methodIl.DefineLabel();
 
             //return chLeft.charWithAttr == chRight.charWithAttr;
+            methodIl.Emit(OpCodes.Nop);
             methodIl.Emit(OpCodes.Ldarg_0);
             methodIl.Emit(OpCodes.Ldfld, charWithAttrField);
             methodIl.Emit(OpCodes.Ldarg_1);
@@ -494,6 +505,7 @@ namespace NCurses.Core.Interop.Dynamic.chtype
             lbl1 = methodIl.DefineLabel();
 
             //return chLeft.charWithAttr != chRight.charWithAttr;
+            methodIl.Emit(OpCodes.Nop);
             methodIl.Emit(OpCodes.Ldarg_0);
             methodIl.Emit(OpCodes.Ldfld, charWithAttrField);
             methodIl.Emit(OpCodes.Ldarg_1);
@@ -520,7 +532,7 @@ namespace NCurses.Core.Interop.Dynamic.chtype
 
             methodIl.Emit(OpCodes.Nop);
             methodIl.Emit(OpCodes.Ldarg_0);
-            methodIl.Emit(OpCodes.Ldarga_S, 1);
+            methodIl.Emit(OpCodes.Ldarga_S, (byte)1);
             methodIl.Emit(OpCodes.Call, opEquality);
             methodIl.Emit(OpCodes.Stloc_0);
             methodIl.Emit(OpCodes.Br_S, lbl1);
@@ -780,6 +792,7 @@ namespace NCurses.Core.Interop.Dynamic.chtype
             lbl1 = methodIl.DefineLabel();
 
             //return -1027107954 + this.charWithAttr.GetHashCode();
+            methodIl.Emit(OpCodes.Nop);
             methodIl.Emit(OpCodes.Ldc_I4, -1027107954);
             methodIl.Emit(OpCodes.Ldarg_0);
             methodIl.Emit(OpCodes.Ldflda, charWithAttrField);

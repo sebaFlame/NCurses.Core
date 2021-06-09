@@ -157,14 +157,18 @@ namespace NCurses.Core.Interop
 
             NCursesWrapper = (INCursesWrapper)Activator.CreateInstance(DynamicTypeBuilder.CreateDefaultWrapper<INCursesWrapper>(Constants.DLLNAME));
 
-            NCursesCustomTypeWrapper = (ICustomTypeWrapper)Activator
-                .CreateInstance(typeof(NativeCustomTypeWrapper<,,,,>)
-                .MakeGenericType(
-                    DynamicTypeBuilder.cchar_t, 
-                    DynamicTypeBuilder.wchar_t,
-                    DynamicTypeBuilder.chtype, 
-                    DynamicTypeBuilder.schar, 
-                    DynamicTypeBuilder.MEVENT));
+            NCursesCustomTypeWrapper = (ICustomTypeWrapper)Activator.CreateInstance
+            (
+                typeof(NativeCustomTypeWrapper<,,,,>)
+                    .MakeGenericType
+                    (
+                        DynamicTypeBuilder.cchar_t,
+                        DynamicTypeBuilder.wchar_t,
+                        DynamicTypeBuilder.chtype,
+                        DynamicTypeBuilder.schar,
+                        DynamicTypeBuilder.MEVENT
+                    )
+            );
         }
 
         #region native thread-safety

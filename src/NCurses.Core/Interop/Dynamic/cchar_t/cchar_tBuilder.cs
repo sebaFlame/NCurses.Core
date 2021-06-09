@@ -708,7 +708,7 @@ namespace NCurses.Core.Interop.Dynamic.cchar_t
 
             methodIl.Emit(OpCodes.Nop);
             methodIl.Emit(OpCodes.Ldarg_0);
-            methodIl.Emit(OpCodes.Ldarga_S, 1);
+            methodIl.Emit(OpCodes.Ldarga_S, (byte)1);
             methodIl.Emit(OpCodes.Call, opEquality);
             methodIl.Emit(OpCodes.Stloc_0);
             methodIl.Emit(OpCodes.Br_S, lbl1);

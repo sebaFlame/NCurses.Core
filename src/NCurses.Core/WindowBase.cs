@@ -4,7 +4,7 @@ using System.Collections.Concurrent;
 using System.Linq;
 using System.Text;
 using System.Runtime.InteropServices;
-using System.Globalization;
+using System.Buffers;
 
 using NCurses.Core.Interop.MultiByte;
 using NCurses.Core.Interop.SingleByte;
@@ -355,6 +355,18 @@ namespace NCurses.Core
         public abstract void Write(byte[] str, Encoding encoding);
 
         /// <summary>
+        /// <see cref="Write(byte[], Encoding)"/>
+        /// </summary>
+        /// <param name="str"></param>
+        /// <param name="encoding"></param>
+        public abstract void Write(ReadOnlySpan<byte> str, Encoding encoding);
+
+        /// <summary>
+        /// <see cref="Write(byte[], Encoding)"/>
+        /// </summary>
+        public abstract void Write(ReadOnlySequence<byte> str, Encoding encoding);
+
+        /// <summary>
         /// write byte array <paramref name="str"/> encoded in <paramref name="encoding"/> to the window. with defined attributes/color pair.
         /// </summary>
         /// <param name="str">the string to write</param>
@@ -364,6 +376,16 @@ namespace NCurses.Core
         public abstract void Write(byte[] str, Encoding encoding, ulong attrs, ushort pair);
 
         /// <summary>
+        /// <see cref="Write(byte[], Encoding, ulong, ushort)"/>
+        /// </summary>
+        public abstract void Write(ReadOnlySpan<byte> str, Encoding encoding, ulong attrs, ushort pair);
+
+        /// <summary>
+        /// <see cref="Write(byte[], Encoding, ulong, ushort)"/>
+        /// </summary>
+        public abstract void Write(ReadOnlySequence<byte> str, Encoding encoding, ulong attrs, ushort pair);
+
+        /// <summary>
         /// write byte array <paramref name="str"/> encoded in <paramref name="encoding"/> to the window on line <paramref name="nline"/> and column <paramref name="ncol"/>.
         /// </summary>
         /// <param name="nline">the line number to start writing</param>
@@ -371,6 +393,16 @@ namespace NCurses.Core
         /// <param name="str">the string to add</param>
         /// <param name="encoding">encoding of <paramref name="str"/></param>
         public abstract void Write(int nline, int ncol, byte[] str, Encoding encoding);
+
+        /// <summary>
+        /// <see cref="Write(int, int, byte[], Encoding)"/>
+        /// </summary>
+        public abstract void Write(int nline, int ncol, ReadOnlySpan<byte> str, Encoding encoding);
+
+        /// <summary>
+        /// <see cref="Write(int, int, byte[], Encoding)"/>
+        /// </summary>
+        public abstract void Write(int nline, int ncol, ReadOnlySequence<byte> str, Encoding encoding);
 
         /// <summary>
         /// write byte array <paramref name="str"/> encoded in <paramref name="encoding"/> to the window on line <paramref name="nline"/> and column <paramref name="ncol"/>.
@@ -383,6 +415,16 @@ namespace NCurses.Core
         /// <param name="attrs">the attributes you want to add (eg <see cref="Attrs.BOLD"/>)</param>
         /// <param name="pair">the color pair you want to use on this character</param>
         public abstract void Write(int nline, int ncol, byte[] str, Encoding encoding, ulong attrs, ushort pair);
+
+        /// <summary>
+        /// <see cref="Write(int, int, byte[], Encoding, ulong, ushort)"/>
+        /// </summary>
+        public abstract void Write(int nline, int ncol, ReadOnlySpan<byte> str, Encoding encoding, ulong attrs, ushort pair);
+
+        /// <summary>
+        /// <see cref="Write(int, int, byte[], Encoding, ulong, ushort)"/>
+        /// </summary>
+        public abstract void Write(int nline, int ncol, ReadOnlySequence<byte> str, Encoding encoding, ulong attrs, ushort pair);
 
         public abstract void Write(int nline, int ncol, in INCursesChar ch);
         public abstract void Write(int nline, int ncol, in INCursesCharString str);
@@ -798,6 +840,8 @@ namespace NCurses.Core
 
         public abstract void Write(string str, int maxLength);
         public abstract void Write(ReadOnlySpan<char> str, int maxLength);
+        public abstract void Write(ReadOnlySpan<byte> str, int maxLength, Encoding encoding);
+        public abstract void Write(ReadOnlySequence<byte> str, int maxLength, Encoding encoding);
 
         #region Equality
         public override bool Equals(object obj)
