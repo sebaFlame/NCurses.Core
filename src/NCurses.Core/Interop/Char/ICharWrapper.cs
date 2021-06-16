@@ -7,6 +7,7 @@ using NCurses.Core.Interop.SafeHandles;
 namespace NCurses.Core.Interop.Char
 {
     internal interface ICharWrapper<TChar>
+        where TChar : unmanaged, IChar
     {
         //int addnstr(const char *str, int n);
         int addnstr(in TChar txt, int number);

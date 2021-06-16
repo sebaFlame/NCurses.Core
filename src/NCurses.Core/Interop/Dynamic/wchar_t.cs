@@ -2,14 +2,16 @@
 using System.Collections.Generic;
 using System.Text;
 using System.Runtime.CompilerServices;
+using System.Runtime.InteropServices;
 
-namespace NCurses.Core.Interop.Dynamic.wchar_t
+namespace NCurses.Core.Interop.Dynamic
 {
+    [StructLayout(LayoutKind.Sequential)]
     internal struct wchar_t : IMultiByteChar, IEquatable<wchar_t> //wchar_t & wint_t
     {
-        private const int wchar_t_size = 2; //Constants.SIZEOF_WCHAR_T
+        private const int _WcharTSize = 2; //Constants.SIZEOF_WCHAR_T
 
-        public unsafe fixed byte @char[wchar_t_size];
+        public unsafe fixed byte @char[_WcharTSize];
 
         public char Char => (char)this;
 
@@ -19,7 +21,7 @@ namespace NCurses.Core.Interop.Dynamic.wchar_t
             {
                 fixed (byte* bArr = @char)
                 {
-                    return new Span<byte>(bArr, Constants.SIZEOF_WCHAR_T);
+                    return new Span<byte>(bArr, _WcharTSize);
                 }
             }
         }
@@ -33,7 +35,7 @@ namespace NCurses.Core.Interop.Dynamic.wchar_t
 
                 fixed (byte* bArr = this.@char)
                 {
-                    NativeNCurses.Encoding.GetBytes(charArr, 1, bArr, wchar_t_size); //Constants.SIZEOF_WCHAR_T
+                    NativeNCurses.Encoding.GetBytes(charArr, 1, bArr, _WcharTSize); //Constants.SIZEOF_WCHAR_T
                 }
             }
         }
@@ -80,7 +82,7 @@ namespace NCurses.Core.Interop.Dynamic.wchar_t
             {
                 fixed (byte* leftPtr = wchLeft.@char, rightPtr = wchRight.@char)
                 {
-                    return NativeNCurses.EqualBytesLongUnrolled(leftPtr, rightPtr, wchar_t_size);
+                    return NativeNCurses.EqualBytesLongUnrolled(leftPtr, rightPtr, _WcharTSize);
                 }
             }
         }
@@ -91,7 +93,7 @@ namespace NCurses.Core.Interop.Dynamic.wchar_t
             {
                 fixed (byte* leftPtr = wchLeft.@char, rightPtr = wchRight.@char)
                 {
-                    return !NativeNCurses.EqualBytesLongUnrolled(leftPtr, rightPtr, wchar_t_size);
+                    return !NativeNCurses.EqualBytesLongUnrolled(leftPtr, rightPtr, _WcharTSize);
                 }
             }
         }
@@ -102,7 +104,7 @@ namespace NCurses.Core.Interop.Dynamic.wchar_t
             unsafe
             {
                 char* charArr = stackalloc char[1];
-                if (NativeNCurses.Encoding.GetChars(ch.@char, wchar_t_size, charArr, 1) > 0)
+                if (NativeNCurses.Encoding.GetChars(ch.@char, _WcharTSize, charArr, 1) > 0)
                 {
                     ret = charArr[0];
                 }

@@ -8,7 +8,6 @@ using NCurses.Core.Interop.SingleByte;
 using NCurses.Core.Interop.Char;
 using NCurses.Core.Interop.WideChar;
 using NCurses.Core.Interop.MultiByte;
-using NCurses.Core.Interop.Dynamic;
 using NCurses.Core.Interop.SafeHandles;
 using NCurses.Core.Interop.Wrappers;
 

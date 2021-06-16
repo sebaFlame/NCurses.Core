@@ -5,8 +5,6 @@ using System.Text;
 using System.Runtime.InteropServices;
 using System.Buffers;
 
-using NCurses.Core.Interop.Dynamic;
-
 namespace NCurses.Core.Interop.MultiByte
 {
     internal delegate TMultiByte CreateMultiByteCharFromSpan<TMultiByte>(Span<byte> byteSpan)
@@ -34,7 +32,7 @@ namespace NCurses.Core.Interop.MultiByte
         {
             Instance = new MultiByteCharFactory();
 
-            FactoryType = typeof(MultiByteCharFactoryInternal<>).MakeGenericType(DynamicTypeBuilder.cchar_t);
+            FactoryType = typeof(MultiByteCharFactoryInternal<>).MakeGenericType(Constants.MultiByteChar);
 
             PropertyInfo property = FactoryType.GetProperty("Instance", BindingFlags.NonPublic | BindingFlags.Static);
             MethodInfo getMethod = property.GetGetMethod(true);

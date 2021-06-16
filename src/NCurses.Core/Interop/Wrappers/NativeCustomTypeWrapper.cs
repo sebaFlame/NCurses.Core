@@ -6,7 +6,6 @@ using NCurses.Core.Interop.MultiByte;
 using NCurses.Core.Interop.SingleByte;
 using NCurses.Core.Interop.WideChar;
 using NCurses.Core.Interop.Char;
-using NCurses.Core.Interop.Dynamic;
 using NCurses.Core.Interop.Mouse;
 
 namespace NCurses.Core.Interop.Wrappers
@@ -40,18 +39,7 @@ namespace NCurses.Core.Interop.Wrappers
 
         static NativeCustomTypeWrapper()
         {
-            object wrapper = Activator.CreateInstance
-            (
-                    DynamicTypeBuilder.CreateCustomTypeWrapper
-                (
-                    Constants.DLLNAME, 
-                    typeof(TMultiByte), 
-                    typeof(TWideChar), 
-                    typeof(TSingleByte), 
-                    typeof(TChar),
-                    typeof(TMouseEvent)
-                )
-            );
+            object wrapper = Activator.CreateInstance(Constants.NCursesCharWrapper);
 
             MultiByteWrapper = (IMultiByteWrapper<TMultiByte, TWideChar, TSingleByte, TChar>)wrapper;
             SingleByteWrapper = (ISingleByteWrapper<TSingleByte, TChar, TMouseEvent>)wrapper;

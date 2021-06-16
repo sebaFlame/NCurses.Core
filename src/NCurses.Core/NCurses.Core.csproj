@@ -5,10 +5,15 @@
     <DebugType>portable</DebugType>
     <AssemblyName>NCurses.Core</AssemblyName>
     <PackageId>NCurses.Core</PackageId>
-    <LangVersion>7.3</LangVersion>
+	<LangVersion>7.3</LangVersion>
     <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
   </PropertyGroup>
 
+  <!-- Source Generator -->
+  <ItemGroup>
+	  <ProjectReference Include="..\NCurses.Core.Generator\NCurses.Core.Generator.csproj" OutputItemType="Analyzer" ReferenceOutputAssembly="false" />
+  </ItemGroup>
+	
   <!-- Microsoft.DotNet.PlatformAbstractions dependencies (unix) -->
   <ItemGroup>
     <PackageReference Include="System.Runtime.InteropServices" Version="4.3.0" />
@@ -26,10 +31,15 @@
     <PackageReference Include="System.Text.Encoding.CodePages" Version="4.5.0" />
   </ItemGroup>
 
-  <!-- Predefined types only work in windows -->
-  <PropertyGroup>
-    <DynamicTypes Condition="'$(DynamicTypes)' == ''">true</DynamicTypes>
-    <DefineConstants Condition="'$(DynamicTypes)' == 'true' OR ('$(DynamicTypes)' == 'false' AND '$(Configuration)' != 'Debug') OR '$(OS)' != 'Windows_NT'">$(DefineConstants);DYNAMICTYPES</DefineConstants>
-  </PropertyGroup>
+	<ItemGroup>
+		<Compile Remove="Interop\Dynamic\**\*.cs" />
+	</ItemGroup>
 
+	<ItemGroup>
+		<CharacterTemplates Include="Interop\Dynamic\**\*.cs" />
+	</ItemGroup>
+	
+	<PropertyGroup>
+		<AdditionalFileItemNames>$(AdditionalFileItemNames);CharacterTemplates</AdditionalFileItemNames>
+	</PropertyGroup>
 </Project>

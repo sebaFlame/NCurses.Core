@@ -1,21 +1,19 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Runtime.InteropServices;
-using NCurses.Core.Interop.SingleByte;
+
 using NCurses.Core.Interop.MultiByte;
 
-namespace NCurses.Core.Interop.Dynamic.cchar_t
+namespace NCurses.Core.Interop.Dynamic
 {
-    /* TODO
-     * temporary test class -> REMOVE
-    */
     [StructLayout(LayoutKind.Sequential)]
     internal struct cchar_t : IMultiByteNCursesChar, IEquatable<cchar_t> //cchar_t
     {
-        private const int charGlobalLength = 10; //Constants.SIZEOF_WCHAR_T * Constants.CCHARW_MAX
+        private const int _WcharTSize = 2;
+        private const int _CharGlobalLength = 10; //Constants.SIZEOF_WCHAR_T * Constants.CCHARW_MAX
 
-        public chtype.chtype attr;
-        public unsafe fixed byte chars[charGlobalLength];
+        public chtype attr;
+        public unsafe fixed byte chars[_CharGlobalLength];
         public int ext_color;
 
         public char Char => (char)this;
@@ -28,7 +26,7 @@ namespace NCurses.Core.Interop.Dynamic.cchar_t
             {
                 fixed (byte* bArr = chars)
                 {
-                    return new Span<byte>(bArr, Constants.SIZEOF_WCHAR_T);
+                    return new Span<byte>(bArr, _WcharTSize);
                 }
             }
         }
@@ -45,7 +43,7 @@ namespace NCurses.Core.Interop.Dynamic.cchar_t
                 //TODO: cache bytesUsed as length
                 fixed (byte* b = this.chars)
                 {
-                    NativeNCurses.Encoding.GetBytes(ch, 1, b, charGlobalLength);
+                    NativeNCurses.Encoding.GetBytes(ch, 1, b, _CharGlobalLength);
                 }
             }
         }
@@ -128,8 +126,8 @@ namespace NCurses.Core.Interop.Dynamic.cchar_t
             char ret = '\0';
             unsafe
             {
-                char* chArr = stackalloc char[charGlobalLength];
-                if (NativeNCurses.Encoding.GetChars(ch.chars, charGlobalLength, chArr, charGlobalLength / 2) > 0)
+                char* chArr = stackalloc char[_CharGlobalLength];
+                if (NativeNCurses.Encoding.GetChars(ch.chars, _CharGlobalLength, chArr, _CharGlobalLength / 2) > 0)
                     ret = chArr[0];
                 else
                     throw new InvalidOperationException("Failed to cast to character");
@@ -145,7 +143,7 @@ namespace NCurses.Core.Interop.Dynamic.cchar_t
             unsafe
             {
                 fixed (byte* leftPtr = wchLeft.chars, rightPtr = wchRight.chars)
-                    return NativeNCurses.EqualBytesLongUnrolled(leftPtr, rightPtr, charGlobalLength)
+                    return NativeNCurses.EqualBytesLongUnrolled(leftPtr, rightPtr, _CharGlobalLength)
                         && wchLeft.attr == wchRight.attr
                         && wchLeft.ext_color == wchRight.ext_color;
             }
@@ -156,7 +154,7 @@ namespace NCurses.Core.Interop.Dynamic.cchar_t
             unsafe
             {
                 fixed (byte* leftPtr = wchLeft.chars, rightPtr = wchRight.chars)
-                    return !(NativeNCurses.EqualBytesLongUnrolled(leftPtr, rightPtr, charGlobalLength)
+                    return !(NativeNCurses.EqualBytesLongUnrolled(leftPtr, rightPtr, _CharGlobalLength)
                         && wchLeft.attr == wchRight.attr
                         && wchLeft.ext_color == wchRight.ext_color);
             }
@@ -215,7 +213,7 @@ namespace NCurses.Core.Interop.Dynamic.cchar_t
         public override int GetHashCode()
         {
             int hashCode = -946517152;
-            hashCode = hashCode * -1521134295 + EqualityComparer<chtype.chtype>.Default.GetHashCode(this.attr);
+            hashCode = hashCode * -1521134295 + this.attr.GetHashCode();
             unsafe
             {
                 fixed(byte* b = this.chars)

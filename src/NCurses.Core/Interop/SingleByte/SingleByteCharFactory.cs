@@ -4,8 +4,6 @@ using System.Reflection;
 using System.Linq.Expressions;
 using System.Runtime.InteropServices;
 
-using NCurses.Core.Interop.Dynamic;
-
 namespace NCurses.Core.Interop.SingleByte
 {
     /// <summary>
@@ -24,7 +22,7 @@ namespace NCurses.Core.Interop.SingleByte
         {
             Instance = new SingleByteCharFactory();
 
-            FactoryType = typeof(SingleByteCharFactoryInternal<>).MakeGenericType(DynamicTypeBuilder.chtype);
+            FactoryType = typeof(SingleByteCharFactoryInternal<>).MakeGenericType(Constants.SingleByteChar);
 
             PropertyInfo property = FactoryType.GetProperty("Instance", BindingFlags.NonPublic | BindingFlags.Static);
             MethodInfo getMethod = property.GetGetMethod(true);

@@ -4,8 +4,6 @@ using System.Reflection;
 using System.Text;
 using System.Runtime.InteropServices;
 
-using NCurses.Core.Interop.Dynamic;
-
 namespace NCurses.Core.Interop.Char
 {
     public class CharFactory : ICharFactory<IChar, ICharString>

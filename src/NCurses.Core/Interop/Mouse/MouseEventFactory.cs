@@ -4,7 +4,6 @@ using System.Text;
 using System.Reflection;
 using System.Linq.Expressions;
 using NCurses.Core.Interop.SingleByte;
-using NCurses.Core.Interop.Dynamic;
 
 namespace NCurses.Core.Interop.Mouse
 {
@@ -21,7 +20,7 @@ namespace NCurses.Core.Interop.Mouse
         {
             instance = new MouseEventFactory();
 
-            MouseEventType = DynamicTypeBuilder.MEVENT;
+            MouseEventType = Constants.MouseEvent;
 
             ConstructorInfo ctor;
             ParameterExpression par1, par2, par3, par4, par5;

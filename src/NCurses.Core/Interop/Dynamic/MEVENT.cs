@@ -1,9 +1,10 @@
 ﻿using System;
 using System.Collections.Generic;
-using NCurses.Core.Interop.Mouse;
-using NCurses.Core.Interop.Dynamic.chtype;
+using System.Runtime.InteropServices;
 
-namespace NCurses.Core.Interop.Dynamic.MEVENT
+using NCurses.Core.Interop.Mouse;
+
+namespace NCurses.Core.Interop.Dynamic
 {
     /*
     typedef struct {
@@ -13,11 +14,12 @@ namespace NCurses.Core.Interop.Dynamic.MEVENT
     } MEVENT;
     */
 
+    [StructLayout(LayoutKind.Sequential)]
     internal struct MEVENT : IMEVENT
     {
         public short id;        /* ID to distinguish multiple devices */
         public int x, y, z;     /* event coordinates (character-cell) */
-        public chtype.chtype bstate;     /* button state bits */
+        public chtype bstate;     /* button state bits */
 
         public MEVENT(short id, int x, int y, int z, ulong bstate)
         {

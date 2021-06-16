@@ -5,8 +5,6 @@ using System.Text;
 using System.Runtime.InteropServices;
 using System.Buffers;
 
-using NCurses.Core.Interop.Dynamic;
-
 namespace NCurses.Core.Interop.WideChar
 {
     internal delegate TWideChar CreateWideCharStringFromSpan<TWideChar>(Span<byte> byteSpan)
@@ -24,7 +22,7 @@ namespace NCurses.Core.Interop.WideChar
         {
             Instance = new WideCharFactory();
 
-            FactoryType = typeof(WideCharFactoryInternal<>).MakeGenericType(DynamicTypeBuilder.wchar_t);
+            FactoryType = typeof(WideCharFactoryInternal<>).MakeGenericType(Constants.WideChar);
 
             PropertyInfo property = FactoryType.GetProperty("Instance", BindingFlags.NonPublic | BindingFlags.Static);
             MethodInfo getMethod = property.GetGetMethod(true);

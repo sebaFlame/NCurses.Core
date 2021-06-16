@@ -2,7 +2,6 @@
 using System.Collections.Generic;
 using System.Text;
 
-using NCurses.Core.Interop.Dynamic;
 using NCurses.Core.Interop.SafeHandles;
 
 namespace NCurses.Core.Interop.Panel
@@ -16,7 +15,7 @@ namespace NCurses.Core.Interop.Panel
             //guarantee INCursesWrapper gets created first
             bool hasUnicode = NativeNCurses.HasUnicodeSupport;
 
-            NCursesWrapper = (INCursesPanelWrapper)Activator.CreateInstance(DynamicTypeBuilder.CreateDefaultWrapper<INCursesPanelWrapper>(Constants.DLLPANELNAME));
+            NCursesWrapper = (INCursesPanelWrapper)Activator.CreateInstance(Constants.PanelWrapper);
         }
 
         /// <summary>

@@ -35,8 +35,6 @@ namespace NCurses.Core.Tests.MultiByte
 
         public MultiByteWriteTest(ITestOutputHelper testOutputHelper, MultiByteStdScrState multiByteStdScrState)
             :base(testOutputHelper, multiByteStdScrState)
-        {
-
-        }
+        { }
     }
 }

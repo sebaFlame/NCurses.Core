@@ -2,11 +2,11 @@
 using System.Collections.Generic;
 using System.Text;
 using System.Runtime.InteropServices;
+
 using NCurses.Core.Interop.SingleByte;
 
-namespace NCurses.Core.Interop.Dynamic.chtype
+namespace NCurses.Core.Interop.Dynamic
 {
-    //TODO: temporary test class -> REMOVE
     [StructLayout(LayoutKind.Sequential)]
     internal struct chtype : ISingleByteNCursesChar, IEquatable<chtype> //chtype & attr_t
     {

@@ -10,7 +10,6 @@ using NCurses.Core.Interop.SingleByte;
 using NCurses.Core.Interop.Char;
 using NCurses.Core.Interop.Mouse;
 using NCurses.Core.Interop.Platform;
-using NCurses.Core.Interop.Dynamic;
 using NCurses.Core.Interop.SafeHandles;
 using NCurses.Core.Interop.Wrappers;
 
@@ -155,18 +154,18 @@ namespace NCurses.Core.Interop
             SingleByteDecoder = SingleByteEncoding.GetDecoder();
             SingleByteEncoder = SingleByteEncoding.GetEncoder();
 
-            NCursesWrapper = (INCursesWrapper)Activator.CreateInstance(DynamicTypeBuilder.CreateDefaultWrapper<INCursesWrapper>(Constants.DLLNAME));
+            NCursesWrapper = (INCursesWrapper)Activator.CreateInstance(Constants.NCursesWrapper);
 
             NCursesCustomTypeWrapper = (ICustomTypeWrapper)Activator.CreateInstance
             (
                 typeof(NativeCustomTypeWrapper<,,,,>)
                     .MakeGenericType
                     (
-                        DynamicTypeBuilder.cchar_t,
-                        DynamicTypeBuilder.wchar_t,
-                        DynamicTypeBuilder.chtype,
-                        DynamicTypeBuilder.schar,
-                        DynamicTypeBuilder.MEVENT
+                        Constants.MultiByteChar,
+                        Constants.WideChar,
+                        Constants.SingleByteChar,
+                        typeof(schar_t),
+                        Constants.MouseEvent
                     )
             );
         }

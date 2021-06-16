@@ -1,0 +1,66 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <OutputType>Exe</OutputType>
+    <TargetFramework>netcoreapp3.1</TargetFramework>
+  </PropertyGroup>
+
+	<ItemGroup>
+		<ProjectReference Include="..\..\src\NCurses.Core.Generator\NCurses.Core.Generator.csproj" />
+	</ItemGroup>
+	
+	<ItemGroup>
+		<PackageReference Include="Microsoft.CodeAnalysis.CSharp" Version="3.8.0" PrivateAssets="all" />
+	</ItemGroup>
+	
+	<ItemGroup>
+		<Content Include="..\..\src\NCurses.Core\Interop\Constants.cs">
+			<Link>Deps\Constants.cs</Link>
+			<CopyToOutputDirectory>Always</CopyToOutputDirectory>
+		</Content>
+		<Content Include="..\..\src\NCurses.Core\Interop\MultiByte\IMultiByteWrapper.cs">
+			<Link>Deps\IMultiByteWrapper.cs</Link>
+			<CopyToOutputDirectory>Always</CopyToOutputDirectory>
+		</Content>
+		<Content Include="..\..\src\NCurses.Core\Interop\SingleByte\ISingleByteWrapper.cs">
+			<Link>Deps\ISingleByteWrapper.cs</Link>
+			<CopyToOutputDirectory>Always</CopyToOutputDirectory>
+		</Content>
+		<Content Include="..\..\src\NCurses.Core\Interop\WideChar\IWideCharWrapper.cs">
+			<Link>Deps\IWideCharWrapper.cs</Link>
+			<CopyToOutputDirectory>Always</CopyToOutputDirectory>
+		</Content>
+		<Content Include="..\..\src\NCurses.Core\Interop\Char\ICharWrapper.cs">
+			<Link>Deps\ICharWrapper.cs</Link>
+			<CopyToOutputDirectory>Always</CopyToOutputDirectory>
+		</Content>
+		<Content Include="..\..\src\NCurses.Core\Interop\Panel\INCursesPanelWrapper.cs">
+			<Link>Deps\INCursesPanelWrapper.cs</Link>
+			<CopyToOutputDirectory>Always</CopyToOutputDirectory>
+		</Content>
+		<Content Include="..\..\src\NCurses.Core\Interop\INCursesWrapper.cs">
+			<Link>Deps\INCursesWrapper.cs</Link>
+			<CopyToOutputDirectory>Always</CopyToOutputDirectory>
+		</Content>
+		<Content Include="..\..\src\NCurses.Core\Interop\Dynamic\cchar_t.cs">
+			<Link>Deps\cchar_t.cs</Link>
+			<CopyToOutputDirectory>Always</CopyToOutputDirectory>
+		</Content>
+		<Content Include="..\..\src\NCurses.Core\Interop\Dynamic\chtype.cs">
+			<Link>Deps\chtype.cs</Link>
+			<CopyToOutputDirectory>Always</CopyToOutputDirectory>
+		</Content>
+		<Content Include="..\..\src\NCurses.Core\Interop\Dynamic\MEVENT.cs">
+			<Link>Deps\MEVENT.cs</Link>
+			<CopyToOutputDirectory>Always</CopyToOutputDirectory>
+		</Content>
+		<Content Include="..\..\src\NCurses.Core\Interop\Dynamic\wchar_t.cs">
+			<Link>Deps\wchar_t.cs</Link>
+			<CopyToOutputDirectory>Always</CopyToOutputDirectory>
+		</Content>
+	</ItemGroup>
+
+	<ItemGroup>
+		<Compile Remove="Deps\**\*.cs" />
+	</ItemGroup>
+</Project>
