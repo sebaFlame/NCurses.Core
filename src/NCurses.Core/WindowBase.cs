@@ -233,6 +233,7 @@ namespace NCurses.Core
 
         /// <summary>
         /// Activate attributes OR's together and color
+        /// Use this for <paramref name="colorPair"/> &gt; 256
         /// </summary>
         /// <param name="attrs">Attributes to enable</param>
         /// <param name="colorPair">Color pair to use</param>
@@ -281,7 +282,21 @@ namespace NCurses.Core
         /// </summary>
         /// <param name="str">the string to write</param>
         public abstract void Write(string str);
+
+        /// <summary>
+        /// <see cref="Write(string)"/>
+        /// </summary>
         public abstract void Write(ReadOnlySpan<char> str);
+
+        /// <summary>
+        /// <see cref="Write(string)"/>
+        /// </summary>
+        public abstract void Write(ReadOnlySpan<byte> str);
+
+        /// <summary>
+        /// <see cref="Write(string)"/>
+        /// </summary>
+        public abstract void Write(in ReadOnlySequence<byte> str);
 
         /// <summary>
         /// write string <paramref name="str"/> to the window. with defined attributes/color pair.
@@ -290,7 +305,21 @@ namespace NCurses.Core
         /// <param name="attrs">the attributes you want to add (eg <see cref="Attrs.BOLD"/>)</param>
         /// <param name="pair">the color pair you want to use on this character</param>
         public abstract void Write(string str, ulong attrs, ushort pair);
+
+        /// <summary>
+        /// <see cref="Write(string, ulong, ushort)"/>
+        /// </summary>
         public abstract void Write(ReadOnlySpan<char> str, ulong attrs, ushort pair);
+
+        /// <summary>
+        /// <see cref="Write(string, ulong, ushort)"/>
+        /// </summary>
+        public abstract void Write(ReadOnlySpan<byte> str, ulong attrs, ushort pair);
+
+        /// <summary>
+        /// <see cref="Write(string, ulong, ushort)"/>
+        /// </summary>
+        public abstract void Write(in ReadOnlySequence<byte> str, ulong attrs, ushort pair);
 
         /// <summary>
         /// write string <paramref name="str"/> to the window on line <paramref name="nline"/> and column <paramref name="ncol"/>.
@@ -299,7 +328,26 @@ namespace NCurses.Core
         /// <param name="ncol">the column number to start writing</param>
         /// <param name="str">the string to add</param>
         public abstract void Write(int nline, int ncol, string str);
+
+        /// <summary>
+        /// <see cref="Write(int, int, string)"/>
+        /// </summary>
         public abstract void Write(int nline, int ncol, ReadOnlySpan<char> str);
+
+        /// <summary>
+        /// <see cref="Write(int, int, string)"/>
+        /// </summary>
+        public abstract void Write(int nline, int ncol, ReadOnlySpan<byte> str);
+
+        /// <summary>
+        /// <see cref="Write(int, int, string)"/>
+        /// </summary>
+        public abstract void Write(int nline, int ncol, in ReadOnlySequence<byte> str);
+
+        /// <summary>
+        /// <see cref="Write(int, int, string)"/>
+        /// </summary>
+        public abstract void Write(int nline, int ncol, in ReadOnlySequence<byte> str, Encoding encoding);
 
         /// <summary>
         /// write string <paramref name="str"/> to the window on line <paramref name="nline"/> and column <paramref name="ncol"/>.
@@ -311,7 +359,26 @@ namespace NCurses.Core
         /// <param name="attrs">the attributes you want to add (eg <see cref="Attrs.BOLD"/>)</param>
         /// <param name="pair">the color pair you want to use on this character</param>
         public abstract void Write(int nline, int ncol, string str, ulong attrs, ushort pair);
+
+        /// <summary>
+        /// <see cref="Write(int, int, string, ulong, ushort"/>
+        /// </summary>
         public abstract void Write(int nline, int ncol, ReadOnlySpan<char> str, ulong attrs, ushort pair);
+
+        /// <summary>
+        /// <see cref="Write(int, int, string, ulong, ushort"/>
+        /// </summary>
+        public abstract void Write(int nline, int ncol, ReadOnlySpan<byte> str, ulong attrs, ushort pair);
+
+        /// <summary>
+        /// <see cref="Write(int, int, string, ulong, ushort"/>
+        /// </summary>
+        public abstract void Write(int nline, int ncol, in ReadOnlySequence<byte> str, ulong attrs, ushort pair);
+
+        /// <summary>
+        /// <see cref="Write(int, int, string, ulong, ushort"/>
+        /// </summary>
+        public abstract void Write(int nline, int ncol, in ReadOnlySequence<byte> str, Encoding encoding, ulong attrs, ushort pair);
 
         /// <summary>
         /// write character <paramref name="ch"/> to the window.
@@ -347,24 +414,19 @@ namespace NCurses.Core
         /// <param name="pair">the color pair you want to use on this character</param>
         public abstract void Write(int nline, int ncol, char ch, ulong attrs, ushort pair);
 
+
         /// <summary>
         /// write byte array <paramref name="str"/>  encoded in <paramref name="encoding"/> to the window.
         /// </summary>
         /// <param name="str">the string to write</param>
         /// <param name="encoding">encoding of <paramref name="str"/></param>
-        public abstract void Write(byte[] str, Encoding encoding);
-
-        /// <summary>
-        /// <see cref="Write(byte[], Encoding)"/>
-        /// </summary>
-        /// <param name="str"></param>
-        /// <param name="encoding"></param>
         public abstract void Write(ReadOnlySpan<byte> str, Encoding encoding);
 
         /// <summary>
-        /// <see cref="Write(byte[], Encoding)"/>
+        /// <see cref="Write(ReadOnlySpan{byte}, Encoding)"/>
         /// </summary>
-        public abstract void Write(ReadOnlySequence<byte> str, Encoding encoding);
+        public abstract void Write(in ReadOnlySequence<byte> str, Encoding encoding);
+
 
         /// <summary>
         /// write byte array <paramref name="str"/> encoded in <paramref name="encoding"/> to the window. with defined attributes/color pair.
@@ -373,17 +435,12 @@ namespace NCurses.Core
         /// <param name="encoding">encoding of <paramref name="str"/></param>
         /// <param name="attrs">the attributes you want to add (eg <see cref="Attrs.BOLD"/>)</param>
         /// <param name="pair">the color pair you want to use on this character</param>
-        public abstract void Write(byte[] str, Encoding encoding, ulong attrs, ushort pair);
-
-        /// <summary>
-        /// <see cref="Write(byte[], Encoding, ulong, ushort)"/>
-        /// </summary>
         public abstract void Write(ReadOnlySpan<byte> str, Encoding encoding, ulong attrs, ushort pair);
 
         /// <summary>
-        /// <see cref="Write(byte[], Encoding, ulong, ushort)"/>
+        /// <see cref="Write(ReadOnlySpan{byte}, Encoding, ulong, ushort)"/>
         /// </summary>
-        public abstract void Write(ReadOnlySequence<byte> str, Encoding encoding, ulong attrs, ushort pair);
+        public abstract void Write(in ReadOnlySequence<byte> str, Encoding encoding, ulong attrs, ushort pair);
 
         /// <summary>
         /// write byte array <paramref name="str"/> encoded in <paramref name="encoding"/> to the window on line <paramref name="nline"/> and column <paramref name="ncol"/>.
@@ -392,17 +449,7 @@ namespace NCurses.Core
         /// <param name="ncol">the column number to start writing</param>
         /// <param name="str">the string to add</param>
         /// <param name="encoding">encoding of <paramref name="str"/></param>
-        public abstract void Write(int nline, int ncol, byte[] str, Encoding encoding);
-
-        /// <summary>
-        /// <see cref="Write(int, int, byte[], Encoding)"/>
-        /// </summary>
         public abstract void Write(int nline, int ncol, ReadOnlySpan<byte> str, Encoding encoding);
-
-        /// <summary>
-        /// <see cref="Write(int, int, byte[], Encoding)"/>
-        /// </summary>
-        public abstract void Write(int nline, int ncol, ReadOnlySequence<byte> str, Encoding encoding);
 
         /// <summary>
         /// write byte array <paramref name="str"/> encoded in <paramref name="encoding"/> to the window on line <paramref name="nline"/> and column <paramref name="ncol"/>.
@@ -414,17 +461,7 @@ namespace NCurses.Core
         /// <param name="encoding">encoding of <paramref name="str"/></param>
         /// <param name="attrs">the attributes you want to add (eg <see cref="Attrs.BOLD"/>)</param>
         /// <param name="pair">the color pair you want to use on this character</param>
-        public abstract void Write(int nline, int ncol, byte[] str, Encoding encoding, ulong attrs, ushort pair);
-
-        /// <summary>
-        /// <see cref="Write(int, int, byte[], Encoding, ulong, ushort)"/>
-        /// </summary>
         public abstract void Write(int nline, int ncol, ReadOnlySpan<byte> str, Encoding encoding, ulong attrs, ushort pair);
-
-        /// <summary>
-        /// <see cref="Write(int, int, byte[], Encoding, ulong, ushort)"/>
-        /// </summary>
-        public abstract void Write(int nline, int ncol, ReadOnlySequence<byte> str, Encoding encoding, ulong attrs, ushort pair);
 
         public abstract void Write(int nline, int ncol, in INCursesChar ch);
         public abstract void Write(int nline, int ncol, in INCursesCharString str);
@@ -568,6 +605,12 @@ namespace NCurses.Core
         public abstract char ExtractChar();
 
         /// <summary>
+        /// Extract a char from an existing char
+        /// </summary>
+        /// <returns>the read character</returns>
+        public abstract char ExtractChar(INCursesChar @char);
+
+        /// <summary>
         /// read a character from the console output on line <paramref name="nline"/> and column <paramref name="ncol"/>. 
         /// </summary>
         /// <param name="nline">the line number to start writing</param>
@@ -679,7 +722,7 @@ namespace NCurses.Core
         /// </summary>
         /// <param name="ch">The character to convert</param>
         /// <returns>The converted cahracter</returns>
-        public abstract INCursesChar CreateChar(char ch);
+        public abstract IChar CreateChar(char ch);
 
         /// <summary>
         /// Get a native character representing <paramref name="ch"/>
@@ -703,8 +746,11 @@ namespace NCurses.Core
         /// </summary>
         /// <param name="str">The string to convert</param>
         /// <returns>The converted str</returns>
-        public abstract INCursesCharString CreateString(string str);
-        public abstract INCursesCharString CreateString(ReadOnlySpan<char> str);
+        public abstract ICharString CreateString(string str);
+        public abstract ICharString CreateString(ReadOnlySpan<char> str);
+        public abstract ICharString CreateString(ReadOnlySpan<byte> str);
+        public abstract ICharString CreateString(in ReadOnlySequence<byte> str);
+        public abstract ICharString CreateString(in ReadOnlySequence<byte> str, Encoding encoding);
 
         /// <summary>
         /// Get a native string representing <paramref name="str"/>
@@ -714,6 +760,9 @@ namespace NCurses.Core
         /// <returns>The converted str</returns>
         public abstract INCursesCharString CreateString(string str, ulong attrs);
         public abstract INCursesCharString CreateString(ReadOnlySpan<char> str, ulong attrs);
+        public abstract INCursesCharString CreateString(ReadOnlySpan<byte> str, ulong attrs);
+        public abstract INCursesCharString CreateString(in ReadOnlySequence<byte> str, ulong attrs);
+        public abstract INCursesCharString CreateString(in ReadOnlySequence<byte> str, Encoding encoding, ulong attrs);
 
         /// <summary>
         /// Get a native string representing <paramref name="str"/> with attributes/color applied
@@ -724,6 +773,9 @@ namespace NCurses.Core
         /// <returns>The converted cahracter</returns>
         public abstract INCursesCharString CreateString(string str, ulong attrs, ushort pair);
         public abstract INCursesCharString CreateString(ReadOnlySpan<char> str, ulong attrs, ushort pair);
+        public abstract INCursesCharString CreateString(ReadOnlySpan<byte> str, ulong attrs, ushort pair);
+        public abstract INCursesCharString CreateString(in ReadOnlySequence<byte> str, ulong attrs, ushort pair);
+        public abstract INCursesCharString CreateString(in ReadOnlySequence<byte> str, Encoding encoding, ulong attrs, ushort pair);
         #endregion
 
         #region border
@@ -840,8 +892,11 @@ namespace NCurses.Core
 
         public abstract void Write(string str, int maxLength);
         public abstract void Write(ReadOnlySpan<char> str, int maxLength);
+        public abstract void Write(ReadOnlySpan<byte> str, int maxLength);
+        public abstract void Write(in ReadOnlySequence<byte> str, int maxLength);
+
         public abstract void Write(ReadOnlySpan<byte> str, int maxLength, Encoding encoding);
-        public abstract void Write(ReadOnlySequence<byte> str, int maxLength, Encoding encoding);
+        public abstract void Write(in ReadOnlySequence<byte> str, int maxLength, Encoding encoding);
 
         #region Equality
         public override bool Equals(object obj)

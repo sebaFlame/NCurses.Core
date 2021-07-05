@@ -21,7 +21,7 @@ namespace NCurses.Core.Tests.Model
 
         public int ColorCount { get; private set; }
 
-        protected IWindow StdScr { get; }
+        internal IWindow StdScr { get; }
 
         public StdScrState()
         {

@@ -16,7 +16,13 @@ namespace NCurses.Core.Interop.Char
 
         public CharString<TChar> curses_version()
         {
-            return CharFactoryInternal<TChar>.Instance.CreateNativeString(ref this.Wrapper.curses_version());
+            using (BufferState<TChar> BufferState = CharFactory<TChar>._Instance.GetNativeString(
+                CharFactory<TChar>._CreateArrayBuffer,
+                ref NCursesException.Verify(ref this.Wrapper.curses_version(), "curses_version"),
+                out CharString<TChar> @string))
+            {
+                return @string;
+            }
         }
 
         public void define_key(in CharString<TChar>definition, int keycode)
@@ -31,12 +37,24 @@ namespace NCurses.Core.Interop.Char
 
         public CharString<TChar> keybound(int keycode, int count)
         {
-            return CharFactoryInternal<TChar>.Instance.CreateNativeString(ref this.Wrapper.keybound(keycode, count));
+            using (BufferState<TChar> BufferState = CharFactory<TChar>._Instance.GetNativeString(
+                CharFactory<TChar>._CreateArrayBuffer,
+                ref NCursesException.Verify(ref this.Wrapper.keybound(keycode, count), "keybound"),
+                out CharString<TChar> @string))
+            {
+                return @string;
+            }
         }
 
         public CharString<TChar> keyname(int c)
         {
-            return CharFactoryInternal<TChar>.Instance.CreateNativeString(ref this.Wrapper.keyname(c));
+            using (BufferState<TChar> BufferState = CharFactory<TChar>._Instance.GetNativeString(
+                CharFactory<TChar>._CreateArrayBuffer,
+                ref NCursesException.Verify(ref this.Wrapper.keyname(c), "keyname"),
+                out CharString<TChar> @string))
+            {
+                return @string;
+            }
         }
 
         public TChar killchar()
@@ -46,7 +64,13 @@ namespace NCurses.Core.Interop.Char
 
         public CharString<TChar> longname()
         {
-            return CharFactoryInternal<TChar>.Instance.CreateNativeString(ref this.Wrapper.longname());
+            using (BufferState<TChar> BufferState = CharFactory<TChar>._Instance.GetNativeString(
+                CharFactory<TChar>._CreateArrayBuffer,
+                ref NCursesException.Verify(ref this.Wrapper.longname(), "longname"),
+                out CharString<TChar> @string))
+            {
+                return @string;
+            }
         }
 
         public TChar erasechar()
@@ -86,7 +110,13 @@ namespace NCurses.Core.Interop.Char
 
         public CharString<TChar> slk_label(int labnum)
         {
-            return CharFactoryInternal<TChar>.Instance.CreateNativeString(ref this.Wrapper.slk_label(labnum));
+            using (BufferState<TChar> BufferState = CharFactory<TChar>._Instance.GetNativeString(
+                CharFactory<TChar>._CreateArrayBuffer,
+                ref NCursesException.Verify(ref this.Wrapper.slk_label(labnum), "slk_label"),
+                out CharString<TChar> @string))
+            {
+                return @string;
+            }
         }
 
         public void slk_set(int labnum, in CharString<TChar>label, int fmt)
@@ -96,7 +126,13 @@ namespace NCurses.Core.Interop.Char
 
         public CharString<TChar> termname()
         {
-            return CharFactoryInternal<TChar>.Instance.CreateNativeString(ref this.Wrapper.termname());
+            using (BufferState<TChar> BufferState = CharFactory<TChar>._Instance.GetNativeString(
+                CharFactory<TChar>._CreateArrayBuffer,
+                ref NCursesException.Verify(ref this.Wrapper.termname(), "termname"),
+                out CharString<TChar> @string))
+            {
+                return @string;
+            }
         }
 
         public int tigetflag(in CharString<TChar>capname)

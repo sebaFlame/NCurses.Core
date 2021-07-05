@@ -20,7 +20,7 @@ namespace NCurses.Core.Interop
     internal class NativeScreenInternal<TMultiByte, TWideChar, TSingleByte, TChar, TMouseEvent>
             : INativeScreenWrapper<
                 TMultiByte,
-                MultiByteCharString<TMultiByte>,
+                MultiByteCharString<TMultiByte, TWideChar, TSingleByte>,
                 TWideChar,
                 WideCharString<TWideChar>,
                 TSingleByte,

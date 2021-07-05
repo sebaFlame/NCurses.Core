@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Text;
 using System.Runtime.InteropServices;
+using System.Runtime.CompilerServices;
 
 namespace NCurses.Core.Interop.Char
 {
@@ -10,6 +11,13 @@ namespace NCurses.Core.Interop.Char
             INativeStdScrChar<TChar, CharString<TChar>>
         where TChar : unmanaged, ISingleByteChar, IEquatable<TChar>
     {
+        private static int _CharLength;
+
+        static NativeStdScrChar()
+        {
+            _CharLength = Unsafe.SizeOf<TChar>();
+        }
+
         internal NativeStdScrChar(ICharWrapper<TChar> wrapper)
             : base(wrapper) { }
 
@@ -107,7 +115,7 @@ namespace NCurses.Core.Interop.Char
                     byte** ptrArr = stackalloc byte*[argList.Length];
                     for(int i = 0; i < argList.Length; i++)
                     {
-                        byte* arr = stackalloc byte[argList[i].Length * CharFactoryInternal<TChar>.Instance.GetCharLength()];
+                        byte* arr = stackalloc byte[argList[i].Length * _CharLength];
                         ptrArr[i] = arr;
                     }
                     argPtr = CreateVarArgList(argList, ptrArr);
@@ -132,7 +140,7 @@ namespace NCurses.Core.Interop.Char
                     byte** ptrArr = stackalloc byte*[argList.Length];
                     for (int i = 0; i < argList.Length; i++)
                     {
-                        byte* arr = stackalloc byte[argList[i].Length * CharFactoryInternal<TChar>.Instance.GetCharLength()];
+                        byte* arr = stackalloc byte[argList[i].Length * _CharLength];
                         ptrArr[i] = arr;
                     }
                     argPtr = CreateVarArgList(argList, ptrArr);
@@ -157,7 +165,7 @@ namespace NCurses.Core.Interop.Char
                     byte** ptrArr = stackalloc byte*[argList.Length];
                     for (int i = 0; i < argList.Length; i++)
                     {
-                        byte* arr = stackalloc byte[argList[i].Length * CharFactoryInternal<TChar>.Instance.GetCharLength()];
+                        byte* arr = stackalloc byte[argList[i].Length * _CharLength];
                         ptrArr[i] = arr;
                     }
                     argPtr = CreateVarArgList(argList, ptrArr);
@@ -183,7 +191,7 @@ namespace NCurses.Core.Interop.Char
                     byte** ptrArr = stackalloc byte*[argList.Length];
                     for (int i = 0; i < argList.Length; i++)
                     {
-                        byte* arr = stackalloc byte[argList[i].Length * CharFactoryInternal<TChar>.Instance.GetCharLength()];
+                        byte* arr = stackalloc byte[argList[i].Length * _CharLength];
                         ptrArr[i] = arr;
                     }
                     argPtr = CreateVarArgList(argList, ptrArr);

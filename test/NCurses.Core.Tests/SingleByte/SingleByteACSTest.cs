@@ -70,7 +70,9 @@ namespace NCurses.Core.Tests.SingleByte
             };
 
             foreach (PropertyInfo prop in typeof(Acs).GetProperties())
-                lstChar.Add(((INCursesChar)prop.GetValue(null)).Char);
+            {
+                lstChar.Add(this.Window.ExtractChar((INCursesChar)prop.GetValue(null)));
+            }
 
             Assert.Equal(verifyList.Count, lstChar.Count);
             Assert.Equal<char>(verifyList, lstChar);

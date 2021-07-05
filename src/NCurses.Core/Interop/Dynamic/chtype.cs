@@ -12,24 +12,23 @@ namespace NCurses.Core.Interop.Dynamic
     {
         public UInt32 charWithAttr;
 
-        public char Char => (char)(this.charWithAttr & Attrs.CHARTEXT);
         public ulong Attributes => (ulong)((this.charWithAttr ^ (this.charWithAttr & Attrs.COLOR)) & Attrs.ATTRIBUTES);
         public ushort ColorPair => (ushort)Constants.PAIR_NUMBER(this.charWithAttr);
 
-        public byte EncodedChar => (byte)(this.charWithAttr & Attrs.CHARTEXT);
+        public int Char => (int)(this.charWithAttr & Attrs.CHARTEXT);
 
-        public chtype(sbyte ch)
+        public chtype(byte ch)
         {
             this.charWithAttr = (UInt32)ch;
         }
 
-        public chtype(sbyte ch, ulong attr)
+        public chtype(byte ch, ulong attr)
             :this(ch)
         {
             this.charWithAttr |= (UInt32)attr;
         }
 
-        public chtype(sbyte ch, ulong attr, ushort pair)
+        public chtype(byte ch, ulong attr, ushort pair)
             : this(ch, attr)
         {
             this.charWithAttr |= (UInt32)NativeNCurses.COLOR_PAIR(pair);
@@ -53,26 +52,7 @@ namespace NCurses.Core.Interop.Dynamic
             return ch;
         }
 
-        public static explicit operator char(chtype ch)
-        {
-            return ch.Char;
-        }
-
-        public static explicit operator sbyte(chtype ch)
-        {
-            return (sbyte)ch.Char;
-        }
-
-        public static explicit operator chtype(char ch)
-        {
-            if (ch > sbyte.MaxValue)
-            {
-                throw new InvalidOperationException("This character can not be expressed in 1 byte");
-            }
-            return new chtype((sbyte)ch);
-        }
-
-        public static explicit operator chtype(sbyte ch)
+        public static explicit operator chtype(byte ch)
         {
             return new chtype(ch);
         }

@@ -1,7 +1,9 @@
 ﻿using System;
 using System.Text;
 
+#if DEBUG && !DISABLESOURCEGENERATION
 using NCurses.Core.Generated;
+#endif
 
 //several constants taken from ncurses.h
 namespace NCurses.Core.Interop
@@ -24,9 +26,6 @@ namespace NCurses.Core.Interop
         internal const int CCHARW_MAX = 5;
         //TODO: all references to this value can overflow
         internal const int MAX_STRING_LENGTH = 1024;
-
-        internal const string TypeGenerationExceptionMessage = "Custom types haven't been generated yet, please run NCurses.Start, NativeNCurses.initscr or create a window with Window.CreateWindow";
-        internal const string NoUnicodeExceptionMessage = "Unicode not supported";
 
         public const int ERR = -1;
         public const int OK = 0;
@@ -60,7 +59,7 @@ namespace NCurses.Core.Interop
                     DLLPANELNAME = "libpanelw6";
                     SIZEOF_WCHAR_T = 2;
                     CHTYPE_TYPE = typeof(UInt32);
-
+#if DEBUG && !DISABLESOURCEGENERATION
                     SingleByteChar = typeof(SingleByteChar_UInt32);
                     MultiByteChar = typeof(MultiByteChar_SingleByteChar_UInt32_2);
                     WideChar = typeof(WideChar_2);
@@ -68,6 +67,7 @@ namespace NCurses.Core.Interop
                     PanelWrapper = typeof(PanelWrapper_libpanelw6);
                     NCursesCharWrapper = typeof(NCursesCharWrapper_libncursesw6_MultiByteChar_SingleByteChar_UInt32_2_WideChar_2_SingleByteChar_UInt32_schar_t_MouseEvent_SingleByteChar_UInt32);
                     NCursesWrapper = typeof(NCursesWrapper_libncursesw6);
+#endif
                     break;
                 case "ubuntu.16.04-x64":
                 case "ubuntu.18.04-x64":
@@ -78,7 +78,7 @@ namespace NCurses.Core.Interop
                     DLLPANELNAME = "libpanelw.so.5.9";
                     SIZEOF_WCHAR_T = 4;
                     CHTYPE_TYPE = typeof(UInt64);
-
+#if DEBUG && !DISABLESOURCEGENERATION
                     SingleByteChar = typeof(SingleByteChar_UInt64);
                     MultiByteChar = typeof(MultiByteChar_SingleByteChar_UInt64_4);
                     WideChar = typeof(WideChar_4);
@@ -86,13 +86,14 @@ namespace NCurses.Core.Interop
                     PanelWrapper = typeof(PanelWrapper_libpanelw_so_5_9);
                     NCursesCharWrapper = typeof(NCursesCharWrapper_libncursesw_so_5_9_MultiByteChar_SingleByteChar_UInt64_4_WideChar_4_SingleByteChar_UInt64_schar_t_MouseEvent_SingleByteChar_UInt64);
                     NCursesWrapper = typeof(NCursesWrapper_libncursesw_so_5_9);
+#endif
                     break;
                 default:
                     DLLNAME = "libncursesw.so.6";
                     DLLPANELNAME = "libpanelw.so.6";
                     SIZEOF_WCHAR_T = 4;
                     CHTYPE_TYPE = typeof(UInt32);
-
+#if DEBUG && !DISABLESOURCEGENERATION
                     SingleByteChar = typeof(SingleByteChar_UInt32);
                     MultiByteChar = typeof(MultiByteChar_SingleByteChar_UInt32_4);
                     WideChar = typeof(WideChar_4);
@@ -100,6 +101,7 @@ namespace NCurses.Core.Interop
                     PanelWrapper = typeof(PanelWrapper_libpanelw_so_6);
                     NCursesCharWrapper = typeof(NCursesCharWrapper_libncursesw_so_6_MultiByteChar_SingleByteChar_UInt32_4_WideChar_4_SingleByteChar_UInt32_schar_t_MouseEvent_SingleByteChar_UInt32);
                     NCursesWrapper = typeof(NCursesWrapper_libncursesw_so_6);
+#endif
                     break;
             }
         }

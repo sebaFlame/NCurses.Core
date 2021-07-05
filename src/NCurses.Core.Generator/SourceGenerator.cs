@@ -27,11 +27,6 @@ namespace NCurses.Core.Generator
 
         public void Initialize(GeneratorInitializationContext context)
         {
-            //if (!Debugger.IsAttached)
-            //{
-            //    Debugger.Launch();
-            //}
-
             context.RegisterForSyntaxNotifications(this.GetSyntaxReceiver);
         }
 
@@ -274,6 +269,14 @@ namespace NCurses.Core.Generator
                 (x, y) => SyntaxFactory.Identifier(x.LeadingTrivia, concreteClassName, x.TrailingTrivia)
             );
 
+            newRoot = newRoot.ReplaceTokens
+            (
+                newRoot
+                    .DescendantTokens()
+                    .Where(x => string.Equals("UInt32", x.ValueText)),
+                (x, y) => SyntaxFactory.Identifier(x.LeadingTrivia, charWithAttrType, x.TrailingTrivia)
+            );
+
             SyntaxTree syntaxTree = CSharpSyntaxTree.Create
             (
                 SyntaxFactory.CompilationUnit()
@@ -281,6 +284,7 @@ namespace NCurses.Core.Generator
                 (
                     SyntaxFactory.UsingDirective(SyntaxFactory.ParseName("System")),
                     SyntaxFactory.UsingDirective(SyntaxFactory.ParseName("System.Runtime.InteropServices")),
+                    SyntaxFactory.UsingDirective(SyntaxFactory.ParseName("System.Runtime.CompilerServices")),
                     SyntaxFactory.UsingDirective(SyntaxFactory.ParseName("NCurses.Core.Interop")),
                     SyntaxFactory.UsingDirective(SyntaxFactory.ParseName("NCurses.Core.Interop.SingleByte"))
                 )
@@ -401,6 +405,7 @@ namespace NCurses.Core.Generator
                 (
                     SyntaxFactory.UsingDirective(SyntaxFactory.ParseName("System")),
                     SyntaxFactory.UsingDirective(SyntaxFactory.ParseName("System.Runtime.InteropServices")),
+                    SyntaxFactory.UsingDirective(SyntaxFactory.ParseName("System.Runtime.CompilerServices")),
                     SyntaxFactory.UsingDirective(SyntaxFactory.ParseName("NCurses.Core.Interop")),
                     SyntaxFactory.UsingDirective(SyntaxFactory.ParseName("NCurses.Core.Interop.MultiByte"))
                 )
@@ -936,7 +941,21 @@ namespace NCurses.Core.Generator
                                                             SyntaxKind.StringLiteralExpression,
                                                             SyntaxFactory.Literal(interfaceMethod.Identifier.ValueText)
                                                         )
-                                                    )
+                                                    )/*,
+                                                    SyntaxFactory.AttributeArgument
+                                                    (
+                                                        SyntaxFactory.NameEquals
+                                                        (
+                                                            SyntaxFactory.IdentifierName("CallingConvention")
+                                                        ),
+                                                        null,
+                                                        SyntaxFactory.MemberAccessExpression
+                                                        (
+                                                            SyntaxKind.SimpleMemberAccessExpression,
+                                                            SyntaxFactory.IdentifierName("CallingConvention"),
+                                                            SyntaxFactory.IdentifierName("Cdecl")
+                                                        )
+                                                    )*/
                                                 }
                                             )
                                         )

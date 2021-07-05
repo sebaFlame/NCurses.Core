@@ -9,7 +9,7 @@ namespace NCurses.Core.Interop.MultiByte
 {
     internal class NativeStdScrMultiByte<TMultiByte, TWideChar, TSingleByte, TChar, TMouseEvent>
             : MultiByteWrapper<TMultiByte, TWideChar, TSingleByte, TChar, TMouseEvent>, 
-            INativeStdScrMultiByte<TMultiByte, MultiByteCharString<TMultiByte>>
+            INativeStdScrMultiByte<TMultiByte, MultiByteCharString<TMultiByte, TWideChar, TSingleByte>>
         where TMultiByte : unmanaged, IMultiByteNCursesChar, IEquatable<TMultiByte>
         where TWideChar : unmanaged, IMultiByteChar, IEquatable<TWideChar>
         where TSingleByte : unmanaged, ISingleByteNCursesChar, IEquatable<TSingleByte>
@@ -24,12 +24,12 @@ namespace NCurses.Core.Interop.MultiByte
             NCursesException.Verify(Wrapper.add_wch(in wch), "add_wch");
         }
 
-        public void add_wchnstr(in MultiByteCharString<TMultiByte> wchStr, int n)
+        public void add_wchnstr(in MultiByteCharString<TMultiByte, TWideChar, TSingleByte> wchStr, int n)
         {
             NCursesException.Verify(Wrapper.add_wchnstr(in wchStr.GetPinnableReference(), n), "add_wchnstr");
         }
 
-        public void add_wchstr(in MultiByteCharString<TMultiByte> wchStr)
+        public void add_wchstr(in MultiByteCharString<TMultiByte, TWideChar, TSingleByte> wchStr)
         {
             NCursesException.Verify(Wrapper.add_wchstr(in wchStr.GetPinnableReference()), "add_wchstr");
         }
@@ -64,7 +64,7 @@ namespace NCurses.Core.Interop.MultiByte
 
         public void getbkgrnd(out TMultiByte wch)
         {
-            wch = MultiByteCharFactoryInternal<TMultiByte>.Instance.GetNativeEmptyCharInternal();
+            wch = default;
             NCursesException.Verify(Wrapper.getbkgrnd(ref wch), "getbkgrnd");
         }
 
@@ -75,16 +75,16 @@ namespace NCurses.Core.Interop.MultiByte
 
         public void in_wch(out TMultiByte wch)
         {
-            wch = MultiByteCharFactoryInternal<TMultiByte>.Instance.GetNativeEmptyCharInternal();
+            wch = default;
             NCursesException.Verify(Wrapper.in_wch(ref wch), "in_wch");
         }
 
-        public void in_wchnstr(ref MultiByteCharString<TMultiByte> wchStr, int n)
+        public void in_wchnstr(ref MultiByteCharString<TMultiByte, TWideChar, TSingleByte> wchStr, int n)
         {
             NCursesException.Verify(Wrapper.in_wchnstr(ref wchStr.GetPinnableReference(), n), "in_wchnstr");
         }
 
-        public void in_wchstr(ref MultiByteCharString<TMultiByte> wchStr)
+        public void in_wchstr(ref MultiByteCharString<TMultiByte, TWideChar, TSingleByte> wchStr)
         {
             NCursesException.Verify(Wrapper.in_wchstr(ref wchStr.GetPinnableReference()), "in_wchstr");
         }
@@ -99,12 +99,12 @@ namespace NCurses.Core.Interop.MultiByte
             NCursesException.Verify(Wrapper.mvadd_wch(y, x, in wch), "mvadd_wch");
         }
 
-        public void mvadd_wchnstr(int y, int x, in MultiByteCharString<TMultiByte> wchStr, int n)
+        public void mvadd_wchnstr(int y, int x, in MultiByteCharString<TMultiByte, TWideChar, TSingleByte> wchStr, int n)
         {
             NCursesException.Verify(Wrapper.mvadd_wchnstr(y, x, in wchStr.GetPinnableReference(), n), "mvadd_wchnstr");
         }
 
-        public void mvadd_wchstr(int y, int x, in MultiByteCharString<TMultiByte> wchStr)
+        public void mvadd_wchstr(int y, int x, in MultiByteCharString<TMultiByte, TWideChar, TSingleByte> wchStr)
         {
             NCursesException.Verify(Wrapper.mvadd_wchstr(y, x, in wchStr.GetPinnableReference()), "mvadd_wchstr");
         }
@@ -116,16 +116,16 @@ namespace NCurses.Core.Interop.MultiByte
 
         public void mvin_wch(int y, int x, out TMultiByte wch)
         {
-            wch = MultiByteCharFactoryInternal<TMultiByte>.Instance.GetNativeEmptyCharInternal();
+            wch = default;
             NCursesException.Verify(this.Wrapper.mvin_wch(y, x, ref wch), "mvin_wch");
         }
 
-        public void mvin_wchstr(int y, int x, ref MultiByteCharString<TMultiByte> wchStr)
+        public void mvin_wchstr(int y, int x, ref MultiByteCharString<TMultiByte, TWideChar, TSingleByte> wchStr)
         {
             NCursesException.Verify(this.Wrapper.mvin_wchstr(y, x, ref wchStr.GetPinnableReference()), "mvin_wchnstr");
         }
 
-        public void mvin_wchnstr(int y, int x, ref MultiByteCharString<TMultiByte> wchStr, int n)
+        public void mvin_wchnstr(int y, int x, ref MultiByteCharString<TMultiByte, TWideChar, TSingleByte> wchStr, int n)
         {
             NCursesException.Verify(this.Wrapper.mvin_wchnstr(y, x, ref wchStr.GetPinnableReference(), n), "mvin_wchnstr");
         }

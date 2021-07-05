@@ -11,7 +11,7 @@ namespace NCurses.Core.Interop.MultiByte
 {
     internal class NativeNCursesMultiByte<TMultiByte, TWideChar, TSingleByte, TChar, TMouseEvent> 
             : MultiByteWrapper<TMultiByte, TWideChar, TSingleByte, TChar, TMouseEvent>, 
-            INativeNCursesMultiByte<TMultiByte, MultiByteCharString<TMultiByte>>
+            INativeNCursesMultiByte<TMultiByte, MultiByteCharString<TMultiByte, TWideChar, TSingleByte>>
         where TMultiByte : unmanaged, IMultiByteNCursesChar, IEquatable<TMultiByte>
         where TWideChar : unmanaged, IMultiByteChar, IEquatable<TWideChar>
         where TSingleByte : unmanaged, ISingleByteNCursesChar, IEquatable<TSingleByte>
@@ -23,9 +23,8 @@ namespace NCurses.Core.Interop.MultiByte
 
         public void getcchar(in TMultiByte wcval, out char wch, out ulong attrs, out ushort color_pair)
         {
-            TWideChar ch = WideCharFactoryInternal<TWideChar>.Instance.GetNativeEmptyCharInternal();
-
-            TSingleByte attrChar = SingleByteCharFactoryInternal<TSingleByte>.Instance.GetNativeEmptyCharInternal();
+            TWideChar ch = default;
+            TSingleByte attrChar = default;
 
             short limitedPair = 0;
             //int extendedPair = 0;
@@ -33,19 +32,18 @@ namespace NCurses.Core.Interop.MultiByte
             //TODO: replace IntPtr.Zero with a ref int when ubuntu switches to ncurses6.2+20210116
             NCursesException.Verify(this.Wrapper.getcchar(in wcval, ref ch, ref attrChar, ref limitedPair, IntPtr.Zero), "getcchar");
 
-            wch = ch.Char;
+            wch = (char)WideCharFactory<TWideChar>._Instance.GetChar(ch);
             attrs = attrChar.Attributes;
-            //color_pair = extendedPair == 0 ? (ushort)limitedPair : (ushort)extendedPair;
             color_pair = (ushort)limitedPair;
         }
 
         public void setcchar(out TMultiByte wcval, in char wch, ulong attrs, ushort color_pair)
         {
-            TMultiByte output = MultiByteCharFactoryInternal<TMultiByte>.Instance.GetNativeEmptyCharInternal();
+            TMultiByte output = default;
 
-            TWideChar wideCh = WideCharFactoryInternal<TWideChar>.Instance.GetNativeCharInternal(wch);
+            TWideChar wideCh = WideCharFactory<TWideChar>._Instance.GetNativeChar(wch);
 
-            TSingleByte attrChar = SingleByteCharFactoryInternal<TSingleByte>.Instance.GetAttributeInternal(attrs);
+            TSingleByte attrChar = SingleByteCharFactory<TSingleByte>._Instance.GetNativeAttribute(attrs);
 
             int extendedColor = color_pair;
 
@@ -63,9 +61,10 @@ namespace NCurses.Core.Interop.MultiByte
         {
             ref TWideChar strRef = ref this.Wrapper.wunctrl(CastChar(wch));
 
-            WideCharString<TWideChar> wideStr = WideCharFactoryInternal<TWideChar>.Instance.CreateNativeString(ref strRef);
-
-            str = wideStr.ToString();
+            using (BufferState<TWideChar> bufferState = WideCharFactory<TWideChar>._Instance.GetNativeString(WideCharFactory<TWideChar>._CreatePooledBuffer, ref strRef, out WideCharString<TWideChar> wideStr))
+            {
+                str = wideStr.ToString();
+            }
         }
     }
 }

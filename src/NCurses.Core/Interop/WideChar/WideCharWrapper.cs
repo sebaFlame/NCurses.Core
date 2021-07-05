@@ -59,7 +59,7 @@ namespace NCurses.Core.Interop.WideChar
 
             if (ret == (int)Key.CODE_YES)
             {
-                wch = WideCharFactoryInternal<TWideChar>.Instance.GetNativeEmptyCharInternal();
+                wch = default;
                 key = (Key)(short)wc;
                 return true;
             }
@@ -67,7 +67,7 @@ namespace NCurses.Core.Interop.WideChar
             //TODO: can still be an escaped function key? (iterate over all function keys????)
             NCursesException.Verify(ret, method);
             key = default(Key);
-            wch = WideCharFactoryInternal<TWideChar>.Instance.GetNativeCharInternal(wc);
+            wch = WideCharFactory<TWideChar>._Instance.GetNativeChar(wc);
             return false;
         }
 
@@ -100,7 +100,7 @@ namespace NCurses.Core.Interop.WideChar
             }
 
             //not a unicode char
-            wch = WideCharFactoryInternal<TWideChar>.Instance.GetNativeCharInternal(ch);
+            wch = WideCharFactory<TWideChar>._Instance.GetNativeChar(ch);
             return functionKey;
         }
     }

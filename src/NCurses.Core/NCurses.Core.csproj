@@ -9,10 +9,19 @@
     <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
   </PropertyGroup>
 
-  <!-- Source Generator -->
-  <ItemGroup>
-	  <ProjectReference Include="..\NCurses.Core.Generator\NCurses.Core.Generator.csproj" OutputItemType="Analyzer" ReferenceOutputAssembly="false" />
-  </ItemGroup>
+	<!-- Workaround for slow intellisense when coding using source generator -->
+	<PropertyGroup Condition="'$(Configuration)' == 'Debug'">
+		<DisableSourceGeneration Condition="'$(DisableSourceGeneration)' == ''">false</DisableSourceGeneration>
+	</PropertyGroup>
+
+	<PropertyGroup>
+		<DefineConstants Condition="'$(DisableSourceGeneration)' == 'true'">$(DefineConstants);DISABLESOURCEGENERATION</DefineConstants>
+	</PropertyGroup>
+
+	<!-- Source Generator -->
+	<ItemGroup Condition="'$(DisableSourceGeneration)' != 'true' AND '$(Configuration)' == 'Debug'">
+		<ProjectReference Include="..\NCurses.Core.Generator\NCurses.Core.Generator.csproj" OutputItemType="Analyzer" ReferenceOutputAssembly="false" />
+	</ItemGroup>
 	
   <!-- Microsoft.DotNet.PlatformAbstractions dependencies (unix) -->
   <ItemGroup>

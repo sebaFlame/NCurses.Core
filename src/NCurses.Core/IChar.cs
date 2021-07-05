@@ -6,6 +6,6 @@ namespace NCurses.Core
 {
     public interface IChar : IEquatable<IChar>
     {
-        char Char { get; }
+        int Char { get; }
     }
 }

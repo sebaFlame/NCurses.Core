@@ -37,7 +37,12 @@ namespace NCurses.Core.Pad
 
         public override void Echo(char ch)
         {
-            TSingleByte sch = SingleByteCharFactoryInternal<TSingleByte>.Instance.GetNativeCharInternal(ch);
+            if (ch > sbyte.MaxValue)
+            {
+                throw _RangeException;
+            }
+
+            TSingleByte sch = SingleByteCharFactory<TSingleByte>._Instance.GetNativeChar((byte)ch);
             Pad.pechochar(this.WindowBaseSafeHandle, in sch);
         }
 

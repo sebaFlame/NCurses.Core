@@ -6,35 +6,18 @@ namespace NCurses.Core.Interop.Char
 {
     public struct schar_t : ISingleByteChar, IEquatable<schar_t>//char
     {
-        public sbyte @char;
+        public byte @char;
 
-        public char Char => (char)this;
-
-        public byte EncodedChar => (byte)@char;
+        public int Char => @char;
 
         public schar_t(byte ch)
         {
-            this.@char = (sbyte)ch;
-        }
-
-        public schar_t(char ch)
-        {
-            if (ch > sbyte.MaxValue)
-            {
-                throw new InvalidOperationException("This character can not be expressed in 1 byte, please use the correct multibyte overrides");
-            }   
-
-            this.@char = (sbyte)ch;
+            this.@char = ch;
         }
 
         public static explicit operator char(schar_t ch)
         {
             return (char)ch.@char;
-        }
-
-        public static explicit operator schar_t(char ch)
-        {
-            return new schar_t(ch);
         }
 
         public static bool operator ==(in schar_t wchLeft, in schar_t wchRight) => wchLeft.@char == wchRight.@char;

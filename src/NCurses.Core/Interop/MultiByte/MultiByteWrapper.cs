@@ -11,7 +11,7 @@ using NCurses.Core.Interop.Mouse;
 namespace NCurses.Core.Interop.MultiByte
 {
     internal abstract class MultiByteWrapper<TMultiByte, TWideChar, TSingleByte, TChar, TMouseEvent> // handles cchar_t
-        : INativeCharWrapper<IMultiByteNCursesChar, TMultiByte, IMultiByteNCursesCharString, MultiByteCharString<TMultiByte>>
+        : INativeCharWrapper<IMultiByteNCursesChar, TMultiByte, IMultiByteNCursesCharString, MultiByteCharString<TMultiByte, TWideChar, TSingleByte>>
         where TMultiByte : unmanaged, IMultiByteNCursesChar, IEquatable<TMultiByte>
         where TWideChar : unmanaged, IMultiByteChar, IEquatable<TWideChar>
         where TSingleByte : unmanaged, ISingleByteNCursesChar, IEquatable<TSingleByte>
@@ -25,9 +25,9 @@ namespace NCurses.Core.Interop.MultiByte
             this.Wrapper = wrapper;
         }
 
-        public MultiByteCharString<TMultiByte> CastString(in IMultiByteNCursesCharString wCharStr)
+        public MultiByteCharString<TMultiByte, TWideChar, TSingleByte> CastString(in IMultiByteNCursesCharString wCharStr)
         {
-            if (!(wCharStr is MultiByteCharString<TMultiByte> wCasted))
+            if (!(wCharStr is MultiByteCharString<TMultiByte, TWideChar, TSingleByte> wCasted))
             {
                 throw new InvalidCastException("MultiByte character is in incorrect format");
             }

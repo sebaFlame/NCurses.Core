@@ -20,18 +20,24 @@ namespace NCurses.Core.Interop.WideChar
 
         public void erasewchar(out TWideChar wch)
         {
-            wch = WideCharFactoryInternal<TWideChar>.Instance.GetNativeEmptyCharInternal();
+            wch = default;
             NCursesException.Verify(this.Wrapper.erasewchar(ref wch), "erasewTWideChar");
         }
 
         public string key_name(in TWideChar ch)
         {
-            return CharFactoryInternal<TChar>.Instance.CreateNativeString(ref this.Wrapper.key_name(ch)).ToString();
+            using (BufferState<TChar> BufferState = CharFactory<TChar>._Instance.GetNativeString(
+                CharFactory<TChar>._CreatePooledBuffer,
+                ref NCursesException.Verify(ref this.Wrapper.key_name(ch), "key_name"),
+                out CharString<TChar> @string))
+            {
+                return @string.ToString();
+            }
         }
 
         public void killwchar(out TWideChar wch)
         {
-            wch = WideCharFactoryInternal<TWideChar>.Instance.GetNativeEmptyCharInternal();
+            wch = default;
             NCursesException.Verify(this.Wrapper.killwchar(ref wch), "killwTWideChar");
         }
 

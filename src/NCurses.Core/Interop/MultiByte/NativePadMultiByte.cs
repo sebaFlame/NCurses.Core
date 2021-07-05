@@ -10,7 +10,7 @@ namespace NCurses.Core.Interop.MultiByte
 {
     internal class NativePadMultiByte<TMultiByte, TWideChar, TSingleByte, TChar, TMouseEvent> 
             : MultiByteWrapper<TMultiByte, TWideChar, TSingleByte, TChar, TMouseEvent>, 
-            INativePadMultiByte<TMultiByte, MultiByteCharString<TMultiByte>>
+            INativePadMultiByte<TMultiByte, MultiByteCharString<TMultiByte, TWideChar, TSingleByte>>
         where TMultiByte : unmanaged, IMultiByteNCursesChar, IEquatable<TMultiByte>
         where TWideChar : unmanaged, IMultiByteChar, IEquatable<TWideChar>
         where TSingleByte : unmanaged, ISingleByteNCursesChar, IEquatable<TSingleByte>

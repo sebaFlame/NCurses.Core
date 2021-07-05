@@ -26,8 +26,8 @@ namespace NCurses.Core.Interop.SingleByte
 
         public ulong mousemask_sp(IntPtr screen, ulong newmask, out ulong oldmask)
         {
-            TSingleByte newMouseMask = SingleByteCharFactoryInternal<TSingleByte>.Instance.GetAttributeInternal(newmask);
-            TSingleByte oldMouseMask = SingleByteCharFactoryInternal<TSingleByte>.Instance.GetNativeEmptyCharInternal();
+            TSingleByte newMouseMask = SingleByteCharFactory<TSingleByte>._Instance.GetNativeAttribute(newmask);
+            TSingleByte oldMouseMask = default;
 
             TSingleByte res = this.Wrapper.mousemask_sp(screen, newMouseMask, ref oldMouseMask);
 
@@ -43,25 +43,25 @@ namespace NCurses.Core.Interop.SingleByte
 
         public void slk_attr_set_sp(IntPtr screen, ulong attrs, short color_pair)
         {
-            TSingleByte ch = SingleByteCharFactoryInternal<TSingleByte>.Instance.GetAttributeInternal(attrs);
+            TSingleByte ch = SingleByteCharFactory<TSingleByte>._Instance.GetNativeAttribute(attrs);
             NCursesException.Verify(this.Wrapper.slk_attr_set_sp(screen, ch, color_pair, IntPtr.Zero), "slk_attr_set_sp");
         }
 
         public void slk_attroff_sp(IntPtr screen, ulong attrs)
         {
-            TSingleByte ch = SingleByteCharFactoryInternal<TSingleByte>.Instance.GetAttributeInternal(attrs);
+            TSingleByte ch = SingleByteCharFactory<TSingleByte>._Instance.GetNativeAttribute(attrs);
             NCursesException.Verify(this.Wrapper.slk_attroff_sp(screen, ch), "slk_attroff_sp");
         }
 
         public void slk_attron_sp(IntPtr screen, ulong attrs)
         {
-            TSingleByte ch = SingleByteCharFactoryInternal<TSingleByte>.Instance.GetAttributeInternal(attrs);
+            TSingleByte ch = SingleByteCharFactory<TSingleByte>._Instance.GetNativeAttribute(attrs);
             NCursesException.Verify(this.Wrapper.slk_attron_sp(screen, ch), "slk_attron_sp");
         }
 
         public void slk_attrset_sp(IntPtr screen, ulong attrs)
         {
-            TSingleByte ch = SingleByteCharFactoryInternal<TSingleByte>.Instance.GetAttributeInternal(attrs);
+            TSingleByte ch = SingleByteCharFactory<TSingleByte>._Instance.GetNativeAttribute(attrs);
             NCursesException.Verify(this.Wrapper.slk_attrset_sp(screen, ch), "slk_attrset_sp");
         }
 
@@ -89,13 +89,13 @@ namespace NCurses.Core.Interop.SingleByte
 
         public void vid_attr_sp(IntPtr screen, ulong attrs, short pair)
         {
-            TSingleByte ch = SingleByteCharFactoryInternal<TSingleByte>.Instance.GetAttributeInternal(attrs);
+            TSingleByte ch = SingleByteCharFactory<TSingleByte>._Instance.GetNativeAttribute(attrs);
             NCursesException.Verify(this.Wrapper.vid_attr_sp(screen, ch, pair, IntPtr.Zero), "vid_attr_sp");
         }
 
         public void vid_puts_sp(IntPtr screen, ulong attrs, short pair, Func<int, int> putc)
         {
-            TSingleByte ch = SingleByteCharFactoryInternal<TSingleByte>.Instance.GetAttributeInternal(attrs);
+            TSingleByte ch = SingleByteCharFactory<TSingleByte>._Instance.GetNativeAttribute(attrs);
             IntPtr func = Marshal.GetFunctionPointerForDelegate(putc);
             try
             {
@@ -109,13 +109,13 @@ namespace NCurses.Core.Interop.SingleByte
 
         public void vidattr_sp(IntPtr screen, ulong attrs)
         {
-            TSingleByte ch = SingleByteCharFactoryInternal<TSingleByte>.Instance.GetAttributeInternal(attrs);
+            TSingleByte ch = SingleByteCharFactory<TSingleByte>._Instance.GetNativeAttribute(attrs);
             NCursesException.Verify(this.Wrapper.vidattr_sp(screen, ch), "vidattr_sp");
         }
 
         public void vidputs_sp(IntPtr screen, ulong attrs, Func<int, int> putc)
         {
-            TSingleByte ch = SingleByteCharFactoryInternal<TSingleByte>.Instance.GetAttributeInternal(attrs);
+            TSingleByte ch = SingleByteCharFactory<TSingleByte>._Instance.GetNativeAttribute(attrs);
             IntPtr func = Marshal.GetFunctionPointerForDelegate(putc);
             try
             {

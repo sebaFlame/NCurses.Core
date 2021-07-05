@@ -77,7 +77,7 @@
     <Compile Remove="RipOffTest.cs" /> 
     <Compile Remove="InitTest.cs" />
 
-    <Compile Include="MultiByte\*WriteTest.cs" /> 
+    <Compile Include="MultiByte\*.cs" />
   </ItemGroup>
 
 </Project>

@@ -2,547 +2,448 @@
 using System.Linq.Expressions;
 using System.Reflection;
 using System.Text;
-using System.Runtime.InteropServices;
 using System.Buffers;
+using System.Runtime.InteropServices;
+using System.Runtime.CompilerServices;
+
+using NCurses.Core.Interop.SingleByte;
+using NCurses.Core.Interop.WideChar;
+using NCurses.Core.Interop.Platform;
 
 namespace NCurses.Core.Interop.MultiByte
 {
-    internal delegate TMultiByte CreateMultiByteCharFromSpan<TMultiByte>(Span<byte> byteSpan)
+    internal delegate TMultiByte CreateMultiByteCharWithAttributeAndColorPairFromSpan<TMultiByte>(Span<byte> byteSpan, ulong attrs, ushort colorPair)
         where TMultiByte : unmanaged, IMultiByteNCursesChar, IEquatable<TMultiByte>;
 
-    internal delegate TMultiByte CreateMultiByteCharWithAttributeFromSpan<TMultiByte>(Span<byte> byteSpan, ulong attrs)
-        where TMultiByte : unmanaged, IMultiByteNCursesChar, IEquatable<TMultiByte>;
-
-    internal delegate TMultiByte CreateMultiByteCharWithAttributeAndColorPairFromSpan<TMultiByte>(Span<byte> byteSpan, ulong attrs, ushort color)
-        where TMultiByte : unmanaged, IMultiByteNCursesChar, IEquatable<TMultiByte>;
-
-    /// <summary>
-    /// Create native chars strings
-    /// These methods should not be used, because these incur heap allocations and alot of boxing
-    /// </summary>
-    public class MultiByteCharFactory : INCursesCharFactory<IMultiByteNCursesChar, IMultiByteNCursesCharString>
+    internal class MultiByteCharFactory<TMultiByte, TWideChar, TSingleByte> :
+        IMultiByteNCursesCharFactory<TMultiByte, MultiByteCharString<TMultiByte, TWideChar, TSingleByte>>
+        where TMultiByte : unmanaged, IMultiByteNCursesChar, IEquatable<TMultiByte>
+        where TWideChar : unmanaged, IMultiByteChar, IEquatable<TWideChar>
+        where TSingleByte : unmanaged, ISingleByteNCursesChar, IEquatable<TSingleByte>
     {
-        public static MultiByteCharFactory Instance { get; }
+        internal static MultiByteCharFactory<TMultiByte, TWideChar, TSingleByte> _Instance;
+        internal static CreateBuffer<TMultiByte> _CreatePooledBuffer;
+        internal static CreateBuffer<TMultiByte> _CreateArrayBuffer;
 
-        internal static INCursesCharFactory<IMultiByteNCursesChar, IMultiByteNCursesCharString> Factory { get; }
-
-        private static Type FactoryType;
+        private static CreateMultiByteCharWithAttributeAndColorPairFromSpan<TMultiByte> _CreateCharWithAttributeAndColorPairFromSpan;
+        private static int _WideCharOffset;
+        private static int _ExtColorOffset;
 
         static MultiByteCharFactory()
         {
-            Instance = new MultiByteCharFactory();
+            _Instance = new MultiByteCharFactory<TMultiByte, TWideChar, TSingleByte>();
 
-            FactoryType = typeof(MultiByteCharFactoryInternal<>).MakeGenericType(Constants.MultiByteChar);
+            _CreatePooledBuffer = NativeNCurses.CreatePoolBuffer<TMultiByte>;
+            _CreateArrayBuffer = NativeNCurses.CreateArrayBuffer<TMultiByte>;
 
-            PropertyInfo property = FactoryType.GetProperty("Instance", BindingFlags.NonPublic | BindingFlags.Static);
-            MethodInfo getMethod = property.GetGetMethod(true);
+            Type mbType = typeof(TMultiByte);
 
-            Factory = (INCursesCharFactory<IMultiByteNCursesChar, IMultiByteNCursesCharString>)getMethod.Invoke(null, Array.Empty<object>());
-        }
+            _WideCharOffset = Marshal.SizeOf<TSingleByte>();
+            _ExtColorOffset = Marshal.SizeOf<TSingleByte>() + (Marshal.SizeOf<TWideChar>() * Constants.CCHARW_MAX);
 
-        public IMultiByteNCursesChar GetNativeEmptyChar() => 
-            Factory.GetNativeEmptyChar();
-
-        public IMultiByteNCursesChar GetNativeChar(char ch) => 
-            Factory.GetNativeChar(ch);
-
-        public IMultiByteNCursesChar GetNativeChar(char ch, ulong attrs) => 
-            Factory.GetNativeChar(ch, attrs);
-
-        public IMultiByteNCursesChar GetNativeChar(char ch, ulong attrs, ushort colorPair) =>
-            Factory.GetNativeChar(ch, attrs, colorPair);
-
-        public IMultiByteNCursesCharString GetNativeEmptyString(int length) =>
-            Factory.GetNativeEmptyString(length);
-
-        public IMultiByteNCursesCharString GetNativeString(string str) =>
-            Factory.GetNativeString(str);
-
-        public IMultiByteNCursesCharString GetNativeString(ReadOnlySpan<char> str) =>
-            Factory.GetNativeString(str);
-
-        public IMultiByteNCursesCharString GetNativeString(string str, ulong attrs) =>
-            Factory.GetNativeString(str, attrs);
-
-        public IMultiByteNCursesCharString GetNativeString(ReadOnlySpan<char> str, ulong attrs) =>
-            Factory.GetNativeString(str, attrs);
-
-        public IMultiByteNCursesCharString GetNativeString(string str, ulong attrs, ushort colorPair) =>
-            Factory.GetNativeString(str, attrs, colorPair);
-
-        public IMultiByteNCursesCharString GetNativeString(ReadOnlySpan<char> str, ulong attrs, ushort colorPair) =>
-            Factory.GetNativeString(str, attrs, colorPair);
-
-        public unsafe IMultiByteNCursesCharString GetNativeEmptyString(byte* buffer, int bufferLenght, int charLength)
-            => Factory.GetNativeEmptyString(buffer, bufferLenght, charLength);
-
-        public IMultiByteNCursesCharString GetNativeEmptyString(byte[] buffer, int bufferLength, int charLength)
-            => Factory.GetNativeEmptyString(buffer, bufferLength, charLength);
-
-        public unsafe IMultiByteNCursesCharString GetNativeString(byte* buffer, int length, string str)
-            => Factory.GetNativeString(buffer, length, str);
-
-        public unsafe IMultiByteNCursesCharString GetNativeString(byte* buffer, int length, ReadOnlySpan<char> str)
-            => Factory.GetNativeString(buffer, length, str);
-
-        public IMultiByteNCursesCharString GetNativeString(byte[] buffer, int bufferLength, string str)
-            => Factory.GetNativeString(buffer, bufferLength, str);
-
-        public IMultiByteNCursesCharString GetNativeString(byte[] buffer, int bufferLength, ReadOnlySpan<char> str)
-            => Factory.GetNativeString(buffer, bufferLength, str);
-
-        public unsafe IMultiByteNCursesCharString GetNativeString(byte* buffer, int length, string str, ulong attrs)
-            => Factory.GetNativeString(buffer, length, str, attrs);
-
-        public unsafe IMultiByteNCursesCharString GetNativeString(byte* buffer, int length, ReadOnlySpan<char> str, ulong attrs)
-            => Factory.GetNativeString(buffer, length, str, attrs);
-
-        public IMultiByteNCursesCharString GetNativeString(byte[] buffer, int bufferLength, string str, ulong attrs)
-            => Factory.GetNativeString(buffer, bufferLength, str, attrs);
-
-        public IMultiByteNCursesCharString GetNativeString(byte[] buffer, int bufferLength, ReadOnlySpan<char> str, ulong attrs)
-            => Factory.GetNativeString(buffer, bufferLength, str, attrs);
-
-        public unsafe IMultiByteNCursesCharString GetNativeString(byte* buffer, int length, string str, ulong attrs, ushort colorPair)
-            => Factory.GetNativeString(buffer, length, str, attrs, colorPair);
-
-        public unsafe IMultiByteNCursesCharString GetNativeString(byte* buffer, int length, ReadOnlySpan<char> str, ulong attrs, ushort colorPair)
-            => Factory.GetNativeString(buffer, length, str, attrs, colorPair);
-
-        public IMultiByteNCursesCharString GetNativeString(byte[] buffer, int bufferLength, string str, ulong attrs, ushort colorPair)
-            => Factory.GetNativeString(buffer, bufferLength, str, attrs, colorPair);
-
-        public IMultiByteNCursesCharString GetNativeString(byte[] buffer, int bufferLength, ReadOnlySpan<char> str, ulong attrs, ushort colorPair)
-            => Factory.GetNativeString(buffer, bufferLength, str, attrs, colorPair);
-
-        public int GetByteCount(string str)
-            => Factory.GetByteCount(str);
-
-        public int GetByteCount(ReadOnlySpan<char> str)
-            => Factory.GetByteCount(str);
-
-        public int GetByteCount(int length)
-            => Factory.GetByteCount(length);
-
-        public int GetCharLength()
-            => Factory.GetCharLength();
-    }
-
-    internal class MultiByteCharFactoryInternal<TMultiByte> :
-        INCursesCharFactoryInternal<IMultiByteNCursesChar, IMultiByteNCursesCharString, TMultiByte, MultiByteCharString<TMultiByte>>
-        where TMultiByte : unmanaged, IMultiByteNCursesChar, IEquatable<TMultiByte>
-    {
-        internal static Func<ArraySegment<byte>, TMultiByte> CreateCharFromArraySegment;
-        internal static Func<ArraySegment<byte>, ulong, TMultiByte> CreateCharWithAttributeFromArraySegment;
-        internal static Func<ArraySegment<byte>, ulong, ushort, TMultiByte> CreateCharWithAttributeAndColorPairFromArraySegment;
-
-        internal static CreateMultiByteCharFromSpan<TMultiByte> CreateCharFromSpan;
-        internal static CreateMultiByteCharWithAttributeFromSpan<TMultiByte> CreateCharWithAttributeFromSpan;
-        internal static CreateMultiByteCharWithAttributeAndColorPairFromSpan<TMultiByte> CreateCharWithAttributeAndColorPairFromSpan;
-
-        internal static Func<char, TMultiByte> CreateCharFromChar;
-        internal static Func<char, ulong, TMultiByte> CreateCharWithAttributeFromChar;
-        internal static Func<char, ulong, ushort, TMultiByte> CreateCharWithAttributeAndColorPairFromChar;
-
-        internal static MultiByteCharFactoryInternal<TMultiByte> Instance { get; }
-
-        private const int _BufferSize = 32;
-
-        static MultiByteCharFactoryInternal()
-        {
-            Instance = new MultiByteCharFactoryInternal<TMultiByte>();
+            /* padding should always be after the chars field */
+            _ExtColorOffset = (_ExtColorOffset + mbType.StructLayoutAttribute.Pack / 2) / mbType.StructLayoutAttribute.Pack * mbType.StructLayoutAttribute.Pack;
 
             ConstructorInfo ctor;
             ParameterExpression par1, par2, par3;
 
-            par1 = Expression.Parameter(typeof(ArraySegment<byte>));
+            par1 = Expression.Parameter(typeof(Span<byte>));
             par2 = Expression.Parameter(typeof(ulong));
             par3 = Expression.Parameter(typeof(ushort));
 
-            ctor = typeof(TMultiByte).GetConstructor(new Type[] { typeof(ArraySegment<byte>) });
-            CreateCharFromArraySegment =
-                Expression.Lambda<Func<ArraySegment<byte>, TMultiByte>>(Expression.New(ctor, par1), par1).Compile();
-
-            ctor = typeof(TMultiByte).GetConstructor(new Type[] { typeof(ArraySegment<byte>), typeof(ulong) });
-            CreateCharWithAttributeFromArraySegment =
-                Expression.Lambda<Func<ArraySegment<byte>, ulong, TMultiByte>>(Expression.New(ctor, par1, par2), par1, par2).Compile();
-
-            ctor = typeof(TMultiByte).GetConstructor(new Type[] { typeof(ArraySegment<byte>), typeof(ulong), typeof(ushort) });
-            CreateCharWithAttributeAndColorPairFromArraySegment =
-                Expression.Lambda<Func<ArraySegment<byte>, ulong, ushort, TMultiByte>>(Expression.New(ctor, par1, par2, par3), par1, par2, par3).Compile();
-
-            par1 = Expression.Parameter(typeof(Span<byte>));
-
-            ctor = typeof(TMultiByte).GetConstructor(new Type[] { typeof(Span<byte>) });
-            CreateCharFromSpan =
-                Expression.Lambda<CreateMultiByteCharFromSpan<TMultiByte>>(Expression.New(ctor, par1), par1).Compile();
-
-            ctor = typeof(TMultiByte).GetConstructor(new Type[] { typeof(Span<byte>), typeof(ulong) });
-            CreateCharWithAttributeFromSpan =
-                Expression.Lambda<CreateMultiByteCharWithAttributeFromSpan<TMultiByte>>(Expression.New(ctor, par1, par2), par1, par2).Compile();
-
             ctor = typeof(TMultiByte).GetConstructor(new Type[] { typeof(Span<byte>), typeof(ulong), typeof(ushort) });
-            CreateCharWithAttributeAndColorPairFromSpan =
+            _CreateCharWithAttributeAndColorPairFromSpan =
                 Expression.Lambda<CreateMultiByteCharWithAttributeAndColorPairFromSpan<TMultiByte>>(Expression.New(ctor, par1, par2, par3), par1, par2, par3).Compile();
-
-            par1 = Expression.Parameter(typeof(char));
-            ctor = typeof(TMultiByte).GetConstructor(new Type[] { typeof(char) });
-            CreateCharFromChar =
-                Expression.Lambda<Func<char, TMultiByte>>(Expression.New(ctor, par1), par1).Compile();
-
-            ctor = typeof(TMultiByte).GetConstructor(new Type[] { typeof(char), typeof(ulong) });
-            CreateCharWithAttributeFromChar =
-                Expression.Lambda<Func<char, ulong, TMultiByte>>(Expression.New(ctor, par1, par2), par1, par2).Compile();
-
-            ctor = typeof(TMultiByte).GetConstructor(new Type[] { typeof(char), typeof(ulong), typeof(ushort) });
-            CreateCharWithAttributeAndColorPairFromChar =
-                Expression.Lambda<Func<char, ulong, ushort, TMultiByte>>(Expression.New(ctor, par1, par2, par3), par1, par2, par3).Compile();
         }
 
-        #region ICharFactoryInternal<TChar, TString>
-        public TMultiByte GetNativeEmptyCharInternal() =>
-            CreateCharFromChar('\0');
-
-        public TMultiByte GetNativeCharInternal(char ch) =>
-            CreateCharFromChar(ch);
-
-        public unsafe MultiByteCharString<TMultiByte> GetNativeEmptyStringInternal(byte* buffer, int bufferLenght, int charLength) =>
-            new MultiByteCharString<TMultiByte>(buffer, bufferLenght, charLength);
-
-        public MultiByteCharString<TMultiByte> GetNativeEmptyStringInternal(byte[] buffer, int bufferLength, int charLength) =>
-            new MultiByteCharString<TMultiByte>(buffer, bufferLength, charLength);
-
-        public unsafe MultiByteCharString<TMultiByte> GetNativeStringInternal(byte* buffer, int length, string str) =>
-            new MultiByteCharString<TMultiByte>(buffer, length, str);
-
-        public unsafe MultiByteCharString<TMultiByte> GetNativeStringInternal(byte* buffer, int length, ReadOnlySpan<char> str) =>
-            new MultiByteCharString<TMultiByte>(buffer, length, str);
-
-        public MultiByteCharString<TMultiByte> GetNativeStringInternal(byte[] buffer, int bufferLength, string str) =>
-            new MultiByteCharString<TMultiByte>(buffer, bufferLength, str);
-
-        public MultiByteCharString<TMultiByte> GetNativeStringInternal(byte[] buffer, int bufferLength, ReadOnlySpan<char> str) =>
-            new MultiByteCharString<TMultiByte>(buffer, bufferLength, str);
-
-        public int GetByteCount(string str, bool addNullTerminator = true) =>
-            (str.Length * Marshal.SizeOf<TMultiByte>()) + (addNullTerminator ? Marshal.SizeOf<TMultiByte>() : 0);
-
-        public int GetByteCount(ReadOnlySpan<char> str, bool addNullTerminator = true) =>
-            (str.Length * Marshal.SizeOf<TMultiByte>()) + (addNullTerminator ? Marshal.SizeOf<TMultiByte>() : 0);
-
-        public int GetByteCount(int length, bool addNullTerminator = true) =>
-            (length * Marshal.SizeOf<TMultiByte>()) + (addNullTerminator ? Marshal.SizeOf<TMultiByte>() : 0);
-
-        public int GetCharLength() => Marshal.SizeOf<TMultiByte>();
-
-        public MultiByteCharString<TMultiByte> CreateNativeString(ref TMultiByte strRef)
-            => new MultiByteCharString<TMultiByte>(ref strRef);
-        #endregion
-
-        #region ICharFactoryInternal<TCharType, TStringType, TChar, TString>
-        public TMultiByte GetNativeCharInternal(char ch, ulong attrs) => 
-            CreateCharWithAttributeFromChar(ch, attrs);
-
-        public TMultiByte GetNativeCharInternal(char ch, ulong attrs, ushort colorPair) => 
-            CreateCharWithAttributeAndColorPairFromChar(ch, attrs, colorPair);
-
-        public unsafe MultiByteCharString<TMultiByte> GetNativeStringInternal(byte* buffer, int length, string str, ulong attrs) => 
-            new MultiByteCharString<TMultiByte>(buffer, length, str, attrs);
-
-        public unsafe MultiByteCharString<TMultiByte> GetNativeStringInternal(byte* buffer, int length, ReadOnlySpan<char> str, ulong attrs) =>
-            new MultiByteCharString<TMultiByte>(buffer, length, str, attrs);
-
-        public MultiByteCharString<TMultiByte> GetNativeStringInternal(byte[] buffer, int bufferLength, string str, ulong attrs) =>
-            new MultiByteCharString<TMultiByte>(buffer, bufferLength, str, attrs);
-
-        public MultiByteCharString<TMultiByte> GetNativeStringInternal(byte[] buffer, int bufferLength, ReadOnlySpan<char> str, ulong attrs) =>
-            new MultiByteCharString<TMultiByte>(buffer, bufferLength, str, attrs);
-
-        public unsafe MultiByteCharString<TMultiByte> GetNativeStringInternal(byte* buffer, int length, string str, ulong attrs, ushort colorPair) =>
-            new MultiByteCharString<TMultiByte>(buffer, length, str, attrs, colorPair);
-
-        public unsafe MultiByteCharString<TMultiByte> GetNativeStringInternal(byte* buffer, int length, ReadOnlySpan<char> str, ulong attrs, ushort colorPair) =>
-            new MultiByteCharString<TMultiByte>(buffer, length, str, attrs, colorPair);
-
-        public MultiByteCharString<TMultiByte> GetNativeStringInternal(byte[] buffer, int bufferLength, string str, ulong attrs, ushort colorPair) =>
-            new MultiByteCharString<TMultiByte>(buffer, bufferLength, str, attrs, colorPair);
-
-        public MultiByteCharString<TMultiByte> GetNativeStringInternal(byte[] buffer, int bufferLength, ReadOnlySpan<char> str, ulong attrs, ushort colorPair) =>
-            new MultiByteCharString<TMultiByte>(buffer, bufferLength, str, attrs, colorPair);
-        #endregion
-
-        #region ICharFactory
-        public IMultiByteNCursesChar GetNativeEmptyChar() =>
-            this.GetNativeEmptyCharInternal();
-
-        public IMultiByteNCursesChar GetNativeChar(char ch) =>
-            this.GetNativeCharInternal(ch);
-
-        public IMultiByteNCursesChar GetNativeChar(char ch, ulong attr) =>
-            this.GetNativeCharInternal(ch, attr);
-
-        public IMultiByteNCursesChar GetNativeChar(char ch, ulong attr, ushort pair) =>
-            this.GetNativeCharInternal(ch, attr, pair);
-
-        public unsafe IMultiByteNCursesCharString GetNativeEmptyString(byte* buffer, int bufferLength, int charLength)
-            => this.GetNativeEmptyString(buffer, bufferLength, charLength);
-
-        public IMultiByteNCursesCharString GetNativeEmptyString(byte[] buffer, int bufferLength, int charLength)
-            => this.GetNativeEmptyStringInternal(buffer, bufferLength, charLength);
-
-        public IMultiByteNCursesCharString GetNativeEmptyString(int charLength)
-            => this.GetNativeEmptyString(new byte[this.GetByteCount(charLength)], this.GetByteCount(charLength), charLength);
-
-        public unsafe IMultiByteNCursesCharString GetNativeString(byte* buffer, int length, string str)
-            => this.GetNativeStringInternal(buffer, length, str);
-
-        public unsafe IMultiByteNCursesCharString GetNativeString(byte* buffer, int length, ReadOnlySpan<char> str)
-            => this.GetNativeStringInternal(buffer, length, str);
-
-        public IMultiByteNCursesCharString GetNativeString(byte[] buffer, int bufferLength, string str)
-            => this.GetNativeStringInternal(buffer, bufferLength,  str);
-
-        public IMultiByteNCursesCharString GetNativeString(byte[] buffer, int bufferLength, ReadOnlySpan<char> str)
-            => this.GetNativeStringInternal(buffer, bufferLength, str);
-
-        public IMultiByteNCursesCharString GetNativeString(string str)
-            => this.GetNativeString(new byte[this.GetByteCount(str)], this.GetByteCount(str), str);
-
-        public IMultiByteNCursesCharString GetNativeString(ReadOnlySpan<char> str)
-            => this.GetNativeString(new byte[this.GetByteCount(str)], this.GetByteCount(str), str);
-
-        public unsafe IMultiByteNCursesCharString GetNativeString(byte* buffer, int length, string str, ulong attrs)
-            => this.GetNativeStringInternal(buffer, length, str, attrs);
-
-        public unsafe IMultiByteNCursesCharString GetNativeString(byte* buffer, int length, ReadOnlySpan<char> str, ulong attrs)
-            => this.GetNativeStringInternal(buffer, length, str, attrs);
-
-        public IMultiByteNCursesCharString GetNativeString(byte[] buffer, int bufferLength, string str, ulong attrs)
-            => this.GetNativeStringInternal(buffer, bufferLength, str, attrs);
-
-        public IMultiByteNCursesCharString GetNativeString(byte[] buffer, int bufferLength, ReadOnlySpan<char> str, ulong attrs)
-            => this.GetNativeStringInternal(buffer, bufferLength, str, attrs);
-
-        public IMultiByteNCursesCharString GetNativeString(string str, ulong attrs)
-            => this.GetNativeString(new byte[this.GetByteCount(str)], this.GetByteCount(str), str, attrs);
-
-        public IMultiByteNCursesCharString GetNativeString(ReadOnlySpan<char> str, ulong attrs)
-            => this.GetNativeString(new byte[this.GetByteCount(str)], this.GetByteCount(str), str, attrs);
-
-        public unsafe IMultiByteNCursesCharString GetNativeString(byte* buffer, int length, string str, ulong attrs, ushort colorPair)
-            => this.GetNativeStringInternal(buffer, length, str, attrs, colorPair);
-
-        public unsafe IMultiByteNCursesCharString GetNativeString(byte* buffer, int length, ReadOnlySpan<char> str, ulong attrs, ushort colorPair)
-            => this.GetNativeStringInternal(buffer, length, str, attrs, colorPair);
-
-        public IMultiByteNCursesCharString GetNativeString(byte[] buffer, int bufferLength, string str, ulong attrs, ushort colorPair)
-            => this.GetNativeStringInternal(buffer, bufferLength, str, attrs, colorPair);
-
-        public IMultiByteNCursesCharString GetNativeString(byte[] buffer, int bufferLength, ReadOnlySpan<char> str, ulong attrs, ushort colorPair)
-            => this.GetNativeStringInternal(buffer, bufferLength, str, attrs, colorPair);
-
-        public IMultiByteNCursesCharString GetNativeString(string str, ulong attrs, ushort colorPair)
-            => this.GetNativeStringInternal(new byte[this.GetByteCount(str)], this.GetByteCount(str), str, attrs, colorPair);
-
-        public IMultiByteNCursesCharString GetNativeString(ReadOnlySpan<char> str, ulong attrs, ushort colorPair)
-            => this.GetNativeStringInternal(new byte[this.GetByteCount(str)], this.GetByteCount(str), str, attrs, colorPair);
-
-        public int GetByteCount(string str)
-            => this.GetByteCount(str, true);
-
-        public int GetByteCount(ReadOnlySpan<char> str)
-            => this.GetByteCount(str, true);
-
-        public int GetByteCount(int length)
-            => this.GetByteCount(length, true);
-        #endregion
-
-        public unsafe MultiByteCharString<TMultiByte> GetNativeStringInternal(byte* buffer, int bufferLength, ReadOnlySpan<byte> str, int charLength, Encoding encoding) =>
-            new MultiByteCharString<TMultiByte>(buffer, bufferLength, str, charLength, encoding);
-
-        public unsafe MultiByteCharString<TMultiByte> GetNativeStringInternal(byte* buffer, int bufferLength, ReadOnlySequence<byte> str, int charLength, Encoding encoding) =>
-            new MultiByteCharString<TMultiByte>(buffer, bufferLength, str, charLength, encoding);
-
-        public MultiByteCharString<TMultiByte> GetNativeStringInternal(byte[] buffer, int bufferLength, ReadOnlySpan<byte> str, int charLength, Encoding encoding) =>
-            new MultiByteCharString<TMultiByte>(buffer, bufferLength, str, charLength, encoding);
-
-        public MultiByteCharString<TMultiByte> GetNativeStringInternal(byte[] buffer, int bufferLength, ReadOnlySequence<byte> str, int charLength, Encoding encoding) =>
-            new MultiByteCharString<TMultiByte>(buffer, bufferLength, str, charLength, encoding);
-
-        public unsafe MultiByteCharString<TMultiByte> GetNativeStringInternal(byte* buffer, int bufferLength, ReadOnlySpan<byte> str, int charLength, Encoding encoding, ulong attrs) =>
-            new MultiByteCharString<TMultiByte>(buffer, bufferLength, str, charLength, encoding, attrs);
-
-        public unsafe MultiByteCharString<TMultiByte> GetNativeStringInternal(byte* buffer, int bufferLength, ReadOnlySequence<byte> str, int charLength, Encoding encoding, ulong attrs) =>
-            new MultiByteCharString<TMultiByte>(buffer, bufferLength, str, charLength, encoding, attrs);
-
-        public MultiByteCharString<TMultiByte> GetNativeStringInternal(byte[] buffer, int bufferLength, ReadOnlySpan<byte> str, int charLength, Encoding encoding, ulong attrs) =>
-            new MultiByteCharString<TMultiByte>(buffer, bufferLength, str, charLength, encoding, attrs);
-
-        public MultiByteCharString<TMultiByte> GetNativeStringInternal(byte[] buffer, int bufferLength, ReadOnlySequence<byte> str, int charLength, Encoding encoding, ulong attrs) =>
-            new MultiByteCharString<TMultiByte>(buffer, bufferLength, str, charLength, encoding, attrs);
-
-        public unsafe MultiByteCharString<TMultiByte> GetNativeStringInternal(byte* buffer, int bufferLength, ReadOnlySpan<byte> str, int charLength, Encoding encoding, ulong attrs, ushort colorPair) =>
-            new MultiByteCharString<TMultiByte>(buffer, bufferLength, str, charLength, encoding, attrs, colorPair);
-
-        public unsafe MultiByteCharString<TMultiByte> GetNativeStringInternal(byte* buffer, int bufferLength, ReadOnlySequence<byte> str, int charLength, Encoding encoding, ulong attrs, ushort colorPair) =>
-            new MultiByteCharString<TMultiByte>(buffer, bufferLength, str, charLength, encoding, attrs, colorPair);
-
-        public MultiByteCharString<TMultiByte> GetNativeStringInternal(byte[] buffer, int bufferLength, ReadOnlySpan<byte> str, int charLength, Encoding encoding, ulong attrs, ushort colorPair) =>
-            new MultiByteCharString<TMultiByte>(buffer, bufferLength, str, charLength, encoding, attrs, colorPair);
-
-        public MultiByteCharString<TMultiByte> GetNativeStringInternal(byte[] buffer, int bufferLength, ReadOnlySequence<byte> str, int charLength, Encoding encoding, ulong attrs, ushort colorPair) =>
-            new MultiByteCharString<TMultiByte>(buffer, bufferLength, str, charLength, encoding, attrs, colorPair);
-
-        public unsafe int GetByteCount(ReadOnlySpan<byte> bytes, Encoding encoding, out int charLength, bool addNullTerminator = true)
+        internal static TMultiByte CreateMultiByteChar(int @char, ulong attrs, ushort colorPair)
         {
-            Decoder decoder = encoding.GetDecoder();
-            fixed (byte* originalBytes = bytes)
+            int wideCharSize = Unsafe.SizeOf<TWideChar>();
+            TWideChar wCh = PlatformWideCharEncoder<TWideChar>._Instance.Encode(@char);
+            Span<byte> wChBuffer;
+
+            unsafe
             {
-                return ((charLength = decoder.GetCharCount(originalBytes, bytes.Length, true)) * Marshal.SizeOf<TMultiByte>()) + (addNullTerminator ? Marshal.SizeOf<TMultiByte>() : 0);
+                wChBuffer = new Span<byte>(&wCh, wideCharSize);
+            }
+
+            return _CreateCharWithAttributeAndColorPairFromSpan(wChBuffer, attrs, colorPair);
+        }
+
+        internal static void CreateMultiByteStringFromWideCharString(
+            Memory<TMultiByte> buffer,
+            Memory<TWideChar> wchBuffer, 
+            ulong attrs, 
+            ushort colorPair)
+        {
+            if (colorPair > 0)
+            {
+                attrs |= (uint)NativeNCurses.COLOR_PAIR(colorPair);
+            }
+
+            uint multiByteSize = (uint)Unsafe.SizeOf<TMultiByte>();
+            uint singleByteSize = (uint)Unsafe.SizeOf<TSingleByte>();
+            uint ulongByteSize = (uint)Unsafe.SizeOf<ulong>();
+
+            unsafe
+            {
+                byte* bOffset, b;
+                byte* a = ((byte*)&attrs);
+
+                fixed (TMultiByte* mb = buffer.Span)
+                {
+                    fixed (TWideChar* wch = wchBuffer.Span)
+                    {
+                        for (int i = 0; i < wchBuffer.Length - 1; i++) //-1 -> ensure null termintor stays null
+                        {
+                            b = (byte*)(mb + i);
+
+                            if (attrs > 0)
+                            {
+                                bOffset = b;
+
+                                Unsafe.CopyBlock(bOffset, a, singleByteSize);
+                            }
+
+                            bOffset = b + _WideCharOffset;
+                            Unsafe.Write(bOffset, *(wch + i));
+
+                            if (colorPair > 0)
+                            {
+                                bOffset = b + _ExtColorOffset;
+                                Unsafe.Write(bOffset, colorPair);
+                            }
+                        }
+                    }
+                }
             }
         }
 
-        public int GetByteCount(ReadOnlySequence<byte> sequence, Encoding encoding, out int charLength, bool addNullTerminator = true)
+        internal static string GenerateString(Memory<TMultiByte> buffer)
         {
-            Decoder decoder = encoding.GetDecoder();
-            charLength = 0;
+            uint wideCharSize = (uint)Unsafe.SizeOf<TWideChar>();
 
-            int charsUsed = 0, bytesUsed = 0, length = 0, bytesLeft, newByteIndex;
-            long currentLeft;
-            Span<byte> bufferSpan = default;
-            Span<char> charSpan = default;
-            ReadOnlySpan<byte> readableSpan;
-            currentLeft = sequence.Length;
-            bool completed = false;
-
-            byte[] decoderByteBuffer = ArrayPool<byte>.Shared.Rent(_BufferSize);
-            //use the same buffer size, because a 1 byte UTF8 rune could be a char
-            char[] decoderCharBuffer = ArrayPool<char>.Shared.Rent(_BufferSize);
-
-            try
+            using (BufferState<TWideChar> wchBufferState = WideCharFactory<TWideChar>._CreatePooledBuffer((CharEncoderState)buffer.Length, false))
             {
-                charSpan = new Span<char>(decoderCharBuffer);
-                bufferSpan = new Span<byte>(decoderByteBuffer);
+                Memory<TWideChar> wchBuffer = wchBufferState.Memory;
 
-                foreach (ReadOnlyMemory<byte> memory in sequence)
+                unsafe
                 {
-                    if (memory.IsEmpty)
+                    byte* bOffset, b;
+
+                    fixed (TMultiByte* mb = buffer.Span)
                     {
-                        continue;
-                    }
-
-                    readableSpan = memory.Span;
-
-                    while (!readableSpan.IsEmpty)
-                    {
-                        //there's still bytes left from the previous conversion
-                        if ((bytesLeft = (length - bytesUsed)) > 0)
+                        fixed (TWideChar* wch = wchBuffer.Span)
                         {
-                            if (bytesUsed > 0)
+                            for (int i = 0; i < buffer.Length; i++)
                             {
-                                //move these to the beginning of the buffer (1 by 1)
-                                newByteIndex = 0;
-                                for (int i = bytesUsed; i < length; i++)
-                                {
-                                    bufferSpan[newByteIndex++] = bufferSpan[i];
-                                }
-                            }
+                                b = (byte*)(mb + i);
+                                bOffset = b + _WideCharOffset;
 
-                            length = (bufferSpan.Length - bytesLeft) > readableSpan.Length ? readableSpan.Length : (bufferSpan.Length - bytesLeft);
-                            readableSpan.Slice(0, length).CopyTo(bufferSpan.Slice(bytesLeft));
-                            readableSpan = readableSpan.Slice(length);
-                            length += bytesLeft;
-                        }
-                        else
-                        {
-                            length = bufferSpan.Length > readableSpan.Length ? readableSpan.Length : bufferSpan.Length;
-                            readableSpan.Slice(0, length).CopyTo(bufferSpan);
-                            readableSpan = readableSpan.Slice(length);
-                        }
-
-                        unsafe
-                        {
-                            fixed (byte* b = bufferSpan)
-                            {
-                                fixed (char* c = charSpan)
-                                {
-                                    decoder.Convert
-                                    (
-                                        b,
-                                        length,
-                                        c,
-                                        decoderCharBuffer.Length,
-                                        currentLeft <= length,
-                                        out bytesUsed,
-                                        out charsUsed,
-                                        out completed
-                                    );
-                                }
+                                Unsafe.CopyBlock(wch + i, bOffset, wideCharSize);
                             }
                         }
-
-                        currentLeft -= bytesUsed;
-                        charLength += charsUsed;
                     }
                 }
 
-                if (!completed)
-                {
-                    throw new InvalidOperationException("Encoding conversion did not succeed");
-                }
+                return WideCharFactory<TWideChar>.GenerateString(wchBuffer);
             }
-            finally
-            {
-                ArrayPool<byte>.Shared.Return(decoderByteBuffer);
-                ArrayPool<char>.Shared.Return(decoderCharBuffer);
-            }
-
-            return (charLength * Marshal.SizeOf<TMultiByte>()) + (addNullTerminator ? Marshal.SizeOf<TMultiByte>() : 0);
         }
 
-        public unsafe IMultiByteNCursesCharString GetNativeString(byte* buffer, int length, ReadOnlySpan<byte> str, int charLength, Encoding encoding)
-            => this.GetNativeStringInternal(buffer, length, str, charLength, encoding);
+        #region IMultiByteCharFactory
+        public TMultiByte GetNativeChar(int ch)
+            => this.GetNativeChar(ch, 0, 0);
 
-        public unsafe IMultiByteNCursesCharString GetNativeString(byte* buffer, int length, ReadOnlySequence<byte> str, int charLength, Encoding encoding)
-            => this.GetNativeStringInternal(buffer, length, str, charLength, encoding);
+        public TMultiByte GetNativeChar(byte ch)
+            => this.GetNativeChar(ch, 0, 0);
 
-        public IMultiByteNCursesCharString GetNativeString(byte[] buffer, int bufferLength, ReadOnlySpan<byte> str, int charLength, Encoding encoding)
-            => this.GetNativeStringInternal(buffer, bufferLength, str, charLength, encoding);
+        public byte GetByte(TMultiByte @char)
+        {
+            byte res;
 
-        public IMultiByteNCursesCharString GetNativeString(byte[] buffer, int bufferLength, ReadOnlySequence<byte> str, int charLength, Encoding encoding)
-            => this.GetNativeStringInternal(buffer, bufferLength, str, charLength, encoding);
+            unsafe
+            {
+                byte* b = ((byte*)(&@char)) + _WideCharOffset;
+                res = *b;
+            }
 
-        //public IMultiByteNCursesCharString GetNativeString(ReadOnlySpan<byte> str, int charLength, Encoding encoding)
-        //    => this.GetNativeString(new byte[this.GetByteCount(str, encoding)], this.GetByteCount(str, encoding), str, charLength, encoding);
+            return res;
+        }
 
-        public unsafe IMultiByteNCursesCharString GetNativeString(byte* buffer, int length, ReadOnlySpan<byte> str, int charLength, Encoding encoding, ulong attr)
-            => this.GetNativeStringInternal(buffer, length, str, charLength, encoding, attr);
+        public int GetChar(TMultiByte @char)
+        {
+            TWideChar wCh = default;
 
-        public unsafe IMultiByteNCursesCharString GetNativeString(byte* buffer, int length, ReadOnlySequence<byte> str, int charLength, Encoding encoding, ulong attr)
-            => this.GetNativeStringInternal(buffer, length, str, charLength, encoding, attr);
+            unsafe
+            {
+                byte* b = ((byte*)(&@char)) + _WideCharOffset;
+                wCh = *((TWideChar*)b);
+            }
 
-        public IMultiByteNCursesCharString GetNativeString(byte[] buffer, int bufferLength, ReadOnlySpan<byte> str, int charLength, Encoding encoding, ulong attr)
-            => this.GetNativeStringInternal(buffer, bufferLength, str, charLength, encoding, attr);
+            using (BufferState<TWideChar> wchBufferState = WideCharFactory<TWideChar>._CreatePooledBuffer((CharEncoderState)1))
+            {
+                Memory<TWideChar> wchBuffer = wchBufferState.Memory;
+                wchBuffer.Span[0] = wCh;
 
-        public IMultiByteNCursesCharString GetNativeString(byte[] buffer, int bufferLength, ReadOnlySequence<byte> str, int charLength, Encoding encoding, ulong attr)
-            => this.GetNativeStringInternal(buffer, bufferLength, str, charLength, encoding, attr);
+                return (WideCharFactory<TWideChar>.GenerateString(wchBuffer))[0];
+            }
+        }
 
-        //public IMultiByteNCursesCharString GetNativeString(ReadOnlySpan<byte> str, int charLength, Encoding encoding, ulong attrs)
-        //    => this.GetNativeString(new byte[this.GetByteCount(str, encoding)], this.GetByteCount(str, encoding), str, charLength, encoding, attrs);
+        public BufferState<TMultiByte> GetNativeEmptyString(CreateBuffer<TMultiByte> createBuffer, int length, out MultiByteCharString<TMultiByte, TWideChar, TSingleByte> @string)
+        {
+            BufferState<TMultiByte> bufferState = createBuffer((CharEncoderState)length);
+            bufferState.Memory.Span.Clear();
+            @string = new MultiByteCharString<TMultiByte, TWideChar, TSingleByte>(bufferState.Memory);
+            return bufferState;
+        }
 
-        public unsafe IMultiByteNCursesCharString GetNativeString(byte* buffer, int length, ReadOnlySpan<byte> str, int charLength, Encoding encoding, ulong attr, ushort pair)
-            => this.GetNativeStringInternal(buffer, length, str, charLength, encoding, attr, pair);
+        public BufferState<TMultiByte> GetNativeString(CreateBuffer<TMultiByte> createBuffer, ReadOnlySpan<char> str, out MultiByteCharString<TMultiByte, TWideChar, TSingleByte> @string)
+        {
+            CharEncoderState encoderState = PlatformWideCharEncoder<TWideChar>._Instance.GetBufferSize(str);
+            BufferState<TMultiByte> multiBufferState = createBuffer((CharEncoderState)encoderState.BufferLength);
 
-        public unsafe IMultiByteNCursesCharString GetNativeString(byte* buffer, int length, ReadOnlySequence<byte> str, int charLength, Encoding encoding, ulong attr, ushort pair)
-            => this.GetNativeStringInternal(buffer, length, str, charLength, encoding, attr, pair);
+            using (BufferState<TWideChar> wideBufferState = WideCharFactory<TWideChar>._CreatePooledBuffer(encoderState))
+            {
+                PlatformWideCharEncoder<TWideChar>._Instance.Encode(str, wideBufferState);
 
-        public IMultiByteNCursesCharString GetNativeString(byte[] buffer, int bufferLength, ReadOnlySpan<byte> str, int charLength, Encoding encoding, ulong attr, ushort pair)
-            => this.GetNativeStringInternal(buffer, bufferLength, str, charLength, encoding, attr, pair);
+                CreateMultiByteStringFromWideCharString
+                (
+                    multiBufferState.Memory,
+                    wideBufferState.Memory.Slice(0, str.Length),
+                    0,
+                    0
+                );
+            }
 
-        public IMultiByteNCursesCharString GetNativeString(byte[] buffer, int bufferLength, ReadOnlySequence<byte> str, int charLength, Encoding encoding, ulong attr, ushort pair)
-            => this.GetNativeStringInternal(buffer, bufferLength, str, charLength, encoding, attr, pair);
+            @string = new MultiByteCharString<TMultiByte, TWideChar, TSingleByte>(multiBufferState.Memory);
+            return multiBufferState;
+        }
 
-        //public IMultiByteNCursesCharString GetNativeString(ReadOnlySpan<byte> str, int charLength, Encoding encoding, ulong attr, ushort pair)
-        //    => this.GetNativeString(new byte[this.GetByteCount(str, encoding)], this.GetByteCount(str, encoding), str, charLength, encoding, attr, pair);
+        public BufferState<TMultiByte> GetNativeString(CreateBuffer<TMultiByte> createBuffer, ReadOnlySpan<byte> str, out MultiByteCharString<TMultiByte, TWideChar, TSingleByte> @string)
+        {
+            CharEncoderState encoderState = PlatformWideCharEncoder<TWideChar>._Instance.GetBufferSize(str, Encoding.ASCII);
+            BufferState<TMultiByte> multiBufferState = createBuffer((CharEncoderState)encoderState.BufferLength);
+
+            using (BufferState<TWideChar> wideBufferState = WideCharFactory<TWideChar>._CreatePooledBuffer(encoderState))
+            {
+                PlatformWideCharEncoder<TWideChar>._Instance.Encode(str, Encoding.ASCII, wideBufferState);
+
+                CreateMultiByteStringFromWideCharString
+                (
+                    multiBufferState.Memory,
+                    wideBufferState.Memory,
+                    0,
+                    0
+                );
+            }
+
+            @string = new MultiByteCharString<TMultiByte, TWideChar, TSingleByte>(multiBufferState.Memory);
+            return multiBufferState;
+        }
+
+        public BufferState<TMultiByte> GetNativeString(CreateBuffer<TMultiByte> createBuffer, in ReadOnlySequence<byte> str, out MultiByteCharString<TMultiByte, TWideChar, TSingleByte> @string)
+        {
+            CharEncoderState encoderState = PlatformWideCharEncoder<TWideChar>._Instance.GetBufferSize(str, Encoding.ASCII);
+            BufferState<TMultiByte> multiBufferState = createBuffer((CharEncoderState)encoderState.BufferLength);
+
+            using (BufferState<TWideChar> wideBufferState = WideCharFactory<TWideChar>._CreatePooledBuffer(encoderState))
+            {
+                PlatformWideCharEncoder<TWideChar>._Instance.Encode(str, Encoding.ASCII, wideBufferState);
+
+                CreateMultiByteStringFromWideCharString
+                (
+                    multiBufferState.Memory,
+                    wideBufferState.Memory,
+                    0,
+                    0
+                );
+            }
+
+            @string = new MultiByteCharString<TMultiByte, TWideChar, TSingleByte>(multiBufferState.Memory);
+            return multiBufferState;
+        }
+
+        public BufferState<TMultiByte> GetNativeString(CreateBuffer<TMultiByte> createBuffer, ReadOnlySpan<byte> str, Encoding encoding, out MultiByteCharString<TMultiByte, TWideChar, TSingleByte> @string)
+        {
+            CharEncoderState encoderState = PlatformWideCharEncoder<TWideChar>._Instance.GetBufferSize(str, encoding);
+            BufferState<TMultiByte> multiBufferState = createBuffer((CharEncoderState)encoderState.BufferLength);
+
+            using (BufferState<TWideChar> wideBufferState = WideCharFactory<TWideChar>._CreatePooledBuffer(encoderState))
+            {
+                PlatformWideCharEncoder<TWideChar>._Instance.Encode(str, encoding, wideBufferState);
+
+                CreateMultiByteStringFromWideCharString
+                (
+                    multiBufferState.Memory,
+                    wideBufferState.Memory,
+                    0,
+                    0
+                );
+            }
+
+            @string = new MultiByteCharString<TMultiByte, TWideChar, TSingleByte>(multiBufferState.Memory);
+            return multiBufferState;
+        }
+
+        public BufferState<TMultiByte> GetNativeString(CreateBuffer<TMultiByte> createBuffer, in ReadOnlySequence<byte> str, Encoding encoding, out MultiByteCharString<TMultiByte, TWideChar, TSingleByte> @string)
+        {
+            CharEncoderState encoderState = PlatformWideCharEncoder<TWideChar>._Instance.GetBufferSize(str, encoding);
+            BufferState<TMultiByte> multiBufferState = createBuffer((CharEncoderState)encoderState.BufferLength);
+
+            using (BufferState<TWideChar> wideBufferState = WideCharFactory<TWideChar>._CreatePooledBuffer(encoderState))
+            {
+                PlatformWideCharEncoder<TWideChar>._Instance.Encode(str, encoding, wideBufferState);
+
+                CreateMultiByteStringFromWideCharString
+                (
+                    multiBufferState.Memory,
+                    wideBufferState.Memory,
+                    0,
+                    0
+                );
+            }
+
+            @string = new MultiByteCharString<TMultiByte, TWideChar, TSingleByte>(multiBufferState.Memory);
+            return multiBufferState;
+        }
+
+        public BufferState<TMultiByte> GetNativeString(CreateBuffer<TMultiByte> createBuffer, ref TMultiByte strRef, out MultiByteCharString<TMultiByte, TWideChar, TSingleByte> @string)
+        {
+            int length = NativeNCurses.FindStringLength(ref strRef);
+            BufferState<TMultiByte> bufferState = createBuffer((CharEncoderState)length);
+
+            ref TMultiByte bufferRef = ref bufferState.Memory.Span.GetPinnableReference();
+
+            Unsafe.CopyBlock
+            (
+                ref Unsafe.As<TMultiByte, byte>(ref bufferRef),
+                ref Unsafe.As<TMultiByte, byte>(ref strRef),
+                (uint)(bufferState.EncoderState.BufferLength * Marshal.SizeOf<TMultiByte>())
+            );
+
+            @string = new MultiByteCharString<TMultiByte, TWideChar, TSingleByte>(bufferState.Memory);
+
+            return bufferState;
+        }
+        #endregion
+
+        #region IMultiByteNCursesCharFactory
+        public TMultiByte GetNativeChar(byte ch, ulong attrs, ushort colorPair)
+            => CreateMultiByteChar((char)ch, attrs, colorPair);
+
+
+        public TMultiByte GetNativeChar(int ch, ulong attrs, ushort colorPair)
+            => CreateMultiByteChar(ch, attrs, colorPair);
+
+        public BufferState<TMultiByte> GetNativeString(CreateBuffer<TMultiByte> createBuffer, ReadOnlySpan<char> str, ulong attrs, ushort colorPair, out MultiByteCharString<TMultiByte, TWideChar, TSingleByte> @string)
+        {
+            CharEncoderState encoderState = PlatformWideCharEncoder<TWideChar>._Instance.GetBufferSize(str);
+            BufferState<TMultiByte> multiBufferState = createBuffer((CharEncoderState)encoderState.BufferLength);
+
+            using (BufferState<TWideChar> wideBufferState = WideCharFactory<TWideChar>._CreatePooledBuffer(encoderState))
+            {
+                PlatformWideCharEncoder<TWideChar>._Instance.Encode(str, wideBufferState);
+
+                CreateMultiByteStringFromWideCharString
+                (
+                    multiBufferState.Memory,
+                    wideBufferState.Memory,
+                    attrs,
+                    colorPair
+                );
+            }
+
+            @string = new MultiByteCharString<TMultiByte, TWideChar, TSingleByte>(multiBufferState.Memory);
+            return multiBufferState;
+        }
+
+        public BufferState<TMultiByte> GetNativeString(CreateBuffer<TMultiByte> createBuffer, ReadOnlySpan<byte> str, ulong attrs, ushort colorPair, out MultiByteCharString<TMultiByte, TWideChar, TSingleByte> @string)
+        {
+            CharEncoderState encoderState = PlatformWideCharEncoder<TWideChar>._Instance.GetBufferSize(str, Encoding.ASCII);
+            BufferState<TMultiByte> multiBufferState = createBuffer((CharEncoderState)encoderState.BufferLength);
+
+            using (BufferState<TWideChar> wideBufferState = WideCharFactory<TWideChar>._CreatePooledBuffer(encoderState))
+            {
+                PlatformWideCharEncoder<TWideChar>._Instance.Encode(str, Encoding.ASCII, wideBufferState);
+
+                CreateMultiByteStringFromWideCharString
+                (
+                    multiBufferState.Memory,
+                    wideBufferState.Memory,
+                    attrs,
+                    colorPair
+                );
+            }
+
+            @string = new MultiByteCharString<TMultiByte, TWideChar, TSingleByte>(multiBufferState.Memory);
+            return multiBufferState;
+        }
+
+        public BufferState<TMultiByte> GetNativeString(CreateBuffer<TMultiByte> createBuffer, in ReadOnlySequence<byte> str, ulong attrs, ushort colorPair, out MultiByteCharString<TMultiByte, TWideChar, TSingleByte> @string)
+        {
+            CharEncoderState encoderState = PlatformWideCharEncoder<TWideChar>._Instance.GetBufferSize(str, Encoding.ASCII);
+            BufferState<TMultiByte> multiBufferState = createBuffer((CharEncoderState)encoderState.BufferLength);
+
+            using (BufferState<TWideChar> wideBufferState = WideCharFactory<TWideChar>._CreatePooledBuffer(encoderState))
+            {
+                PlatformWideCharEncoder<TWideChar>._Instance.Encode(str, Encoding.ASCII, wideBufferState);
+
+                CreateMultiByteStringFromWideCharString
+                (
+                    multiBufferState.Memory,
+                    wideBufferState.Memory,
+                    attrs,
+                    colorPair
+                );
+            }
+
+            @string = new MultiByteCharString<TMultiByte, TWideChar, TSingleByte>(multiBufferState.Memory);
+            return multiBufferState;
+        }
+
+        public BufferState<TMultiByte> GetNativeString(CreateBuffer<TMultiByte> createBuffer, ReadOnlySpan<byte> str, Encoding encoding, ulong attrs, ushort colorPair, out MultiByteCharString<TMultiByte, TWideChar, TSingleByte> @string)
+        {
+            CharEncoderState encoderState = PlatformWideCharEncoder<TWideChar>._Instance.GetBufferSize(str, encoding);
+            BufferState<TMultiByte> multiBufferState = createBuffer((CharEncoderState)encoderState.BufferLength);
+
+            using (BufferState<TWideChar> wideBufferState = WideCharFactory<TWideChar>._CreatePooledBuffer(encoderState))
+            {
+                PlatformWideCharEncoder<TWideChar>._Instance.Encode(str,  encoding, wideBufferState);
+
+                CreateMultiByteStringFromWideCharString
+                (
+                    multiBufferState.Memory,
+                    wideBufferState.Memory,
+                    attrs,
+                    colorPair
+                );
+            }
+
+            @string = new MultiByteCharString<TMultiByte, TWideChar, TSingleByte>(multiBufferState.Memory);
+            return multiBufferState;
+        }
+
+        public BufferState<TMultiByte> GetNativeString(CreateBuffer<TMultiByte> createBuffer, in ReadOnlySequence<byte> str, Encoding encoding, ulong attrs, ushort colorPair, out MultiByteCharString<TMultiByte, TWideChar, TSingleByte> @string)
+        {
+            CharEncoderState encoderState = PlatformWideCharEncoder<TWideChar>._Instance.GetBufferSize(str, encoding);
+            BufferState<TMultiByte> multiBufferState = createBuffer((CharEncoderState)encoderState.BufferLength);
+
+            using (BufferState<TWideChar> wideBufferState = WideCharFactory<TWideChar>._CreatePooledBuffer(encoderState))
+            {
+                PlatformWideCharEncoder<TWideChar>._Instance.Encode(str, encoding, wideBufferState);
+
+                CreateMultiByteStringFromWideCharString
+                (
+                    multiBufferState.Memory,
+                    wideBufferState.Memory,
+                    attrs,
+                    colorPair
+                );
+            }
+
+            @string = new MultiByteCharString<TMultiByte, TWideChar, TSingleByte>(multiBufferState.Memory);
+            return multiBufferState;
+        }
+        #endregion
     }
 }

@@ -14,7 +14,7 @@ namespace NCurses.Core.Interop
     internal class NativePadInternal<TMultiByte, TWideChar, TSingleByte, TChar, TMouseEvent>
             : INativePadWrapper<
                 TMultiByte,
-                MultiByteCharString<TMultiByte>,
+                MultiByteCharString<TMultiByte, TWideChar, TSingleByte>,
                 TWideChar,
                 WideCharString<TWideChar>,
                 TSingleByte,

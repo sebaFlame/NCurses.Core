@@ -44,7 +44,7 @@ namespace NCurses.Core.Interop.SingleByte
 
         public void mvwchgat(WindowBaseSafeHandle window, int y, int x, int number, ulong attrs, short pair)
         {
-            TSingleByte a = SingleByteCharFactoryInternal<TSingleByte>.Instance.GetAttributeInternal(attrs);
+            TSingleByte a = SingleByteCharFactory<TSingleByte>._Instance.GetNativeAttribute(attrs);
             NCursesException.Verify(this.Wrapper.mvwchgat(window, y, x, number, a, pair, IntPtr.Zero), "mvwchgat");
         }
 
@@ -95,7 +95,7 @@ namespace NCurses.Core.Interop.SingleByte
 
         public void wattr_get(WindowBaseSafeHandle window, out ulong attrs, out ushort pair)
         {
-            TSingleByte ch = SingleByteCharFactoryInternal<TSingleByte>.Instance.GetNativeEmptyCharInternal();
+            TSingleByte ch = default;
 
             short limitedPair = 0;
             int extendedPair = 0;
@@ -108,19 +108,19 @@ namespace NCurses.Core.Interop.SingleByte
 
         public void wattr_off(WindowBaseSafeHandle window, ulong attrs)
         {
-            TSingleByte attr = SingleByteCharFactoryInternal<TSingleByte>.Instance.GetAttributeInternal(attrs);
+            TSingleByte attr = SingleByteCharFactory<TSingleByte>._Instance.GetNativeAttribute(attrs);
             NCursesException.Verify(this.Wrapper.wattr_off(window, attr, IntPtr.Zero), "wattr_off");
         }
 
         public void wattr_on(WindowBaseSafeHandle window, ulong attrs)
         {
-            TSingleByte attr = SingleByteCharFactoryInternal<TSingleByte>.Instance.GetAttributeInternal(attrs);
+            TSingleByte attr = SingleByteCharFactory<TSingleByte>._Instance.GetNativeAttribute(attrs);
             NCursesException.Verify(this.Wrapper.wattr_on(window, attr, IntPtr.Zero), "wattr_on");
         }
 
         public void wattr_set(WindowBaseSafeHandle window, ulong attrs, ushort pair)
         {
-            TSingleByte attr = SingleByteCharFactoryInternal<TSingleByte>.Instance.GetAttributeInternal(attrs);
+            TSingleByte attr = SingleByteCharFactory<TSingleByte>._Instance.GetNativeAttribute(attrs);
 
             int extendedPair = (int)pair;
             NCursesException.Verify(this.Wrapper.wattr_set(window, attr, (short)pair, ref extendedPair), "wattr_set");
@@ -152,7 +152,7 @@ namespace NCurses.Core.Interop.SingleByte
 
         public void wchgat(WindowBaseSafeHandle window, int number, ulong attrs, short pair)
         {
-            TSingleByte attr = SingleByteCharFactoryInternal<TSingleByte>.Instance.GetAttributeInternal(attrs);
+            TSingleByte attr = SingleByteCharFactory<TSingleByte>._Instance.GetNativeAttribute(attrs);
             NCursesException.Verify(this.Wrapper.wchgat(window, number, attr, pair, IntPtr.Zero), "wchgat");
         }
 

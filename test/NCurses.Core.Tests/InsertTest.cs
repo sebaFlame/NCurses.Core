@@ -19,9 +19,7 @@ namespace NCurses.Core.Tests
 
         public InsertTest(ITestOutputHelper testOutputHelper, StdScrState stdScrState)
             : base(testOutputHelper, stdScrState)
-        {
-            
-        }
+        { }
 
         [Fact]
         public void InsertCharTest()
@@ -58,7 +56,7 @@ namespace NCurses.Core.Tests
             Assert.Equal(0, this.Window.CursorColumn);
 
             this.Window.ExtractChar(0, 0, out INCursesChar resultChar);
-            Assert.Equal(this.TestChar, resultChar.Char);
+            Assert.Equal(this.TestChar, this.Window.ExtractChar(resultChar));
             Assert.Equal(Attrs.BOLD, resultChar.Attributes);
             Assert.Equal(4, resultChar.ColorPair);
         }
@@ -76,7 +74,7 @@ namespace NCurses.Core.Tests
             Assert.Equal(0, this.Window.CursorColumn);
 
             this.Window.ExtractChar(0, 0, out INCursesChar resultChar);
-            Assert.Equal(this.TestChar, resultChar.Char);
+            Assert.Equal(this.TestChar, this.Window.ExtractChar(resultChar));
             Assert.Equal(Attrs.BOLD, resultChar.Attributes);
             Assert.Equal(4, resultChar.ColorPair);
 

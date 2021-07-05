@@ -24,12 +24,24 @@ namespace NCurses.Core.Interop.Char
 
         public CharString<TChar> keybound_sp(IntPtr screen, int keycode, int count)
         {
-            return CharFactoryInternal<TChar>.Instance.CreateNativeString(ref this.Wrapper.keybound_sp(screen, keycode, count));
+            using (BufferState<TChar> BufferState = CharFactory<TChar>._Instance.GetNativeString(
+                CharFactory<TChar>._CreateArrayBuffer,
+                ref NCursesException.Verify(ref this.Wrapper.keybound_sp(screen, keycode, count), "keybound_sp"),
+                out CharString<TChar> @string))
+            {
+                return @string;
+            }
         }
 
         public CharString<TChar> keyname_sp(IntPtr screen, int c)
         {
-            return CharFactoryInternal<TChar>.Instance.CreateNativeString(ref this.Wrapper.keyname_sp(screen, c));
+            using (BufferState<TChar> BufferState = CharFactory<TChar>._Instance.GetNativeString(
+                CharFactory<TChar>._CreateArrayBuffer,
+                ref NCursesException.Verify(ref this.Wrapper.keyname_sp(screen, c), "keyname_sp"),
+                out CharString<TChar> @string))
+            {
+                return @string;
+            }
         }
 
         public TChar killchar_sp(IntPtr screen)
@@ -39,7 +51,13 @@ namespace NCurses.Core.Interop.Char
 
         public CharString<TChar> longname_sp(IntPtr screen)
         {
-            return CharFactoryInternal<TChar>.Instance.CreateNativeString(ref this.Wrapper.longname_sp(screen));
+            using (BufferState<TChar> BufferState = CharFactory<TChar>._Instance.GetNativeString(
+                CharFactory<TChar>._CreateArrayBuffer,
+                ref NCursesException.Verify(ref this.Wrapper.longname_sp(screen), "longname_sp"),
+                out CharString<TChar> @string))
+            {
+                return @string;
+            }
         }
 
         public TChar erasechar_sp(IntPtr screen)
@@ -74,7 +92,13 @@ namespace NCurses.Core.Interop.Char
 
         public CharString<TChar> slk_label_sp(IntPtr screen, int labnum)
         {
-            return CharFactoryInternal<TChar>.Instance.CreateNativeString(ref this.Wrapper.slk_label_sp(screen, labnum));
+            using (BufferState<TChar> BufferState = CharFactory<TChar>._Instance.GetNativeString(
+                CharFactory<TChar>._CreateArrayBuffer,
+                ref NCursesException.Verify(ref this.Wrapper.slk_label_sp(screen, labnum), "slk_label_sp"),
+                out CharString<TChar> @string))
+            {
+                return @string;
+            }
         }
 
         public void slk_set_sp(IntPtr screen, int labnum, in CharString<TChar> label, int fmt)
@@ -84,7 +108,13 @@ namespace NCurses.Core.Interop.Char
 
         public CharString<TChar> termname_sp(IntPtr screen)
         {
-            return CharFactoryInternal<TChar>.Instance.CreateNativeString(ref this.Wrapper.termname_sp(screen));
+            using (BufferState<TChar> BufferState = CharFactory<TChar>._Instance.GetNativeString(
+                CharFactory<TChar>._CreateArrayBuffer,
+                ref NCursesException.Verify(ref this.Wrapper.termname_sp(screen), "termname_sp"),
+                out CharString<TChar> @string))
+            {
+                return @string;
+            }
         }
 
         public int tigetflag_sp(IntPtr screen, in CharString<TChar> capname)

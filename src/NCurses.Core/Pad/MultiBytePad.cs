@@ -37,7 +37,7 @@ namespace NCurses.Core.Pad
 
         public override void Echo(char ch)
         {
-            TMultiByte wCh = MultiByteCharFactoryInternal<TMultiByte>.Instance.GetNativeCharInternal(ch);
+            TMultiByte wCh = MultiByteCharFactory<TMultiByte, TWideChar, TSingleByte>._Instance.GetNativeChar(ch);
             Pad.pecho_wchar(this.WindowBaseSafeHandle, in wCh);
         }
 

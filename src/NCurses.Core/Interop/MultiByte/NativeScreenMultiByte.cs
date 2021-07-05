@@ -9,7 +9,7 @@ namespace NCurses.Core.Interop.MultiByte
 {
     internal class NativeScreenMultiByte<TMultiByte, TWideChar, TSingleByte, TChar, TMouseEvent> 
             : MultiByteWrapper<TMultiByte, TWideChar, TSingleByte, TChar, TMouseEvent>, 
-            INativeScreenMultiByte<TMultiByte, MultiByteCharString<TMultiByte>>
+            INativeScreenMultiByte<TMultiByte, MultiByteCharString<TMultiByte, TWideChar, TSingleByte>>
         where TMultiByte : unmanaged, IMultiByteNCursesChar, IEquatable<TMultiByte>
         where TWideChar : unmanaged, IMultiByteChar, IEquatable<TWideChar>
         where TSingleByte : unmanaged, ISingleByteNCursesChar, IEquatable<TSingleByte>
@@ -23,9 +23,10 @@ namespace NCurses.Core.Interop.MultiByte
         {
             ref TWideChar strRef = ref this.Wrapper.wunctrl_sp(screen, in wch);
 
-            WideCharString<TWideChar> wideStr = WideCharFactoryInternal<TWideChar>.Instance.CreateNativeString(ref strRef);
-
-            str = wideStr.ToString();
+            using (BufferState<TWideChar> bufferState = WideCharFactory<TWideChar>._Instance.GetNativeString(WideCharFactory<TWideChar>._CreatePooledBuffer, ref strRef, out WideCharString<TWideChar> wideStr))
+            {
+                str = wideStr.ToString();
+            }
         }
     }
 }

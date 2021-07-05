@@ -17,7 +17,7 @@ namespace NCurses.Core.Interop
     internal class NativeNCursesInternal<TMultiByte, TWideChar, TSingleByte, TChar, TMouseEvent>
             : INativeNCursesWrapper<
                 TMultiByte,
-                MultiByteCharString<TMultiByte>,
+                MultiByteCharString<TMultiByte, TWideChar, TSingleByte>,
                 TWideChar,
                 WideCharString<TWideChar>,
                 TSingleByte,
@@ -509,26 +509,6 @@ namespace NCurses.Core.Interop
                 bool supportsUnicode = NativeNCurses.HasUnicodeSupport;
 
                 NativeNCurses.StdScrSafeHandle = NCursesException.Verify(NativeNCurses.NCursesWrapper.initscr(), "initscr");
-
-                /*TODO
-                 * version / platform customization
-                 * use correct chtype type
-                */
-                {
-                    // chtype size calculation
-                    string version = this.curses_version().ToString();
-                    int major = (int)char.GetNumericValue(version, version.IndexOf(' ') + 1);
-
-                    Type chtypeType;
-                    if (major >= 6)
-                    {
-                        chtypeType = typeof(UInt32);
-                    }
-                    else
-                    {
-                        chtypeType = typeof(UInt64);
-                    }
-                }
 
                 //TODO: put in methods (if it fails and can't return stdScr)
                 if (ACSMapInternal is null)

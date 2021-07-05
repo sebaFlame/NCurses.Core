@@ -26,6 +26,9 @@ namespace NCurses.Core
 
         private WindowInternal<TMultiByte, TWideChar, TSingleByte, TChar, TMouseEvent> ParentWindow;
 
+        protected static NotImplementedException _MultiByteException = new NotImplementedException("Only useful in multibyte mode");
+        protected static ArgumentOutOfRangeException _RangeException = new ArgumentOutOfRangeException("Char is not ASCII range");
+
         internal WindowInternal(WindowBaseSafeHandle windowBaseSafeHandle)
             : base(windowBaseSafeHandle)
         { }
@@ -47,12 +50,13 @@ namespace NCurses.Core
             this.SubWindows.Remove(childWindow);
         }
 
-        internal void Advance(int charLength)
+        internal void Advance<TString>(TString charString)
+            where TString : ICharString
         {
             int currentLine = this.CursorLine;
             int currentColumn = this.CursorColumn;
 
-            int newPosition = (currentColumn + (currentLine * this.MaxColumn)) + charLength;
+            int newPosition = (currentColumn + (currentLine * this.MaxColumn)) + charString.Length;
 
             int newLine = (int)Math.Floor(newPosition / (double)this.MaxColumn);
             int newColumn = newPosition - (newLine * this.MaxColumn);

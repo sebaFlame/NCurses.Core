@@ -33,7 +33,7 @@ namespace NCurses.Core.Interop.SingleByte
 
         public void attr_get(out ulong attrs, out ushort pair)
         {
-            TSingleByte ch = SingleByteCharFactoryInternal<TSingleByte>.Instance.GetNativeEmptyCharInternal();
+            TSingleByte ch = default;
 
             short limitedPair = 0;
             int extendedPair = 0;
@@ -46,19 +46,19 @@ namespace NCurses.Core.Interop.SingleByte
 
         public void attr_off(ulong attrs)
         {
-            TSingleByte attr = SingleByteCharFactoryInternal<TSingleByte>.Instance.GetAttributeInternal(attrs);
+            TSingleByte attr = SingleByteCharFactory<TSingleByte>._Instance.GetNativeAttribute(attrs);
             NCursesException.Verify(this.Wrapper.attr_off(attr, IntPtr.Zero), "attr_off");
         }
 
         public void attr_on(ulong attrs)
         {
-            TSingleByte attr = SingleByteCharFactoryInternal<TSingleByte>.Instance.GetAttributeInternal(attrs);
+            TSingleByte attr = SingleByteCharFactory<TSingleByte>._Instance.GetNativeAttribute(attrs);
             NCursesException.Verify(this.Wrapper.attr_on(attr, IntPtr.Zero), "attr_on");
         }
 
         public void attr_set(ulong attrs, ushort pair)
         {
-            TSingleByte attr = SingleByteCharFactoryInternal<TSingleByte>.Instance.GetAttributeInternal(attrs);
+            TSingleByte attr = SingleByteCharFactory<TSingleByte>._Instance.GetNativeAttribute(attrs);
 
             int extendedPair = (int)pair;
             NCursesException.Verify(this.Wrapper.attr_set(attr, (short)pair, ref extendedPair), "attr_set");
@@ -89,7 +89,7 @@ namespace NCurses.Core.Interop.SingleByte
 
         public void chgat(int number, ulong attrs, short pair)
         {
-            TSingleByte attr = SingleByteCharFactoryInternal<TSingleByte>.Instance.GetAttributeInternal(attrs);
+            TSingleByte attr = SingleByteCharFactory<TSingleByte>._Instance.GetNativeAttribute(attrs);
             NCursesException.Verify(this.Wrapper.chgat(number, attr, pair, IntPtr.Zero), "chgat");
         }
 
@@ -142,7 +142,7 @@ namespace NCurses.Core.Interop.SingleByte
 
         public void mvchgat(int y, int x, int number, ulong attrs, short pair)
         {
-            TSingleByte attr = SingleByteCharFactoryInternal<TSingleByte>.Instance.GetAttributeInternal(attrs);
+            TSingleByte attr = SingleByteCharFactory<TSingleByte>._Instance.GetNativeAttribute(attrs);
             NCursesException.Verify(this.Wrapper.mvchgat(y, x, number, attr, pair, IntPtr.Zero), "mvchgat");
         }
 

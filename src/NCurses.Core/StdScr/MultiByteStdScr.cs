@@ -80,9 +80,9 @@ namespace NCurses.Core.StdScr
             return tmp;
         }
 
-        private MultiByteCharString<TMultiByte> VerifyString(in INCursesCharString str)
+        private MultiByteCharString<TMultiByte, TWideChar, TSingleByte> VerifyString(in INCursesCharString str)
         {
-            if (!(str is MultiByteCharString<TMultiByte> tmp))
+            if (!(str is MultiByteCharString<TMultiByte, TWideChar, TSingleByte> tmp))
             {
                 throw new InvalidCastException("String is in incorrect format");
             }
@@ -99,14 +99,14 @@ namespace NCurses.Core.StdScr
 
         public override void Border()
         {
-            TMultiByte ls = MultiByteCharFactoryInternal<TMultiByte>.Instance.GetNativeEmptyCharInternal();
-            TMultiByte rs = MultiByteCharFactoryInternal<TMultiByte>.Instance.GetNativeEmptyCharInternal();
-            TMultiByte ts = MultiByteCharFactoryInternal<TMultiByte>.Instance.GetNativeEmptyCharInternal();
-            TMultiByte bs = MultiByteCharFactoryInternal<TMultiByte>.Instance.GetNativeEmptyCharInternal();
-            TMultiByte tl = MultiByteCharFactoryInternal<TMultiByte>.Instance.GetNativeEmptyCharInternal();
-            TMultiByte tr = MultiByteCharFactoryInternal<TMultiByte>.Instance.GetNativeEmptyCharInternal();
-            TMultiByte bl = MultiByteCharFactoryInternal<TMultiByte>.Instance.GetNativeEmptyCharInternal();
-            TMultiByte br = MultiByteCharFactoryInternal<TMultiByte>.Instance.GetNativeEmptyCharInternal();
+            TMultiByte ls = default;
+            TMultiByte rs = default;
+            TMultiByte ts = default;
+            TMultiByte bs = default;
+            TMultiByte tl = default;
+            TMultiByte tr = default;
+            TMultiByte bl = default;
+            TMultiByte br = default;
 
             StdScr.border_set(in ls, in rs, in ts, in bs, in tl, in tr, in bl, in br);
         }
@@ -118,62 +118,158 @@ namespace NCurses.Core.StdScr
 
         public override void Box()
         {
-            TMultiByte verch = MultiByteCharFactoryInternal<TMultiByte>.Instance.GetNativeEmptyCharInternal();
-            TMultiByte horch = MultiByteCharFactoryInternal<TMultiByte>.Instance.GetNativeEmptyCharInternal();
+            TMultiByte verch = default;
+            TMultiByte horch = default;
 
             Window.box_set(this.WindowBaseSafeHandle, in verch, in horch);
         }
 
         //TODO: use native override?
-        public override INCursesChar CreateChar(char ch)
+        public override IChar CreateChar(char ch)
         {
-            return MultiByteCharFactoryInternal<TMultiByte>.Instance.GetNativeCharInternal(ch);
+            return WideCharFactory<TWideChar>._Instance.GetNativeChar(ch);
         }
 
         public override INCursesChar CreateChar(char ch, ulong attrs)
         {
-            return MultiByteCharFactoryInternal<TMultiByte>.Instance.GetNativeCharInternal(ch, attrs);
+            return MultiByteCharFactory<TMultiByte, TWideChar, TSingleByte>._Instance.GetNativeChar(ch, attrs, 0);
         }
 
         public override INCursesChar CreateChar(char ch, ulong attrs, ushort pair)
         {
-            return MultiByteCharFactoryInternal<TMultiByte>.Instance.GetNativeCharInternal(ch, attrs, pair);
+            return MultiByteCharFactory<TMultiByte, TWideChar, TSingleByte>._Instance.GetNativeChar(ch, attrs, pair);
         }
 
-        public override INCursesCharString CreateString(string str)
+        public override ICharString CreateString(string str)
         {
-            byte[] buffer = new byte[MultiByteCharFactoryInternal<TMultiByte>.Instance.GetByteCount(str)];
-            return MultiByteCharFactoryInternal<TMultiByte>.Instance.GetNativeStringInternal(buffer, buffer.Length, str);
+            return this.CreateString(str.AsSpan());
         }
 
-        public override INCursesCharString CreateString(ReadOnlySpan<char> str)
+        public override ICharString CreateString(ReadOnlySpan<char> str)
         {
-            byte[] buffer = new byte[MultiByteCharFactoryInternal<TMultiByte>.Instance.GetByteCount(str)];
-            return MultiByteCharFactoryInternal<TMultiByte>.Instance.GetNativeStringInternal(buffer, buffer.Length, str);
+            using (BufferState<TWideChar> bufferState = WideCharFactory<TWideChar>._Instance.GetNativeString(
+                WideCharFactory<TWideChar>._CreateArrayBuffer,
+                str,
+                out WideCharString<TWideChar> @string))
+            {
+                return @string;
+            }
+        }
+
+        public override ICharString CreateString(ReadOnlySpan<byte> str)
+        {
+            using (BufferState<TWideChar> bufferState = WideCharFactory<TWideChar>._Instance.GetNativeString(
+                WideCharFactory<TWideChar>._CreateArrayBuffer,
+                str,
+                out WideCharString<TWideChar> @string))
+            {
+                return @string;
+            }
+        }
+
+        public override ICharString CreateString(in ReadOnlySequence<byte> str)
+        {
+            using (BufferState<TWideChar> bufferState = WideCharFactory<TWideChar>._Instance.GetNativeString(
+                WideCharFactory<TWideChar>._CreateArrayBuffer,
+                str,
+                out WideCharString<TWideChar> @string))
+            {
+                return @string;
+            }
+        }
+
+        public override ICharString CreateString(in ReadOnlySequence<byte> str, Encoding encoding)
+        {
+            using (BufferState<TWideChar> bufferState = WideCharFactory<TWideChar>._Instance.GetNativeString(
+                WideCharFactory<TWideChar>._CreateArrayBuffer,
+                in str,
+                encoding,
+                out WideCharString<TWideChar> @string))
+            {
+                return @string;
+            }
         }
 
         public override INCursesCharString CreateString(string str, ulong attrs)
         {
-            byte[] buffer = new byte[MultiByteCharFactoryInternal<TMultiByte>.Instance.GetByteCount(str)];
-            return MultiByteCharFactoryInternal<TMultiByte>.Instance.GetNativeStringInternal(buffer, buffer.Length, str, attrs);
+            return this.CreateString(str.AsSpan(), attrs);
         }
 
         public override INCursesCharString CreateString(ReadOnlySpan<char> str, ulong attrs)
         {
-            byte[] buffer = new byte[MultiByteCharFactoryInternal<TMultiByte>.Instance.GetByteCount(str)];
-            return MultiByteCharFactoryInternal<TMultiByte>.Instance.GetNativeStringInternal(buffer, buffer.Length, str, attrs);
+            return this.CreateString(str, attrs, 0);
         }
 
         public override INCursesCharString CreateString(string str, ulong attrs, ushort pair)
         {
-            byte[] buffer = new byte[MultiByteCharFactoryInternal<TMultiByte>.Instance.GetByteCount(str)];
-            return MultiByteCharFactoryInternal<TMultiByte>.Instance.GetNativeStringInternal(buffer, buffer.Length, str, attrs, pair);
+            return this.CreateString(str.AsSpan(), attrs, pair);
         }
 
         public override INCursesCharString CreateString(ReadOnlySpan<char> str, ulong attrs, ushort pair)
         {
-            byte[] buffer = new byte[MultiByteCharFactoryInternal<TMultiByte>.Instance.GetByteCount(str)];
-            return MultiByteCharFactoryInternal<TMultiByte>.Instance.GetNativeStringInternal(buffer, buffer.Length, str, attrs, pair);
+            using (BufferState<TMultiByte> bufferState = MultiByteCharFactory<TMultiByte, TWideChar, TSingleByte>._Instance.GetNativeString(
+                MultiByteCharFactory<TMultiByte, TWideChar, TSingleByte>._CreateArrayBuffer,
+                str,
+                attrs,
+                pair,
+                out MultiByteCharString<TMultiByte, TWideChar, TSingleByte> @string))
+            {
+                return @string;
+            }
+        }
+
+        public override INCursesCharString CreateString(ReadOnlySpan<byte> str, ulong attrs)
+        {
+            return this.CreateString(str, attrs, 0);
+        }
+
+        public override INCursesCharString CreateString(ReadOnlySpan<byte> str, ulong attrs, ushort pair)
+        {
+            using (BufferState<TMultiByte> bufferState = MultiByteCharFactory<TMultiByte, TWideChar, TSingleByte>._Instance.GetNativeString(
+                MultiByteCharFactory<TMultiByte, TWideChar, TSingleByte>._CreateArrayBuffer,
+                str,
+                attrs,
+                pair,
+                out MultiByteCharString<TMultiByte, TWideChar, TSingleByte> @string))
+            {
+                return @string;
+            }
+        }
+
+        public override INCursesCharString CreateString(in ReadOnlySequence<byte> str, ulong attrs)
+        {
+            return this.CreateString(str, attrs, 0);
+        }
+
+        public override INCursesCharString CreateString(in ReadOnlySequence<byte> str, ulong attrs, ushort pair)
+        {
+            using (BufferState<TMultiByte> bufferState = MultiByteCharFactory<TMultiByte, TWideChar, TSingleByte>._Instance.GetNativeString(
+                MultiByteCharFactory<TMultiByte, TWideChar, TSingleByte>._CreateArrayBuffer,
+                str,
+                attrs,
+                pair,
+                out MultiByteCharString<TMultiByte, TWideChar, TSingleByte> @string))
+            {
+                return @string;
+            }
+        }
+
+        public override INCursesCharString CreateString(in ReadOnlySequence<byte> str, Encoding encoding, ulong attrs)
+        {
+            return this.CreateString(in str, encoding, attrs, 0);
+        }
+
+        public override INCursesCharString CreateString(in ReadOnlySequence<byte> str, Encoding encoding, ulong attrs, ushort pair)
+        {
+            using (BufferState<TMultiByte> bufferState = MultiByteCharFactory<TMultiByte, TWideChar, TSingleByte>._Instance.GetNativeString(
+                MultiByteCharFactory<TMultiByte, TWideChar, TSingleByte>._CreateArrayBuffer,
+                str,
+                attrs,
+                pair,
+                out MultiByteCharString<TMultiByte, TWideChar, TSingleByte> @string))
+            {
+                return @string;
+            }
         }
 
         public override void ExtractChar(out INCursesChar ch)
@@ -191,13 +287,18 @@ namespace NCurses.Core.StdScr
         public override char ExtractChar()
         {
             StdScr.in_wch(out TMultiByte ch);
-            return ch.Char;
+            return (char)MultiByteCharFactory<TMultiByte, TWideChar, TSingleByte>._Instance.GetChar(ch);
+        }
+
+        public override char ExtractChar(INCursesChar ch)
+        {
+            return (char)MultiByteCharFactory<TMultiByte, TWideChar, TSingleByte>._Instance.GetChar(VerifyChar(ch));
         }
 
         public override char ExtractChar(int nline, int ncol)
         {
             StdScr.mvin_wch(nline, ncol, out TMultiByte ch);
-            return ch.Char;
+            return (char)MultiByteCharFactory<TMultiByte, TWideChar, TSingleByte>._Instance.GetChar(ch);
         }
 
         public override char ExtractChar(out ulong attrs, out ushort pair)
@@ -205,7 +306,7 @@ namespace NCurses.Core.StdScr
             StdScr.in_wch(out TMultiByte ch);
             attrs = ch.Attributes;
             pair = ch.ColorPair;
-            return ch.Char;
+            return (char)MultiByteCharFactory<TMultiByte, TWideChar, TSingleByte>._Instance.GetChar(ch);
         }
 
         public override char ExtractChar(int nline, int ncol, out ulong attrs, out ushort pair)
@@ -213,89 +314,107 @@ namespace NCurses.Core.StdScr
             StdScr.mvin_wch(nline, ncol, out TMultiByte ch);
             attrs = ch.Attributes;
             pair = ch.ColorPair;
-            return ch.Char;
+            return (char)MultiByteCharFactory<TMultiByte, TWideChar, TSingleByte>._Instance.GetChar(ch);
         }
 
         public override string ExtractString()
         {
-            byte[] buffer = NativeNCurses.GetBuffer();
-            WideCharString<TWideChar> wChStr = WideCharFactoryInternal<TWideChar>.Instance.GetNativeEmptyStringInternal(
-                buffer, 
-                buffer.Length,
-                buffer.Length / WideCharFactoryInternal<TWideChar>.Instance.GetCharLength());
-            StdScr.innwstr(ref wChStr, buffer.Length / WideCharFactoryInternal<TWideChar>.Instance.GetCharLength(),  out int read);
-            return wChStr.ToString();
+            using (BufferState<TWideChar> bufferState = WideCharFactory<TWideChar>._Instance.GetNativeEmptyString(
+                WideCharFactory<TWideChar>._CreatePooledBuffer,
+                Constants.MAX_STRING_LENGTH,
+                out WideCharString<TWideChar> @string))
+            {
+                StdScr.innwstr(ref @string, bufferState.EncoderState.BufferLength, out int read);
+
+                return @string.ToString();
+            }
         }
 
         public override string ExtractString(int maxChars, out int read)
         {
-            int bufferLength = WideCharFactoryInternal<TWideChar>.Instance.GetByteCount(maxChars);
-            byte[] buffer = NativeNCurses.GetBuffer(bufferLength);
-            WideCharString<TWideChar> wChStr = WideCharFactoryInternal<TWideChar>.Instance.GetNativeEmptyStringInternal(buffer, bufferLength, maxChars);
-            StdScr.innwstr(ref wChStr, maxChars, out read);
-            return wChStr.ToString();
+            using (BufferState<TWideChar> bufferState = WideCharFactory<TWideChar>._Instance.GetNativeEmptyString(
+                WideCharFactory<TWideChar>._CreatePooledBuffer,
+                maxChars,
+                out WideCharString<TWideChar> @string))
+            {
+                StdScr.innwstr(ref @string, maxChars, out read);
+
+                return @string.ToString();
+            }
         }
 
         public override string ExtractString(int nline, int ncol)
         {
-            byte[] buffer = NativeNCurses.GetBuffer();
-            WideCharString<TWideChar> wChStr = WideCharFactoryInternal<TWideChar>.Instance.GetNativeEmptyStringInternal(
-                buffer,
-                buffer.Length,
-                buffer.Length / WideCharFactoryInternal<TWideChar>.Instance.GetCharLength());
-            StdScr.mvinnwstr(nline, ncol, ref wChStr, buffer.Length / WideCharFactoryInternal<TWideChar>.Instance.GetCharLength(), out int read);
-            return wChStr.ToString();
+            using (BufferState<TWideChar> bufferState = WideCharFactory<TWideChar>._Instance.GetNativeEmptyString(
+                WideCharFactory<TWideChar>._CreatePooledBuffer,
+                Constants.MAX_STRING_LENGTH,
+                out WideCharString<TWideChar> @string))
+            {
+                StdScr.mvinnwstr(nline, ncol, ref @string, @string.CharLength, out int read);
+
+                return @string.ToString();
+            }
         }
 
         public override string ExtractString(int nline, int ncol, int maxChars, out int read)
         {
-            int bufferLength = WideCharFactoryInternal<TWideChar>.Instance.GetByteCount(maxChars);
-            byte[] buffer = NativeNCurses.GetBuffer(bufferLength);
-            WideCharString<TWideChar> wChStr = WideCharFactoryInternal<TWideChar>.Instance.GetNativeEmptyStringInternal(buffer, bufferLength, maxChars);
-            StdScr.mvinnwstr(nline, ncol, ref wChStr, maxChars, out read);
-            return wChStr.ToString();
+            using (BufferState<TWideChar> bufferState = WideCharFactory<TWideChar>._Instance.GetNativeEmptyString(
+                WideCharFactory<TWideChar>._CreatePooledBuffer,
+                maxChars,
+                out WideCharString<TWideChar> @string))
+            {
+                StdScr.mvinnwstr(nline, ncol, ref @string, maxChars, out read);
+
+                return @string.ToString();
+            }
         }
 
         public override void ExtractString(out INCursesCharString charsWithAttributes)
         {
-            int bufferLength = MultiByteCharFactoryInternal<TMultiByte>.Instance.GetByteCount(Constants.MAX_STRING_LENGTH);
-            byte[] buffer = new byte[bufferLength];
-            MultiByteCharString<TMultiByte> wChStr = MultiByteCharFactoryInternal<TMultiByte>.Instance.GetNativeEmptyStringInternal(
-                buffer, 
-                bufferLength, 
-                Constants.MAX_STRING_LENGTH);
-            StdScr.in_wchstr(ref wChStr);
-            charsWithAttributes = wChStr;
+            using (BufferState<TMultiByte> bufferState = MultiByteCharFactory<TMultiByte, TWideChar, TSingleByte>._Instance.GetNativeEmptyString(
+                MultiByteCharFactory<TMultiByte, TWideChar, TSingleByte>._CreateArrayBuffer,
+                Constants.MAX_STRING_LENGTH,
+                out MultiByteCharString<TMultiByte, TWideChar, TSingleByte> @string))
+            {
+                StdScr.in_wchstr(ref @string);
+                charsWithAttributes = @string;
+            }
         }
 
         public override void ExtractString(out INCursesCharString charsWithAttributes, int maxChars)
         {
-            int bufferLength = MultiByteCharFactoryInternal<TMultiByte>.Instance.GetByteCount(maxChars);
-            byte[] buffer = new byte[bufferLength];
-            MultiByteCharString<TMultiByte> wChStr = MultiByteCharFactoryInternal<TMultiByte>.Instance.GetNativeEmptyStringInternal(buffer, bufferLength, maxChars);
-            StdScr.in_wchnstr(ref wChStr, maxChars);
-            charsWithAttributes = wChStr;
+            using (BufferState<TMultiByte> bufferState = MultiByteCharFactory<TMultiByte, TWideChar, TSingleByte>._Instance.GetNativeEmptyString(
+                MultiByteCharFactory<TMultiByte, TWideChar, TSingleByte>._CreateArrayBuffer,
+                maxChars,
+                out MultiByteCharString<TMultiByte, TWideChar, TSingleByte> @string))
+            {
+                StdScr.in_wchnstr(ref @string, maxChars);
+                charsWithAttributes = @string;
+            }
         }
 
         public override void ExtractString(int nline, int ncol, out INCursesCharString charsWithAttributes)
         {
-            int bufferLength = MultiByteCharFactoryInternal<TMultiByte>.Instance.GetByteCount(Constants.MAX_STRING_LENGTH);
-            byte[] buffer = new byte[bufferLength];
-            MultiByteCharString<TMultiByte> wChStr = MultiByteCharFactoryInternal<TMultiByte>.Instance.GetNativeEmptyStringInternal(
-                buffer, 
-                bufferLength, 
-                Constants.MAX_STRING_LENGTH);
-            StdScr.mvin_wchstr(nline, ncol, ref wChStr);
-            charsWithAttributes = wChStr;
+            using (BufferState<TMultiByte> bufferState = MultiByteCharFactory<TMultiByte, TWideChar, TSingleByte>._Instance.GetNativeEmptyString(
+                MultiByteCharFactory<TMultiByte, TWideChar, TSingleByte>._CreateArrayBuffer,
+                Constants.MAX_STRING_LENGTH,
+                out MultiByteCharString<TMultiByte, TWideChar, TSingleByte> @string))
+            {
+                StdScr.mvin_wchstr(nline, ncol, ref @string);
+                charsWithAttributes = @string;
+            }
         }
 
         public override void ExtractString(int nline, int ncol, out INCursesCharString charsWithAttributes, int maxChars)
         {
-            int bufferLength = MultiByteCharFactoryInternal<TMultiByte>.Instance.GetByteCount(maxChars);
-            byte[] buffer = new byte[bufferLength];
-            MultiByteCharString<TMultiByte> wChStr = MultiByteCharFactoryInternal<TMultiByte>.Instance.GetNativeEmptyStringInternal(buffer, bufferLength, maxChars);
-            StdScr.mvin_wchnstr(nline, ncol, ref wChStr, maxChars);
-            charsWithAttributes = wChStr;
+            using (BufferState<TMultiByte> bufferState = MultiByteCharFactory<TMultiByte, TWideChar, TSingleByte>._Instance.GetNativeEmptyString(
+                MultiByteCharFactory<TMultiByte, TWideChar, TSingleByte>._CreateArrayBuffer,
+                maxChars,
+                out MultiByteCharString<TMultiByte, TWideChar, TSingleByte> @string))
+            {
+                StdScr.mvin_wchnstr(nline, ncol, ref @string, maxChars);
+                charsWithAttributes = @string;
+            }
         }
 
         public override void HorizontalLine(in INCursesChar lineChar, int length)
@@ -310,7 +429,7 @@ namespace NCurses.Core.StdScr
 
         public override void Insert(char ch)
         {
-            TMultiByte wCh = MultiByteCharFactoryInternal<TMultiByte>.Instance.GetNativeCharInternal(ch);
+            TMultiByte wCh = MultiByteCharFactory<TMultiByte, TWideChar, TSingleByte>._Instance.GetNativeChar(ch);
             StdScr.ins_wch(in wCh);
         }
 
@@ -326,132 +445,140 @@ namespace NCurses.Core.StdScr
 
         public override void Insert(int nline, int ncol, char ch)
         {
-            TMultiByte wCh = MultiByteCharFactoryInternal<TMultiByte>.Instance.GetNativeCharInternal(ch);
+            TMultiByte wCh = MultiByteCharFactory<TMultiByte, TWideChar, TSingleByte>._Instance.GetNativeChar(ch);
             StdScr.mvins_wch(nline, ncol, in wCh);
         }
 
         public override void Insert(char ch, ulong attrs, ushort pair)
         {
-            TMultiByte wCh = MultiByteCharFactoryInternal<TMultiByte>.Instance.GetNativeCharInternal(ch, attrs, pair);
+            TMultiByte wCh = MultiByteCharFactory<TMultiByte, TWideChar, TSingleByte>._Instance.GetNativeChar(ch, attrs, pair);
             StdScr.ins_wch(in wCh);
         }
 
         public override void Insert(int nline, int ncol, char ch, ulong attrs, ushort pair)
         {
-            TMultiByte wCh = MultiByteCharFactoryInternal<TMultiByte>.Instance.GetNativeCharInternal(ch, attrs, pair);
+            TMultiByte wCh = MultiByteCharFactory<TMultiByte, TWideChar, TSingleByte>._Instance.GetNativeChar(ch, attrs, pair);
             StdScr.mvins_wch(nline, ncol, in wCh);
         }
 
         public override void Insert(string str)
         {
-            int bufferLength = WideCharFactoryInternal<TWideChar>.Instance.GetByteCount(str);
-            byte[] buffer = NativeNCurses.GetBuffer(bufferLength);
-            WideCharString<TWideChar> wChStr = WideCharFactoryInternal<TWideChar>.Instance.GetNativeStringInternal(buffer, bufferLength, str);
-            StdScr.ins_nwstr(in wChStr, wChStr.Length);
+            this.Insert(str.AsSpan());
         }
 
         public override void Insert(ReadOnlySpan<char> str)
         {
-            int bufferLength = WideCharFactoryInternal<TWideChar>.Instance.GetByteCount(str);
-            byte[] buffer = NativeNCurses.GetBuffer(bufferLength);
-            WideCharString<TWideChar> wChStr = WideCharFactoryInternal<TWideChar>.Instance.GetNativeStringInternal(buffer, bufferLength, str);
-            StdScr.ins_nwstr(in wChStr, wChStr.Length);
+            using (BufferState<TWideChar> bufferState = WideCharFactory<TWideChar>._Instance.GetNativeString(
+                WideCharFactory<TWideChar>._CreatePooledBuffer,
+                str,
+                out WideCharString<TWideChar> @string))
+            {
+                StdScr.ins_nwstr(in @string, @string.CharLength);
+            }
         }
 
         public override void Insert(int nline, int ncol, string str)
         {
-            int bufferLength = WideCharFactoryInternal<TWideChar>.Instance.GetByteCount(str);
-            byte[] buffer = NativeNCurses.GetBuffer(bufferLength);
-            WideCharString<TWideChar> wChStr = WideCharFactoryInternal<TWideChar>.Instance.GetNativeStringInternal(buffer, bufferLength, str);
-            StdScr.mvins_nwstr(nline, ncol, in wChStr, wChStr.Length);
+            this.Insert(nline, ncol, str.AsSpan());
         }
 
         public override void Insert(int nline, int ncol, ReadOnlySpan<char> str)
         {
-            int bufferLength = WideCharFactoryInternal<TWideChar>.Instance.GetByteCount(str);
-            byte[] buffer = NativeNCurses.GetBuffer(bufferLength);
-            WideCharString<TWideChar> wChStr = WideCharFactoryInternal<TWideChar>.Instance.GetNativeStringInternal(buffer, bufferLength, str);
-            StdScr.mvins_nwstr(nline, ncol, in wChStr, wChStr.Length);
+            using (BufferState<TWideChar> bufferState = WideCharFactory<TWideChar>._Instance.GetNativeString(
+                WideCharFactory<TWideChar>._CreatePooledBuffer,
+                str,
+                out WideCharString<TWideChar> @string))
+            {
+                StdScr.mvins_nwstr(nline, ncol, in @string, @string.CharLength);
+            }
         }
 
         public override void Insert(string str, ulong attrs, ushort pair)
         {
-            int bufferLength = MultiByteCharFactoryInternal<TMultiByte>.Instance.GetByteCount(str);
-            byte[] buffer = NativeNCurses.GetBuffer(bufferLength);
-            MultiByteCharString<TMultiByte> mbStr = MultiByteCharFactoryInternal<TMultiByte>.Instance.GetNativeStringInternal(buffer, bufferLength, str, attrs, pair);
-
-            IEnumerable<IMultiByteNCursesChar> wchars = mbStr;
-            foreach (IMultiByteNCursesChar wch in wchars.Reverse())
-            {
-                StdScr.ins_wch(VerifyChar(wch));
-            }
+            this.Insert(str.AsSpan(), attrs, pair);
         }
 
         public override void Insert(ReadOnlySpan<char> str, ulong attrs, ushort pair)
         {
-            int bufferLength = MultiByteCharFactoryInternal<TMultiByte>.Instance.GetByteCount(str);
-            byte[] buffer = NativeNCurses.GetBuffer(bufferLength);
-            MultiByteCharString<TMultiByte> mbStr = MultiByteCharFactoryInternal<TMultiByte>.Instance.GetNativeStringInternal(buffer, bufferLength, str, attrs, pair);
-
-            IEnumerable<IMultiByteNCursesChar> wchars = mbStr;
-            foreach (IMultiByteNCursesChar wch in wchars.Reverse())
+            using (BufferState<TMultiByte> bufferState = MultiByteCharFactory<TMultiByte, TWideChar, TSingleByte>._Instance.GetNativeString(
+                MultiByteCharFactory<TMultiByte, TWideChar, TSingleByte>._CreatePooledBuffer,
+                str,
+                attrs,
+                pair,
+                out MultiByteCharString<TMultiByte, TWideChar, TSingleByte> @string))
             {
-                StdScr.ins_wch(VerifyChar(wch));
+                Span<TMultiByte> buffer = bufferState.Memory.Span;
+                for (int i = buffer.Length - 2; i >= 0; i--) //-2 because of null terminator
+                {
+                    StdScr.ins_wch(in buffer[i]);
+                }
             }
         }
 
         public override bool ReadKey(out char ch, out Key key)
         {
             bool ret = StdScr.get_wch(out TWideChar wch, out key);
-            ch = wch.Char;
+
+            ch = (char)WideCharFactory<TWideChar>._Instance.GetChar(wch);
+
             return ret;
         }
 
         public override bool ReadKey(int nline, int ncol, out char ch, out Key key)
         {
             bool ret = StdScr.mvget_wch(nline, ncol, out TWideChar wch, out key);
-            ch = wch.Char;
+            
+            ch = (char)WideCharFactory<TWideChar>._Instance.GetChar(wch);
+
             return ret;
         }
 
         public override string ReadLine()
         {
-            byte[] buffer = NativeNCurses.GetBuffer();
-            WideCharString<TWideChar> wChStr = WideCharFactoryInternal<TWideChar>.Instance.GetNativeEmptyStringInternal(
-                buffer,
-                buffer.Length,
-                buffer.Length / WideCharFactoryInternal<TWideChar>.Instance.GetCharLength());
-            StdScr.get_wstr(ref wChStr);
-            return wChStr.ToString();
+            using (BufferState<TWideChar> bufferState = WideCharFactory<TWideChar>._Instance.GetNativeEmptyString(
+                WideCharFactory<TWideChar>._CreatePooledBuffer,
+                Constants.MAX_STRING_LENGTH,
+                out WideCharString<TWideChar> @string))
+            {
+                StdScr.get_wstr(ref @string);
+                return @string.ToString();
+            }
         }
 
         public override string ReadLine(int nline, int ncol)
         {
-            byte[] buffer = NativeNCurses.GetBuffer();
-            WideCharString<TWideChar> wChStr = WideCharFactoryInternal<TWideChar>.Instance.GetNativeEmptyStringInternal(
-                buffer,
-                buffer.Length,
-                buffer.Length / WideCharFactoryInternal<TWideChar>.Instance.GetCharLength());
-            StdScr.mvget_wstr(nline, ncol, ref wChStr);
-            return wChStr.ToString();
+            using (BufferState<TWideChar> bufferState = WideCharFactory<TWideChar>._Instance.GetNativeEmptyString(
+                WideCharFactory<TWideChar>._CreatePooledBuffer,
+                Constants.MAX_STRING_LENGTH,
+                out WideCharString<TWideChar> @string))
+            {
+                StdScr.mvget_wstr(nline, ncol, ref @string);
+                return @string.ToString();
+            }
         }
 
         public override string ReadLine(int length)
         {
-            int bufferLength = WideCharFactoryInternal<TWideChar>.Instance.GetByteCount(length);
-            byte[] buffer = NativeNCurses.GetBuffer(bufferLength);
-            WideCharString<TWideChar> wChStr = WideCharFactoryInternal<TWideChar>.Instance.GetNativeEmptyStringInternal(buffer, bufferLength, length);
-            StdScr.getn_wstr(ref wChStr, length);
-            return wChStr.ToString();
+            using (BufferState<TWideChar> bufferState = WideCharFactory<TWideChar>._Instance.GetNativeEmptyString(
+                WideCharFactory<TWideChar>._CreatePooledBuffer,
+                length,
+                out WideCharString<TWideChar> @string))
+            {
+                StdScr.getn_wstr(ref @string, length);
+                return @string.ToString();
+            }
         }
 
         public override string ReadLine(int nline, int ncol, int length)
         {
-            int bufferLength = WideCharFactoryInternal<TWideChar>.Instance.GetByteCount(length);
-            byte[] buffer = NativeNCurses.GetBuffer(bufferLength);
-            WideCharString<TWideChar> wChStr = WideCharFactoryInternal<TWideChar>.Instance.GetNativeEmptyStringInternal(buffer, bufferLength, length);
-            StdScr.mvgetn_wstr(nline, ncol, ref wChStr, length);
-            return wChStr.ToString();
+            using (BufferState<TWideChar> bufferState = WideCharFactory<TWideChar>._Instance.GetNativeEmptyString(
+                WideCharFactory<TWideChar>._CreatePooledBuffer,
+                length,
+                out WideCharString<TWideChar> @string))
+            {
+                StdScr.mvgetn_wstr(nline, ncol, ref @string, length);
+                return @string.ToString();
+            }
         }
 
         public override void VerticalLine(in INCursesChar lineChar, int length)
@@ -473,222 +600,320 @@ namespace NCurses.Core.StdScr
         {
             StdScr.add_wchstr(VerifyString(str));
 
-            this.Advance(str.Length);
+            this.Advance(str);
         }
 
         public override void Write(string str)
         {
-            int bufferLength = WideCharFactoryInternal<TWideChar>.Instance.GetByteCount(str);
-            byte[] buffer = NativeNCurses.GetBuffer(bufferLength);
-            WideCharString<TWideChar> wChStr = WideCharFactoryInternal<TWideChar>.Instance.GetNativeStringInternal(buffer, bufferLength, str);
-            StdScr.addnwstr(in wChStr, wChStr.Length);
+            this.Write(str.AsSpan());
         }
 
         public override void Write(ReadOnlySpan<char> str)
         {
-            int bufferLength = WideCharFactoryInternal<TWideChar>.Instance.GetByteCount(str);
-            byte[] buffer = NativeNCurses.GetBuffer(bufferLength);
-            WideCharString<TWideChar> wChStr = WideCharFactoryInternal<TWideChar>.Instance.GetNativeStringInternal(buffer, bufferLength, str);
-            StdScr.addnwstr(in wChStr, wChStr.Length);
+            using (BufferState<TWideChar> bufferState = WideCharFactory<TWideChar>._Instance.GetNativeString(
+                WideCharFactory<TWideChar>._CreatePooledBuffer,
+                str,
+                out WideCharString<TWideChar> @string))
+            {
+                StdScr.addnwstr(in @string, @string.CharLength);
+            }
+        }
+
+        public override void Write(ReadOnlySpan<byte> str)
+        {
+            using (BufferState<TWideChar> bufferState = WideCharFactory<TWideChar>._Instance.GetNativeString(
+                WideCharFactory<TWideChar>._CreatePooledBuffer,
+                str,
+                out WideCharString<TWideChar> @string))
+            {
+                StdScr.addnwstr(in @string, @string.CharLength);
+            }
+        }
+
+        public override void Write(in ReadOnlySequence<byte> str)
+        {
+            using (BufferState<TWideChar> bufferState = WideCharFactory<TWideChar>._Instance.GetNativeString(
+                WideCharFactory<TWideChar>._CreatePooledBuffer,
+                in str,
+                out WideCharString<TWideChar> @string))
+            {
+                StdScr.addnwstr(in @string, @string.CharLength);
+            }
         }
 
         public override void Write(string str, ulong attrs, ushort pair)
         {
-            int bufferLength = MultiByteCharFactoryInternal<TMultiByte>.Instance.GetByteCount(str);
-            byte[] buffer = NativeNCurses.GetBuffer(bufferLength);
-            MultiByteCharString<TMultiByte> wChStr = MultiByteCharFactoryInternal<TMultiByte>.Instance.GetNativeStringInternal(buffer, bufferLength, str, attrs, pair);
-
-            StdScr.add_wchnstr(in wChStr, wChStr.Length);
-
-            this.Advance(wChStr.Length);
+            this.Write(str.AsSpan(), attrs, pair);
         }
 
         public override void Write(ReadOnlySpan<char> str, ulong attrs, ushort pair)
         {
-            int bufferLength = MultiByteCharFactoryInternal<TMultiByte>.Instance.GetByteCount(str);
-            byte[] buffer = NativeNCurses.GetBuffer(bufferLength);
-            MultiByteCharString<TMultiByte> wChStr = MultiByteCharFactoryInternal<TMultiByte>.Instance.GetNativeStringInternal(buffer, bufferLength, str, attrs, pair);
+            using (BufferState<TMultiByte> bufferState = MultiByteCharFactory<TMultiByte, TWideChar, TSingleByte>._Instance.GetNativeString(
+                MultiByteCharFactory<TMultiByte, TWideChar, TSingleByte>._CreatePooledBuffer,
+                str,
+                attrs,
+                pair,
+                out MultiByteCharString<TMultiByte, TWideChar, TSingleByte> @string))
+            {
+                StdScr.add_wchnstr(in @string, @string.CharLength);
 
-            StdScr.add_wchnstr(in wChStr, wChStr.Length);
+                this.Advance(@string);
+            }
+        }
 
-            this.Advance(wChStr.Length);
+        public override void Write(ReadOnlySpan<byte> str, ulong attrs, ushort pair)
+        {
+            using (BufferState<TMultiByte> bufferState = MultiByteCharFactory<TMultiByte, TWideChar, TSingleByte>._Instance.GetNativeString(
+                MultiByteCharFactory<TMultiByte, TWideChar, TSingleByte>._CreatePooledBuffer,
+                str,
+                attrs,
+                pair,
+                out MultiByteCharString<TMultiByte, TWideChar, TSingleByte> @string))
+            {
+                StdScr.add_wchnstr(in @string, @string.CharLength);
+
+                this.Advance(@string);
+            }
+        }
+
+        public override void Write(in ReadOnlySequence<byte> str, ulong attrs, ushort pair)
+        {
+            using (BufferState<TMultiByte> bufferState = MultiByteCharFactory<TMultiByte, TWideChar, TSingleByte>._Instance.GetNativeString(
+                MultiByteCharFactory<TMultiByte, TWideChar, TSingleByte>._CreatePooledBuffer,
+                str,
+                attrs,
+                pair,
+                out MultiByteCharString<TMultiByte, TWideChar, TSingleByte> @string))
+            {
+                StdScr.add_wchnstr(in @string, @string.CharLength);
+
+                this.Advance(@string);
+            }
         }
 
         public override void Write(int nline, int ncol, string str)
         {
-            int bufferLength = WideCharFactoryInternal<TWideChar>.Instance.GetByteCount(str);
-            byte[] buffer = NativeNCurses.GetBuffer(bufferLength);
-            WideCharString<TWideChar> wChStr = WideCharFactoryInternal<TWideChar>.Instance.GetNativeStringInternal(buffer, bufferLength, str);
-            StdScr.mvaddnwstr(nline, ncol, in wChStr, wChStr.Length);
+            this.Write(nline, ncol, str.AsSpan());
         }
 
         public override void Write(int nline, int ncol, ReadOnlySpan<char> str)
         {
-            int bufferLength = WideCharFactoryInternal<TWideChar>.Instance.GetByteCount(str);
-            byte[] buffer = NativeNCurses.GetBuffer(bufferLength);
-            WideCharString<TWideChar> wChStr = WideCharFactoryInternal<TWideChar>.Instance.GetNativeStringInternal(buffer, bufferLength, str);
-            StdScr.mvaddnwstr(nline, ncol, in wChStr, wChStr.Length);
+            using (BufferState<TWideChar> bufferState = WideCharFactory<TWideChar>._Instance.GetNativeString(
+                WideCharFactory<TWideChar>._CreatePooledBuffer,
+                str,
+                out WideCharString<TWideChar> @string))
+            {
+                StdScr.mvaddnwstr(nline, ncol, in @string, @string.CharLength);
+            }
+        }
+
+        public override void Write(int nline, int ncol, ReadOnlySpan<byte> str)
+        {
+            using (BufferState<TWideChar> bufferState = WideCharFactory<TWideChar>._Instance.GetNativeString(
+                WideCharFactory<TWideChar>._CreatePooledBuffer,
+                str,
+                out WideCharString<TWideChar> @string))
+            {
+                StdScr.mvaddnwstr(nline, ncol, in @string, @string.CharLength);
+            }
+        }
+
+        public override void Write(int nline, int ncol, in ReadOnlySequence<byte> str)
+        {
+            using (BufferState<TWideChar> bufferState = WideCharFactory<TWideChar>._Instance.GetNativeString(
+                WideCharFactory<TWideChar>._CreatePooledBuffer,
+                str,
+                out WideCharString<TWideChar> @string))
+            {
+                StdScr.mvaddnwstr(nline, ncol, in @string, @string.CharLength);
+            }
         }
 
         public override void Write(int nline, int ncol, string str, ulong attrs, ushort pair)
         {
-            int bufferLength = MultiByteCharFactoryInternal<TMultiByte>.Instance.GetByteCount(str);
-            byte[] buffer = NativeNCurses.GetBuffer(bufferLength);
-            MultiByteCharString<TMultiByte> wChStr = MultiByteCharFactoryInternal<TMultiByte>.Instance.GetNativeStringInternal(buffer, bufferLength, str, attrs, pair);
-
-            StdScr.mvadd_wchnstr(nline, ncol, in wChStr, wChStr.Length);
-
-            this.Advance(wChStr.Length);
+            this.Write(nline, ncol, str.AsSpan(), attrs, pair);
         }
 
         public override void Write(int nline, int ncol, ReadOnlySpan<char> str, ulong attrs, ushort pair)
         {
-            int bufferLength = MultiByteCharFactoryInternal<TMultiByte>.Instance.GetByteCount(str);
-            byte[] buffer = NativeNCurses.GetBuffer(bufferLength);
-            MultiByteCharString<TMultiByte> wChStr = MultiByteCharFactoryInternal<TMultiByte>.Instance.GetNativeStringInternal(buffer, bufferLength, str, attrs, pair);
+            using (BufferState<TMultiByte> bufferState = MultiByteCharFactory<TMultiByte, TWideChar, TSingleByte>._Instance.GetNativeString(
+                MultiByteCharFactory<TMultiByte, TWideChar, TSingleByte>._CreatePooledBuffer,
+                str,
+                attrs,
+                pair,
+                out MultiByteCharString<TMultiByte, TWideChar, TSingleByte> @string))
+            {
+                StdScr.mvadd_wchnstr(nline, ncol, in @string, @string.CharLength);
 
-            StdScr.mvadd_wchnstr(nline, ncol, in wChStr, wChStr.Length);
+                this.Advance(@string);
+            }
+        }
 
-            this.Advance(wChStr.Length);
+        public override void Write(int nline, int ncol, ReadOnlySpan<byte> str, ulong attrs, ushort pair)
+        {
+            using (BufferState<TMultiByte> bufferState = MultiByteCharFactory<TMultiByte, TWideChar, TSingleByte>._Instance.GetNativeString(
+                MultiByteCharFactory<TMultiByte, TWideChar, TSingleByte>._CreatePooledBuffer,
+                str,
+                attrs,
+                pair,
+                out MultiByteCharString<TMultiByte, TWideChar, TSingleByte> @string))
+            {
+                StdScr.mvadd_wchnstr(nline, ncol, in @string, @string.CharLength);
+
+                this.Advance(@string);
+            }
+        }
+
+        public override void Write(int nline, int ncol, in ReadOnlySequence<byte> str, ulong attrs, ushort pair)
+        {
+            using (BufferState<TMultiByte> bufferState = MultiByteCharFactory<TMultiByte, TWideChar, TSingleByte>._Instance.GetNativeString(
+                MultiByteCharFactory<TMultiByte, TWideChar, TSingleByte>._CreatePooledBuffer,
+                str,
+                attrs,
+                pair,
+                out MultiByteCharString<TMultiByte, TWideChar, TSingleByte> @string))
+            {
+                StdScr.mvadd_wchnstr(nline, ncol, in @string, @string.CharLength);
+
+                this.Advance(@string);
+            }
         }
 
         //TODO: don't convert?
         public override void Write(char ch)
         {
-            TMultiByte wCh = MultiByteCharFactoryInternal<TMultiByte>.Instance.GetNativeCharInternal(ch);
+            TMultiByte wCh = MultiByteCharFactory<TMultiByte, TWideChar, TSingleByte>._Instance.GetNativeChar(ch);
             StdScr.add_wch(in wCh);
         }
 
         public override void Write(char ch, ulong attrs, ushort pair)
         {
-            TMultiByte wCh = MultiByteCharFactoryInternal<TMultiByte>.Instance.GetNativeCharInternal(ch, attrs, pair);
+            TMultiByte wCh = MultiByteCharFactory<TMultiByte, TWideChar, TSingleByte>._Instance.GetNativeChar(ch, attrs, pair);
             StdScr.add_wch(in wCh);
         }
 
         public override void Write(int nline, int ncol, char ch)
         {
-            TMultiByte wCh = MultiByteCharFactoryInternal<TMultiByte>.Instance.GetNativeCharInternal(ch);
+            TMultiByte wCh = MultiByteCharFactory<TMultiByte, TWideChar, TSingleByte>._Instance.GetNativeChar(ch);
             StdScr.mvadd_wch(nline, ncol, in wCh);
         }
 
         public override void Write(int nline, int ncol, char ch, ulong attrs, ushort pair)
         {
-            TMultiByte wCh = MultiByteCharFactoryInternal<TMultiByte>.Instance.GetNativeCharInternal(ch, attrs, pair);
+            TMultiByte wCh = MultiByteCharFactory<TMultiByte, TWideChar, TSingleByte>._Instance.GetNativeChar(ch, attrs, pair);
             StdScr.mvadd_wch(nline, ncol, in wCh);
-        }
-
-        public override void Write(byte[] str, Encoding encoding)
-        {
-            int bufferLength = WideCharFactoryInternal<TWideChar>.Instance.GetByteCount(str, encoding, out int charLength);
-            byte[] buffer = NativeNCurses.GetBuffer(bufferLength);
-            WideCharString<TWideChar> wChStr = WideCharFactoryInternal<TWideChar>.Instance.GetNativeStringInternal(buffer, bufferLength, str, charLength, encoding);
-            StdScr.addnwstr(in wChStr, wChStr.Length);
         }
 
         public override void Write(ReadOnlySpan<byte> str, Encoding encoding)
         {
-            int bufferLength = WideCharFactoryInternal<TWideChar>.Instance.GetByteCount(str, encoding, out int charLength);
-            byte[] buffer = NativeNCurses.GetBuffer(bufferLength);
-            WideCharString<TWideChar> wChStr = WideCharFactoryInternal<TWideChar>.Instance.GetNativeStringInternal(buffer, bufferLength, str, charLength, encoding);
-            StdScr.addnwstr(in wChStr, wChStr.Length);
+            using (BufferState<TWideChar> bufferState = WideCharFactory<TWideChar>._Instance.GetNativeString(
+                WideCharFactory<TWideChar>._CreatePooledBuffer,
+                str,
+                encoding,
+                out WideCharString<TWideChar> @string))
+            {
+                StdScr.addnwstr(in @string, @string.CharLength);
+            }
         }
 
-        public override void Write(ReadOnlySequence<byte> str, Encoding encoding)
+        public override void Write(in ReadOnlySequence<byte> str, Encoding encoding)
         {
-            int bufferLength = WideCharFactoryInternal<TWideChar>.Instance.GetByteCount(str, encoding, out int charLength);
-            byte[] buffer = NativeNCurses.GetBuffer(bufferLength);
-            WideCharString<TWideChar> wChStr = WideCharFactoryInternal<TWideChar>.Instance.GetNativeStringInternal(buffer, bufferLength, str, charLength, encoding);
-            StdScr.addnwstr(in wChStr, wChStr.Length);
-        }
-
-        public override void Write(byte[] str, Encoding encoding, ulong attrs, ushort pair)
-        {
-            int bufferLength = MultiByteCharFactoryInternal<TMultiByte>.Instance.GetByteCount(str, encoding, out int charLength);
-            byte[] buffer = NativeNCurses.GetBuffer(bufferLength);
-            MultiByteCharString<TMultiByte> wChStr = MultiByteCharFactoryInternal<TMultiByte>.Instance.GetNativeStringInternal(buffer, bufferLength, str, charLength, encoding, attrs, pair);
-
-            StdScr.add_wchnstr(in wChStr, wChStr.Length);
-
-            this.Advance(wChStr.Length);
-        }
-
-        public override void Write(ReadOnlySpan<byte> str, Encoding encoding, ulong attrs, ushort pair)
-        {
-            int bufferLength = MultiByteCharFactoryInternal<TMultiByte>.Instance.GetByteCount(str, encoding, out int charLength);
-            byte[] buffer = NativeNCurses.GetBuffer(bufferLength);
-            MultiByteCharString<TMultiByte> wChStr = MultiByteCharFactoryInternal<TMultiByte>.Instance.GetNativeStringInternal(buffer, bufferLength, str, charLength, encoding, attrs, pair);
-
-            StdScr.add_wchnstr(in wChStr, wChStr.Length);
-
-            this.Advance(wChStr.Length);
-        }
-
-        public override void Write(ReadOnlySequence<byte> str, Encoding encoding, ulong attrs, ushort pair)
-        {
-            int bufferLength = MultiByteCharFactoryInternal<TMultiByte>.Instance.GetByteCount(str, encoding, out int charLength);
-            byte[] buffer = NativeNCurses.GetBuffer(bufferLength);
-            MultiByteCharString<TMultiByte> wChStr = MultiByteCharFactoryInternal<TMultiByte>.Instance.GetNativeStringInternal(buffer, bufferLength, str, charLength, encoding, attrs, pair);
-
-            StdScr.add_wchnstr(in wChStr, wChStr.Length);
-
-            this.Advance(wChStr.Length);
-        }
-
-        public override void Write(int nline, int ncol, byte[] str, Encoding encoding)
-        {
-            int bufferLength = WideCharFactoryInternal<TWideChar>.Instance.GetByteCount(str, encoding, out int charLength);
-            byte[] buffer = NativeNCurses.GetBuffer(bufferLength);
-            WideCharString<TWideChar> wChStr = WideCharFactoryInternal<TWideChar>.Instance.GetNativeStringInternal(buffer, bufferLength, str, charLength, encoding);
-            StdScr.mvaddnwstr(nline, ncol, in wChStr, wChStr.Length);
+            using (BufferState<TWideChar> bufferState = WideCharFactory<TWideChar>._Instance.GetNativeString(
+                WideCharFactory<TWideChar>._CreatePooledBuffer,
+                in str,
+                encoding,
+                out WideCharString<TWideChar> @string))
+            {
+                StdScr.addnwstr(in @string, @string.CharLength);
+            }
         }
 
         public override void Write(int nline, int ncol, ReadOnlySpan<byte> str, Encoding encoding)
         {
-            int bufferLength = WideCharFactoryInternal<TWideChar>.Instance.GetByteCount(str, encoding, out int charLength);
-            byte[] buffer = NativeNCurses.GetBuffer(bufferLength);
-            WideCharString<TWideChar> wChStr = WideCharFactoryInternal<TWideChar>.Instance.GetNativeStringInternal(buffer, bufferLength, str, charLength, encoding);
-            StdScr.mvaddnwstr(nline, ncol, in wChStr, wChStr.Length);
+            using (BufferState<TWideChar> bufferState = WideCharFactory<TWideChar>._Instance.GetNativeString(
+                WideCharFactory<TWideChar>._CreatePooledBuffer,
+                str,
+                encoding,
+                out WideCharString<TWideChar> @string))
+            {
+                StdScr.mvaddnwstr(nline, ncol, in @string, @string.CharLength);
+            }
         }
 
-        public override void Write(int nline, int ncol, ReadOnlySequence<byte> str, Encoding encoding)
+        public override void Write(int nline, int ncol, in ReadOnlySequence<byte> str, Encoding encoding)
         {
-            int bufferLength = WideCharFactoryInternal<TWideChar>.Instance.GetByteCount(str, encoding, out int charLength);
-            byte[] buffer = NativeNCurses.GetBuffer(bufferLength);
-            WideCharString<TWideChar> wChStr = WideCharFactoryInternal<TWideChar>.Instance.GetNativeStringInternal(buffer, bufferLength, str, charLength, encoding);
-            StdScr.mvaddnwstr(nline, ncol, in wChStr, wChStr.Length);
+            using (BufferState<TWideChar> bufferState = WideCharFactory<TWideChar>._Instance.GetNativeString(
+                WideCharFactory<TWideChar>._CreatePooledBuffer,
+                str,
+                encoding,
+                out WideCharString<TWideChar> @string))
+            {
+                StdScr.mvaddnwstr(nline, ncol, in @string, @string.CharLength);
+            }
         }
 
-        public override void Write(int nline, int ncol, byte[] str, Encoding encoding, ulong attrs, ushort pair)
+        public override void Write(ReadOnlySpan<byte> str, Encoding encoding, ulong attrs, ushort pair)
         {
-            int bufferLength = MultiByteCharFactoryInternal<TMultiByte>.Instance.GetByteCount(str, encoding, out int charLength);
-            byte[] buffer = NativeNCurses.GetBuffer(bufferLength);
-            MultiByteCharString<TMultiByte> wChStr = MultiByteCharFactoryInternal<TMultiByte>.Instance.GetNativeStringInternal(buffer, bufferLength, str, charLength, encoding, attrs, pair);
+            using (BufferState<TMultiByte> bufferState = MultiByteCharFactory<TMultiByte, TWideChar, TSingleByte>._Instance.GetNativeString(
+                MultiByteCharFactory<TMultiByte, TWideChar, TSingleByte>._CreatePooledBuffer,
+                str,
+                encoding,
+                attrs,
+                pair,
+                out MultiByteCharString<TMultiByte, TWideChar, TSingleByte> @string))
+            {
+                StdScr.add_wchnstr( in @string, @string.CharLength);
 
-            StdScr.mvadd_wchnstr(nline, ncol, in wChStr, wChStr.Length);
+                this.Advance(@string);
+            }
+        }
 
-            this.Advance(wChStr.Length);
+        public override void Write(in ReadOnlySequence<byte> str, Encoding encoding, ulong attrs, ushort pair)
+        {
+            using (BufferState<TMultiByte> bufferState = MultiByteCharFactory<TMultiByte, TWideChar, TSingleByte>._Instance.GetNativeString(
+                MultiByteCharFactory<TMultiByte, TWideChar, TSingleByte>._CreatePooledBuffer,
+                str,
+                encoding,
+                attrs,
+                pair,
+                out MultiByteCharString<TMultiByte, TWideChar, TSingleByte> @string))
+            {
+                StdScr.add_wchnstr(in @string, @string.CharLength);
+
+                this.Advance(@string);
+            }
         }
 
         public override void Write(int nline, int ncol, ReadOnlySpan<byte> str, Encoding encoding, ulong attrs, ushort pair)
         {
-            int bufferLength = MultiByteCharFactoryInternal<TMultiByte>.Instance.GetByteCount(str, encoding, out int charLength);
-            byte[] buffer = NativeNCurses.GetBuffer(bufferLength);
-            MultiByteCharString<TMultiByte> wChStr = MultiByteCharFactoryInternal<TMultiByte>.Instance.GetNativeStringInternal(buffer, bufferLength, str, charLength, encoding, attrs, pair);
+            using (BufferState<TMultiByte> bufferState = MultiByteCharFactory<TMultiByte, TWideChar, TSingleByte>._Instance.GetNativeString(
+                MultiByteCharFactory<TMultiByte, TWideChar, TSingleByte>._CreatePooledBuffer,
+                str,
+                encoding,
+                attrs,
+                pair,
+                out MultiByteCharString<TMultiByte, TWideChar, TSingleByte> @string))
+            {
+                StdScr.mvadd_wchnstr(nline, ncol, in @string, @string.CharLength);
 
-            StdScr.mvadd_wchnstr(nline, ncol, in wChStr, wChStr.Length);
-
-            this.Advance(wChStr.Length);
+                this.Advance(@string);
+            }
         }
 
-        public override void Write(int nline, int ncol, ReadOnlySequence<byte> str, Encoding encoding, ulong attrs, ushort pair)
+        public override void Write(int nline, int ncol, in ReadOnlySequence<byte> str, Encoding encoding, ulong attrs, ushort pair)
         {
-            int bufferLength = MultiByteCharFactoryInternal<TMultiByte>.Instance.GetByteCount(str, encoding, out int charLength);
-            byte[] buffer = NativeNCurses.GetBuffer(bufferLength);
-            MultiByteCharString<TMultiByte> wChStr = MultiByteCharFactoryInternal<TMultiByte>.Instance.GetNativeStringInternal(buffer, bufferLength, str, charLength, encoding, attrs, pair);
+            using (BufferState<TMultiByte> bufferState = MultiByteCharFactory<TMultiByte, TWideChar, TSingleByte>._Instance.GetNativeString(
+                MultiByteCharFactory<TMultiByte, TWideChar, TSingleByte>._CreatePooledBuffer,
+                str,
+                encoding,
+                attrs,
+                pair,
+                out MultiByteCharString<TMultiByte, TWideChar, TSingleByte> @string))
+            {
+                StdScr.mvadd_wchnstr(nline, ncol, in @string, @string.CharLength);
 
-            StdScr.mvadd_wchnstr(nline, ncol, in wChStr, wChStr.Length);
-
-            this.Advance(wChStr.Length);
+                this.Advance(@string);
+            }
         }
 
         public override void Write(int nline, int ncol, in INCursesChar ch)
@@ -703,7 +928,7 @@ namespace NCurses.Core.StdScr
 
         public override void Put(char ch)
         {
-            NCurses.unget_wch(WideCharFactoryInternal<TWideChar>.Instance.GetNativeCharInternal(ch));
+            NCurses.unget_wch(WideCharFactory<TWideChar>._Instance.GetNativeChar(ch));
         }
 
         public override void Put(Key key)
@@ -713,34 +938,64 @@ namespace NCurses.Core.StdScr
 
         public override void Write(string str, int maxLength)
         {
-            int bufferLength = WideCharFactoryInternal<TWideChar>.Instance.GetByteCount(str);
-            byte[] buffer = NativeNCurses.GetBuffer(bufferLength);
-            WideCharString<TWideChar> wChStr = WideCharFactoryInternal<TWideChar>.Instance.GetNativeStringInternal(buffer, bufferLength, str);
-            StdScr.addnwstr(in wChStr, maxLength);
+            this.Write(str.AsSpan(), maxLength);
         }
 
         public override void Write(ReadOnlySpan<char> str, int maxLength)
         {
-            int bufferLength = WideCharFactoryInternal<TWideChar>.Instance.GetByteCount(str);
-            byte[] buffer = NativeNCurses.GetBuffer(bufferLength);
-            WideCharString<TWideChar> wChStr = WideCharFactoryInternal<TWideChar>.Instance.GetNativeStringInternal(buffer, bufferLength, str);
-            StdScr.addnwstr(in wChStr, maxLength);
+            using (BufferState<TWideChar> bufferState = WideCharFactory<TWideChar>._Instance.GetNativeString(
+                WideCharFactory<TWideChar>._CreatePooledBuffer,
+                str,
+                out WideCharString<TWideChar> @string))
+            {
+                StdScr.addnwstr(in @string, maxLength);
+            }
+        }
+
+        public override void Write(ReadOnlySpan<byte> str, int maxLength)
+        {
+            using (BufferState<TWideChar> bufferState = WideCharFactory<TWideChar>._Instance.GetNativeString(
+                WideCharFactory<TWideChar>._CreatePooledBuffer,
+                str,
+                out WideCharString<TWideChar> @string))
+            {
+                StdScr.addnwstr(in @string, maxLength);
+            }
+        }
+
+        public override void Write(in ReadOnlySequence<byte> str, int maxLength)
+        {
+            using (BufferState<TWideChar> bufferState = WideCharFactory<TWideChar>._Instance.GetNativeString(
+                WideCharFactory<TWideChar>._CreatePooledBuffer,
+                str,
+                out WideCharString<TWideChar> @string))
+            {
+                StdScr.addnwstr(in @string, maxLength);
+            }
         }
 
         public override void Write(ReadOnlySpan<byte> str, int maxLength, Encoding encoding)
         {
-            int bufferLength = WideCharFactoryInternal<TWideChar>.Instance.GetByteCount(str, encoding, out int charLength);
-            byte[] buffer = NativeNCurses.GetBuffer(bufferLength);
-            WideCharString<TWideChar> wChStr = WideCharFactoryInternal<TWideChar>.Instance.GetNativeStringInternal(buffer, bufferLength, str, charLength, encoding);
-            StdScr.addnwstr(in wChStr, maxLength);
+            using (BufferState<TWideChar> bufferState = WideCharFactory<TWideChar>._Instance.GetNativeString(
+                WideCharFactory<TWideChar>._CreatePooledBuffer,
+                str,
+                encoding,
+                out WideCharString<TWideChar> @string))
+            {
+                StdScr.addnwstr(in @string, maxLength);
+            }
         }
 
-        public override void Write(ReadOnlySequence<byte> str, int maxLength, Encoding encoding)
+        public override void Write(in ReadOnlySequence<byte> str, int maxLength, Encoding encoding)
         {
-            int bufferLength = WideCharFactoryInternal<TWideChar>.Instance.GetByteCount(str, encoding, out int charLength);
-            byte[] buffer = NativeNCurses.GetBuffer(bufferLength);
-            WideCharString<TWideChar> wChStr = WideCharFactoryInternal<TWideChar>.Instance.GetNativeStringInternal(buffer, bufferLength, str, charLength, encoding);
-            StdScr.addnwstr(in wChStr, maxLength);
+            using (BufferState<TWideChar> bufferState = WideCharFactory<TWideChar>._Instance.GetNativeString(
+                WideCharFactory<TWideChar>._CreatePooledBuffer,
+                str,
+                encoding,
+                out WideCharString<TWideChar> @string))
+            {
+                StdScr.addnwstr(in @string, maxLength);
+            }
         }
     }
 }

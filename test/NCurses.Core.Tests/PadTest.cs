@@ -25,21 +25,26 @@ namespace NCurses.Core.Tests
             string testString = (this.Window.MaxColumn < loremString.Length + 3) ? loremString.Substring(0, this.Window.MaxColumn - 3) : loremString;
             IPad pad = NCurses.CreatePad(this.Window, 200, 200);
 
-            for (int i = 0; i < 200; i++)
+            for (int i = 1; i <= 200; i++)
             {
-                pad.Write($"{i.ToString().PadLeft(3, ' ')}{testString}{(i < 199 ? "\n" : "")}");
+                pad.Write($"{i.ToString().PadLeft(3, ' ')}{testString}");
+
+                if(i < 200)
+                {
+                    pad.MoveCursor(pad.CursorLine + 1, 0);
+                }
             }
 
             string resString = pad.ExtractString(0, 0, 3, out int read);
             if (int.TryParse(resString.Trim(' '), out int lineNumber))
             {
-                Assert.Equal(0, lineNumber);
+                Assert.Equal(1, lineNumber);
             }
 
             resString = pad.ExtractString(150, 0, 3, out read);
             if (int.TryParse(resString.Trim(' '), out lineNumber))
             {
-                Assert.Equal(150, lineNumber);
+                Assert.Equal(151, lineNumber);
             }
 
             pad.Dispose();

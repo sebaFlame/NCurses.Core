@@ -1,12 +1,15 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Text;
+using System.Runtime.InteropServices;
+using System.Runtime.CompilerServices;
 
 using NCurses.Core.Interop.MultiByte;
 using NCurses.Core.Interop.SingleByte;
 using NCurses.Core.Interop.WideChar;
 using NCurses.Core.Interop.Char;
 using NCurses.Core.Interop.Mouse;
+using NCurses.Core.Interop.Platform;
 
 namespace NCurses.Core.Interop.Wrappers
 {
@@ -35,7 +38,10 @@ namespace NCurses.Core.Interop.Wrappers
         internal static NativeScreenInternal<TMultiByte, TWideChar, TSingleByte, TChar, TMouseEvent> ScreenInternal { get; }
         internal static NativePadInternal<TMultiByte, TWideChar, TSingleByte, TChar, TMouseEvent> PadInternal { get; }
 
+        internal static PlatformWideCharEncoder<TWideChar> WideCharEncoder { get; }
         internal static WindowFactory<TMultiByte, TWideChar, TSingleByte, TChar, TMouseEvent> WindowFactoryInternal { get; }
+
+        internal static CreateBuffer<TChar> CreatePooledBuffer;
 
         static NativeCustomTypeWrapper()
         {

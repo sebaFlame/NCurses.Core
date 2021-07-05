@@ -17,7 +17,7 @@ namespace NCurses.Core.Interop
     internal class NativeStdScrInternal<TMultiByte, TWideChar, TSingleByte, TChar, TMouseEvent>
             : INativeStdScrWrapper<
                 TMultiByte,
-                MultiByteCharString<TMultiByte>,
+                MultiByteCharString<TMultiByte, TWideChar, TSingleByte>,
                 TWideChar,
                 WideCharString<TWideChar>,
                 TSingleByte,
@@ -1132,7 +1132,7 @@ namespace NCurses.Core.Interop
         /// </summary>
         /// <param name="wchStr">The string of complex characters you want to add</param>
         /// <param name="n">number of elements to copy</param>
-        public void add_wchnstr(in MultiByteCharString<TMultiByte> wchStr, int n)
+        public void add_wchnstr(in MultiByteCharString<TMultiByte, TWideChar, TSingleByte> wchStr, int n)
         {
             MultiByteNCursesWrapper.add_wchnstr(wchStr, n);
         }
@@ -1145,7 +1145,7 @@ namespace NCurses.Core.Interop
         /// </summary>
         /// <param name="wchStr">The string of complex characters you want to add</param>
         /// <param name="n">number of elements to copy</param>
-        public void add_wchstr(in MultiByteCharString<TMultiByte> wchStr)
+        public void add_wchstr(in MultiByteCharString<TMultiByte, TWideChar, TSingleByte> wchStr)
         {
             MultiByteNCursesWrapper.add_wchstr(wchStr);
         }
@@ -1358,7 +1358,7 @@ namespace NCurses.Core.Interop
         /// <para />native method wrapped with verification.
         /// </summary>
         /// <param name="wcval">array reference to store the complex characters in</param>
-        public void in_wchnstr(ref MultiByteCharString<TMultiByte> wcval, int n)
+        public void in_wchnstr(ref MultiByteCharString<TMultiByte, TWideChar, TSingleByte> wcval, int n)
         {
             MultiByteNCursesWrapper.in_wchnstr(ref wcval, n);
         }
@@ -1370,7 +1370,7 @@ namespace NCurses.Core.Interop
         /// <para />native method wrapped with verification.
         /// </summary>
         /// <param name="wcval">array reference to store the complex characters in</param>
-        public void in_wchstr(ref MultiByteCharString<TMultiByte> wcval)
+        public void in_wchstr(ref MultiByteCharString<TMultiByte, TWideChar, TSingleByte> wcval)
         {
             MultiByteNCursesWrapper.in_wchstr(ref wcval);
         }
@@ -1476,7 +1476,7 @@ namespace NCurses.Core.Interop
         /// </summary>
         /// <param name="y">the line number to move to</param>
         /// <param name="x">the column number to move to</param>
-        public void mvadd_wchnstr(int y, int x, in MultiByteCharString<TMultiByte> wchStr, int n)
+        public void mvadd_wchnstr(int y, int x, in MultiByteCharString<TMultiByte, TWideChar, TSingleByte> wchStr, int n)
         {
             MultiByteNCursesWrapper.mvadd_wchnstr(y, x, wchStr, n);
         }
@@ -1489,7 +1489,7 @@ namespace NCurses.Core.Interop
         /// </summary>
         /// <param name="y">the line number to move to</param>
         /// <param name="x">the column number to move to</param>
-        public void mvadd_wchstr(int y, int x, in MultiByteCharString<TMultiByte> wchStr)
+        public void mvadd_wchstr(int y, int x, in MultiByteCharString<TMultiByte, TWideChar, TSingleByte> wchStr)
         {
             MultiByteNCursesWrapper.mvadd_wchstr(y, x, wchStr);
         }
@@ -1593,7 +1593,7 @@ namespace NCurses.Core.Interop
         /// </summary>
         /// <param name="y">the line number to move to</param>
         /// <param name="x">the column number to move to</param>
-        public void mvin_wchnstr(int y, int x, ref MultiByteCharString<TMultiByte> wchStr, int n)
+        public void mvin_wchnstr(int y, int x, ref MultiByteCharString<TMultiByte, TWideChar, TSingleByte> wchStr, int n)
         {
             MultiByteNCursesWrapper.mvin_wchnstr(y, x, ref wchStr, n);
         }
@@ -1606,7 +1606,7 @@ namespace NCurses.Core.Interop
         /// </summary>
         /// <param name="y">the line number to move to</param>
         /// <param name="x">the column number to move to</param>
-        public void mvin_wchstr(int y, int x, ref MultiByteCharString<TMultiByte> wchStr)
+        public void mvin_wchstr(int y, int x, ref MultiByteCharString<TMultiByte, TWideChar, TSingleByte> wchStr)
         {
             MultiByteNCursesWrapper.mvin_wchstr(y, x, ref wchStr);
         }
@@ -1710,13 +1710,13 @@ namespace NCurses.Core.Interop
 
         public void add_wchnstr(in IMultiByteNCursesCharString wchStr, int n)
         {
-            MultiByteCharString<TMultiByte> casted = this.MultiByteNCursesWrapper.CastString(wchStr);
+            MultiByteCharString<TMultiByte, TWideChar, TSingleByte> casted = this.MultiByteNCursesWrapper.CastString(wchStr);
             this.add_wchnstr(in casted, n);
         }
 
         public void add_wchstr(in IMultiByteNCursesCharString wchStr)
         {
-            MultiByteCharString<TMultiByte> casted = this.MultiByteNCursesWrapper.CastString(wchStr);
+            MultiByteCharString<TMultiByte, TWideChar, TSingleByte> casted = this.MultiByteNCursesWrapper.CastString(wchStr);
             this.add_wchstr(in casted);
         }
 
@@ -1771,13 +1771,13 @@ namespace NCurses.Core.Interop
 
         public void in_wchnstr(ref IMultiByteNCursesCharString wchStr, int n)
         {
-            MultiByteCharString<TMultiByte> casted = this.MultiByteNCursesWrapper.CastString(wchStr);
+            MultiByteCharString<TMultiByte, TWideChar, TSingleByte> casted = this.MultiByteNCursesWrapper.CastString(wchStr);
             this.in_wchnstr(ref casted, n);
         }
 
         public void in_wchstr(ref IMultiByteNCursesCharString wch)
         {
-            MultiByteCharString<TMultiByte> casted = this.MultiByteNCursesWrapper.CastString(wch);
+            MultiByteCharString<TMultiByte, TWideChar, TSingleByte> casted = this.MultiByteNCursesWrapper.CastString(wch);
             this.in_wchstr(ref casted);
         }
 
@@ -1795,13 +1795,13 @@ namespace NCurses.Core.Interop
 
         public void mvadd_wchnstr(int y, int x, in IMultiByteNCursesCharString wchStr, int n)
         {
-            MultiByteCharString<TMultiByte> casted = this.MultiByteNCursesWrapper.CastString(wchStr);
+            MultiByteCharString<TMultiByte, TWideChar, TSingleByte> casted = this.MultiByteNCursesWrapper.CastString(wchStr);
             this.mvadd_wchnstr(y, x, in casted, n);
         }
 
         public void mvadd_wchstr(int y, int x, in IMultiByteNCursesCharString wchStr)
         {
-            MultiByteCharString<TMultiByte> casted = this.MultiByteNCursesWrapper.CastString(wchStr);
+            MultiByteCharString<TMultiByte, TWideChar, TSingleByte> casted = this.MultiByteNCursesWrapper.CastString(wchStr);
             this.mvadd_wchstr(y, x, in casted);
         }
 
@@ -1819,13 +1819,13 @@ namespace NCurses.Core.Interop
 
         public void mvin_wchnstr(int y, int x, ref IMultiByteNCursesCharString wchStr, int n)
         {
-            MultiByteCharString<TMultiByte> casted = this.MultiByteNCursesWrapper.CastString(wchStr);
+            MultiByteCharString<TMultiByte, TWideChar, TSingleByte> casted = this.MultiByteNCursesWrapper.CastString(wchStr);
             this.mvin_wchnstr(y, x, ref casted, n);
         }
 
         public void mvin_wchstr(int y, int x, ref IMultiByteNCursesCharString wchStr)
         {
-            MultiByteCharString<TMultiByte> casted = this.MultiByteNCursesWrapper.CastString(wchStr);
+            MultiByteCharString<TMultiByte, TWideChar, TSingleByte> casted = this.MultiByteNCursesWrapper.CastString(wchStr);
             this.mvin_wchstr(y, x, ref casted);
         }
 

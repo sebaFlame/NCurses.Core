@@ -3,6 +3,9 @@ using System.Collections.Generic;
 using System.Text;
 using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
+using System.Collections;
+
+using NCurses.Core.Interop.Platform;
 
 namespace NCurses.Core.Interop.Dynamic
 {
@@ -13,76 +16,70 @@ namespace NCurses.Core.Interop.Dynamic
 
         public unsafe fixed byte @char[_WcharTSize];
 
-        public char Char => (char)this;
-
-        public unsafe Span<byte> EncodedChar
+        public int Char
         {
             get
             {
-                fixed (byte* bArr = @char)
-                {
-                    return new Span<byte>(bArr, _WcharTSize);
-                }
-            }
-        }
+                int ret = 0;
 
-        public wchar_t(char c)
-        {
-            unsafe
-            {
-                char* charArr = stackalloc char[1];
-                charArr[0] = c;
-
-                fixed (byte* bArr = this.@char)
+                unsafe
                 {
-                    NativeNCurses.Encoding.GetBytes(charArr, 1, bArr, _WcharTSize); //Constants.SIZEOF_WCHAR_T
+                    int* retPtr = &ret;
+
+                    fixed (byte* b = @char)
+                    {
+                        Unsafe.CopyBlock(retPtr, b, _WcharTSize);
+                    }
                 }
+
+                return ret;
             }
         }
 
         public wchar_t(Span<byte> encodedBytesChar)
         {
+            if (encodedBytesChar.Length > _WcharTSize)
+            {
+                throw new ArgumentOutOfRangeException($"Wide char can only contain {_WcharTSize} bytes");
+            }
+
             unsafe
             {
-                for (int i = 0; i < encodedBytesChar.Length; i++)
+                fixed (byte* b = this.@char)
                 {
-                    this.@char[i] = encodedBytesChar[i];
+                    Span<byte> @char = new Span<byte>(b, _WcharTSize);
+                    encodedBytesChar.CopyTo(@char);
                 }
             }
         }
 
         public wchar_t(ArraySegment<byte> encodedBytesChar)
         {
+            if (encodedBytesChar.Count > _WcharTSize)
+            {
+                throw new ArgumentOutOfRangeException($"Wide char can only contain {_WcharTSize} bytes");
+            }
+
             unsafe
             {
-                for (int i = 0; i < encodedBytesChar.Count; i++)
+                fixed (byte* b = this.@char)
                 {
-                    this.@char[i] = encodedBytesChar.Array[encodedBytesChar.Offset + i];
+                    Span<byte> @char = new Span<byte>(b, _WcharTSize);
+                    ((Span<byte>)encodedBytesChar).CopyTo(@char);
                 }
             }
         }
 
-        public wchar_t(int c)
-        {
-            unsafe
-            {
-                fixed (byte* bArr = this.@char)
-                {
-                    Unsafe.Write<int>(bArr, c);
-                }
-            }
-        }
-
-        /* TODO
-        * ReadOnlySpan.SequenceEqual returns false on linux (using netcoreapp2.0 or netcoreapp2.1)
-        */
         public static bool operator ==(in wchar_t wchLeft, in wchar_t wchRight)
         {
             unsafe
             {
-                fixed (byte* leftPtr = wchLeft.@char, rightPtr = wchRight.@char)
+                fixed (byte* l = wchLeft.@char, r = wchRight.@char)
                 {
-                    return NativeNCurses.EqualBytesLongUnrolled(leftPtr, rightPtr, _WcharTSize);
+                    Span<byte> leftSpan = new Span<byte>(l, _WcharTSize);
+                    Span<byte> rightSpan = new Span<byte>(r, _WcharTSize);
+
+                    return leftSpan.SequenceEqual(rightSpan);
                 }
             }
         }
@@ -91,34 +88,14 @@ namespace NCurses.Core.Interop.Dynamic
         {
             unsafe
             {
-                fixed (byte* leftPtr = wchLeft.@char, rightPtr = wchRight.@char)
+                fixed (byte* l = wchLeft.@char, r = wchRight.@char)
                 {
-                    return !NativeNCurses.EqualBytesLongUnrolled(leftPtr, rightPtr, _WcharTSize);
+                    Span<byte> leftSpan = new Span<byte>(l, _WcharTSize);
+                    Span<byte> rightSpan = new Span<byte>(r, _WcharTSize);
+
+                    return !leftSpan.SequenceEqual(rightSpan);
                 }
             }
-        }
-
-        public static explicit operator char(wchar_t ch)
-        {
-            char ret;
-            unsafe
-            {
-                char* charArr = stackalloc char[1];
-                if (NativeNCurses.Encoding.GetChars(ch.@char, _WcharTSize, charArr, 1) > 0)
-                {
-                    ret = charArr[0];
-                }
-                else
-                {
-                    throw new InvalidCastException("Failed to cast to current encoding");
-                }
-            }
-            return ret;
-        }
-
-        public static implicit operator wchar_t(char ch)
-        {
-            return new wchar_t(ch);
         }
 
         public override bool Equals(object obj)
@@ -156,15 +133,23 @@ namespace NCurses.Core.Interop.Dynamic
         public override int GetHashCode()
         {
             int hashCode = -355065691;
+            int @char = 0;
 
             unsafe
             {
                 fixed (byte* b = this.@char)
                 {
-                    hashCode = hashCode * -1521134295 + (int)b;
+                    byte* bOffset;
+
+                    for (int i = _WcharTSize - 1; i >= 0; i--)
+                    {
+                        bOffset = b + i;
+                        @char = @char | (*bOffset << (i * 8));
+                    }
                 }
             }
 
+            hashCode = hashCode * -1521134295 + @char;
             return hashCode;
         }
     }

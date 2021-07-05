@@ -234,24 +234,14 @@ namespace NCurses.Core.Pad
             this.WrappedWindow.Write(nline, ncol, ch, attrs, pair);
         }
 
-        public override void Write(byte[] str, Encoding encoding)
-        {
-            this.WrappedWindow.Write(str, encoding);
-        }
-
         public override void Write(ReadOnlySpan<byte> str, Encoding encoding)
         {
             this.WrappedWindow.Write(str, encoding);
         }
 
-        public override void Write(ReadOnlySequence<byte> str, Encoding encoding)
+        public override void Write(in ReadOnlySequence<byte> str, Encoding encoding)
         {
-            this.WrappedWindow.Write(str, encoding);
-        }
-
-        public override void Write(byte[] str, Encoding encoding, ulong attrs, ushort pair)
-        {
-            this.WrappedWindow.Write(str, encoding, attrs, pair);
+            this.WrappedWindow.Write(in str, encoding);
         }
 
         public override void Write(ReadOnlySpan<byte> str, Encoding encoding, ulong attrs, ushort pair)
@@ -259,14 +249,9 @@ namespace NCurses.Core.Pad
             this.WrappedWindow.Write(str, encoding, attrs, pair);
         }
 
-        public override void Write(ReadOnlySequence<byte> str, Encoding encoding, ulong attrs, ushort pair)
+        public override void Write(in ReadOnlySequence<byte> str, Encoding encoding, ulong attrs, ushort pair)
         {
             this.WrappedWindow.Write(str, encoding, attrs, pair);
-        }
-
-        public override void Write(int nline, int ncol, byte[] str, Encoding encoding)
-        {
-            this.WrappedWindow.Write(nline, ncol, str, encoding);
         }
 
         public override void Write(int nline, int ncol, ReadOnlySpan<byte> str, Encoding encoding)
@@ -274,14 +259,9 @@ namespace NCurses.Core.Pad
             this.WrappedWindow.Write(nline, ncol, str, encoding);
         }
 
-        public override void Write(int nline, int ncol, ReadOnlySequence<byte> str, Encoding encoding)
+        public override void Write(int nline, int ncol, in ReadOnlySequence<byte> str, Encoding encoding)
         {
-            this.WrappedWindow.Write(nline, ncol, str, encoding);
-        }
-
-        public override void Write(int nline, int ncol, byte[] str, Encoding encoding, ulong attrs, ushort pair)
-        {
-            this.WrappedWindow.Write(nline, ncol, str, encoding, attrs, pair);
+            this.WrappedWindow.Write(nline, ncol, in str, encoding);
         }
 
         public override void Write(int nline, int ncol, ReadOnlySpan<byte> str, Encoding encoding, ulong attrs, ushort pair)
@@ -289,9 +269,9 @@ namespace NCurses.Core.Pad
             this.WrappedWindow.Write(nline, ncol, str, encoding, attrs, pair);
         }
 
-        public override void Write(int nline, int ncol, ReadOnlySequence<byte> str, Encoding encoding, ulong attrs, ushort pair)
+        public override void Write(int nline, int ncol, in ReadOnlySequence<byte> str, Encoding encoding, ulong attrs, ushort pair)
         {
-            this.WrappedWindow.Write(nline, ncol, str, encoding, attrs, pair);
+            this.WrappedWindow.Write(nline, ncol, in str, encoding, attrs, pair);
         }
 
         public override bool ReadKey(out char ch, out Key key)
@@ -374,6 +354,11 @@ namespace NCurses.Core.Pad
             return this.WrappedWindow.ExtractChar();
         }
 
+        public override char ExtractChar(INCursesChar @char)
+        {
+            return this.WrappedWindow.ExtractChar(@char);
+        }
+
         public override char ExtractChar(int nline, int ncol)
         {
             return this.WrappedWindow.ExtractChar(nline, ncol);
@@ -434,7 +419,7 @@ namespace NCurses.Core.Pad
             this.WrappedWindow.ExtractString(nline, ncol, out charsWithAttributes, maxChars);
         }
 
-        public override INCursesChar CreateChar(char ch)
+        public override IChar CreateChar(char ch)
         {
             return this.WrappedWindow.CreateChar(ch);
         }
@@ -449,12 +434,12 @@ namespace NCurses.Core.Pad
             return this.WrappedWindow.CreateChar(ch, attrs, pair);
         }
 
-        public override INCursesCharString CreateString(string str)
+        public override ICharString CreateString(string str)
         {
             return this.WrappedWindow.CreateString(str);
         }
 
-        public override INCursesCharString CreateString(ReadOnlySpan<char> str)
+        public override ICharString CreateString(ReadOnlySpan<char> str)
         {
             return this.WrappedWindow.CreateString(str);
         }
@@ -524,9 +509,104 @@ namespace NCurses.Core.Pad
             this.WrappedWindow.Write(str, maxLength, encoding);
         }
 
-        public override void Write(ReadOnlySequence<byte> str, int maxLength, Encoding encoding)
+        public override void Write(in ReadOnlySequence<byte> str, int maxLength, Encoding encoding)
         {
-            this.WrappedWindow.Write(str, maxLength, encoding);
+            this.WrappedWindow.Write(in str, maxLength, encoding);
+        }
+
+        public override void Write(ReadOnlySpan<byte> str)
+        {
+            this.WrappedWindow.Write(str);
+        }
+
+        public override void Write(in ReadOnlySequence<byte> str)
+        {
+            this.WrappedWindow.Write(in str);
+        }
+
+        public override void Write(ReadOnlySpan<byte> str, ulong attrs, ushort pair)
+        {
+            this.WrappedWindow.Write(str, attrs, pair);
+        }
+
+        public override void Write(in ReadOnlySequence<byte> str, ulong attrs, ushort pair)
+        {
+            this.WrappedWindow.Write(in str, attrs, pair);
+        }
+
+        public override void Write(int nline, int ncol, ReadOnlySpan<byte> str)
+        {
+            this.WrappedWindow.Write(nline, ncol, str);
+        }
+
+        public override void Write(int nline, int ncol, in ReadOnlySequence<byte> str)
+        {
+            this.WrappedWindow.Write(nline, ncol, in str);
+        }
+
+        public override void Write(int nline, int ncol, ReadOnlySpan<byte> str, ulong attrs, ushort pair)
+        {
+            this.WrappedWindow.Write(nline, ncol, str, attrs, pair);
+        }
+
+        public override void Write(int nline, int ncol, in ReadOnlySequence<byte> str, ulong attrs, ushort pair)
+        {
+            this.WrappedWindow.Write(nline, ncol, in str, attrs, pair);
+        }
+
+        public override ICharString CreateString(ReadOnlySpan<byte> str)
+        {
+            return this.WrappedWindow.CreateString(str);
+        }
+
+        public override ICharString CreateString(in ReadOnlySequence<byte> str)
+        {
+            return this.WrappedWindow.CreateString(in str);
+        }
+
+        public override ICharString CreateString(in ReadOnlySequence<byte> str, Encoding encoding)
+        {
+            return this.WrappedWindow.CreateString(in str);
+        }
+
+        public override INCursesCharString CreateString(ReadOnlySpan<byte> str, ulong attrs)
+        {
+            return this.WrappedWindow.CreateString(str, attrs);
+        }
+
+        public override INCursesCharString CreateString(in ReadOnlySequence<byte> str, ulong attrs)
+        {
+            return this.WrappedWindow.CreateString(in str, attrs);
+        }
+
+        public override INCursesCharString CreateString(in ReadOnlySequence<byte> str, Encoding encoding, ulong attrs)
+        {
+            return this.WrappedWindow.CreateString(in str, encoding, attrs);
+        }
+
+        public override INCursesCharString CreateString(ReadOnlySpan<byte> str, ulong attrs, ushort pair)
+        {
+            return this.WrappedWindow.CreateString(str, attrs, pair);
+        }
+
+        public override INCursesCharString CreateString(in ReadOnlySequence<byte> str, ulong attrs, ushort pair)
+        {
+            return this.WrappedWindow.CreateString(in str, attrs, pair);
+        }
+
+        public override INCursesCharString CreateString(in ReadOnlySequence<byte> str, Encoding encoding, ulong attrs, ushort pair)
+        {
+            return this.WrappedWindow.CreateString(in str, encoding, attrs, pair);
+        }
+
+        public override void Write(ReadOnlySpan<byte> str, int maxLength)
+        {
+            this.WrappedWindow.Write(str, maxLength);
+        }
+
+        public override void Write(in ReadOnlySequence<byte> str, int maxLength)
+        {
+            this.WrappedWindow.Write(in str, maxLength);
         }
 
         public override void Dispose()

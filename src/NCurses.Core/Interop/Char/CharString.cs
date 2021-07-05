@@ -14,179 +14,20 @@ namespace NCurses.Core.Interop.Char
     internal struct CharString<TChar> : ISingleByteCharString, IEquatable<CharString<TChar>>
         where TChar : unmanaged, ISingleByteChar, IEquatable<TChar>
     {
-        public unsafe Span<byte> ByteSpan =>
-            this.BufferArray is null ? new Span<byte>(this.BufferPointer, this.BufferLength) : new Span<byte>(this.BufferArray, 0, this.BufferLength);
-        public unsafe Span<TChar> CharSpan =>
-            this.BufferArray is null ? new Span<TChar>(this.BufferPointer, this.BufferLength / Marshal.SizeOf<TChar>()) : MemoryMarshal.Cast<byte, TChar>(this.ByteSpan);
+        public Span<byte> ByteSpan => MemoryMarshal.AsBytes(this._buffer.Span);
+        public Span<TChar> CharSpan => this._buffer.Span;
 
-        public int Length { get; }
+        public ref TChar GetPinnableReference() => ref this._buffer.Span.GetPinnableReference();
+        public int Length => this._buffer.Length;
 
-        public ref TChar GetPinnableReference() => ref this.CharSpan.GetPinnableReference();
+        public int CharLength => this._buffer.Length - 1; // actual character length
+        int ICharString.Length => this._buffer.Length - 1; // actual character length
 
-        private unsafe byte* BufferPointer;
-        private byte[] BufferArray;
-        private int BufferLength;
-        
+        private Memory<TChar> _buffer;
 
-        public unsafe CharString(
-            byte* buffer,
-            int bufferLength,
-            string str)
+        public CharString(Memory<TChar> buffer)
         {
-            this.BufferPointer = buffer;
-            this.BufferLength = bufferLength;
-            this.BufferArray = null;
-            this.Length = str.Length;
-
-            CreateCharString(new Span<byte>(buffer, bufferLength), str.AsSpan());
-        }
-
-        public unsafe CharString(
-            byte* buffer,
-            int bufferLength,
-            ReadOnlySpan<char> str)
-        {
-            this.BufferPointer = buffer;
-            this.BufferLength = bufferLength;
-            this.BufferArray = null;
-            this.Length = str.Length;
-
-            CreateCharString(new Span<byte>(buffer, bufferLength), str);
-        }
-
-        public unsafe CharString(
-            byte[] buffer,
-            int bufferLength,
-            string str)
-        {
-            this.BufferArray = buffer;
-            this.BufferPointer = (byte*)0;
-            this.BufferLength = bufferLength;
-            this.Length = str.Length;
-
-            CreateCharString(new Span<byte>(buffer), str.AsSpan());
-        }
-
-        public unsafe CharString(
-            byte[] buffer,
-            int bufferLength,
-            ReadOnlySpan<char> str)
-        {
-            this.BufferArray = buffer;
-            this.BufferPointer = (byte*)0;
-            this.BufferLength = bufferLength;
-            this.Length = str.Length;
-
-            CreateCharString(new Span<byte>(buffer), str);
-        }
-
-        public unsafe CharString(
-            byte* buffer, 
-            int bufferLength,
-            int stringLength)
-        {
-            this.BufferPointer = buffer;
-            this.BufferLength = bufferLength;
-            this.BufferArray = null;
-            this.Length = stringLength;
-        }
-
-        public unsafe CharString(
-            byte[] buffer,
-            int bufferLength,
-            int stringLength)
-        {
-            this.BufferArray = buffer;
-            this.BufferPointer = (byte*)0;
-            this.BufferLength = bufferLength;
-            this.Length = stringLength;
-        }
-
-        public unsafe CharString(ref TChar strRef)
-        {
-            TChar* wideArr = (TChar*)Unsafe.AsPointer<TChar>(ref strRef);
-
-            this.BufferPointer = (byte*)wideArr;
-            this.Length = FindStringLength(wideArr, out this.BufferLength);
-            this.BufferArray = null;
-        }
-
-        private static unsafe void CreateCharString(
-            Span<byte> buffer,
-            ReadOnlySpan<char> charArray)
-        {
-            Span<TChar> charString = MemoryMarshal.Cast<byte, TChar>(buffer);
-
-            fixed (char* originalChars = charArray)
-            {
-                int bytesUsed = 0, charsUsed = 0;
-                bool completed = false;
-
-                lock (NativeNCurses.SyncRoot)
-                {
-                    Encoder encoder = NativeNCurses.SingleByteEncoder;
-                    encoder.Reset();
-
-                    int byteCount = encoder.GetByteCount(originalChars, charArray.Length, false);
-                    byte* bytePtr = stackalloc byte[byteCount];
-
-                    encoder.Convert(
-                        originalChars,
-                        charArray.Length,
-                        bytePtr,
-                        byteCount,
-                        true,
-                        out charsUsed,
-                        out bytesUsed,
-                        out completed);
-
-                    if (!completed)
-                    {
-                        throw new InvalidOperationException("Could not complete encoding string");
-                    }
-
-                    for (int i = 0; i < byteCount; i++)
-                    {
-                        charString[i] = CharFactoryInternal<TChar>.CreateCharFromByte(bytePtr[i]);
-                    }
-                }
-            }
-        }
-
-        internal unsafe static int FindStringLength(TChar* strArr, out int byteLength)
-        {
-            TChar zero = CharFactoryInternal<TChar>.Instance.GetNativeEmptyCharInternal();
-            TChar val;
-
-            int length = 0;
-
-            while (true)
-            {
-                val = *(strArr + (length++ * Marshal.SizeOf<TChar>()));
-                if (zero.Equals(val))
-                {
-                    break;
-                }
-            }
-
-            byteLength = length * Marshal.SizeOf<TChar>();
-            return --length;
-        }
-
-        internal static int FindStringLength(Span<TChar> str, out int byteLength)
-        {
-            TChar zero = CharFactoryInternal<TChar>.Instance.GetNativeEmptyCharInternal();
-
-            int length = str.IndexOf(zero);
-
-            if (length == -1)
-            {
-                length = str.Length;
-            }
-
-            byteLength = length * Marshal.SizeOf<TChar>();
-
-            return length;
+            this._buffer = buffer;
         }
 
         IEnumerator IEnumerable.GetEnumerator() => new CharStringEnumerator(this);
@@ -234,33 +75,7 @@ namespace NCurses.Core.Interop.Char
         }
 
         public override string ToString()
-        {
-            int length = FindStringLength(this.CharSpan, out int byteLength);
-            if (length == 0)
-            {
-                return string.Empty;
-            }
-
-            unsafe
-            {
-                Span<byte> bSpan = this.ByteSpan.Slice(0, length * Marshal.SizeOf<TChar>());
-                char* charArr = stackalloc char[length];
-
-                lock (NativeNCurses.SyncRoot)
-                {
-                    Decoder decoder = NativeNCurses.SingleByteDecoder;
-                    decoder.Reset();
-
-                    fixed (byte* b = bSpan)
-                    {
-                        decoder.GetChars(b, bSpan.Length, charArr, length, true);
-                    }
-                }
-
-                ReadOnlySpan<char> charSpan = new ReadOnlySpan<char>(charArr, length);
-                return charSpan.ToString();
-            }
-        }
+            => CharFactory<TChar>.GenerateString(this._buffer);
 
         public override int GetHashCode()
         {

@@ -21,7 +21,7 @@ namespace NCurses.Core.Interop
     internal class NativeWindowInternal<TMultiByte, TWideChar, TSingleByte, TChar, TMouseEvent>
             : INativeWindowWrapper<
                 TMultiByte,
-                MultiByteCharString<TMultiByte>,
+                MultiByteCharString<TMultiByte, TWideChar, TSingleByte>,
                 TWideChar,
                 WideCharString<TWideChar>,
                 TSingleByte,
@@ -1642,7 +1642,7 @@ namespace NCurses.Core.Interop
         /// <para />native method wrapped with verification.
         /// </summary>
         /// <param name="window">A pointer to a window</param>
-        public void wadd_wchnstr(WindowBaseSafeHandle window, in MultiByteCharString<TMultiByte> wchStr, int n)
+        public void wadd_wchnstr(WindowBaseSafeHandle window, in MultiByteCharString<TMultiByte, TWideChar, TSingleByte> wchStr, int n)
         {
             MultiByteNCursesWrapper.wadd_wchnstr(window, in wchStr, n);
         }
@@ -1654,7 +1654,7 @@ namespace NCurses.Core.Interop
         /// <para />native method wrapped with verification.
         /// </summary>
         /// <param name="window">A pointer to a window</param>
-        public void wadd_wchstr(WindowBaseSafeHandle window, in MultiByteCharString<TMultiByte> wchStr)
+        public void wadd_wchstr(WindowBaseSafeHandle window, in MultiByteCharString<TMultiByte, TWideChar, TSingleByte> wchStr)
         {
             MultiByteNCursesWrapper.wadd_wchstr(window, in wchStr);
         }
@@ -1822,7 +1822,7 @@ namespace NCurses.Core.Interop
         /// <para />native method wrapped with verification.
         /// </summary>
         /// <param name="window">A pointer to a window</param>
-        public void win_wchnstr(WindowBaseSafeHandle window, ref MultiByteCharString<TMultiByte> wchStr, int n)
+        public void win_wchnstr(WindowBaseSafeHandle window, ref MultiByteCharString<TMultiByte, TWideChar, TSingleByte> wchStr, int n)
         {
             MultiByteNCursesWrapper.win_wchnstr(window, ref wchStr, n);
         }
@@ -1834,7 +1834,7 @@ namespace NCurses.Core.Interop
         /// <para />native method wrapped with verification.
         /// </summary>
         /// <param name="window">A pointer to a window</param>
-        public void win_wchstr(WindowBaseSafeHandle window, ref MultiByteCharString<TMultiByte> wchStr)
+        public void win_wchstr(WindowBaseSafeHandle window, ref MultiByteCharString<TMultiByte, TWideChar, TSingleByte> wchStr)
         {
             MultiByteNCursesWrapper.win_wchstr(window, ref wchStr);
         }
@@ -1919,7 +1919,7 @@ namespace NCurses.Core.Interop
         /// <para />native method wrapped with verification.
         /// </summary>
         /// <param name="window">A pointer to a window</param>
-        public void mvwadd_wchnstr(WindowBaseSafeHandle window, int y, int x, in MultiByteCharString<TMultiByte> wchStr, int n)
+        public void mvwadd_wchnstr(WindowBaseSafeHandle window, int y, int x, in MultiByteCharString<TMultiByte, TWideChar, TSingleByte> wchStr, int n)
         {
             MultiByteNCursesWrapper.mvwadd_wchnstr(window, y, x, wchStr, n);
         }
@@ -1931,7 +1931,7 @@ namespace NCurses.Core.Interop
         /// <para />native method wrapped with verification.
         /// </summary>
         /// <param name="window">A pointer to a window</param>
-        public void mvwadd_wchstr(WindowBaseSafeHandle window, int y, int x, in MultiByteCharString<TMultiByte> wchStr)
+        public void mvwadd_wchstr(WindowBaseSafeHandle window, int y, int x, in MultiByteCharString<TMultiByte, TWideChar, TSingleByte> wchStr)
         {
             MultiByteNCursesWrapper.mvwadd_wchstr(window, y, x, wchStr);
         }
@@ -2027,7 +2027,7 @@ namespace NCurses.Core.Interop
         /// <para />native method wrapped with verification.
         /// </summary>
         /// <param name="wcval">array reference to store the complex characters in</param>
-        public void mvwin_wchnstr(WindowBaseSafeHandle window, int y, int x, ref MultiByteCharString<TMultiByte> wchStr, int n)
+        public void mvwin_wchnstr(WindowBaseSafeHandle window, int y, int x, ref MultiByteCharString<TMultiByte, TWideChar, TSingleByte> wchStr, int n)
         {
             MultiByteNCursesWrapper.mvwin_wchnstr(window, y, x, ref wchStr, n);
         }
@@ -2040,7 +2040,7 @@ namespace NCurses.Core.Interop
         /// </summary>
         /// <param name="y">the line number to move to</param>
         /// <param name="x">the column number to move to</param>
-        public void mvwin_wchstr(WindowBaseSafeHandle window, int y, int x, ref MultiByteCharString<TMultiByte> wchStr)
+        public void mvwin_wchstr(WindowBaseSafeHandle window, int y, int x, ref MultiByteCharString<TMultiByte, TWideChar, TSingleByte> wchStr)
         {
             MultiByteNCursesWrapper.mvwin_wchstr(window, y, x, ref wchStr);
         }
@@ -2182,13 +2182,13 @@ namespace NCurses.Core.Interop
 
         public void mvwadd_wchnstr(WindowBaseSafeHandle win, int y, int x, in IMultiByteNCursesCharString wchStr, int n)
         {
-            MultiByteCharString<TMultiByte> casted = this.MultiByteNCursesWrapper.CastString(wchStr);
+            MultiByteCharString<TMultiByte, TWideChar, TSingleByte> casted = this.MultiByteNCursesWrapper.CastString(wchStr);
             this.mvwadd_wchnstr(win, y, x, in casted, n);
         }
 
         public void mvwadd_wchstr(WindowBaseSafeHandle win, int y, int x, in IMultiByteNCursesCharString wchStr)
         {
-            MultiByteCharString<TMultiByte> casted = this.MultiByteNCursesWrapper.CastString(wchStr);
+            MultiByteCharString<TMultiByte, TWideChar, TSingleByte> casted = this.MultiByteNCursesWrapper.CastString(wchStr);
             this.mvwadd_wchstr(win, y, x, in casted);
         }
 
@@ -2206,13 +2206,13 @@ namespace NCurses.Core.Interop
 
         public void mvwin_wchnstr(WindowBaseSafeHandle win, int y, int x, ref IMultiByteNCursesCharString wchStr, int n)
         {
-            MultiByteCharString<TMultiByte> casted = this.MultiByteNCursesWrapper.CastString(wchStr);
+            MultiByteCharString<TMultiByte, TWideChar, TSingleByte> casted = this.MultiByteNCursesWrapper.CastString(wchStr);
             this.mvwin_wchnstr(win, y, x, ref casted, n);
         }
 
         public void mvwin_wchstr(WindowBaseSafeHandle win, int y, int x, ref IMultiByteNCursesCharString wchStr)
         {
-            MultiByteCharString<TMultiByte> casted = this.MultiByteNCursesWrapper.CastString(wchStr);
+            MultiByteCharString<TMultiByte, TWideChar, TSingleByte> casted = this.MultiByteNCursesWrapper.CastString(wchStr);
             this.mvwin_wchstr(win, y, x, ref casted);
         }
 
@@ -2236,13 +2236,13 @@ namespace NCurses.Core.Interop
 
         public void wadd_wchnstr(WindowBaseSafeHandle win, in IMultiByteNCursesCharString wchStr, int n)
         {
-            MultiByteCharString<TMultiByte> casted = this.MultiByteNCursesWrapper.CastString(wchStr);
+            MultiByteCharString<TMultiByte, TWideChar, TSingleByte> casted = this.MultiByteNCursesWrapper.CastString(wchStr);
             this.wadd_wchnstr(win, in casted, n);
         }
 
         public void wadd_wchstr(WindowBaseSafeHandle win, in IMultiByteNCursesCharString wchStr)
         {
-            MultiByteCharString<TMultiByte> casted = this.MultiByteNCursesWrapper.CastString(wchStr);
+            MultiByteCharString<TMultiByte, TWideChar, TSingleByte> casted = this.MultiByteNCursesWrapper.CastString(wchStr);
             this.wadd_wchstr(win, in casted);
         }
 
@@ -2297,13 +2297,13 @@ namespace NCurses.Core.Interop
 
         public void win_wchnstr(WindowBaseSafeHandle win, ref IMultiByteNCursesCharString wchStr, int n)
         {
-            MultiByteCharString<TMultiByte> casted = this.MultiByteNCursesWrapper.CastString(wchStr);
+            MultiByteCharString<TMultiByte, TWideChar, TSingleByte> casted = this.MultiByteNCursesWrapper.CastString(wchStr);
             this.win_wchnstr(win, ref casted, n);
         }
 
         public void win_wchstr(WindowBaseSafeHandle win, ref IMultiByteNCursesCharString wchStr)
         {
-            MultiByteCharString<TMultiByte> casted = this.MultiByteNCursesWrapper.CastString(wchStr);
+            MultiByteCharString<TMultiByte, TWideChar, TSingleByte> casted = this.MultiByteNCursesWrapper.CastString(wchStr);
             this.win_wchstr(win, ref casted);
         }
 

@@ -2,7 +2,6 @@
 using System.Text;
 using System.Runtime.InteropServices;
 using System.Runtime.CompilerServices;
-using System.Collections.Generic;
 
 using NCurses.Core.Interop.MultiByte;
 using NCurses.Core.Interop.WideChar;
@@ -118,41 +117,21 @@ namespace NCurses.Core.Interop
         }
 
         #region Platform specific properties
-        internal static Encoding Encoding { get; }
-        internal static Encoder MultiByteEncoder { get; }
-        internal static Decoder MultiByteDecoder { get; }
-
-        internal static Encoding SingleByteEncoding { get; }
-        internal static Encoder SingleByteEncoder { get; }
-        internal static Decoder SingleByteDecoder { get; }
-
         internal static INativeLoader NativeLoader { get; }
         internal static INCursesWrapper NCursesWrapper { get; }
         internal static ICustomTypeWrapper NCursesCustomTypeWrapper { get; }
         #endregion
 
-        [ThreadStatic]
-        private static byte[] Buffer;
-
         static NativeNCurses()
         {
             if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
             {
-                Encoding = Encoding.Unicode;
                 NativeLoader = new WindowsLoader();
             }
             else
             {
-                Encoding = Encoding.UTF32;
                 NativeLoader = new LinuxLoader();
             }
-
-            MultiByteDecoder = Encoding.GetDecoder();
-            MultiByteEncoder = Encoding.GetEncoder();
-
-            SingleByteEncoding = Encoding.ASCII;
-            SingleByteDecoder = SingleByteEncoding.GetDecoder();
-            SingleByteEncoder = SingleByteEncoding.GetEncoder();
 
             NCursesWrapper = (INCursesWrapper)Activator.CreateInstance(Constants.NCursesWrapper);
 
@@ -408,6 +387,7 @@ namespace NCurses.Core.Interop
 
         #region unsafe helper methods
         //source: https://stackoverflow.com/questions/43289/comparing-two-byte-arrays-in-net
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         internal static unsafe bool EqualBytesLongUnrolled(byte* bytes1, byte* bytes2, int length)
         {
             int rem = length % (sizeof(long) * 16);
@@ -442,21 +422,65 @@ namespace NCurses.Core.Interop
         }
         #endregion
 
-        #region Buffer "pooling"
-        internal static byte[] GetBuffer(int byteLength = Constants.MAX_STRING_LENGTH)
+        #region Buffers
+        internal static BufferState<TChar> CreatePoolBuffer<TChar>(CharEncoderState encoderState, bool addNullTerminator = true)
+            where TChar : unmanaged, IChar
         {
-            if (Buffer is null)
+            BufferState<TChar> bufferState = new BufferState<TChar>(encoderState, addNullTerminator);
+
+            if (addNullTerminator)
             {
-                Buffer = new byte[Constants.MAX_STRING_LENGTH];
+                bufferState.Memory.Span[encoderState.BufferLength] = default;
             }
 
-            if (byteLength <= Buffer.Length)
+            return bufferState;
+        }
+            
+
+        internal static BufferState<TChar> CreateArrayBuffer<TChar>(CharEncoderState encoderState, bool addNullTerminator = true)
+            where TChar : unmanaged, IChar
+        {
+            BufferState<TChar> bufferState = new BufferState<TChar>(encoderState, new TChar[encoderState.BufferLength + (addNullTerminator ? 1 : 0)]);
+
+            if (addNullTerminator)
             {
-                Array.Clear(Buffer, 0, Buffer.Length);
-                return Buffer;
+                bufferState.Memory.Span[encoderState.BufferLength] = default;
             }
 
-            return new byte[byteLength];
+            return bufferState;
+        }
+            
+        #endregion
+
+        #region string length
+        /// <summary>
+        /// Find the length, excluding (!) the null terminator
+        /// </summary>
+        /// <param name="strRef">Reference to the string reference</param>
+        /// <returns>The string length</returns>
+        internal static int FindStringLength<TChar>(ref TChar strRef)
+            where TChar : unmanaged, IEquatable<TChar>
+        {
+            TChar zero = default, val;
+            int length = 0;
+
+            unsafe
+            {
+                TChar* strPtr = (TChar*)Unsafe.AsPointer<TChar>(ref strRef);
+
+                while (true)
+                {
+                    val = *strPtr;
+
+                    if (zero.Equals(val))
+                    {
+                        return length;
+                    }
+
+                    strPtr = strPtr + 1;
+                    length++;
+                }
+            }
         }
         #endregion
     }
