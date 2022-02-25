@@ -1,12 +1,12 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
-    <TargetFramework>netcoreapp2.1</TargetFramework>
+    <TargetFramework>netcoreapp3.1</TargetFramework>
     <DebugType>portable</DebugType>
     <AssemblyName>NCurses.Core.Tests</AssemblyName>
     <PackageId>NCurses.Core.Tests</PackageId>
     <OutputType>Exe</OutputType>
-	  <RuntimeIdentifiers>ubuntu.16.04-x64;win10-x64;debian.9-x64;ubuntu.18.04-x64;win10-x86;win10-x64</RuntimeIdentifiers>
+	<RuntimeIdentifiers>ubuntu.16.04-x64;win10-x64;debian.9-x64;ubuntu.18.04-x64;win10-x86;win10-x64;debian.10-x64</RuntimeIdentifiers>
   </PropertyGroup>
 
   <ItemGroup>
@@ -24,7 +24,7 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="xunit" Version="2.4.0" />
+    <PackageReference Include="xunit" Version="2.4.1" />
   </ItemGroup>
 
   <!--  
@@ -40,7 +40,7 @@
   -->
   <ItemGroup Condition="'$(OS)' == 'Windows_NT' AND '$(EnableProfiling)' == 'true'">
     <PackageReference Include="JetBrains.dotMemoryUnit" Version="3.1.20200127.214830" />
-    <PackageReference Include="xunit.runner.console" Version="2.4.0" />
+    <PackageReference Include="xunit.runner.console" Version="2.4.1" />
 
     <Compile Remove="MultiByte\*" />
     <Compile Remove="SingleByte\*" />
@@ -58,8 +58,8 @@
   </ItemGroup>
   
   <ItemGroup Condition="'$(VisualCheck)' == 'false'">
-    <PackageReference Include="Microsoft.NET.Test.Sdk" Version="16.2.0" />
-    <PackageReference Include="xunit.runner.visualstudio" Version="2.4.0" />
+    <PackageReference Include="Microsoft.NET.Test.Sdk" Version="16.9.4" />
+    <PackageReference Include="xunit.runner.visualstudio" Version="2.4.3" />
     <Content Include="xunit.runner.json" CopyToOutputDirectory="PreserveNewest" />
     
     <Compile Remove="Program.cs" />
@@ -70,7 +70,7 @@
     So you can attach a debugger
   -->
   <ItemGroup Condition="'$(VisualCheck)' == 'true'">
-    <PackageReference Include="xunit.runner.utility" Version="2.4.0" />
+    <PackageReference Include="xunit.runner.utility" Version="2.4.1" />
 
     <Compile Remove="MultiByte\*" />
     <Compile Remove="SingleByte\*" />

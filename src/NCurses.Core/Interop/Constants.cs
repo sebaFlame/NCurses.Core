@@ -73,7 +73,6 @@ namespace NCurses.Core.Interop
                 case "ubuntu.18.04-x64":
                 case "debian.8-x64":
                 case "debian.9-x64":
-				case "debian.10-x64":
                     DLLNAME = "libncursesw.so.5.9";
                     DLLPANELNAME = "libpanelw.so.5.9";
                     SIZEOF_WCHAR_T = 4;
