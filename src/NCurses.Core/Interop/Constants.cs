@@ -59,7 +59,7 @@ namespace NCurses.Core.Interop
                     DLLPANELNAME = "libpanelw6";
                     SIZEOF_WCHAR_T = 2;
                     CHTYPE_TYPE = typeof(UInt32);
-#if DEBUG && !DISABLESOURCEGENERATION
+#if (DEBUG && !DISABLESOURCEGENERATION) || !DEBUG
                     SingleByteChar = typeof(SingleByteChar_UInt32);
                     MultiByteChar = typeof(MultiByteChar_SingleByteChar_UInt32_2);
                     WideChar = typeof(WideChar_2);
@@ -77,7 +77,7 @@ namespace NCurses.Core.Interop
                     DLLPANELNAME = "libpanelw.so.5.9";
                     SIZEOF_WCHAR_T = 4;
                     CHTYPE_TYPE = typeof(UInt64);
-#if DEBUG && !DISABLESOURCEGENERATION
+#if (DEBUG && !DISABLESOURCEGENERATION) || !DEBUG
                     SingleByteChar = typeof(SingleByteChar_UInt64);
                     MultiByteChar = typeof(MultiByteChar_SingleByteChar_UInt64_4);
                     WideChar = typeof(WideChar_4);
@@ -92,7 +92,7 @@ namespace NCurses.Core.Interop
                     DLLPANELNAME = "libpanelw.so.6";
                     SIZEOF_WCHAR_T = 4;
                     CHTYPE_TYPE = typeof(UInt32);
-#if DEBUG && !DISABLESOURCEGENERATION
+#if (DEBUG && !DISABLESOURCEGENERATION) || !DEBUG
                     SingleByteChar = typeof(SingleByteChar_UInt32);
                     MultiByteChar = typeof(MultiByteChar_SingleByteChar_UInt32_4);
                     WideChar = typeof(WideChar_4);
