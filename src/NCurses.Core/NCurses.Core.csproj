@@ -20,7 +20,7 @@
 	</PropertyGroup>
 
 	<!-- Source Generator -->
-	<ItemGroup Condition="'$(DisableSourceGeneration)' != 'true' AND '$(Configuration)' == 'Debug'">
+	<ItemGroup Condition="('$(DisableSourceGeneration)' != 'true' AND '$(Configuration)' == 'Debug') OR '$(Configuration)' != 'Debug'">
 		<ProjectReference Include="..\NCurses.Core.Generator\NCurses.Core.Generator.csproj" OutputItemType="Analyzer" ReferenceOutputAssembly="false" />
 	</ItemGroup>
 	

@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Text;
 
-#if DEBUG && !DISABLESOURCEGENERATION
+#if (DEBUG && !DISABLESOURCEGENERATION) || !DEBUG
 using NCurses.Core.Generated;
 #endif
 
