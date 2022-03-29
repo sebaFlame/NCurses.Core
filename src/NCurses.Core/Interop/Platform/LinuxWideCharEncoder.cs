@@ -124,6 +124,7 @@ namespace NCurses.Core.Interop.Platform
                         throw new InvalidOperationException("Encoding conversion did not succeed");
                     }
 
+                    encoderState.IntermediateBuffer[bytesUsed] = 0;
                     strSpan = new ReadOnlySpan<byte>(encoderState.IntermediateBuffer, 0, bytesUsed + 1); //add null terminator
                     encoderState.IntermadiateBufferLength = strSpan.Length;
                 }
