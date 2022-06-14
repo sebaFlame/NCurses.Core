@@ -1,1 +1,0 @@
-dotnet.exe "%UserProfile%\.nuget\packages\xunit.runner.console\2.4.0\tools\netcoreapp2.0\xunit.console.dll" .\profiling\NCurses.Core.Tests.dll

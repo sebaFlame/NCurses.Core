@@ -1,0 +1,10 @@
+<Project TreatAsLocalProperty="TaskFolder;TaskAssembly">
+  <PropertyGroup>
+    <TaskFolder Condition=" '$(MSBuildRuntimeType)' == 'Core' ">netcoreapp3.1</TaskFolder>
+    <TaskAssembly>$(MSBuildThisFileDirectory)..\bin\$(Configuration)\$(TaskFolder)\NippyWard.NCurses.Tasks.dll</TaskAssembly>
+  </PropertyGroup>
+
+  <UsingTask TaskName="NippyWard.NCurses.Tasks.WebDownload" AssemblyFile="$(TaskAssembly)" />
+  <UsingTask TaskName="NippyWard.NCurses.Tasks.Unzip" AssemblyFile="$(TaskAssembly)" />
+  <UsingTask TaskName="NippyWard.NCurses.Tasks.LibraryVersionExtractor" AssemblyFile="$(TaskAssembly)" />
+</Project>

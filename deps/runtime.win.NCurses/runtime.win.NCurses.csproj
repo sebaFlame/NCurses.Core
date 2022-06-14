@@ -11,10 +11,10 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\NCurses.Core.Tasks\NCurses.Core.Tasks.csproj" PrivateAssets="All" />
+    <ProjectReference Include="..\NippyWard.NCurses.Tasks\NippyWard.NCurses.Tasks.csproj" PrivateAssets="All" />
   </ItemGroup>
 
-  <Import Project="..\NCurses.Core.Tasks\build\NCurses.Core.Tasks.props" />
+  <Import Project="..\NippyWard.NCurses.Tasks\build\NippyWard.NCurses.Tasks.props" />
 
   <PropertyGroup>
     <x86FileName>mingw32.zip</x86FileName>

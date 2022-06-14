@@ -1,0 +1,83 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>netcoreapp3.1</TargetFramework>
+    <DebugType>portable</DebugType>
+    <AssemblyName>NippyWard.NCurses.Tests</AssemblyName>
+    <PackageId>NippyWard.NCurses.Tests</PackageId>
+    <OutputType>Exe</OutputType>
+	<RuntimeIdentifiers>ubuntu.16.04-x64;win10-x64;debian.9-x64;ubuntu.18.04-x64;win10-x86;win10-x64;debian.10-x64</RuntimeIdentifiers>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\..\src\NippyWard.NCurses\NippyWard.NCurses.csproj" />
+  </ItemGroup>
+
+  <PropertyGroup>
+    <VisualCheck Condition="'$(VisualCheck)' == ''">false</VisualCheck>
+    <EnableProfiling Condition="'$(EnableProfiling)' == ''">false</EnableProfiling>
+  </PropertyGroup>
+
+  <!-- Profiling only available on Windows -->
+  <PropertyGroup Condition="'$(OS)' != 'Windows_NT' AND '$(EnableProfiling)' == 'true'">
+    <EnableProfiling>false</EnableProfiling>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="xunit" Version="2.4.1" />
+  </ItemGroup>
+
+  <!--  
+    - Publish NippyWard.NCurses.Tests to profiling directory
+        dotnet publish -o profiling
+    - Run the profiler using the wrapper script after publishing
+        %UserProfile%\.nuget\packages\jetbrains.dotmemoryunit\3.1.20200127.214830\lib\tools\dotMemoryUnit.exe .\profiling_wrapper.bat \-\-no-updates
+    - dotMemoryUnit shows output and if there was an exception and you can find the memory snapshots in
+        %UserProfile%\AppData\Local\Temp\dotMemoryUnitWorkspace
+      Ordered by timestamp. These can be opened by JetBrains dotMemory
+      You can also find log files in
+        %UserProfile%\AppData\Local\Temp\JetLogs
+  -->
+  <ItemGroup Condition="'$(OS)' == 'Windows_NT' AND '$(EnableProfiling)' == 'true'">
+    <PackageReference Include="JetBrains.dotMemoryUnit" Version="3.1.20200127.214830" />
+    <PackageReference Include="xunit.runner.console" Version="2.4.1" />
+
+    <Compile Remove="MultiByte\*" />
+    <Compile Remove="SingleByte\*" />
+    <Compile Remove="RipOffTest.cs" />
+    <Compile Remove="InitTest.cs" />
+  </ItemGroup>
+
+  <ItemGroup Condition="'$(EnableProfiling)' != 'true'">
+    <Compile Remove="GCTest.cs" />
+  </ItemGroup>
+  
+  <!-- import only when consumed -->
+  <ItemGroup Condition="'$(OS)' == 'Windows_NT'">
+    <PackageReference Include="runtime.win.NCurses" Version="6.2.20210116" />
+  </ItemGroup>
+  
+  <ItemGroup Condition="'$(VisualCheck)' == 'false'">
+    <PackageReference Include="Microsoft.NET.Test.Sdk" Version="16.9.4" />
+    <PackageReference Include="xunit.runner.visualstudio" Version="2.4.3" />
+    <Content Include="xunit.runner.json" CopyToOutputDirectory="PreserveNewest" />
+    
+    <Compile Remove="Program.cs" />
+  </ItemGroup>
+
+  <!-- 
+    Under Linux you have to test every test class 1 by 1 using Compile Remove/Include and the included Program.cs
+    So you can attach a debugger
+  -->
+  <ItemGroup Condition="'$(VisualCheck)' == 'true'">
+    <PackageReference Include="xunit.runner.utility" Version="2.4.1" />
+
+    <Compile Remove="MultiByte\*" />
+    <Compile Remove="SingleByte\*" />
+    <Compile Remove="RipOffTest.cs" /> 
+    <Compile Remove="InitTest.cs" />
+
+    <Compile Include="MultiByte\*.cs" />
+  </ItemGroup>
+
+</Project>
