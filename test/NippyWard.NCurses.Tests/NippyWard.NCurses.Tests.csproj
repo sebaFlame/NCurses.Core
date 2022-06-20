@@ -52,11 +52,6 @@
     <Compile Remove="GCTest.cs" />
   </ItemGroup>
   
-  <!-- import only when consumed -->
-  <ItemGroup Condition="'$(OS)' == 'Windows_NT'">
-    <PackageReference Include="runtime.win.NCurses" Version="6.2.20210116" />
-  </ItemGroup>
-  
   <ItemGroup Condition="'$(VisualCheck)' == 'false'">
     <PackageReference Include="Microsoft.NET.Test.Sdk" Version="16.9.4" />
     <PackageReference Include="xunit.runner.visualstudio" Version="2.4.3" />

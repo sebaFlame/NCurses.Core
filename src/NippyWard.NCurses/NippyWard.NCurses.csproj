@@ -23,6 +23,14 @@
 	<ItemGroup Condition="('$(DisableSourceGeneration)' != 'true' AND '$(Configuration)' == 'Debug') OR '$(Configuration)' != 'Debug'">
 		<ProjectReference Include="..\NippyWard.NCurses.Generator\NippyWard.NCurses.Generator.csproj" OutputItemType="Analyzer" ReferenceOutputAssembly="false" />
 	</ItemGroup>
+
+  <!-- nupkg -->
+  <ItemGroup>
+	  <Content Include="Directory.Build.props">
+	    <PackagePath>build/netstandard2.0/NippyWard.NCurses.props</PackagePath>
+	    <Pack>true</Pack>
+	  </Content>
+  </ItemGroup>
 	
   <!-- Microsoft.DotNet.PlatformAbstractions dependencies (unix) -->
   <ItemGroup>
