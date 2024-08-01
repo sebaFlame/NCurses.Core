@@ -42,7 +42,10 @@ namespace NippyWard.NCurses.Interop.MultiByte
             _ExtColorOffset = Marshal.SizeOf<TSingleByte>() + (Marshal.SizeOf<TWideChar>() * Constants.CCHARW_MAX);
 
             /* padding should always be after the chars field */
-            _ExtColorOffset = (_ExtColorOffset + mbType.StructLayoutAttribute.Pack / 2) / mbType.StructLayoutAttribute.Pack * mbType.StructLayoutAttribute.Pack;
+            if (mbType.StructLayoutAttribute.Pack > 0)
+            {
+                _ExtColorOffset = (_ExtColorOffset + mbType.StructLayoutAttribute.Pack / 2) / mbType.StructLayoutAttribute.Pack * mbType.StructLayoutAttribute.Pack;
+            }
 
             ConstructorInfo ctor;
             ParameterExpression par1, par2, par3;
