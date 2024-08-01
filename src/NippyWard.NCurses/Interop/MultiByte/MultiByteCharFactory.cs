@@ -39,13 +39,13 @@ namespace NippyWard.NCurses.Interop.MultiByte
             Type mbType = typeof(TMultiByte);
 
             _WideCharOffset = Marshal.SizeOf<TSingleByte>();
-            _ExtColorOffset = Marshal.SizeOf<TSingleByte>() + (Marshal.SizeOf<TWideChar>() * Constants.CCHARW_MAX);
 
-            /* padding should always be after the chars field */
-            if (mbType.StructLayoutAttribute.Pack > 0)
-            {
-                _ExtColorOffset = (_ExtColorOffset + mbType.StructLayoutAttribute.Pack / 2) / mbType.StructLayoutAttribute.Pack * mbType.StructLayoutAttribute.Pack;
-            }
+            /* 
+             * padding should always be after the chars field 
+             * so we start from the end of the struct minus
+             * the size of an int
+            */
+            _ExtColorOffset = Marshal.SizeOf<TMultiByte>() - Marshal.SizeOf<int>();
 
             ConstructorInfo ctor;
             ParameterExpression par1, par2, par3;
