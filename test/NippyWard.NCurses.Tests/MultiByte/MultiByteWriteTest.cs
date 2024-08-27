@@ -13,7 +13,8 @@ namespace NippyWard.NCurses.Tests.MultiByte
 {
     /* TODO:
      * Optimized ASCII path on Windows */
-    public class MultiByteWriteTest : WriteTest, IClassFixture<MultiByteStdScrState>
+    [Collection("Default")]
+    public class MultiByteWriteTest : WriteTest
     {
         protected override char TestChar => '\u263A';
         protected override string TestString => new string(
@@ -43,8 +44,8 @@ namespace NippyWard.NCurses.Tests.MultiByte
         private ReadOnlyMemory<byte> _utf8Memory;
         private ReadOnlySequence<byte> _utf8Sequence;
 
-        public MultiByteWriteTest(ITestOutputHelper testOutputHelper, MultiByteStdScrState multiByteStdScrState)
-            :base(testOutputHelper, multiByteStdScrState)
+        public MultiByteWriteTest(ITestOutputHelper testOutputHelper, StdScrState stdScrState)
+            :base(testOutputHelper, stdScrState)
         {
             TestSequenceSegment startSegment = null, endSegment = null;
 
@@ -93,6 +94,11 @@ namespace NippyWard.NCurses.Tests.MultiByte
 
             this._utf8Memory = new Memory<byte>(bytes);
             this._utf8Sequence = new ReadOnlySequence<byte>(startSegment, 0, endSegment, endSegment.Memory.Length);
+        }
+
+        protected override IWindow GenerateWindow(IWindow window)
+        {
+            return window.ToMultiByteWindow();
         }
 
         [Fact]

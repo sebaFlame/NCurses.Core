@@ -30,6 +30,9 @@ namespace NippyWard.NCurses.Interop
         public const int ERR = -1;
         public const int OK = 0;
 
+        public const int TRACE_SHIFT = 13;	/* number of bits in the trace masks */
+        public const int TRACE_MAXIMUM = ((1 << TRACE_SHIFT) - 1); /* maximum trace level */
+
         internal static Type SingleByteChar { get; }
         internal static Type MultiByteChar { get; }
         internal static Type WideChar { get; }

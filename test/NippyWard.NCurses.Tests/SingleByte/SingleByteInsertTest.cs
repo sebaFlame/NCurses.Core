@@ -9,16 +9,22 @@ using NippyWard.NCurses.Tests.Model;
 
 namespace NippyWard.NCurses.Tests.SingleByte
 {
-    public class SingleByteInsertTest : InsertTest, IClassFixture<SingleByteStdScrState>
+    [Collection("Default")]
+    public class SingleByteInsertTest : InsertTest
     {
         protected override char TestChar => 'a';
 
         protected override string TestString => "test";
 
-        public SingleByteInsertTest(ITestOutputHelper testOutputHelper, SingleByteStdScrState singleByteStdScrState)
-            : base(testOutputHelper, singleByteStdScrState)
+        public SingleByteInsertTest(ITestOutputHelper testOutputHelper, StdScrState stdScrState)
+            : base(testOutputHelper, stdScrState)
         {
 
+        }
+
+        protected override IWindow GenerateWindow(IWindow window)
+        {
+            return window.ToSingleByteWindow();
         }
     }
 }

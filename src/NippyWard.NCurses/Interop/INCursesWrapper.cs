@@ -419,6 +419,8 @@ namespace NippyWard.NCurses.Interop
         int touchline(WindowBaseSafeHandle window, int start, int count);
         //int touchwin(WINDOW *win);
         int touchwin(WindowBaseSafeHandle window);
+        //void trace(const unsigned int param);
+        void trace(uint param);
         //int typeahead(int fd);
         int typeahead(int fd);
         //int typeahead_sp(SCREEN* sp, int fd);

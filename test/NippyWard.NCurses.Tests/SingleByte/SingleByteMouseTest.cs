@@ -9,12 +9,18 @@ using NippyWard.NCurses.Tests.Model;
 
 namespace NippyWard.NCurses.Tests.SingleByte
 {
-    public class SingleByteMouseTest : MouseTest, IClassFixture<SingleByteStdScrState>
+    [Collection("Default")]
+    public class SingleByteMouseTest : MouseTest
     {
-        public SingleByteMouseTest(ITestOutputHelper testOutputHelper, SingleByteStdScrState singleByteStdScrState)
-            : base(testOutputHelper, singleByteStdScrState)
+        public SingleByteMouseTest(ITestOutputHelper testOutputHelper, StdScrState stdScrState)
+            : base(testOutputHelper, stdScrState)
         {
 
+        }
+
+        protected override IWindow GenerateWindow(IWindow window)
+        {
+            return window.ToSingleByteWindow();
         }
     }
 }

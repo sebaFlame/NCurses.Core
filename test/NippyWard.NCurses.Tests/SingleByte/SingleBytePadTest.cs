@@ -9,12 +9,18 @@ using NippyWard.NCurses.Tests.Model;
 
 namespace NippyWard.NCurses.Tests.SingleByte
 {
-    public class SingleBytePadTest : PadTest, IClassFixture<SingleByteStdScrState>
+    [Collection("Default")]
+    public class SingleBytePadTest : PadTest
     {
-        public SingleBytePadTest(ITestOutputHelper testOutputHelper, SingleByteStdScrState singleByteStdScrState)
-            : base(testOutputHelper, singleByteStdScrState)
+        public SingleBytePadTest(ITestOutputHelper testOutputHelper, StdScrState stdScrState)
+            : base(testOutputHelper, stdScrState)
         {
 
+        }
+
+        protected override IWindow GenerateWindow(IWindow window)
+        {
+            return window.ToSingleByteWindow();
         }
     }
 }

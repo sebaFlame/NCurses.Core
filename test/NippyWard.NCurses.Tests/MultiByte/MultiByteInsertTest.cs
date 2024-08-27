@@ -9,7 +9,8 @@ using NippyWard.NCurses.Tests.Model;
 
 namespace NippyWard.NCurses.Tests.MultiByte
 {
-    public class MultiByteInsertTest : InsertTest, IClassFixture<MultiByteStdScrState>
+    [Collection("Default")]
+    public class MultiByteInsertTest : InsertTest
     {
         protected override char TestChar => '\u263A';
         protected override string TestString => new string(
@@ -33,10 +34,15 @@ namespace NippyWard.NCurses.Tests.MultiByte
                 '\u049F'
             });
 
-        public MultiByteInsertTest(ITestOutputHelper testOutputHelper, MultiByteStdScrState multiByteStdScrState)
-            : base(testOutputHelper, multiByteStdScrState)
+        public MultiByteInsertTest(ITestOutputHelper testOutputHelper, StdScrState stdScrState)
+            : base(testOutputHelper, stdScrState)
         {
 
+        }
+
+        protected override IWindow GenerateWindow(IWindow window)
+        {
+            return window.ToMultiByteWindow();
         }
     }
 }

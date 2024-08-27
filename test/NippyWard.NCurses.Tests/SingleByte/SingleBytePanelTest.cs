@@ -9,10 +9,16 @@ using NippyWard.NCurses.Tests.Model;
 
 namespace NippyWard.NCurses.Tests.SingleByte
 {
-    public class SingleBytePanelTest : PanelTest, IClassFixture<SingleByteStdScrState>
+    [Collection("Default")]
+    public class SingleBytePanelTest : PanelTest
     {
-        public SingleBytePanelTest(ITestOutputHelper testOutputHelper, SingleByteStdScrState singleByteStdScrState)
-            : base(testOutputHelper, singleByteStdScrState)
+        public SingleBytePanelTest(ITestOutputHelper testOutputHelper, StdScrState stdScrState)
+            : base(testOutputHelper, stdScrState)
         { }
+
+        protected override IWindow GenerateWindow(IWindow window)
+        {
+            return window.ToSingleByteWindow();
+        }
     }
 }

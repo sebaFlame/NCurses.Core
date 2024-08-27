@@ -350,6 +350,18 @@ namespace NippyWard.NCurses.Interop
         }
         #endregion
 
+        #region trace
+        public static void TraceOn()
+        {
+            NCursesWrapper.trace(Constants.TRACE_MAXIMUM);
+        }
+
+        public static void TraceOff()
+        {
+            NCursesWrapper.trace(0);
+        }
+        #endregion
+
         #region ripoffline
         /// <summary>
         /// The ripoffline routine provides access to the same facility that  slk_init[see  curs_slk(3x)] uses to reduce the

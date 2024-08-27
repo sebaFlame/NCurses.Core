@@ -9,12 +9,18 @@ using NippyWard.NCurses.Tests.Model;
 
 namespace NippyWard.NCurses.Tests.MultiByte
 {
-    public class MultiBytePanelTest : PanelTest, IClassFixture<MultiByteStdScrState>
+    [Collection("Default")]
+    public class MultiBytePanelTest : PanelTest
     {
-        public MultiBytePanelTest(ITestOutputHelper testOutputHelper, MultiByteStdScrState multiByteStdScrState)
-            : base(testOutputHelper, multiByteStdScrState)
+        public MultiBytePanelTest(ITestOutputHelper testOutputHelper, StdScrState stdScrState)
+            : base(testOutputHelper, stdScrState)
         {
 
+        }
+
+        protected override IWindow GenerateWindow(IWindow window)
+        {
+            return window.ToMultiByteWindow();
         }
     }
 }

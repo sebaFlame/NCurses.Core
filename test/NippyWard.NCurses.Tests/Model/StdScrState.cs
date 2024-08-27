@@ -6,10 +6,8 @@ using Xunit;
 
 namespace NippyWard.NCurses.Tests.Model
 {
-    public abstract class StdScrState : IDisposable
+    public class StdScrState : IDisposable
     {
-        public abstract IWindow CurrentStandardScreen { get; }
-
         //works without NCurses intialization
         public bool SupportsUnicode => NCurses.UnicodeSupported;
 
@@ -41,11 +39,7 @@ namespace NippyWard.NCurses.Tests.Model
 
         public void Dispose()
         {
-            this.CurrentStandardScreen.Dispose();
-
             this.StdScr.Dispose();
-
-            NCurses.End();
         }
     }
 }

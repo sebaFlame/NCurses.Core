@@ -14,6 +14,12 @@ namespace NippyWard.NCurses.Tasks
         public static extern IntPtr LoadLibrary(string dllToLoad);
 
         [DllImport("kernel32.dll")]
+        public static extern bool FreeLibrary(IntPtr library);
+
+        [DllImport("kernel32.dll")]
+        public static extern IntPtr GetProcAddress(IntPtr hModule, string procName);
+
+        [DllImport("kernel32.dll")]
         public static extern bool SetDllDirectoryA(string lpPathName);
     }
 }

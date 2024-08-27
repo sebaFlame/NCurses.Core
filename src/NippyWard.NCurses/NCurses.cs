@@ -634,5 +634,15 @@ namespace NippyWard.NCurses
         {
             NCursesWrapper.reset_shell_mode();
         }
+
+        public static void TraceOn()
+        {
+            NativeNCurses.TraceOn();
+        }
+
+        public static void TraceOff()
+        {
+            NativeNCurses.TraceOff();
+        }
     }
 }

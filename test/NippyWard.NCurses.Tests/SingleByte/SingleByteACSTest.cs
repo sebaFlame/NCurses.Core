@@ -11,12 +11,18 @@ using NippyWard.NCurses.Interop;
 
 namespace NippyWard.NCurses.Tests.SingleByte
 {
-    public class SingleByteACSTest : ACSTest, IClassFixture<SingleByteStdScrState>
+    [Collection("Default")]
+    public class SingleByteACSTest : ACSTest
     {
-        public SingleByteACSTest(ITestOutputHelper testOutputHelper, SingleByteStdScrState singleByteStdScrState)
-            : base(testOutputHelper, singleByteStdScrState)
+        public SingleByteACSTest(ITestOutputHelper testOutputHelper, StdScrState stdScrState)
+            : base(testOutputHelper, stdScrState)
         {
 
+        }
+
+        protected override IWindow GenerateWindow(IWindow window)
+        {
+            return window.ToSingleByteWindow();
         }
 
         [Fact]

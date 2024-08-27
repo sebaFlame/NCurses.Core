@@ -9,14 +9,20 @@ using NippyWard.NCurses.Tests.Model;
 
 namespace NippyWard.NCurses.Tests.SingleByte
 {
-    public class SingleByteReadTest : ReadTest, IClassFixture<SingleByteStdScrState>
+    [Collection("Default")]
+    public class SingleByteReadTest : ReadTest
     {
         protected override char TestChar => 'a';
 
-        public SingleByteReadTest(ITestOutputHelper testOutputHelper, SingleByteStdScrState singleByteStdScrState)
-            : base(testOutputHelper, singleByteStdScrState)
+        public SingleByteReadTest(ITestOutputHelper testOutputHelper, StdScrState stdScrState)
+            : base(testOutputHelper, stdScrState)
         {
 
+        }
+
+        protected override IWindow GenerateWindow(IWindow window)
+        {
+            return window.ToSingleByteWindow();
         }
     }
 }

@@ -9,12 +9,18 @@ using NippyWard.NCurses.Tests.Model;
 
 namespace NippyWard.NCurses.Tests.MultiByte
 {
-    public class MultiBytePadTest : PadTest, IClassFixture<MultiByteStdScrState>
+    [Collection("Default")]
+    public class MultiBytePadTest : PadTest
     {
-        public MultiBytePadTest(ITestOutputHelper testOutputHelper, MultiByteStdScrState multiByteStdScrState)
-            : base(testOutputHelper, multiByteStdScrState)
+        public MultiBytePadTest(ITestOutputHelper testOutputHelper, StdScrState stdScrState)
+            : base(testOutputHelper, stdScrState)
         {
 
+        }
+
+        protected override IWindow GenerateWindow(IWindow window)
+        {
+            return window.ToMultiByteWindow();
         }
     }
 }

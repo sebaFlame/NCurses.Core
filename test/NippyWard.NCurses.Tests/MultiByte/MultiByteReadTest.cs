@@ -9,14 +9,20 @@ using NippyWard.NCurses.Tests.Model;
 
 namespace NippyWard.NCurses.Tests.MultiByte
 {
-    public class MultiByteReadTest : ReadTest, IClassFixture<MultiByteStdScrState>
+    [Collection("Default")]
+    public class MultiByteReadTest : ReadTest
     {
         protected override char TestChar => '\u263A';
 
-        public MultiByteReadTest(ITestOutputHelper testOutputHelper, MultiByteStdScrState multiByteStdScrState)
-            : base(testOutputHelper, multiByteStdScrState)
+        public MultiByteReadTest(ITestOutputHelper testOutputHelper, StdScrState stdScrState)
+            : base(testOutputHelper, stdScrState)
         {
 
+        }
+
+        protected override IWindow GenerateWindow(IWindow window)
+        {
+            return window.ToMultiByteWindow();
         }
     }
 }

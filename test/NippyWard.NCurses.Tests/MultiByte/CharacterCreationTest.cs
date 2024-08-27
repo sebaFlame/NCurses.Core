@@ -12,14 +12,18 @@ using NippyWard.NCurses.Interop.MultiByte;
 
 namespace NippyWard.NCurses.Tests.MultiByte
 {
-    public class CharacterCreationTest : TestBase, IClassFixture<MultiByteStdScrState>
+    [Collection("Default")]
+    public class CharacterCreationTest : TestBase
     {
         private char TestChar => '\u263A';
 
-        public CharacterCreationTest(ITestOutputHelper testOutputHelper, MultiByteStdScrState multiByteStdScrState)
-            : base(testOutputHelper, multiByteStdScrState)
-        {
+        public CharacterCreationTest(ITestOutputHelper testOutputHelper, StdScrState stdScrState)
+            : base(testOutputHelper, stdScrState)
+        { }
 
+        protected override IWindow GenerateWindow(IWindow window)
+        {
+            return window.ToMultiByteWindow();
         }
 
         //TODO: sometimes crashes test host process on windows

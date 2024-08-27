@@ -1,6 +1,7 @@
 <Project TreatAsLocalProperty="TaskFolder;TaskAssembly">
   <PropertyGroup>
-    <TaskFolder Condition=" '$(MSBuildRuntimeType)' == 'Core' ">netcoreapp3.1</TaskFolder>
+    <TaskFolder Condition=" '$(MSBuildRuntimeType)' == 'Core' ">net8.0</TaskFolder>
+    <TaskFolder Condition=" '$(MSBuildRuntimeType)' != 'Core' ">net472</TaskFolder>
     <TaskAssembly>$(MSBuildThisFileDirectory)..\bin\$(Configuration)\$(TaskFolder)\NippyWard.NCurses.Tasks.dll</TaskAssembly>
   </PropertyGroup>
 

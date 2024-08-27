@@ -9,6 +9,8 @@ using System.IO;
 
 namespace NippyWard.NCurses.Tasks
 {
+    internal delegate IntPtr GetVersion();
+
     public class LibraryVersionExtractor : Task
     {
         [Required]
@@ -17,8 +19,13 @@ namespace NippyWard.NCurses.Tasks
         [Output]
         public string NCursesVersion { get; private set; }
 
+        private const string _LibraryName = "libncursesw6.dll";
+        private const string _MethodName = "curses_version";
+
+#if NET8_0
         public LibraryVersionExtractor()
         {
+
             try
             {
                 NativeLibrary.SetDllImportResolver(typeof(LibraryVersionExtractor).Assembly, this.DllImportResolver);
@@ -27,11 +34,12 @@ namespace NippyWard.NCurses.Tasks
             {
                 //ignore 2nd registration error
             }
+
         }
 
         private IntPtr DllImportResolver(string libraryName, Assembly assembly, Nullable<DllImportSearchPath> searchPath)
         {
-            if(string.Equals(libraryName, "libncursesw6.dll"))
+            if(string.Equals(libraryName, _LibraryName))
             {
                 return NCursesWrapper.LoadLibrary(Path.Combine(this.Directory, libraryName));
             }
@@ -53,16 +61,53 @@ namespace NippyWard.NCurses.Tasks
                     char* charArr = stackalloc char[stringLength];
                     Encoding.ASCII.GetChars(bArr, stringLength, charArr, stringLength);
                     version = new ReadOnlySpan<char>(charArr, stringLength).ToString();
+
+                    this.NCursesVersion = version.Split(' ')[1];
                 }
 
-                this.NCursesVersion = version.Split(' ')[1];
                 return true;
             }
-            catch (Exception ex)
+            catch (Exception)
             {
                 return false;
             }
         }
+#else
+        public override bool Execute()
+        {
+            IntPtr module = IntPtr.Zero;
+
+            try
+            {
+                module = NCursesWrapper.LoadLibrary(Path.Combine(this.Directory, _LibraryName));
+                IntPtr method = NCursesWrapper.GetProcAddress(module, _MethodName);
+                GetVersion getVersion = Marshal.GetDelegateForFunctionPointer<GetVersion>(method);
+                IntPtr versionPtr = getVersion();
+
+                string version;
+                unsafe
+                {
+                    byte* bArr = (byte*)versionPtr.ToPointer();
+                    int stringLength = FindStringLength(bArr);
+                    char* charArr = stackalloc char[stringLength];
+                    Encoding.ASCII.GetChars(bArr, stringLength, charArr, stringLength);
+                    version = new string(charArr);
+
+                    this.NCursesVersion = version.Split(' ')[1];
+                }
+                
+                return true;
+            }
+            catch (Exception)
+            {
+                return false;
+            }
+            finally
+            {
+                NCursesWrapper.FreeLibrary(module);
+            }
+        }
+#endif
 
         internal unsafe static int FindStringLength(byte* strArr)
         {

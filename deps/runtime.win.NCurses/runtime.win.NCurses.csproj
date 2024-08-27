@@ -2,17 +2,13 @@
 
   <PropertyGroup>
     <Description>An application programming interface (API) that allows the programmer to write text-based user interfaces in a terminal-independent manner.</Description>
-    <TargetFramework>netcoreapp3.1</TargetFramework>
+    <TargetFramework>netstandard2.0</TargetFramework>
     <PackageId>runtime.win.NCurses</PackageId>
     <PackageTags>ncurses;console</PackageTags>
     <IncludeBuildOutput>false</IncludeBuildOutput>
-    <RuntimeIdentifiers>win7-x86;win7-x64;win8-x86;win8-x64;win81-x86;win81-x64;win10-x86;win10-x64</RuntimeIdentifiers>
+    <RuntimeIdentifiers>win7-x86;win7-x64;win8-x86;win8-x64;win81-x86;win81-x64;win10-x86;win10-x64;win11-x64</RuntimeIdentifiers>
     <SuppressDependenciesWhenPacking>true</SuppressDependenciesWhenPacking>
   </PropertyGroup>
-
-  <ItemGroup>
-    <ProjectReference Include="..\NippyWard.NCurses.Tasks\NippyWard.NCurses.Tasks.csproj" PrivateAssets="All" />
-  </ItemGroup>
 
   <Import Project="..\NippyWard.NCurses.Tasks\build\NippyWard.NCurses.Tasks.props" />
 

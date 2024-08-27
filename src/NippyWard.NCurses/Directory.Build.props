@@ -3,12 +3,12 @@
   <Choose>
 	<When Condition="$(RuntimeIdentifier) != ''">
 	  <ItemGroup Condition="$(RuntimeIdentifier.StartsWith('win'))">
-	    <PackageReference Include="runtime.win.NCurses" Version="6.2.20210116" />
+	    <PackageReference Include="runtime.win.NCurses" Version="6.5.20240824" />
 	  </ItemGroup>
 	</When>
 	<Otherwise>
 	  <ItemGroup Condition="$([MSBuild]::IsOSPlatform('Windows'))">
-	    <PackageReference Include="runtime.win.NCurses" Version="6.2.20210116" />
+	    <PackageReference Include="runtime.win.NCurses" Version="6.5.20240824" />
 	  </ItemGroup>
 	</Otherwise>
   </Choose>

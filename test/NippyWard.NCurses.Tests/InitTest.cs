@@ -9,24 +9,22 @@ using NippyWard.NCurses.Tests.Model;
 
 namespace NippyWard.NCurses.Tests
 {
-    public class InitTest : IDisposable
+    [Collection("Default")]
+    public class InitTest : TestBase
     {
-        public IWindow Window { get; }
+        public InitTest(ITestOutputHelper testOutputHelper, StdScrState state)
+            : base(testOutputHelper, state)
+        { }
 
-        public InitTest()
+        protected override IWindow GenerateWindow(IWindow window)
         {
-            this.Window  = NCurses.Start();
+            return window;
         }
 
         [Fact]
         public void SimpleInitTestTest()
         {
-            this.Window.Dispose();
-        }
-
-        public void Dispose()
-        {
-            NCurses.End();
+            this.Window.Write("Hello world!");
         }
     }
 }

@@ -11,12 +11,18 @@ using NippyWard.NCurses.Interop;
 
 namespace NippyWard.NCurses.Tests.MultiByte
 {
-    public class MultiByteACSTest : ACSTest, IClassFixture<MultiByteStdScrState>
+    [Collection("Default")]
+    public class MultiByteACSTest : ACSTest
     {
-        public MultiByteACSTest(ITestOutputHelper testOutputHelper, MultiByteStdScrState multiByteStdScrState)
-            : base(testOutputHelper, multiByteStdScrState)
+        public MultiByteACSTest(ITestOutputHelper testOutputHelper, StdScrState stdScrState)
+            : base(testOutputHelper, stdScrState)
         {
 
+        }
+
+        protected override IWindow GenerateWindow(IWindow window)
+        {
+            return window.ToMultiByteWindow();
         }
 
         [Fact]

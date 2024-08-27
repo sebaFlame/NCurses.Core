@@ -11,7 +11,8 @@ using NippyWard.NCurses.Interop;
 
 namespace NippyWard.NCurses.Tests.SingleByte
 {
-    public class SingleByteWriteTest : WriteTest, IClassFixture<SingleByteStdScrState>
+    [Collection("Default")]
+    public class SingleByteWriteTest : WriteTest
     {
         protected override char TestChar => 'a';
         protected override string TestString => "test";
@@ -19,8 +20,8 @@ namespace NippyWard.NCurses.Tests.SingleByte
         private ReadOnlyMemory<byte> _singleByteMemory;
         private ReadOnlySequence<byte> _singleByteSequence;
 
-        public SingleByteWriteTest(ITestOutputHelper testOutputHelper, SingleByteStdScrState singleByteStdScrState)
-            : base(testOutputHelper, singleByteStdScrState)
+        public SingleByteWriteTest(ITestOutputHelper testOutputHelper, StdScrState stdScrState)
+            : base(testOutputHelper, stdScrState)
         {
             TestSequenceSegment startSegment = null, endSegment = null;
 
@@ -42,6 +43,11 @@ namespace NippyWard.NCurses.Tests.SingleByte
 
             this._singleByteMemory = new Memory<byte>(bytes);
             this._singleByteSequence = new ReadOnlySequence<byte>(startSegment, 0, endSegment, endSegment.Memory.Length);
+        }
+
+        protected override IWindow GenerateWindow(IWindow window)
+        {
+            return window.ToSingleByteWindow();
         }
 
         [Fact]

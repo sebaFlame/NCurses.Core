@@ -5,9 +5,11 @@
     <DebugType>portable</DebugType>
     <AssemblyName>NippyWard.NCurses</AssemblyName>
     <PackageId>NippyWard.NCurses</PackageId>
-	<LangVersion>7.3</LangVersion>
+	  <LangVersion>7.3</LangVersion>
     <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
-	<!--<EmitCompilerGeneratedFiles>true</EmitCompilerGeneratedFiles>-->
+    <VersionPrefix>1.1.0</VersionPrefix>
+    <VersionSuffix>alpha1</VersionSuffix>
+	  <!--<EmitCompilerGeneratedFiles>true</EmitCompilerGeneratedFiles>-->
   </PropertyGroup>
 
 	<!-- Workaround for slow intellisense when coding using source generator -->
